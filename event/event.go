@@ -51,18 +51,18 @@ type E struct {
 	Sig []byte
 }
 
-// Ts is an array of event.E that sorts in reverse chronological order.
-type Ts []*E
+// S is an array of event.E that sorts in reverse chronological order.
+type S []*E
 
-// Len returns the length of the event.Ts.
-func (ev Ts) Len() int { return len(ev) }
+// Len returns the length of the event.Es.
+func (ev S) Len() int { return len(ev) }
 
 // Less returns whether the first is newer than the second (larger unix
 // timestamp).
-func (ev Ts) Less(i, j int) bool { return ev[i].CreatedAt.I64() > ev[j].CreatedAt.I64() }
+func (ev S) Less(i, j int) bool { return ev[i].CreatedAt.I64() > ev[j].CreatedAt.I64() }
 
-// Swap two indexes of the event.Ts with each other.
-func (ev Ts) Swap(i, j int) { ev[i], ev[j] = ev[j], ev[i] }
+// Swap two indexes of the event.Es with each other.
+func (ev S) Swap(i, j int) { ev[i], ev[j] = ev[j], ev[i] }
 
 // C is a channel that carries event.E.
 type C chan *E

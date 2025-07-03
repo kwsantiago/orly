@@ -13,12 +13,6 @@
 .vscode/**
 **/.vscode
 **/.vscode/**
-.idea
-.idea/
-.idea/**
-**/.idea
-**/.idea/
-**/.idea/**
 node_modules
 node_modules/
 node_modules/**
@@ -80,6 +74,10 @@ node_modules/**
 !*.nix
 !license
 !readme
+!.idea/*
+!*.xml
+!.name
+!.gitignore
 
 # ...even if they are in subdirectories
 !*/
