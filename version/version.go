@@ -5,6 +5,6 @@ import _ "embed"
 //go:embed version
 var V string
 
-var Name = "manifold"
+var Name = "realy"
 
-var Description = "Reference implementation of the Manifold protocol"
+var Description = "fast, simple nostr relay"
