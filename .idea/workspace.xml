@@ -4,51 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="all the necessary things for events and filters&#10;&#10;these are all the fast things that work">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/not.realy.lol.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth/doc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth/nip42.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth/nip42_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/authenvelope/authenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/authenvelope/authenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/closedenvelope/closedenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/closedenvelope/closedenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/closeenvelope/closeenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/closeenvelope/closeenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/countenvelope/countenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/countenvelope/countenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/doc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/eid/eid.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/identify.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/messages/messages.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/noticeenvelope/noticeenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/noticeenvelope/noticeenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/okenvelope/okenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/okenvelope/okenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/process.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/reqenvelope/reqenvelope.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/envelopes/reqenvelope/reqenvelope_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eventidserial/eventidserial.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/alias.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/errors.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/store_interface.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/subscription/subscriptionid.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/subscription/subscriptionid_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/event.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="the rest of the working things&#10;&#10;might be some more yet, not sure">
+      <change afterPath="$PROJECT_DIR$/helpers/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/store/store_interface.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,30 +58,31 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build github.com/mleku/realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build not.realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/david/src/github.com/mleku/realy.lol&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.appearance&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
+    "Go Build.go build not.realy.lol.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.GoLinterPluginOnboarding": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/david/src/not.realy.lol",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.sourceCode.Go"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -171,6 +134,17 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
@@ -178,7 +152,8 @@
     <MESSAGE value="Update project name and description in version.go" />
     <MESSAGE value="tidying things up and getting started" />
     <MESSAGE value="all the necessary things for events and filters&#10;&#10;these are all the fast things that work" />
-    <option name="LAST_COMMIT_MESSAGE" value="all the necessary things for events and filters&#10;&#10;these are all the fast things that work" />
+    <MESSAGE value="the rest of the working things&#10;&#10;might be some more yet, not sure" />
+    <option name="LAST_COMMIT_MESSAGE" value="the rest of the working things&#10;&#10;might be some more yet, not sure" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

@@ -4,11 +4,13 @@ go 1.24.4
 
 require (
 	github.com/adrg/xdg v0.5.3
+	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/fatih/color v1.18.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/minio/sha256-simd v1.0.1
 	github.com/pkg/profile v1.7.0
+	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	github.com/templexxx/xhex v0.0.0-20200614015412-aed53437177b
 	go-simpler.org/env v0.12.0
