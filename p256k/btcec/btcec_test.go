@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/log"
-	"github.com/mleku/realy.lol/p256k/btcec"
+	"not.realy.lol/chk"
+	"not.realy.lol/log"
+	"not.realy.lol/p256k/btcec"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -56,17 +56,21 @@ func TestBTCECECDH(t *testing.T) {
 			}
 			if !bytes.Equal(secret1, secret2) {
 				counter++
-				t.Errorf("ECDH generation failed to work in both directions, %x %x", secret1,
-					secret2)
+				t.Errorf(
+					"ECDH generation failed to work in both directions, %x %x", secret1,
+					secret2,
+				)
 			}
 			count++
 		}
 	}
 	a := time.Now()
 	duration := a.Sub(n)
-	log.I.Ln("errors", counter,
+	log.I.Ln(
+		"errors", counter,
 		"total", count,
 		"time", duration,
 		"time/op", duration/time.Duration(count),
-		"ops/sec", int(time.Second)/int(duration/time.Duration(count)))
+		"ops/sec", int(time.Second)/int(duration/time.Duration(count)),
+	)
 }

@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 // This example demonstrates how to decode a bech32 encoded string.

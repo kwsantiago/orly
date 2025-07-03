@@ -8,8 +8,8 @@ package secp256k1
 import (
 	"math/bits"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/hex"
 )
 
 // References:

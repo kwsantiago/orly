@@ -52,7 +52,7 @@ package secp256k1
 // ordinarily would.  See the documentation for FieldVal for more details.
 
 import (
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/hex"
 )
 
 // Constants used to make the code more readable.
@@ -288,8 +288,10 @@ func (f *FieldVal) SetBytes(b *[32]byte) uint32 {
 	highWordsEq &= constantTimeEq(f.n[2], fieldPrimeWordTwo)
 	overflow := highWordsEq & constantTimeGreater(f.n[1], fieldPrimeWordOne)
 	highWordsEq &= constantTimeEq(f.n[1], fieldPrimeWordOne)
-	overflow |= highWordsEq & constantTimeGreaterOrEq(f.n[0],
-		fieldPrimeWordZero)
+	overflow |= highWordsEq & constantTimeGreaterOrEq(
+		f.n[0],
+		fieldPrimeWordZero,
+	)
 	return overflow
 }
 

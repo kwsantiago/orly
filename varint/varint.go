@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"golang.org/x/exp/constraints"
-	"manifold.mleku.dev/chk"
+	"not.realy.lol/chk"
 )
 
 func Encode[V constraints.Integer](w io.Writer, v V) {

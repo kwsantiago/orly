@@ -5,21 +5,25 @@ package musig2
 import (
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/schnorr"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/schnorr"
 )
 
 var (
 	// ErrSignersNotSpecified is returned when a caller attempts to create
 	// a context without specifying either the total number of signers, or
 	// the complete set of singers.
-	ErrSignersNotSpecified = fmt.Errorf("total number of signers or all " +
-		"signers must be known")
+	ErrSignersNotSpecified = fmt.Errorf(
+		"total number of signers or all " +
+			"signers must be known",
+	)
 	// ErrSignerNotInKeySet is returned when a the secret key for a signer
 	// isn't included in the set of signing public keys.
-	ErrSignerNotInKeySet = fmt.Errorf("signing key is not found in key" +
-		" set")
+	ErrSignerNotInKeySet = fmt.Errorf(
+		"signing key is not found in key" +
+			" set",
+	)
 	// ErrAlreadyHaveAllNonces is called when RegisterPubNonce is called too
 	// many times for a given signing session.
 	//
@@ -166,8 +170,10 @@ func WithEarlyNonceGen() ContextOption {
 // of public keys for each of the other signers.
 //
 // NOTE: This struct should be used over the raw Sign API whenever possible.
-func NewContext(signingKey *btcec.SecretKey, shouldSort bool,
-	ctxOpts ...ContextOption) (*Context, error) {
+func NewContext(
+	signingKey *btcec.SecretKey, shouldSort bool,
+	ctxOpts ...ContextOption,
+) (*Context, error) {
 
 	// First, parse the set of optional context options.
 	opts := defaultContextOptions()
@@ -474,8 +480,10 @@ func (s *Session) RegisterPubNonce(nonce [PubNonceSize]byte) (bool, error) {
 // Sign generates a partial signature for the target message, using the target
 // context. If this method is called more than once per context, then an error
 // is returned, as that means a nonce was re-used.
-func (s *Session) Sign(msg [32]byte,
-	signOpts ...SignOption) (*PartialSignature, error) {
+func (s *Session) Sign(
+	msg [32]byte,
+	signOpts ...SignOption,
+) (*PartialSignature, error) {
 
 	switch {
 	// If no local nonce is present, then this means we already signed, so

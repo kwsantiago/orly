@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"hash"
 
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/sha256"
 )
 
 // References:
@@ -110,8 +110,10 @@ func newHMACSHA256(key []byte) *hmacsha256 {
 // that results in a valid signature in the extremely unlikely event the
 // original nonce produced results in an invalid signature (e.g. R == 0).
 // Signing code should start with 0 and increment it if necessary.
-func NonceRFC6979(secKey []byte, hash []byte, extra []byte, version []byte,
-	extraIterations uint32) *ModNScalar {
+func NonceRFC6979(
+	secKey []byte, hash []byte, extra []byte, version []byte,
+	extraIterations uint32,
+) *ModNScalar {
 	// Input to HMAC is the 32-byte secret key and the 32-byte hash.  In
 	// addition, it may include the optional 32-byte extra data and 16-byte
 	// version.  Create a fixed-size array to avoid extra allocs and slice it

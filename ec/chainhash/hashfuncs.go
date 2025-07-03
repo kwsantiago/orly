@@ -5,7 +5,7 @@
 
 package chainhash
 
-import "github.com/mleku/realy.lol/sha256"
+import "not.realy.lol/sha256"
 
 // HashB calculates hash(b) and returns the resulting bytes.
 func HashB(b []byte) []byte {

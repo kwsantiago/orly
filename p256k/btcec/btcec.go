@@ -2,12 +2,12 @@
 package btcec
 
 import (
-	"github.com/mleku/realy.lol/chk"
-	ec "github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/errorf"
-	"github.com/mleku/realy.lol/signer"
+	"not.realy.lol/chk"
+	ec "not.realy.lol/ec"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/errorf"
+	"not.realy.lol/signer"
 )
 
 // Signer is an implementation of signer.I that uses the btcec library.
@@ -88,8 +88,10 @@ func (s *Signer) Verify(msg, sig []byte) (valid bool, err error) {
 	}
 	var si *schnorr.Signature
 	if si, err = schnorr.ParseSignature(sig); chk.D(err) {
-		err = errorf.E("failed to parse signature:\n%d %s\n%v", len(sig),
-			sig, err)
+		err = errorf.E(
+			"failed to parse signature:\n%d %s\n%v", len(sig),
+			sig, err,
+		)
 		return
 	}
 	valid = si.Verify(msg, s.PublicKey)
@@ -103,7 +105,11 @@ func (s *Signer) Zero() { s.SecretKey.Key.Zero() }
 // to hash this result for security reasons.
 func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
 	var pub *secp256k1.PublicKey
-	if pub, err = secp256k1.ParsePubKey(append([]byte{0x02}, pubkeyBytes...)); chk.E(err) {
+	if pub, err = secp256k1.ParsePubKey(
+		append(
+			[]byte{0x02}, pubkeyBytes...,
+		),
+	); chk.E(err) {
 		return
 	}
 	secret = ec.GenerateSharedSecret(s.SecretKey, pub)

@@ -3,8 +3,8 @@
 package p256k
 
 import (
-	"github.com/mleku/realy.lol/log"
-	"github.com/mleku/realy.lol/p256k/btcec"
+	"not.realy.lol/log"
+	"not.realy.lol/p256k/btcec"
 )
 
 func init() {

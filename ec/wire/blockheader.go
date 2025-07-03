@@ -3,7 +3,7 @@ package wire
 import (
 	"time"
 
-	"github.com/mleku/realy.lol/ec/chainhash"
+	"not.realy.lol/ec/chainhash"
 )
 
 // BlockHeader defines information about a block and is used in the bitcoin

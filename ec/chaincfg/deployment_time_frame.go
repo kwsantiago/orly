@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/wire"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/wire"
 )
 
 var (
@@ -75,8 +75,10 @@ func NewMedianTimeDeploymentStarter(startTime time.Time) *MedianTimeDeploymentSt
 }
 
 // HasStarted returns true if the consensus deployment has started.
-func (m *MedianTimeDeploymentStarter) HasStarted(blkHeader *wire.BlockHeader) (bool,
-	error) {
+func (m *MedianTimeDeploymentStarter) HasStarted(blkHeader *wire.BlockHeader) (
+	bool,
+	error,
+) {
 	switch {
 	// If we haven't yet been synchronized with a block clock, then we
 	// can't tell the time, so we'll fail.
@@ -113,8 +115,10 @@ func NewMedianTimeDeploymentEnder(endTime time.Time) *MedianTimeDeploymentEnder 
 }
 
 // HasEnded returns true if the deployment has ended.
-func (m *MedianTimeDeploymentEnder) HasEnded(blkHeader *wire.BlockHeader) (bool,
-	error) {
+func (m *MedianTimeDeploymentEnder) HasEnded(blkHeader *wire.BlockHeader) (
+	bool,
+	error,
+) {
 	switch {
 	// If we haven't yet been synchronized with a block clock, then we can't tell
 	// the time, so we'll we haven't yet been synchronized with a block

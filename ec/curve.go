@@ -6,8 +6,8 @@ package btcec
 import (
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/secp256k1"
 )
 
 // JacobianPoint is an element of the group formed by the secp256k1 curve in
@@ -74,8 +74,10 @@ func ScalarMultNonConst(k *ModNScalar, point, result *JacobianPoint) {
 func ParseJacobian(point []byte) (JacobianPoint, error) {
 	var result JacobianPoint
 	if len(point) != 33 {
-		str := fmt.Sprintf("invalid nonce: invalid length: %v",
-			len(point))
+		str := fmt.Sprintf(
+			"invalid nonce: invalid length: %v",
+			len(point),
+		)
 		return JacobianPoint{}, makeError(secp256k1.ErrPubKeyInvalidLen, str)
 	}
 	if point[0] == 0x00 {

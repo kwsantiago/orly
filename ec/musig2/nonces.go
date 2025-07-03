@@ -9,10 +9,10 @@ import (
 	"errors"
 	"io"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/chainhash"
-	"github.com/mleku/realy.lol/ec/schnorr"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/chainhash"
+	"not.realy.lol/ec/schnorr"
 )
 
 const (
@@ -232,8 +232,10 @@ func writeBytesPrefix(w io.Writer, b []byte, lenWriter lengthWriter) error {
 // where i is the ith secret nonce being generated and m_prefixed is:
 //   - bytes(1, 0) if the message is blank
 //   - bytes(1, 1) || bytes(8, len(m)) || m if the message is present.
-func genNonceAuxBytes(rand []byte, pubkey []byte, i int,
-	opts *nonceGenOpts) (*chainhash.Hash, error) {
+func genNonceAuxBytes(
+	rand []byte, pubkey []byte, i int,
+	opts *nonceGenOpts,
+) (*chainhash.Hash, error) {
 
 	var w bytes.Buffer
 	// First, write out the randomness generated in the prior step.
@@ -341,8 +343,10 @@ func GenNonces(options ...NonceGenOption) (*Nonces, error) {
 
 // AggregateNonces aggregates the set of a pair of public nonces for each party
 // into a single aggregated nonces to be used for multi-signing.
-func AggregateNonces(pubNonces [][PubNonceSize]byte) ([PubNonceSize]byte,
-	error) {
+func AggregateNonces(pubNonces [][PubNonceSize]byte) (
+	[PubNonceSize]byte,
+	error,
+) {
 
 	// combineNonces is a helper function that aggregates (adds) up a
 	// series of nonces encoded in compressed format. It uses a slicing
@@ -378,15 +382,19 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) ([PubNonceSize]byte,
 	// aggregate the first nonce of all the parties, and the other that
 	// aggregates the second nonce of all the parties.
 	var finalNonce [PubNonceSize]byte
-	combinedNonce1, err := combineNonces(func(n [PubNonceSize]byte) []byte {
-		return n[:btcec.PubKeyBytesLenCompressed]
-	})
+	combinedNonce1, err := combineNonces(
+		func(n [PubNonceSize]byte) []byte {
+			return n[:btcec.PubKeyBytesLenCompressed]
+		},
+	)
 	if chk.E(err) {
 		return finalNonce, err
 	}
-	combinedNonce2, err := combineNonces(func(n [PubNonceSize]byte) []byte {
-		return n[btcec.PubKeyBytesLenCompressed:]
-	})
+	combinedNonce2, err := combineNonces(
+		func(n [PubNonceSize]byte) []byte {
+			return n[btcec.PubKeyBytesLenCompressed:]
+		},
+	)
 	if chk.E(err) {
 		return finalNonce, err
 	}

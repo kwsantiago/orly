@@ -13,9 +13,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/log"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/log"
 )
 
 // curveParams houses the secp256k1 curve parameters for convenient access.
@@ -249,8 +249,12 @@ func deriveEndomorphismParams() [2]endomorphismParams {
 			result.Add(result, one)
 			result.Mod(result, prime)
 			if result.Sign() != 0 {
-				panic(fmt.Sprintf("%[1]x^2 + %[1]x + 1 != 0 (mod %x)", root,
-					prime))
+				panic(
+					fmt.Sprintf(
+						"%[1]x^2 + %[1]x + 1 != 0 (mod %x)", root,
+						prime,
+					),
+				)
 			}
 		}
 	}
@@ -263,8 +267,12 @@ func deriveEndomorphismParams() [2]endomorphismParams {
 		result.Add(result, a)
 		result.Mod(result, curveParams.N)
 		if result.Sign() != 0 {
-			panic(fmt.Sprintf("%x + %x*lambda != 0 (mod %x)", a, b,
-				curveParams.N))
+			panic(
+				fmt.Sprintf(
+					"%x + %x*lambda != 0 (mod %x)", a, b,
+					curveParams.N,
+				),
+			)
 		}
 	}
 	var endoParams [2]endomorphismParams
@@ -304,9 +312,11 @@ func deriveEndomorphismParams() [2]endomorphismParams {
 func main() {
 	if _, err := os.Stat(".git"); chk.T(err) {
 		fmt.Printf("File exists\n")
-		_, _ = fmt.Fprintln(os.Stderr,
+		_, _ = fmt.Fprintln(
+			os.Stderr,
 			"This generator must be run with working directory at the root of"+
-				" the repository")
+				" the repository",
+		)
 		os.Exit(1)
 	}
 	serialized := serializedBytePoints()
@@ -320,8 +330,10 @@ func main() {
 		panic(err)
 	}
 	if n != len(serialized) {
-		fmt.Printf("failed to write all of byte points, wrote %d expected %d",
-			n, len(serialized))
+		fmt.Printf(
+			"failed to write all of byte points, wrote %d expected %d",
+			n, len(serialized),
+		)
 		panic("fail")
 	}
 	_ = embedded.Close()

@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mleku/realy.lol/ec/base58"
+	"not.realy.lol/ec/base58"
 )
 
 var (

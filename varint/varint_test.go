@@ -7,7 +7,7 @@ import (
 
 	"lukechampine.com/frand"
 
-	"manifold.mleku.dev/chk"
+	"not.realy.lol/chk"
 )
 
 func TestEncode_Decode(t *testing.T) {

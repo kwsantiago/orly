@@ -9,12 +9,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/chk"
+	"not.realy.lol/sha256"
 
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there

@@ -4,7 +4,7 @@
 package btcec
 
 import (
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/ec/secp256k1"
 )
 
 // ModNScalar implements optimized 256-bit constant-time fixed-precision
@@ -38,9 +38,13 @@ type ModNScalar = secp256k1.ModNScalar
 // that results in a valid signature in the extremely unlikely event the
 // original nonce produced results in an invalid signature (e.g. R == 0).
 // Signing code should start with 0 and increment it if necessary.
-func NonceRFC6979(privKey []byte, hash []byte, extra []byte, version []byte,
-	extraIterations uint32) *ModNScalar {
+func NonceRFC6979(
+	privKey []byte, hash []byte, extra []byte, version []byte,
+	extraIterations uint32,
+) *ModNScalar {
 
-	return secp256k1.NonceRFC6979(privKey, hash, extra, version,
-		extraIterations)
+	return secp256k1.NonceRFC6979(
+		privKey, hash, extra, version,
+		extraIterations,
+	)
 }

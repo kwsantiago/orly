@@ -6,12 +6,12 @@ import (
 	"crypto/rand"
 	"unsafe"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/errorf"
-	"github.com/mleku/realy.lol/log"
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/errorf"
+	"not.realy.lol/log"
+	"not.realy.lol/sha256"
 )
 
 /*
@@ -36,8 +36,10 @@ var (
 )
 
 func CreateContext() *Context {
-	return C.secp256k1_context_create(C.SECP256K1_CONTEXT_SIGN |
-		C.SECP256K1_CONTEXT_VERIFY)
+	return C.secp256k1_context_create(
+		C.SECP256K1_CONTEXT_SIGN |
+			C.SECP256K1_CONTEXT_VERIFY,
+	)
 }
 
 func GetRandom() (u *Uchar) {
@@ -130,7 +132,8 @@ func FromSecretBytes(skb []byte) (
 	sec *Sec,
 	pub *XPublicKey,
 	// ecPub *PublicKey,
-	err error) {
+	err error,
+) {
 	xpkb := make([]byte, schnorr.PubKeyBytesLen)
 	// clen := C.size_t(secp256k1.PubKeyBytesLenCompressed - 1)
 	pkb = make([]byte, schnorr.PubKeyBytesLen)
@@ -214,8 +217,10 @@ func ECPubFromSchnorrBytes(xkb []byte) (pub *ECPub, err error) {
 	}
 	pub = &ECPub{}
 	p := append([]byte{0}, xkb...)
-	if C.secp256k1_ec_pubkey_parse(ctx, &pub.Key, ToUchar(p),
-		secp256k1.PubKeyBytesLenCompressed) != 1 {
+	if C.secp256k1_ec_pubkey_parse(
+		ctx, &pub.Key, ToUchar(p),
+		secp256k1.PubKeyBytesLenCompressed,
+	) != 1 {
 		err = errorf.E("failed to parse pubkey from %0x", p)
 		log.I.S(pub)
 		return
@@ -280,8 +285,10 @@ func (p *Pub) ToBytes() (b []byte, err error) {
 func Sign(msg *Uchar, sk *SecKey) (sig []byte, err error) {
 	sig = make([]byte, schnorr.SignatureSize)
 	c := CreateRandomContext()
-	if C.secp256k1_schnorrsig_sign32(c, ToUchar(sig), msg, sk,
-		GetRandom()) != 1 {
+	if C.secp256k1_schnorrsig_sign32(
+		c, ToUchar(sig), msg, sk,
+		GetRandom(),
+	) != 1 {
 		err = errorf.E("failed to sign message")
 		return
 	}

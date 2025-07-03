@@ -11,11 +11,11 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/chk"
+	"not.realy.lol/sha256"
 
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 // This example demonstrates use of GenerateSharedSecret to encrypt a message
@@ -32,7 +32,8 @@ func Example_encryptDecryptMessage() {
 	// Decode the hex-encoded pubkey of the recipient.
 	pubKeyBytes, err := hex.Dec(
 		"04115c42e757b2efb7671c578530ec191a1359381e6a71127a9d37c486fd30da" +
-			"e57e76dc58f693bd7e7010358ce6b165e483a2921010db67ac11b1b51b651953d2") // uncompressed pubkey
+			"e57e76dc58f693bd7e7010358ce6b165e483a2921010db67ac11b1b51b651953d2",
+	) // uncompressed pubkey
 	if chk.E(err) {
 		fmt.Println(err)
 		return
@@ -51,8 +52,12 @@ func Example_encryptDecryptMessage() {
 	}
 	ephemeralPubKey := ephemeralSecKey.PubKey().SerializeCompressed()
 	// Using ECDHE, derive a shared symmetric key for encryption of the plaintext.
-	cipherKey := sha256.Sum256(secp256k1.GenerateSharedSecret(ephemeralSecKey,
-		pubKey))
+	cipherKey := sha256.Sum256(
+		secp256k1.GenerateSharedSecret(
+			ephemeralSecKey,
+			pubKey,
+		),
+	)
 	// Seal the message using an AEAD.  Here we use AES-256-GCM.
 	// The ephemeral public key must be included in this message, and becomes
 	// the authenticated data for the AEAD.
@@ -83,7 +88,8 @@ func Example_encryptDecryptMessage() {
 	//
 	// Decode the hex-encoded secret key.
 	pkBytes, err := hex.Dec(
-		"a11b0a4e1a132305652ee7a8eb7848f6ad5ea381e3ce20a2c086a2e388230811")
+		"a11b0a4e1a132305652ee7a8eb7848f6ad5ea381e3ce20a2c086a2e388230811",
+	)
 	if chk.E(err) {
 		fmt.Println(err)
 		return
@@ -101,8 +107,12 @@ func Example_encryptDecryptMessage() {
 	}
 	// Derive the key used to seal the message, this time from the
 	// recipient's secret key and the sender's public key.
-	recoveredCipherKey := sha256.Sum256(secp256k1.GenerateSharedSecret(secKey,
-		senderPubKey))
+	recoveredCipherKey := sha256.Sum256(
+		secp256k1.GenerateSharedSecret(
+			secKey,
+			senderPubKey,
+		),
+	)
 	// Open the sealed message.
 	aead, err = newAEAD(recoveredCipherKey[:])
 	if chk.E(err) {
@@ -110,8 +120,10 @@ func Example_encryptDecryptMessage() {
 		return
 	}
 	nonce = make([]byte, aead.NonceSize())
-	recoveredPlaintext, err := aead.Open(nil, nonce, ciphertext[4+pubKeyLen:],
-		senderPubKeyBytes)
+	recoveredPlaintext, err := aead.Open(
+		nil, nonce, ciphertext[4+pubKeyLen:],
+		senderPubKeyBytes,
+	)
 	if chk.E(err) {
 		fmt.Println(err)
 		return

@@ -21,14 +21,18 @@ import (
 	"runtime"
 
 	"github.com/klauspost/cpuid/v2"
-	"manifold.mleku.dev/chk"
+	"not.realy.lol/chk"
 )
 
 var (
-	hasIntelSha = runtime.GOARCH == "amd64" && cpuid.CPU.Supports(cpuid.SHA, cpuid.SSSE3,
-		cpuid.SSE4)
-	hasAvx512 = cpuid.CPU.Supports(cpuid.AVX512F, cpuid.AVX512DQ, cpuid.AVX512BW,
-		cpuid.AVX512VL)
+	hasIntelSha = runtime.GOARCH == "amd64" && cpuid.CPU.Supports(
+		cpuid.SHA, cpuid.SSSE3,
+		cpuid.SSE4,
+	)
+	hasAvx512 = cpuid.CPU.Supports(
+		cpuid.AVX512F, cpuid.AVX512DQ, cpuid.AVX512BW,
+		cpuid.AVX512VL,
+	)
 )
 
 func hasArmSha2() bool {

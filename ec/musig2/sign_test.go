@@ -11,12 +11,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
 	"github.com/stretchr/testify/require"
+	"not.realy.lol/chk"
 
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 const (
@@ -86,128 +86,142 @@ func TestMusig2SignVerify(t *testing.T) {
 	for i, testCase := range testCases.ValidCases {
 		testCase := testCase
 		testName := fmt.Sprintf("valid_case_%v", i)
-		t.Run(testName, func(t *testing.T) {
-			pubKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			require.NoError(t, err)
-			pubNonces := pubNoncesFromIndices(
-				t, testCase.NonceIndices, testCases.PubNonces,
-			)
-			combinedNonce, err := AggregateNonces(pubNonces)
-			require.NoError(t, err)
-			var msg [32]byte
-			copy(msg[:], mustParseHex(testCases.Msgs[testCase.MsgIndex]))
-			var secNonce [SecNonceSize]byte
-			copy(secNonce[:], mustParseHex(testCases.PrivNonces[0]))
-			partialSig, err := Sign(
-				secNonce, privKey, combinedNonce, pubKeys,
-				msg,
-			)
-			var partialSigBytes [32]byte
-			partialSig.S.PutBytesUnchecked(partialSigBytes[:])
-			require.Equal(
-				t, hex.Enc(partialSigBytes[:]),
-				hex.Enc(mustParseHex(testCase.Expected)),
-			)
-		})
+		t.Run(
+			testName, func(t *testing.T) {
+				pubKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
+				)
+				require.NoError(t, err)
+				pubNonces := pubNoncesFromIndices(
+					t, testCase.NonceIndices, testCases.PubNonces,
+				)
+				combinedNonce, err := AggregateNonces(pubNonces)
+				require.NoError(t, err)
+				var msg [32]byte
+				copy(msg[:], mustParseHex(testCases.Msgs[testCase.MsgIndex]))
+				var secNonce [SecNonceSize]byte
+				copy(secNonce[:], mustParseHex(testCases.PrivNonces[0]))
+				partialSig, err := Sign(
+					secNonce, privKey, combinedNonce, pubKeys,
+					msg,
+				)
+				var partialSigBytes [32]byte
+				partialSig.S.PutBytesUnchecked(partialSigBytes[:])
+				require.Equal(
+					t, hex.Enc(partialSigBytes[:]),
+					hex.Enc(mustParseHex(testCase.Expected)),
+				)
+			},
+		)
 	}
 	for _, testCase := range testCases.SignErrorCases {
 		testCase := testCase
-		testName := fmt.Sprintf("invalid_case_%v",
-			strings.ToLower(testCase.Comment))
-		t.Run(testName, func(t *testing.T) {
-			pubKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			if chk.E(err) {
-				require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
-				return
-			}
-			var aggNonce [PubNonceSize]byte
-			copy(
-				aggNonce[:],
-				mustParseHex(
-					testCases.AggNonces[testCase.AggNonceIndex],
-				),
-			)
-			var msg [32]byte
-			copy(msg[:], mustParseHex(testCases.Msgs[testCase.MsgIndex]))
-			var secNonce [SecNonceSize]byte
-			copy(
-				secNonce[:],
-				mustParseHex(
-					testCases.PrivNonces[testCase.SecNonceIndex],
-				),
-			)
-			_, err = Sign(
-				secNonce, privKey, aggNonce, pubKeys,
-				msg,
-			)
-			require.Error(t, err)
-		})
+		testName := fmt.Sprintf(
+			"invalid_case_%v",
+			strings.ToLower(testCase.Comment),
+		)
+		t.Run(
+			testName, func(t *testing.T) {
+				pubKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
+				)
+				if chk.E(err) {
+					require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
+					return
+				}
+				var aggNonce [PubNonceSize]byte
+				copy(
+					aggNonce[:],
+					mustParseHex(
+						testCases.AggNonces[testCase.AggNonceIndex],
+					),
+				)
+				var msg [32]byte
+				copy(msg[:], mustParseHex(testCases.Msgs[testCase.MsgIndex]))
+				var secNonce [SecNonceSize]byte
+				copy(
+					secNonce[:],
+					mustParseHex(
+						testCases.PrivNonces[testCase.SecNonceIndex],
+					),
+				)
+				_, err = Sign(
+					secNonce, privKey, aggNonce, pubKeys,
+					msg,
+				)
+				require.Error(t, err)
+			},
+		)
 	}
 	for _, testCase := range testCases.VerifyFailCases {
 		testCase := testCase
-		testName := fmt.Sprintf("verify_fail_%v",
-			strings.ToLower(testCase.Comment))
-		t.Run(testName, func(t *testing.T) {
-			pubKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			require.NoError(t, err)
-			pubNonces := pubNoncesFromIndices(
-				t, testCase.NonceIndices, testCases.PubNonces,
-			)
-			combinedNonce, err := AggregateNonces(pubNonces)
-			require.NoError(t, err)
-			var msg [32]byte
-			copy(
-				msg[:],
-				mustParseHex(testCases.Msgs[testCase.MsgIndex]),
-			)
-			var secNonce [SecNonceSize]byte
-			copy(secNonce[:], mustParseHex(testCases.PrivNonces[0]))
-			signerNonce := secNonceToPubNonce(secNonce)
-			var partialSig PartialSignature
-			err = partialSig.Decode(
-				bytes.NewReader(mustParseHex(testCase.Sig)),
-			)
-			if chk.E(err) && strings.Contains(testCase.Comment, "group size") {
-				require.ErrorIs(t, err, ErrPartialSigInvalid)
-			}
-			err = verifyPartialSig(
-				&partialSig, signerNonce, combinedNonce,
-				pubKeys, privKey.PubKey().SerializeCompressed(),
-				msg,
-			)
-			require.Error(t, err)
-		})
+		testName := fmt.Sprintf(
+			"verify_fail_%v",
+			strings.ToLower(testCase.Comment),
+		)
+		t.Run(
+			testName, func(t *testing.T) {
+				pubKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
+				)
+				require.NoError(t, err)
+				pubNonces := pubNoncesFromIndices(
+					t, testCase.NonceIndices, testCases.PubNonces,
+				)
+				combinedNonce, err := AggregateNonces(pubNonces)
+				require.NoError(t, err)
+				var msg [32]byte
+				copy(
+					msg[:],
+					mustParseHex(testCases.Msgs[testCase.MsgIndex]),
+				)
+				var secNonce [SecNonceSize]byte
+				copy(secNonce[:], mustParseHex(testCases.PrivNonces[0]))
+				signerNonce := secNonceToPubNonce(secNonce)
+				var partialSig PartialSignature
+				err = partialSig.Decode(
+					bytes.NewReader(mustParseHex(testCase.Sig)),
+				)
+				if chk.E(err) && strings.Contains(testCase.Comment, "group size") {
+					require.ErrorIs(t, err, ErrPartialSigInvalid)
+				}
+				err = verifyPartialSig(
+					&partialSig, signerNonce, combinedNonce,
+					pubKeys, privKey.PubKey().SerializeCompressed(),
+					msg,
+				)
+				require.Error(t, err)
+			},
+		)
 	}
 
 	for _, testCase := range testCases.VerifyErrorCases {
 		testCase := testCase
-		testName := fmt.Sprintf("verify_error_%v",
-			strings.ToLower(testCase.Comment))
-		t.Run(testName, func(t *testing.T) {
-			switch testCase.Comment {
-			case "Invalid pubnonce":
-				pubNonces := pubNoncesFromIndices(
-					t, testCase.NonceIndices, testCases.PubNonces,
-				)
-				_, err := AggregateNonces(pubNonces)
-				require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
+		testName := fmt.Sprintf(
+			"verify_error_%v",
+			strings.ToLower(testCase.Comment),
+		)
+		t.Run(
+			testName, func(t *testing.T) {
+				switch testCase.Comment {
+				case "Invalid pubnonce":
+					pubNonces := pubNoncesFromIndices(
+						t, testCase.NonceIndices, testCases.PubNonces,
+					)
+					_, err := AggregateNonces(pubNonces)
+					require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
 
-			case "Invalid pubkey":
-				_, err := keysFromIndices(
-					t, testCase.Indices, testCases.PubKeys,
-				)
-				require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
+				case "Invalid pubkey":
+					_, err := keysFromIndices(
+						t, testCase.Indices, testCases.PubKeys,
+					)
+					require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
 
-			default:
-				t.Fatalf("unhandled case: %v", testCase.Comment)
-			}
-		})
+				default:
+					t.Fatalf("unhandled case: %v", testCase.Comment)
+				}
+			},
+		)
 	}
 
 }
@@ -231,8 +245,10 @@ type sigCombineTestVectors struct {
 	ValidCases []sigCombineValidCase `json:"valid_test_cases"`
 }
 
-func pSigsFromIndicies(t *testing.T, sigs []string,
-	indices []int) []*PartialSignature {
+func pSigsFromIndicies(
+	t *testing.T, sigs []string,
+	indices []int,
+) []*PartialSignature {
 	pSigs := make([]*PartialSignature, len(indices))
 	for i, idx := range indices {
 		var pSig PartialSignature
@@ -258,51 +274,56 @@ func TestMusig2SignCombine(t *testing.T) {
 	for i, testCase := range testCases.ValidCases {
 		testCase := testCase
 		testName := fmt.Sprintf("valid_case_%v", i)
-		t.Run(testName, func(t *testing.T) {
-			pubKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			require.NoError(t, err)
-			pubNonces := pubNoncesFromIndices(
-				t, testCase.NonceIndices, testCases.PubNonces,
-			)
-			partialSigs := pSigsFromIndicies(
-				t, testCases.Psigs, testCase.PSigIndices,
-			)
-			var (
-				combineOpts []CombineOption
-				keyOpts     []KeyAggOption
-			)
-			if len(testCase.TweakIndices) > 0 {
-				tweaks := tweaksFromIndices(
-					t, testCase.TweakIndices,
-					testCases.Tweaks, testCase.IsXOnly,
+		t.Run(
+			testName, func(t *testing.T) {
+				pubKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
 				)
-				combineOpts = append(combineOpts, WithTweakedCombine(
-					msg, pubKeys, tweaks, false,
-				))
-				keyOpts = append(keyOpts, WithKeyTweaks(tweaks...))
-			}
-			combinedKey, _, _, err := AggregateKeys(
-				pubKeys, false, keyOpts...,
-			)
-			require.NoError(t, err)
-			combinedNonce, err := AggregateNonces(pubNonces)
-			require.NoError(t, err)
-			finalNonceJ, _, err := computeSigningNonce(
-				combinedNonce, combinedKey.FinalKey, msg,
-			)
-			finalNonceJ.ToAffine()
-			finalNonce := btcec.NewPublicKey(
-				&finalNonceJ.X, &finalNonceJ.Y,
-			)
-			combinedSig := CombineSigs(
-				finalNonce, partialSigs, combineOpts...,
-			)
-			require.Equal(t,
-				strings.ToLower(testCase.Expected),
-				hex.Enc(combinedSig.Serialize()),
-			)
-		})
+				require.NoError(t, err)
+				pubNonces := pubNoncesFromIndices(
+					t, testCase.NonceIndices, testCases.PubNonces,
+				)
+				partialSigs := pSigsFromIndicies(
+					t, testCases.Psigs, testCase.PSigIndices,
+				)
+				var (
+					combineOpts []CombineOption
+					keyOpts     []KeyAggOption
+				)
+				if len(testCase.TweakIndices) > 0 {
+					tweaks := tweaksFromIndices(
+						t, testCase.TweakIndices,
+						testCases.Tweaks, testCase.IsXOnly,
+					)
+					combineOpts = append(
+						combineOpts, WithTweakedCombine(
+							msg, pubKeys, tweaks, false,
+						),
+					)
+					keyOpts = append(keyOpts, WithKeyTweaks(tweaks...))
+				}
+				combinedKey, _, _, err := AggregateKeys(
+					pubKeys, false, keyOpts...,
+				)
+				require.NoError(t, err)
+				combinedNonce, err := AggregateNonces(pubNonces)
+				require.NoError(t, err)
+				finalNonceJ, _, err := computeSigningNonce(
+					combinedNonce, combinedKey.FinalKey, msg,
+				)
+				finalNonceJ.ToAffine()
+				finalNonce := btcec.NewPublicKey(
+					&finalNonceJ.X, &finalNonceJ.Y,
+				)
+				combinedSig := CombineSigs(
+					finalNonce, partialSigs, combineOpts...,
+				)
+				require.Equal(
+					t,
+					strings.ToLower(testCase.Expected),
+					hex.Enc(combinedSig.Serialize()),
+				)
+			},
+		)
 	}
 }

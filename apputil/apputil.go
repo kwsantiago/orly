@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"manifold.mleku.dev/chk"
+	"not.realy.lol/chk"
 )
 
 // EnsureDir checks if a file could be written to a path and creates the necessary

@@ -4,7 +4,7 @@
 package btcec
 
 import (
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/ec/secp256k1"
 )
 
 // Error identifies an error related to public key cryptography using a

@@ -9,7 +9,7 @@ import (
 	"crypto/rand"
 	"io"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 // SecretKey provides facilities for working with secp256k1 secret keys within

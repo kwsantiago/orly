@@ -8,11 +8,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/chk"
+	"not.realy.lol/sha256"
 
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/ec"
+	"not.realy.lol/hex"
 )
 
 const (
@@ -69,8 +69,10 @@ func (s signerSet) combinedKey() *btcec.PublicKey {
 }
 
 // testMultiPartySign executes a multi-party signing context w/ 100 signers.
-func testMultiPartySign(t *testing.T, taprootTweak []byte,
-	tweaks ...KeyTweakDesc) {
+func testMultiPartySign(
+	t *testing.T, taprootTweak []byte,
+	tweaks ...KeyTweakDesc,
+) {
 
 	const numSigners = 100
 	// First generate the set of signers along with their public keys.
@@ -195,36 +197,50 @@ func TestMuSigMultiParty(t *testing.T) {
 		0x96, 0x12, 0xA6, 0x82, 0xA2, 0x5E, 0xBE, 0x79,
 		0x80, 0x2B, 0x26, 0x3C, 0xDF, 0xCD, 0x83, 0xBB,
 	}
-	t.Run("no_tweak", func(t *testing.T) {
-		t.Parallel()
+	t.Run(
+		"no_tweak", func(t *testing.T) {
+			t.Parallel()
 
-		testMultiPartySign(t, nil)
-	})
-	t.Run("tweaked", func(t *testing.T) {
-		t.Parallel()
+			testMultiPartySign(t, nil)
+		},
+	)
+	t.Run(
+		"tweaked", func(t *testing.T) {
+			t.Parallel()
 
-		testMultiPartySign(t, nil, KeyTweakDesc{
-			Tweak: testTweak,
-		})
-	})
-	t.Run("tweaked_x_only", func(t *testing.T) {
-		t.Parallel()
+			testMultiPartySign(
+				t, nil, KeyTweakDesc{
+					Tweak: testTweak,
+				},
+			)
+		},
+	)
+	t.Run(
+		"tweaked_x_only", func(t *testing.T) {
+			t.Parallel()
 
-		testMultiPartySign(t, nil, KeyTweakDesc{
-			Tweak:   testTweak,
-			IsXOnly: true,
-		})
-	})
-	t.Run("taproot_tweaked_x_only", func(t *testing.T) {
-		t.Parallel()
+			testMultiPartySign(
+				t, nil, KeyTweakDesc{
+					Tweak:   testTweak,
+					IsXOnly: true,
+				},
+			)
+		},
+	)
+	t.Run(
+		"taproot_tweaked_x_only", func(t *testing.T) {
+			t.Parallel()
 
-		testMultiPartySign(t, testTweak[:])
-	})
-	t.Run("taproot_bip_86", func(t *testing.T) {
-		t.Parallel()
+			testMultiPartySign(t, testTweak[:])
+		},
+	)
+	t.Run(
+		"taproot_bip_86", func(t *testing.T) {
+			t.Parallel()
 
-		testMultiPartySign(t, []byte{})
-	})
+			testMultiPartySign(t, []byte{})
+		},
+	)
 }
 
 // TestMuSigEarlyNonce tests that for protocols where nonces need to be
@@ -281,12 +297,16 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	}
 	// The number of registered signers should still be 1 for both parties.
 	if ctx1.NumRegisteredSigners() != 1 {
-		t.Fatalf("expected 1 signer, instead have: %v",
-			ctx1.NumRegisteredSigners())
+		t.Fatalf(
+			"expected 1 signer, instead have: %v",
+			ctx1.NumRegisteredSigners(),
+		)
 	}
 	if ctx2.NumRegisteredSigners() != 2 {
-		t.Fatalf("expected 2 signers, instead have: %v",
-			ctx2.NumRegisteredSigners())
+		t.Fatalf(
+			"expected 2 signers, instead have: %v",
+			ctx2.NumRegisteredSigners(),
+		)
 	}
 	// If we try to make a session, we should get an error since we dn't
 	// have all the signers yet.

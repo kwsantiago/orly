@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 //go:generate go run genprecomps.go

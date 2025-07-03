@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/chainhash"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/chainhash"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/ec/secp256k1"
 )
 
 var (
@@ -24,8 +24,10 @@ var (
 
 	// ErrNoncePointAtInfinity is returned if during signing, the fully
 	// combined public nonce is the point at infinity.
-	ErrNoncePointAtInfinity = fmt.Errorf("signing nonce is the infinity " +
-		"point")
+	ErrNoncePointAtInfinity = fmt.Errorf(
+		"signing nonce is the infinity " +
+			"point",
+	)
 
 	// ErrSecKeyZero is returned when the secret key for signing is
 	// actually zero.
@@ -45,8 +47,10 @@ var (
 
 	// ErrPubkeyNotIncluded is returned when the signers pubkey is not included
 	// in the list of pubkeys.
-	ErrPubkeyNotIncluded = fmt.Errorf("signer's pubkey must be included" +
-		" in the list of pubkeys")
+	ErrPubkeyNotIncluded = fmt.Errorf(
+		"signer's pubkey must be included" +
+			" in the list of pubkeys",
+	)
 )
 
 // infinityPoint is the jacobian representation of the point at infinity.
@@ -62,8 +66,10 @@ type PartialSignature struct {
 }
 
 // NewPartialSignature returns a new instances of the partial sig struct.
-func NewPartialSignature(s *btcec.ModNScalar,
-	r *btcec.PublicKey) PartialSignature {
+func NewPartialSignature(
+	s *btcec.ModNScalar,
+	r *btcec.PublicKey,
+) PartialSignature {
 
 	return PartialSignature{
 		S: s,
@@ -196,9 +202,12 @@ func WithBip86SignTweak() SignOption {
 
 // computeSigningNonce calculates the final nonce used for signing. This will
 // be the R value used in the final signature.
-func computeSigningNonce(combinedNonce [PubNonceSize]byte,
-	combinedKey *btcec.PublicKey, msg [32]byte) (
-	*btcec.JacobianPoint, *btcec.ModNScalar, error) {
+func computeSigningNonce(
+	combinedNonce [PubNonceSize]byte,
+	combinedKey *btcec.PublicKey, msg [32]byte,
+) (
+	*btcec.JacobianPoint, *btcec.ModNScalar, error,
+) {
 
 	// Next we'll compute the value b, that blinds our second public
 	// nonce:
@@ -250,9 +259,11 @@ func computeSigningNonce(combinedNonce [PubNonceSize]byte,
 // nonce, public nonce, and secret keys. This method returns an error if the
 // generated nonces are either too large, or end up mapping to the point at
 // infinity.
-func Sign(secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
+func Sign(
+	secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
 	combinedNonce [PubNonceSize]byte, pubKeys []*btcec.PublicKey,
-	msg [32]byte, signOpts ...SignOption) (*PartialSignature, error) {
+	msg [32]byte, signOpts ...SignOption,
+) (*PartialSignature, error) {
 
 	// First, parse the set of optional signing options.
 	opts := defaultSignOptions()
@@ -261,8 +272,10 @@ func Sign(secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
 	}
 
 	// Check that our signing key belongs to the secNonce
-	if !bytes.Equal(secNonce[btcec.SecKeyBytesLen*2:],
-		privKey.PubKey().SerializeCompressed()) {
+	if !bytes.Equal(
+		secNonce[btcec.SecKeyBytesLen*2:],
+		privKey.PubKey().SerializeCompressed(),
+	) {
 
 		return nil, ErrSecNoncePubkey
 	}
@@ -406,9 +419,11 @@ func Sign(secNonce [SecNonceSize]byte, privKey *btcec.SecretKey,
 // Verify implements partial signature verification given the public nonce for
 // the signer, aggregate nonce, signer set and finally the message being
 // signed.
-func (p *PartialSignature) Verify(pubNonce [PubNonceSize]byte,
+func (p *PartialSignature) Verify(
+	pubNonce [PubNonceSize]byte,
 	combinedNonce [PubNonceSize]byte, keySet []*btcec.PublicKey,
-	signingKey *btcec.PublicKey, msg [32]byte, signOpts ...SignOption) bool {
+	signingKey *btcec.PublicKey, msg [32]byte, signOpts ...SignOption,
+) bool {
 
 	pubKey := signingKey.SerializeCompressed()
 
@@ -420,9 +435,11 @@ func (p *PartialSignature) Verify(pubNonce [PubNonceSize]byte,
 // verifyPartialSig attempts to verify a partial schnorr signature given the
 // necessary parameters. This is the internal version of Verify that returns
 // detailed errors.  signed.
-func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
+func verifyPartialSig(
+	partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	combinedNonce [PubNonceSize]byte, keySet []*btcec.PublicKey,
-	pubKey []byte, msg [32]byte, signOpts ...SignOption) error {
+	pubKey []byte, msg [32]byte, signOpts ...SignOption,
+) error {
 
 	opts := defaultSignOptions()
 	for _, option := range signOpts {
@@ -541,9 +558,13 @@ func verifyPartialSig(partialSig *PartialSignature, pubNonce [PubNonceSize]byte,
 	// nonce, combined public key and also the message:
 	//  * e = H(tag=ChallengeHashTag, R || Q || m) mod n
 	var challengeMsg bytes.Buffer
-	challengeMsg.Write(schnorr.SerializePubKey(btcec.NewPublicKey(
-		&nonce.X, &nonce.Y,
-	)))
+	challengeMsg.Write(
+		schnorr.SerializePubKey(
+			btcec.NewPublicKey(
+				&nonce.X, &nonce.Y,
+			),
+		),
+	)
 	challengeMsg.Write(schnorr.SerializePubKey(combinedKey.FinalKey))
 	challengeMsg.Write(msg[:])
 	challengeBytes := chainhash.TaggedHash(
@@ -617,8 +638,10 @@ func defaultCombineOptions() *combineOptions {
 // order to properly aggregate the partial signatures, the caller must specify
 // enough information to reconstruct the challenge, and also the final
 // accumulated tweak value.
-func WithTweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
-	tweaks []KeyTweakDesc, sort bool) CombineOption {
+func WithTweakedCombine(
+	msg [32]byte, keys []*btcec.PublicKey,
+	tweaks []KeyTweakDesc, sort bool,
+) CombineOption {
 
 	return func(o *combineOptions) {
 		combinedKey, _, tweakAcc, _ := AggregateKeys(
@@ -638,8 +661,10 @@ func WithTweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
 // This option should be used over WithTweakedCombine when attempting to
 // aggregate signatures for a top-level taproot keyspend, where the output key
 // commits to a script root.
-func WithTaprootTweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
-	scriptRoot []byte, sort bool) CombineOption {
+func WithTaprootTweakedCombine(
+	msg [32]byte, keys []*btcec.PublicKey,
+	scriptRoot []byte, sort bool,
+) CombineOption {
 
 	return func(o *combineOptions) {
 		combinedKey, _, tweakAcc, _ := AggregateKeys(
@@ -660,8 +685,10 @@ func WithTaprootTweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
 // This option should be used over WithTaprootTweakedCombine when attempting to
 // aggregate signatures for a top-level taproot keyspend, where the output key
 // was generated using BIP 86.
-func WithBip86TweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
-	sort bool) CombineOption {
+func WithBip86TweakedCombine(
+	msg [32]byte, keys []*btcec.PublicKey,
+	sort bool,
+) CombineOption {
 
 	return func(o *combineOptions) {
 		combinedKey, _, tweakAcc, _ := AggregateKeys(
@@ -676,9 +703,11 @@ func WithBip86TweakedCombine(msg [32]byte, keys []*btcec.PublicKey,
 
 // CombineSigs combines the set of public keys given the final aggregated
 // nonce, and the series of partial signatures for each nonce.
-func CombineSigs(combinedNonce *btcec.PublicKey,
+func CombineSigs(
+	combinedNonce *btcec.PublicKey,
 	partialSigs []*PartialSignature,
-	combineOpts ...CombineOption) *schnorr.Signature {
+	combineOpts ...CombineOption,
+) *schnorr.Signature {
 
 	// First, parse the set of optional combine options.
 	opts := defaultCombineOptions()

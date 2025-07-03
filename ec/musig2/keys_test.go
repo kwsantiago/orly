@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
 	"github.com/stretchr/testify/require"
+	"not.realy.lol/chk"
 
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 const (
@@ -82,8 +82,10 @@ type keyAggTestVectors struct {
 	InvalidCases []keyAggInvalidTest `json:"error_test_cases"`
 }
 
-func keysFromIndices(t *testing.T, indices []int,
-	pubKeys []string) ([]*btcec.PublicKey, error) {
+func keysFromIndices(
+	t *testing.T, indices []int,
+	pubKeys []string,
+) ([]*btcec.PublicKey, error) {
 	t.Helper()
 	inputKeys := make([]*btcec.PublicKey, len(indices))
 	for i, keyIdx := range indices {
@@ -98,8 +100,10 @@ func keysFromIndices(t *testing.T, indices []int,
 	return inputKeys, nil
 }
 
-func tweaksFromIndices(t *testing.T, indices []int,
-	tweaks []string, isXonly []bool) []KeyTweakDesc {
+func tweaksFromIndices(
+	t *testing.T, indices []int,
+	tweaks []string, isXonly []bool,
+) []KeyTweakDesc {
 
 	t.Helper()
 	testTweaks := make([]KeyTweakDesc, len(indices))
@@ -138,82 +142,88 @@ func TestMuSig2KeyAggTestVectors(t *testing.T) {
 			t, testCase.Indices, testCases.PubKeys,
 		)
 		require.NoError(t, err)
-		t.Run(fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
-			uniqueKeyIndex := secondUniqueKeyIndex(inputKeys, false)
-			opts := []KeyAggOption{WithUniqueKeyIndex(uniqueKeyIndex)}
+		t.Run(
+			fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
+				uniqueKeyIndex := secondUniqueKeyIndex(inputKeys, false)
+				opts := []KeyAggOption{WithUniqueKeyIndex(uniqueKeyIndex)}
 
-			combinedKey, _, _, err := AggregateKeys(
-				inputKeys, false, opts...,
-			)
-			require.NoError(t, err)
+				combinedKey, _, _, err := AggregateKeys(
+					inputKeys, false, opts...,
+				)
+				require.NoError(t, err)
 
-			require.Equal(
-				t, schnorr.SerializePubKey(combinedKey.FinalKey),
-				mustParseHex(testCase.Expected),
-			)
-		})
+				require.Equal(
+					t, schnorr.SerializePubKey(combinedKey.FinalKey),
+					mustParseHex(testCase.Expected),
+				)
+			},
+		)
 	}
 	for _, testCase := range testCases.InvalidCases {
 		testCase := testCase
-		testName := fmt.Sprintf("invalid_%v",
-			strings.ToLower(testCase.Comment))
-		t.Run(testName, func(t *testing.T) {
-			// For each test, we'll extract the set of input keys
-			// as well as the tweaks since this set of cases also
-			// exercises error cases related to the set of tweaks.
-			inputKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			// In this set of test cases, we should only get this
-			// for the very first vector.
-			if chk.E(err) {
+		testName := fmt.Sprintf(
+			"invalid_%v",
+			strings.ToLower(testCase.Comment),
+		)
+		t.Run(
+			testName, func(t *testing.T) {
+				// For each test, we'll extract the set of input keys
+				// as well as the tweaks since this set of cases also
+				// exercises error cases related to the set of tweaks.
+				inputKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
+				)
+				// In this set of test cases, we should only get this
+				// for the very first vector.
+				if chk.E(err) {
+					switch testCase.Comment {
+					case "Invalid public key":
+						require.ErrorIs(
+							t, err,
+							secp256k1.ErrPubKeyNotOnCurve,
+						)
+					case "Public key exceeds field size":
+						require.ErrorIs(
+							t, err, secp256k1.ErrPubKeyXTooBig,
+						)
+					case "First byte of public key is not 2 or 3":
+						require.ErrorIs(
+							t, err,
+							secp256k1.ErrPubKeyInvalidFormat,
+						)
+					default:
+						t.Fatalf("uncaught err: %v", err)
+					}
+					return
+				}
+				var tweaks []KeyTweakDesc
+				if len(testCase.TweakIndices) != 0 {
+					tweaks = tweaksFromIndices(
+						t, testCase.TweakIndices, testCases.Tweaks,
+						testCase.IsXOnly,
+					)
+				}
+				uniqueKeyIndex := secondUniqueKeyIndex(inputKeys, false)
+				opts := []KeyAggOption{
+					WithUniqueKeyIndex(uniqueKeyIndex),
+				}
+				if len(tweaks) != 0 {
+					opts = append(opts, WithKeyTweaks(tweaks...))
+				}
+				_, _, _, err = AggregateKeys(
+					inputKeys, false, opts...,
+				)
+				require.Error(t, err)
 				switch testCase.Comment {
-				case "Invalid public key":
-					require.ErrorIs(
-						t, err,
-						secp256k1.ErrPubKeyNotOnCurve,
-					)
-				case "Public key exceeds field size":
-					require.ErrorIs(
-						t, err, secp256k1.ErrPubKeyXTooBig,
-					)
-				case "First byte of public key is not 2 or 3":
-					require.ErrorIs(
-						t, err,
-						secp256k1.ErrPubKeyInvalidFormat,
-					)
+				case "Tweak is out of range":
+					require.ErrorIs(t, err, ErrTweakedKeyOverflows)
+				case "Intermediate tweaking result is point at infinity":
+					require.ErrorIs(t, err, ErrTweakedKeyIsInfinity)
 				default:
 					t.Fatalf("uncaught err: %v", err)
 				}
-				return
-			}
-			var tweaks []KeyTweakDesc
-			if len(testCase.TweakIndices) != 0 {
-				tweaks = tweaksFromIndices(
-					t, testCase.TweakIndices, testCases.Tweaks,
-					testCase.IsXOnly,
-				)
-			}
-			uniqueKeyIndex := secondUniqueKeyIndex(inputKeys, false)
-			opts := []KeyAggOption{
-				WithUniqueKeyIndex(uniqueKeyIndex),
-			}
-			if len(tweaks) != 0 {
-				opts = append(opts, WithKeyTweaks(tweaks...))
-			}
-			_, _, _, err = AggregateKeys(
-				inputKeys, false, opts...,
-			)
-			require.Error(t, err)
-			switch testCase.Comment {
-			case "Tweak is out of range":
-				require.ErrorIs(t, err, ErrTweakedKeyOverflows)
-			case "Intermediate tweaking result is point at infinity":
-				require.ErrorIs(t, err, ErrTweakedKeyIsInfinity)
-			default:
-				t.Fatalf("uncaught err: %v", err)
-			}
-		})
+			},
+		)
 	}
 }
 
@@ -248,8 +258,10 @@ type keyTweakVector struct {
 	InvalidCases []keyTweakInvalidTest `json:"error_test_cases"`
 }
 
-func pubNoncesFromIndices(t *testing.T, nonceIndices []int,
-	pubNonces []string) [][PubNonceSize]byte {
+func pubNoncesFromIndices(
+	t *testing.T, nonceIndices []int,
+	pubNonces []string,
+) [][PubNonceSize]byte {
 
 	nonces := make([][PubNonceSize]byte, len(nonceIndices))
 	for i, idx := range nonceIndices {
@@ -278,40 +290,44 @@ func TestMuSig2TweakTestVectors(t *testing.T) {
 	copy(secNonce[:], mustParseHex(testCases.PrivNonce))
 	for _, testCase := range testCases.ValidCases {
 		testCase := testCase
-		testName := fmt.Sprintf("valid_%v",
-			strings.ToLower(testCase.Comment))
-		t.Run(testName, func(t *testing.T) {
-			pubKeys, err := keysFromIndices(
-				t, testCase.Indices, testCases.PubKeys,
-			)
-			require.NoError(t, err)
-			var tweaks []KeyTweakDesc
-			if len(testCase.TweakIndices) != 0 {
-				tweaks = tweaksFromIndices(
-					t, testCase.TweakIndices,
-					testCases.Tweaks, testCase.IsXOnly,
+		testName := fmt.Sprintf(
+			"valid_%v",
+			strings.ToLower(testCase.Comment),
+		)
+		t.Run(
+			testName, func(t *testing.T) {
+				pubKeys, err := keysFromIndices(
+					t, testCase.Indices, testCases.PubKeys,
 				)
-			}
-			pubNonces := pubNoncesFromIndices(
-				t, testCase.NonceIndices, testCases.PubNonces,
-			)
-			combinedNonce, err := AggregateNonces(pubNonces)
-			require.NoError(t, err)
-			var opts []SignOption
-			if len(tweaks) != 0 {
-				opts = append(opts, WithTweaks(tweaks...))
-			}
-			partialSig, err := Sign(
-				secNonce, privKey, combinedNonce, pubKeys,
-				msg, opts...,
-			)
-			var partialSigBytes [32]byte
-			partialSig.S.PutBytesUnchecked(partialSigBytes[:])
-			require.Equal(
-				t, hex.Enc(partialSigBytes[:]),
-				hex.Enc(mustParseHex(testCase.Expected)),
-			)
+				require.NoError(t, err)
+				var tweaks []KeyTweakDesc
+				if len(testCase.TweakIndices) != 0 {
+					tweaks = tweaksFromIndices(
+						t, testCase.TweakIndices,
+						testCases.Tweaks, testCase.IsXOnly,
+					)
+				}
+				pubNonces := pubNoncesFromIndices(
+					t, testCase.NonceIndices, testCases.PubNonces,
+				)
+				combinedNonce, err := AggregateNonces(pubNonces)
+				require.NoError(t, err)
+				var opts []SignOption
+				if len(tweaks) != 0 {
+					opts = append(opts, WithTweaks(tweaks...))
+				}
+				partialSig, err := Sign(
+					secNonce, privKey, combinedNonce, pubKeys,
+					msg, opts...,
+				)
+				var partialSigBytes [32]byte
+				partialSig.S.PutBytesUnchecked(partialSigBytes[:])
+				require.Equal(
+					t, hex.Enc(partialSigBytes[:]),
+					hex.Enc(mustParseHex(testCase.Expected)),
+				)
 
-		})
+			},
+		)
 	}
 }

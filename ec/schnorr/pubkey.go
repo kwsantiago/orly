@@ -8,8 +8,8 @@ package schnorr
 import (
 	"fmt"
 
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/secp256k1"
 )
 
 // These constants define the lengths of serialized public keys.
@@ -27,8 +27,10 @@ func ParsePubKey(pubKeyStr []byte) (*btcec.PublicKey, error) {
 		return nil, err
 	}
 	if len(pubKeyStr) != PubKeyBytesLen {
-		err := fmt.Errorf("bad pubkey byte string size (want %v, have %v)",
-			PubKeyBytesLen, len(pubKeyStr))
+		err := fmt.Errorf(
+			"bad pubkey byte string size (want %v, have %v)",
+			PubKeyBytesLen, len(pubKeyStr),
+		)
 		return nil, err
 	}
 	// We'll manually prepend the compressed byte so we can re-use the

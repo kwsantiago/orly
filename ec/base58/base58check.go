@@ -7,7 +7,7 @@ package base58
 import (
 	"errors"
 
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/sha256"
 )
 
 // ErrChecksum indicates that the checksum of a check-encoded string does not verify against

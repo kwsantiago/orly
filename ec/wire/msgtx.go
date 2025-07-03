@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"github.com/mleku/realy.lol/ec/chainhash"
+	"not.realy.lol/ec/chainhash"
 )
 
 // OutPoint defines a bitcoin data type that is used to track previous

@@ -4,12 +4,12 @@ package p256k
 
 import "C"
 import (
-	"github.com/mleku/realy.lol/chk"
-	btcec "github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/errorf"
-	"github.com/mleku/realy.lol/log"
-	realy "github.com/mleku/realy.lol/signer"
+	"not.realy.lol/chk"
+	btcec "not.realy.lol/ec"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/errorf"
+	"not.realy.lol/log"
+	realy "not.realy.lol/signer"
 )
 
 func init() {
@@ -138,7 +138,11 @@ func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
 		s.BTCECSec, _ = btcec.PrivKeyFromBytes(s.skb)
 	}
 	var pub *secp256k1.PublicKey
-	if pub, err = secp256k1.ParsePubKey(append([]byte{0x02}, pubkeyBytes...)); chk.E(err) {
+	if pub, err = secp256k1.ParsePubKey(
+		append(
+			[]byte{0x02}, pubkeyBytes...,
+		),
+	); chk.E(err) {
 		return
 	}
 	secret = btcec.GenerateSharedSecret(s.BTCECSec, pub)

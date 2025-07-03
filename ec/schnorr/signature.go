@@ -5,10 +5,10 @@ package schnorr
 import (
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/chainhash"
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/chainhash"
+	"not.realy.lol/ec/secp256k1"
 )
 
 const (
@@ -70,13 +70,17 @@ func ParseSignature(sig []byte) (*Signature, error) {
 	// The signature must be the correct length.
 	sigLen := len(sig)
 	if sigLen < SignatureSize {
-		str := fmt.Sprintf("malformed signature: too short: %d < %d", sigLen,
-			SignatureSize)
+		str := fmt.Sprintf(
+			"malformed signature: too short: %d < %d", sigLen,
+			SignatureSize,
+		)
 		return nil, signatureError(ErrSigTooShort, str)
 	}
 	if sigLen > SignatureSize {
-		str := fmt.Sprintf("malformed signature: too long: %d > %d", sigLen,
-			SignatureSize)
+		str := fmt.Sprintf(
+			"malformed signature: too long: %d > %d", sigLen,
+			SignatureSize,
+		)
 		return nil, signatureError(ErrSigTooLong, str)
 	}
 	// The signature is validly encoded at this point, however, enforce
@@ -234,8 +238,10 @@ func zeroArray(a *[scalarSize]byte) {
 // WARNING: The hash MUST be 32 bytes and both the nonce and secret keys must
 // NOT be 0.  Since this is an internal use function, these preconditions MUST
 // be satisified by the caller.
-func schnorrSign(privKey, nonce *btcec.ModNScalar, pubKey *btcec.PublicKey,
-	hash []byte, opts *signOptions) (*Signature, error) {
+func schnorrSign(
+	privKey, nonce *btcec.ModNScalar, pubKey *btcec.PublicKey,
+	hash []byte, opts *signOptions,
+) (*Signature, error) {
 
 	// The algorithm for producing a BIP-340 signature is described in
 	// README.md and is reproduced here for reference:
@@ -366,8 +372,10 @@ func CustomNonce(auxData [32]byte) SignOption {
 // which can expose the signer to constant time attacks.  As a result, this
 // function should not be used in situations where there is the possibility of
 // someone having EM field/cache/etc access.
-func Sign(privKey *btcec.SecretKey, hash []byte,
-	signOpts ...SignOption) (*Signature, error) {
+func Sign(
+	privKey *btcec.SecretKey, hash []byte,
+	signOpts ...SignOption,
+) (*Signature, error) {
 	// First, parse the set of optional signing options.
 	opts := defaultSignOptions()
 	for _, option := range signOpts {

@@ -8,7 +8,7 @@ package ecdsa
 import (
 	"fmt"
 
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/ec/secp256k1"
 )
 
 // References:
@@ -343,26 +343,34 @@ func ParseDERSignature(sig []byte) (*Signature, error) {
 	// The signature must adhere to the minimum and maximum allowed length.
 	sigLen := len(sig)
 	if sigLen < minSigLen {
-		str := fmt.Sprintf("malformed signature: too short: %d < %d", sigLen,
-			minSigLen)
+		str := fmt.Sprintf(
+			"malformed signature: too short: %d < %d", sigLen,
+			minSigLen,
+		)
 		return nil, signatureError(ErrSigTooShort, str)
 	}
 	if sigLen > maxSigLen {
-		str := fmt.Sprintf("malformed signature: too long: %d > %d", sigLen,
-			maxSigLen)
+		str := fmt.Sprintf(
+			"malformed signature: too long: %d > %d", sigLen,
+			maxSigLen,
+		)
 		return nil, signatureError(ErrSigTooLong, str)
 	}
 	// The signature must start with the ASN.1 sequence identifier.
 	if sig[sequenceOffset] != asn1SequenceID {
-		str := fmt.Sprintf("malformed signature: format has wrong type: %#x",
-			sig[sequenceOffset])
+		str := fmt.Sprintf(
+			"malformed signature: format has wrong type: %#x",
+			sig[sequenceOffset],
+		)
 		return nil, signatureError(ErrSigInvalidSeqID, str)
 	}
 	// The signature must indicate the correct amount of data for all elements
 	// related to R and S.
 	if int(sig[dataLenOffset]) != sigLen-2 {
-		str := fmt.Sprintf("malformed signature: bad length: %d != %d",
-			sig[dataLenOffset], sigLen-2)
+		str := fmt.Sprintf(
+			"malformed signature: bad length: %d != %d",
+			sig[dataLenOffset], sigLen-2,
+		)
 		return nil, signatureError(ErrSigInvalidDataLen, str)
 	}
 	// Calculate the offsets of the elements related to S and ensure S is inside
@@ -399,8 +407,10 @@ func ParseDERSignature(sig []byte) (*Signature, error) {
 	}
 	// R elements must be ASN.1 integers.
 	if sig[rTypeOffset] != asn1IntegerID {
-		str := fmt.Sprintf("malformed signature: R integer marker: %#x != %#x",
-			sig[rTypeOffset], asn1IntegerID)
+		str := fmt.Sprintf(
+			"malformed signature: R integer marker: %#x != %#x",
+			sig[rTypeOffset], asn1IntegerID,
+		)
 		return nil, signatureError(ErrSigInvalidRIntID, str)
 	}
 	// Zero-length integers are not allowed for R.
@@ -421,8 +431,10 @@ func ParseDERSignature(sig []byte) (*Signature, error) {
 	}
 	// S elements must be ASN.1 integers.
 	if sig[sTypeOffset] != asn1IntegerID {
-		str := fmt.Sprintf("malformed signature: S integer marker: %#x != %#x",
-			sig[sTypeOffset], asn1IntegerID)
+		str := fmt.Sprintf(
+			"malformed signature: S integer marker: %#x != %#x",
+			sig[sTypeOffset], asn1IntegerID,
+		)
 		return nil, signatureError(ErrSigInvalidSIntID, str)
 	}
 	// Zero-length integers are not allowed for S.
@@ -508,8 +520,10 @@ func ParseDERSignature(sig []byte) (*Signature, error) {
 // signing logic.  It differs in that it accepts a nonce to use when signing and
 // may not successfully produce a valid signature for the given nonce.  It is
 // primarily separated for testing purposes.
-func sign(secKey, nonce *secp256k1.ModNScalar, hash []byte) (*Signature, byte,
-	bool) {
+func sign(secKey, nonce *secp256k1.ModNScalar, hash []byte) (
+	*Signature, byte,
+	bool,
+) {
 	// The algorithm for producing an ECDSA signature is given as algorithm 4.29
 	// in [GECC].
 	//
@@ -617,8 +631,10 @@ func sign(secKey, nonce *secp256k1.ModNScalar, hash []byte) (*Signature, byte,
 // signRFC6979 generates a deterministic ECDSA signature according to RFC 6979
 // and BIP0062 and returns it along with an additional public key recovery code
 // for efficiently recovering the public key from the signature.
-func signRFC6979(secKey *secp256k1.SecretKey, hash []byte) (*Signature,
-	byte) {
+func signRFC6979(secKey *secp256k1.SecretKey, hash []byte) (
+	*Signature,
+	byte,
+) {
 	// The algorithm for producing an ECDSA signature is given as algorithm 4.29
 	// in [GECC].
 	//
@@ -714,8 +730,10 @@ const (
 //
 // The compact sig recovery code is the value 27 + public key recovery code + 4
 // if the compact signature was created with a compressed public key.
-func SignCompact(key *secp256k1.SecretKey, hash []byte,
-	isCompressedKey bool) []byte {
+func SignCompact(
+	key *secp256k1.SecretKey, hash []byte,
+	isCompressedKey bool,
+) []byte {
 	// Create the signature and associated pubkey recovery code and calculate
 	// the compact signature recovery code.
 	sig, pubKeyRecoveryCode := signRFC6979(key, hash)
@@ -735,7 +753,9 @@ func SignCompact(key *secp256k1.SecretKey, hash []byte,
 // compact signature and message hash.  It first verifies the signature, and, if
 // the signature matches then the recovered public key will be returned as well
 // as a boolean indicating whether or not the original key was compressed.
-func RecoverCompact(signature, hash []byte) (*secp256k1.PublicKey, bool, error) {
+func RecoverCompact(signature, hash []byte) (
+	*secp256k1.PublicKey, bool, error,
+) {
 	// The following is very loosely based on the information and algorithm that
 	// describes recovering a public key from and ECDSA signature in section
 	// 4.1.6 of [SEC1].
@@ -802,8 +822,10 @@ func RecoverCompact(signature, hash []byte) (*secp256k1.PublicKey, bool, error) 
 	// A compact signature consists of a recovery byte followed by the R and
 	// S components serialized as 32-byte big-endian values.
 	if len(signature) != compactSigSize {
-		str := fmt.Sprintf("malformed signature: wrong size: %d != %d",
-			len(signature), compactSigSize)
+		str := fmt.Sprintf(
+			"malformed signature: wrong size: %d != %d",
+			len(signature), compactSigSize,
+		)
 		return nil, false, signatureError(ErrSigInvalidLen, str)
 	}
 	// Parse and validate the compact signature recovery code.
@@ -813,9 +835,11 @@ func RecoverCompact(signature, hash []byte) (*secp256k1.PublicKey, bool, error) 
 	)
 	sigRecoveryCode := signature[0]
 	if sigRecoveryCode < minValidCode || sigRecoveryCode > maxValidCode {
-		str := fmt.Sprintf("invalid signature: public key recovery code %d is "+
-			"not in the valid range [%d, %d]", sigRecoveryCode, minValidCode,
-			maxValidCode)
+		str := fmt.Sprintf(
+			"invalid signature: public key recovery code %d is "+
+				"not in the valid range [%d, %d]", sigRecoveryCode, minValidCode,
+			maxValidCode,
+		)
 		return nil, false, signatureError(ErrSigInvalidRecoveryCode, str)
 	}
 	sigRecoveryCode -= compactSigMagicOffset

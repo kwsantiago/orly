@@ -13,10 +13,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 type bip340Test struct {
@@ -193,8 +193,10 @@ var bip340TestVectors = []bip340Test{
 func decodeHex(hexStr string) []byte {
 	b, err := hex.Dec(hexStr)
 	if chk.E(err) {
-		panic("invalid hex string in test source: err " + err.Error() +
-			", hex: " + hexStr)
+		panic(
+			"invalid hex string in test source: err " + err.Error() +
+				", hex: " + hexStr,
+		)
 	}
 	return b
 }
@@ -220,8 +222,10 @@ func TestSchnorrSign(t *testing.T) {
 			t.Fatalf("test #%v: sig generation failed: %v", i+1, err)
 		}
 		if strings.ToUpper(hex.Enc(sig.Serialize())) != test.signature {
-			t.Fatalf("test #%v: got signature %x : "+
-				"want %s", i+1, sig.Serialize(), test.signature)
+			t.Fatalf(
+				"test #%v: got signature %x : "+
+					"want %s", i+1, sig.Serialize(), test.signature,
+			)
 		}
 		pubKeyBytes := decodeHex(test.publicKey)
 		err = schnorrVerify(sig, msg, pubKeyBytes)
@@ -230,8 +234,10 @@ func TestSchnorrSign(t *testing.T) {
 		}
 		verify := !chk.E(err)
 		if test.verifyResult != verify {
-			t.Fatalf("test #%v: verification mismatch: "+
-				"expected %v, got %v", i+1, test.verifyResult, verify)
+			t.Fatalf(
+				"test #%v: verification mismatch: "+
+					"expected %v, got %v", i+1, test.verifyResult, verify,
+			)
 		}
 	}
 }
@@ -244,9 +250,11 @@ func TestSchnorrVerify(t *testing.T) {
 		switch {
 		case !test.validPubKey && chk.E(err):
 			if !errors.Is(err, test.expectErr) {
-				t.Fatalf("test #%v: pubkey validation should "+
-					"have failed, expected %v, got %v", i,
-					test.expectErr, err)
+				t.Fatalf(
+					"test #%v: pubkey validation should "+
+						"have failed, expected %v, got %v", i,
+					test.expectErr, err,
+				)
 			}
 			continue
 		case chk.E(err):
@@ -259,18 +267,24 @@ func TestSchnorrVerify(t *testing.T) {
 		}
 		err = schnorrVerify(sig, msg, pubKeyBytes)
 		if chk.E(err) && test.verifyResult {
-			t.Fatalf("test #%v: verification shouldn't have failed: %v", i+1,
-				err)
+			t.Fatalf(
+				"test #%v: verification shouldn't have failed: %v", i+1,
+				err,
+			)
 		}
 		verify := !chk.E(err)
 		if test.verifyResult != verify {
-			t.Fatalf("test #%v: verificaiton mismatch: expected "+
-				"%v, got %v", i, test.verifyResult, verify)
+			t.Fatalf(
+				"test #%v: verificaiton mismatch: expected "+
+					"%v, got %v", i, test.verifyResult, verify,
+			)
 		}
 		if !test.verifyResult && test.expectErr != nil {
 			if !errors.Is(err, test.expectErr) {
-				t.Fatalf("test #%v: expect error %v : got %v", i,
-					test.expectErr, err)
+				t.Fatalf(
+					"test #%v: expect error %v : got %v", i,
+					test.expectErr, err,
+				)
 			}
 		}
 	}
@@ -295,8 +309,10 @@ func TestSchnorrSignNoMutate(t *testing.T) {
 		// bytes and have that match up again.
 		privKeyCopy, _ := btcec.SecKeyFromBytes(privBytes[:])
 		if *privKey != *privKeyCopy {
-			t.Logf("secret doesn't match: expected %v, got %v",
-				spew.Sdump(privKeyCopy), spew.Sdump(privKey))
+			t.Logf(
+				"secret doesn't match: expected %v, got %v",
+				spew.Sdump(privKeyCopy), spew.Sdump(privKey),
+			)
 			return false
 		}
 		return true

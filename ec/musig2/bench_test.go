@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/hex"
 )
 
 var (
@@ -68,8 +68,10 @@ func BenchmarkPartialSign(b *testing.B) {
 	for _, numSigners := range []int{10, 100} {
 		for _, fastSign := range []bool{true, false} {
 			for _, sortKeys := range []bool{true, false} {
-				name := fmt.Sprintf("num_signers=%v/fast_sign=%v/sort=%v",
-					numSigners, fastSign, sortKeys)
+				name := fmt.Sprintf(
+					"num_signers=%v/fast_sign=%v/sort=%v",
+					numSigners, fastSign, sortKeys,
+				)
 				signers := make(signerSet, numSigners)
 				for i := 0; i < numSigners; i++ {
 					signers[i] = genSigner(b)
@@ -82,28 +84,30 @@ func BenchmarkPartialSign(b *testing.B) {
 				var msg [32]byte
 				copy(msg[:], testMsg[:])
 				keys := signers.keys()
-				b.Run(name, func(b *testing.B) {
-					var signOpts []SignOption
-					if fastSign {
-						signOpts = append(signOpts, WithFastSign())
-					}
-					if sortKeys {
-						signOpts = append(signOpts, WithSortedKeys())
-					}
-					b.ResetTimer()
-					b.ReportAllocs()
-					for i := 0; i < b.N; i++ {
-						sig, err = Sign(
-							signers[0].nonces.SecNonce, signers[0].privKey,
-							combinedNonce, keys, msg, signOpts...,
-						)
-						if chk.E(err) {
-							b.Fatalf("unable to generate sig: %v", err)
+				b.Run(
+					name, func(b *testing.B) {
+						var signOpts []SignOption
+						if fastSign {
+							signOpts = append(signOpts, WithFastSign())
 						}
-					}
-					testSig = sig
-					testErr = err
-				})
+						if sortKeys {
+							signOpts = append(signOpts, WithSortedKeys())
+						}
+						b.ResetTimer()
+						b.ReportAllocs()
+						for i := 0; i < b.N; i++ {
+							sig, err = Sign(
+								signers[0].nonces.SecNonce, signers[0].privKey,
+								combinedNonce, keys, msg, signOpts...,
+							)
+							if chk.E(err) {
+								b.Fatalf("unable to generate sig: %v", err)
+							}
+						}
+						testSig = sig
+						testErr = err
+					},
+				)
 			}
 		}
 	}
@@ -196,8 +200,10 @@ func BenchmarkCombineSigs(b *testing.B) {
 				combinedNonce, signers.keys(), msg,
 			)
 			if chk.E(err) {
-				b.Fatalf("unable to generate partial sig: %v",
-					err)
+				b.Fatalf(
+					"unable to generate partial sig: %v",
+					err,
+				)
 			}
 			signers[i].partialSig = partialSig
 			if finalNonce == nil {
@@ -206,12 +212,14 @@ func BenchmarkCombineSigs(b *testing.B) {
 		}
 		sigs := signers.partialSigs()
 		name := fmt.Sprintf("num_signers=%v", numSigners)
-		b.Run(name, func(b *testing.B) {
-			b.ResetTimer()
-			b.ReportAllocs()
-			finalSig := CombineSigs(finalNonce, sigs)
-			finalSchnorrSig = finalSig
-		})
+		b.Run(
+			name, func(b *testing.B) {
+				b.ResetTimer()
+				b.ReportAllocs()
+				finalSig := CombineSigs(finalNonce, sigs)
+				finalSchnorrSig = finalSig
+			},
+		)
 	}
 }
 
@@ -226,15 +234,17 @@ func BenchmarkAggregateNonces(b *testing.B) {
 		}
 		nonces := signers.pubNonces()
 		name := fmt.Sprintf("num_signers=%v", numSigners)
-		b.Run(name, func(b *testing.B) {
-			b.ResetTimer()
-			b.ReportAllocs()
-			pubNonce, err := AggregateNonces(nonces)
-			if chk.E(err) {
-				b.Fatalf("unable to generate nonces: %v", err)
-			}
-			testNonce = pubNonce
-		})
+		b.Run(
+			name, func(b *testing.B) {
+				b.ResetTimer()
+				b.ReportAllocs()
+				pubNonce, err := AggregateNonces(nonces)
+				if chk.E(err) {
+					b.Fatalf("unable to generate nonces: %v", err)
+				}
+				testNonce = pubNonce
+			},
+		)
 	}
 }
 
@@ -250,18 +260,22 @@ func BenchmarkAggregateKeys(b *testing.B) {
 				signers[i] = genSigner(b)
 			}
 			signerKeys := signers.keys()
-			name := fmt.Sprintf("num_signers=%v/sort_keys=%v",
-				numSigners, sortKeys)
+			name := fmt.Sprintf(
+				"num_signers=%v/sort_keys=%v",
+				numSigners, sortKeys,
+			)
 			uniqueKeyIndex := secondUniqueKeyIndex(signerKeys, false)
-			b.Run(name, func(b *testing.B) {
-				b.ResetTimer()
-				b.ReportAllocs()
-				aggKey, _, _, _ := AggregateKeys(
-					signerKeys, sortKeys,
-					WithUniqueKeyIndex(uniqueKeyIndex),
-				)
-				testKey = aggKey.FinalKey
-			})
+			b.Run(
+				name, func(b *testing.B) {
+					b.ResetTimer()
+					b.ReportAllocs()
+					aggKey, _, _, _ := AggregateKeys(
+						signerKeys, sortKeys,
+						WithUniqueKeyIndex(uniqueKeyIndex),
+					)
+					testKey = aggKey.FinalKey
+				},
+			)
 		}
 	}
 }

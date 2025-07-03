@@ -7,7 +7,7 @@ package secp256k1
 import (
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 // BenchmarkSecretKeyGenerate benchmarks generating new cryptographically

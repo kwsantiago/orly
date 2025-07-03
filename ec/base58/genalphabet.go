@@ -14,7 +14,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 var (

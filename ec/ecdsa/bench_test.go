@@ -8,9 +8,9 @@ package ecdsa
 import (
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 // hexToModNScalar converts the passed hex string into a ModNScalar and will
@@ -144,9 +144,11 @@ func BenchmarkRecoverCompact(b *testing.B) {
 		hexToFieldVal("d2e670a19c6d753d1a6d8b20bd045df8a08fb162cf508956c31268c6d81ffdab"),
 		hexToFieldVal("ab65528eefbb8057aa85d597258a3fbd481a24633bc9b47a9aa045c91371de52"),
 	)
-	compactSig := hexToBytes("205978b7896bc71676ba2e459882a8f52e1299449596c4f" +
-		"93c59bf1fbfa2f9d3b76ecd0c99406f61a6de2bb5a8937c061c176ecf381d0231e0d" +
-		"af73b922c8952c7")
+	compactSig := hexToBytes(
+		"205978b7896bc71676ba2e459882a8f52e1299449596c4f" +
+			"93c59bf1fbfa2f9d3b76ecd0c99406f61a6de2bb5a8937c061c176ecf381d0231e0d" +
+			"af73b922c8952c7",
+	)
 	// blake256 of by{0x01, 0x02, 0x03, 0x04}.
 	msgHash := hexToBytes("c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7")
 	// Ensure a valid compact signature is being benchmarked.

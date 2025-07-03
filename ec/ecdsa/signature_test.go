@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec/secp256k1"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec/secp256k1"
+	"not.realy.lol/hex"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -39,174 +39,230 @@ func TestSignatureParsing(t *testing.T) {
 		name string
 		sig  []byte
 		err  error
-	}{{
-		// signature from Decred blockchain tx
-		// 76634e947f49dfc6228c3e8a09cd3e9e15893439fc06df7df0fc6f08d659856c:0
-		name: "valid signature 1",
-		sig: hexToBytes("3045022100cd496f2ab4fe124f977ffe3caa09f7576d8a34156" +
-			"b4e55d326b4dffc0399a094022013500a0510b5094bff220c74656879b8ca03" +
-			"69d3da78004004c970790862fc03"),
-		err: nil,
-	}, {
-		// signature from Decred blockchain tx
-		// 76634e947f49dfc6228c3e8a09cd3e9e15893439fc06df7df0fc6f08d659856c:1
-		name: "valid signature 2",
-		sig: hexToBytes("3044022036334e598e51879d10bf9ce3171666bc2d1bbba6164" +
-			"cf46dd1d882896ba35d5d022056c39af9ea265c1b6d7eab5bc977f06f81e35c" +
-			"dcac16f3ec0fd218e30f2bad2a"),
-		err: nil,
-	}, {
-		name: "empty",
-		sig:  nil,
-		err:  ErrSigTooShort,
-	}, {
-		name: "too short",
-		sig:  hexToBytes("30050201000200"),
-		err:  ErrSigTooShort,
-	}, {
-		name: "too long",
-		sig: hexToBytes("3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef8481352480101"),
-		err: ErrSigTooLong,
-	}, {
-		name: "bad ASN.1 sequence id",
-		sig: hexToBytes("3145022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidSeqID,
-	}, {
-		name: "mismatched data length (short one byte)",
-		sig: hexToBytes("3044022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidDataLen,
-	}, {
-		name: "mismatched data length (long one byte)",
-		sig: hexToBytes("3046022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidDataLen,
-	}, {
-		name: "bad R ASN.1 int marker",
-		sig: hexToBytes("304403204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
-			"24c6c61548ab5fb8cd410220181522ec8eca07de4860a4acdd12909d831cc56c" +
-			"bbac4622082221a8768d1d09"),
-		err: ErrSigInvalidRIntID,
-	}, {
-		name: "zero R length",
-		sig: hexToBytes("30240200022030e09575e7a1541aa018876a4003cefe1b061a90" +
-			"556b5140c63e0ef848135248"),
-		err: ErrSigZeroRLen,
-	}, {
-		name: "negative R (too little padding)",
-		sig: hexToBytes("30440220b2ec8d34d473c3aa2ab5eb7cc4a0783977e5db8c8daf" +
-			"777e0b6d7bfa6b6623f302207df6f09af2c40460da2c2c5778f636d3b2e27e20" +
-			"d10d90f5a5afb45231454700"),
-		err: ErrSigNegativeR,
-	}, {
-		name: "too much R padding",
-		sig: hexToBytes("304402200077f6e93de5ed43cf1dfddaa79fca4b766e1a8fc879" +
-			"b0333d377f62538d7eb5022054fed940d227ed06d6ef08f320976503848ed1f5" +
-			"2d0dd6d17f80c9c160b01d86"),
-		err: ErrSigTooMuchRPadding,
-	}, {
-		name: "bad S ASN.1 int marker",
-		sig: hexToBytes("3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074032030e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidSIntID,
-	}, {
-		name: "missing S ASN.1 int marker",
-		sig: hexToBytes("3023022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074"),
-		err: ErrSigMissingSTypeID,
-	}, {
-		name: "S length missing",
-		sig: hexToBytes("3024022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef07402"),
-		err: ErrSigMissingSLen,
-	}, {
-		name: "invalid S length (short one byte)",
-		sig: hexToBytes("3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074021f30e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidSLen,
-	}, {
-		name: "invalid S length (long one byte)",
-		sig: hexToBytes("3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef074022130e09575e7a1541aa018876a4003cefe1b061a" +
-			"90556b5140c63e0ef848135248"),
-		err: ErrSigInvalidSLen,
-	}, {
-		name: "zero S length",
-		sig: hexToBytes("3025022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
-			"49f2a1ac584fd546bef0740200"),
-		err: ErrSigZeroSLen,
-	}, {
-		name: "negative S (too little padding)",
-		sig: hexToBytes("304402204fc10344934662ca0a93a84d14d650d8a21cf2ab91f6" +
-			"08e8783d2999c955443202208441aacd6b17038ff3f6700b042934f9a6fea0ce" +
-			"c2051b51dc709e52a5bb7d61"),
-		err: ErrSigNegativeS,
-	}, {
-		name: "too much S padding",
-		sig: hexToBytes("304402206ad2fdaf8caba0f2cb2484e61b81ced77474b4c2aa06" +
-			"9c852df1351b3314fe20022000695ad175b09a4a41cd9433f6b2e8e83253d6a7" +
-			"402096ba313a7be1f086dde5"),
-		err: ErrSigTooMuchSPadding,
-	}, {
-		name: "R == 0",
-		sig: hexToBytes("30250201000220181522ec8eca07de4860a4acdd12909d831cc5" +
-			"6cbbac4622082221a8768d1d09"),
-		err: ErrSigRIsZero,
-	}, {
-		name: "R == N",
-		sig: hexToBytes("3045022100fffffffffffffffffffffffffffffffebaaedce6af" +
-			"48a03bbfd25e8cd03641410220181522ec8eca07de4860a4acdd12909d831cc5" +
-			"6cbbac4622082221a8768d1d09"),
-		err: ErrSigRTooBig,
-	}, {
-		name: "R > N (>32 bytes)",
-		sig: hexToBytes("3045022101cd496f2ab4fe124f977ffe3caa09f756283910fc1a" +
-			"96f60ee6873e88d3cfe1d50220181522ec8eca07de4860a4acdd12909d831cc5" +
-			"6cbbac4622082221a8768d1d09"),
-		err: ErrSigRTooBig,
-	}, {
-		name: "R > N",
-		sig: hexToBytes("3045022100fffffffffffffffffffffffffffffffebaaedce6af" +
-			"48a03bbfd25e8cd03641420220181522ec8eca07de4860a4acdd12909d831cc5" +
-			"6cbbac4622082221a8768d1d09"),
-		err: ErrSigRTooBig,
-	}, {
-		name: "S == 0",
-		sig: hexToBytes("302502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
-			"24c6c61548ab5fb8cd41020100"),
-		err: ErrSigSIsZero,
-	}, {
-		name: "S == N",
-		sig: hexToBytes("304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
-			"24c6c61548ab5fb8cd41022100fffffffffffffffffffffffffffffffebaaedc" +
-			"e6af48a03bbfd25e8cd0364141"),
-		err: ErrSigSTooBig,
-	}, {
-		name: "S > N (>32 bytes)",
-		sig: hexToBytes("304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
-			"24c6c61548ab5fb8cd4102210113500a0510b5094bff220c74656879b784b246" +
-			"ba89c0a07bc49bcf05d8993d44"),
-		err: ErrSigSTooBig,
-	}, {
-		name: "S > N",
-		sig: hexToBytes("304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
-			"24c6c61548ab5fb8cd41022100fffffffffffffffffffffffffffffffebaaedc" +
-			"e6af48a03bbfd25e8cd0364142"),
-		err: ErrSigSTooBig,
-	}}
+	}{
+		{
+			// signature from Decred blockchain tx
+			// 76634e947f49dfc6228c3e8a09cd3e9e15893439fc06df7df0fc6f08d659856c:0
+			name: "valid signature 1",
+			sig: hexToBytes(
+				"3045022100cd496f2ab4fe124f977ffe3caa09f7576d8a34156" +
+					"b4e55d326b4dffc0399a094022013500a0510b5094bff220c74656879b8ca03" +
+					"69d3da78004004c970790862fc03",
+			),
+			err: nil,
+		}, {
+			// signature from Decred blockchain tx
+			// 76634e947f49dfc6228c3e8a09cd3e9e15893439fc06df7df0fc6f08d659856c:1
+			name: "valid signature 2",
+			sig: hexToBytes(
+				"3044022036334e598e51879d10bf9ce3171666bc2d1bbba6164" +
+					"cf46dd1d882896ba35d5d022056c39af9ea265c1b6d7eab5bc977f06f81e35c" +
+					"dcac16f3ec0fd218e30f2bad2a",
+			),
+			err: nil,
+		}, {
+			name: "empty",
+			sig:  nil,
+			err:  ErrSigTooShort,
+		}, {
+			name: "too short",
+			sig:  hexToBytes("30050201000200"),
+			err:  ErrSigTooShort,
+		}, {
+			name: "too long",
+			sig: hexToBytes(
+				"3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef8481352480101",
+			),
+			err: ErrSigTooLong,
+		}, {
+			name: "bad ASN.1 sequence id",
+			sig: hexToBytes(
+				"3145022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidSeqID,
+		}, {
+			name: "mismatched data length (short one byte)",
+			sig: hexToBytes(
+				"3044022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidDataLen,
+		}, {
+			name: "mismatched data length (long one byte)",
+			sig: hexToBytes(
+				"3046022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074022030e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidDataLen,
+		}, {
+			name: "bad R ASN.1 int marker",
+			sig: hexToBytes(
+				"304403204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
+					"24c6c61548ab5fb8cd410220181522ec8eca07de4860a4acdd12909d831cc56c" +
+					"bbac4622082221a8768d1d09",
+			),
+			err: ErrSigInvalidRIntID,
+		}, {
+			name: "zero R length",
+			sig: hexToBytes(
+				"30240200022030e09575e7a1541aa018876a4003cefe1b061a90" +
+					"556b5140c63e0ef848135248",
+			),
+			err: ErrSigZeroRLen,
+		}, {
+			name: "negative R (too little padding)",
+			sig: hexToBytes(
+				"30440220b2ec8d34d473c3aa2ab5eb7cc4a0783977e5db8c8daf" +
+					"777e0b6d7bfa6b6623f302207df6f09af2c40460da2c2c5778f636d3b2e27e20" +
+					"d10d90f5a5afb45231454700",
+			),
+			err: ErrSigNegativeR,
+		}, {
+			name: "too much R padding",
+			sig: hexToBytes(
+				"304402200077f6e93de5ed43cf1dfddaa79fca4b766e1a8fc879" +
+					"b0333d377f62538d7eb5022054fed940d227ed06d6ef08f320976503848ed1f5" +
+					"2d0dd6d17f80c9c160b01d86",
+			),
+			err: ErrSigTooMuchRPadding,
+		}, {
+			name: "bad S ASN.1 int marker",
+			sig: hexToBytes(
+				"3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074032030e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidSIntID,
+		}, {
+			name: "missing S ASN.1 int marker",
+			sig: hexToBytes(
+				"3023022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074",
+			),
+			err: ErrSigMissingSTypeID,
+		}, {
+			name: "S length missing",
+			sig: hexToBytes(
+				"3024022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef07402",
+			),
+			err: ErrSigMissingSLen,
+		}, {
+			name: "invalid S length (short one byte)",
+			sig: hexToBytes(
+				"3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074021f30e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidSLen,
+		}, {
+			name: "invalid S length (long one byte)",
+			sig: hexToBytes(
+				"3045022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef074022130e09575e7a1541aa018876a4003cefe1b061a" +
+					"90556b5140c63e0ef848135248",
+			),
+			err: ErrSigInvalidSLen,
+		}, {
+			name: "zero S length",
+			sig: hexToBytes(
+				"3025022100f5353150d31a63f4a0d06d1f5a01ac65f7267a719e" +
+					"49f2a1ac584fd546bef0740200",
+			),
+			err: ErrSigZeroSLen,
+		}, {
+			name: "negative S (too little padding)",
+			sig: hexToBytes(
+				"304402204fc10344934662ca0a93a84d14d650d8a21cf2ab91f6" +
+					"08e8783d2999c955443202208441aacd6b17038ff3f6700b042934f9a6fea0ce" +
+					"c2051b51dc709e52a5bb7d61",
+			),
+			err: ErrSigNegativeS,
+		}, {
+			name: "too much S padding",
+			sig: hexToBytes(
+				"304402206ad2fdaf8caba0f2cb2484e61b81ced77474b4c2aa06" +
+					"9c852df1351b3314fe20022000695ad175b09a4a41cd9433f6b2e8e83253d6a7" +
+					"402096ba313a7be1f086dde5",
+			),
+			err: ErrSigTooMuchSPadding,
+		}, {
+			name: "R == 0",
+			sig: hexToBytes(
+				"30250201000220181522ec8eca07de4860a4acdd12909d831cc5" +
+					"6cbbac4622082221a8768d1d09",
+			),
+			err: ErrSigRIsZero,
+		}, {
+			name: "R == N",
+			sig: hexToBytes(
+				"3045022100fffffffffffffffffffffffffffffffebaaedce6af" +
+					"48a03bbfd25e8cd03641410220181522ec8eca07de4860a4acdd12909d831cc5" +
+					"6cbbac4622082221a8768d1d09",
+			),
+			err: ErrSigRTooBig,
+		}, {
+			name: "R > N (>32 bytes)",
+			sig: hexToBytes(
+				"3045022101cd496f2ab4fe124f977ffe3caa09f756283910fc1a" +
+					"96f60ee6873e88d3cfe1d50220181522ec8eca07de4860a4acdd12909d831cc5" +
+					"6cbbac4622082221a8768d1d09",
+			),
+			err: ErrSigRTooBig,
+		}, {
+			name: "R > N",
+			sig: hexToBytes(
+				"3045022100fffffffffffffffffffffffffffffffebaaedce6af" +
+					"48a03bbfd25e8cd03641420220181522ec8eca07de4860a4acdd12909d831cc5" +
+					"6cbbac4622082221a8768d1d09",
+			),
+			err: ErrSigRTooBig,
+		}, {
+			name: "S == 0",
+			sig: hexToBytes(
+				"302502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
+					"24c6c61548ab5fb8cd41020100",
+			),
+			err: ErrSigSIsZero,
+		}, {
+			name: "S == N",
+			sig: hexToBytes(
+				"304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
+					"24c6c61548ab5fb8cd41022100fffffffffffffffffffffffffffffffebaaedc" +
+					"e6af48a03bbfd25e8cd0364141",
+			),
+			err: ErrSigSTooBig,
+		}, {
+			name: "S > N (>32 bytes)",
+			sig: hexToBytes(
+				"304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
+					"24c6c61548ab5fb8cd4102210113500a0510b5094bff220c74656879b784b246" +
+					"ba89c0a07bc49bcf05d8993d44",
+			),
+			err: ErrSigSTooBig,
+		}, {
+			name: "S > N",
+			sig: hexToBytes(
+				"304502204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d6" +
+					"24c6c61548ab5fb8cd41022100fffffffffffffffffffffffffffffffebaaedc" +
+					"e6af48a03bbfd25e8cd0364142",
+			),
+			err: ErrSigSTooBig,
+		},
+	}
 	for _, test := range tests {
 		_, err := ParseDERSignature(test.sig)
 		if !errors.Is(err, test.err) {
-			t.Errorf("%s mismatched err -- got %v, want %v", test.name, err,
-				test.err)
+			t.Errorf(
+				"%s mismatched err -- got %v, want %v", test.name, err,
+				test.err,
+			)
 			continue
 		}
 	}
@@ -218,57 +274,67 @@ func TestSignatureSerialize(t *testing.T) {
 		name     string
 		ecsig    *Signature
 		expected []byte
-	}{{
-		// signature from bitcoin blockchain tx
-		// 0437cd7f8525ceed2324359c2d0ba26006d92d85
-		"valid 1 - r and s most significant bits are zero",
-		&Signature{
-			r: *hexToModNScalar("4e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d624c6c61548ab5fb8cd41"),
-			s: *hexToModNScalar("181522ec8eca07de4860a4acdd12909d831cc56cbbac4622082221a8768d1d09"),
+	}{
+		{
+			// signature from bitcoin blockchain tx
+			// 0437cd7f8525ceed2324359c2d0ba26006d92d85
+			"valid 1 - r and s most significant bits are zero",
+			&Signature{
+				r: *hexToModNScalar("4e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d624c6c61548ab5fb8cd41"),
+				s: *hexToModNScalar("181522ec8eca07de4860a4acdd12909d831cc56cbbac4622082221a8768d1d09"),
+			},
+			hexToBytes(
+				"304402204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d62" +
+					"4c6c61548ab5fb8cd410220181522ec8eca07de4860a4acdd12909d831cc" +
+					"56cbbac4622082221a8768d1d09",
+			),
+		}, {
+			// signature from bitcoin blockchain tx
+			// cb00f8a0573b18faa8c4f467b049f5d202bf1101d9ef2633bc611be70376a4b4
+			"valid 2 - r most significant bit is one",
+			&Signature{
+				r: *hexToModNScalar("82235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c30a23b0afbb8d178abcf3"),
+				s: *hexToModNScalar("24bf68e256c534ddfaf966bf908deb944305596f7bdcc38d69acad7f9c868724"),
+			},
+			hexToBytes(
+				"304502210082235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c" +
+					"30a23b0afbb8d178abcf3022024bf68e256c534ddfaf966bf908deb94430" +
+					"5596f7bdcc38d69acad7f9c868724",
+			),
+		}, {
+			// signature from bitcoin blockchain tx
+			// fda204502a3345e08afd6af27377c052e77f1fefeaeb31bdd45f1e1237ca5470
+			//
+			// Note that signatures with an S component that is > half the group
+			// order are neither allowed nor produced in Decred, so this has been
+			// modified to expect the equally valid low S signature variant.
+			"valid 3 - s most significant bit is one",
+			&Signature{
+				r: *hexToModNScalar("1cadddc2838598fee7dc35a12b340c6bde8b389f7bfd19a1252a17c4b5ed2d71"),
+				s: *hexToModNScalar("c1a251bbecb14b058a8bd77f65de87e51c47e95904f4c0e9d52eddc21c1415ac"),
+			},
+			hexToBytes(
+				"304402201cadddc2838598fee7dc35a12b340c6bde8b389f7bfd1" +
+					"9a1252a17c4b5ed2d7102203e5dae44134eb4fa757428809a2178199e66f" +
+					"38daa53df51eaa380cab4222b95",
+			),
+		}, {
+			"zero signature",
+			&Signature{
+				r: *new(secp256k1.ModNScalar).SetInt(0),
+				s: *new(secp256k1.ModNScalar).SetInt(0),
+			},
+			hexToBytes("3006020100020100"),
 		},
-		hexToBytes("304402204e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d62" +
-			"4c6c61548ab5fb8cd410220181522ec8eca07de4860a4acdd12909d831cc" +
-			"56cbbac4622082221a8768d1d09"),
-	}, {
-		// signature from bitcoin blockchain tx
-		// cb00f8a0573b18faa8c4f467b049f5d202bf1101d9ef2633bc611be70376a4b4
-		"valid 2 - r most significant bit is one",
-		&Signature{
-			r: *hexToModNScalar("82235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c30a23b0afbb8d178abcf3"),
-			s: *hexToModNScalar("24bf68e256c534ddfaf966bf908deb944305596f7bdcc38d69acad7f9c868724"),
-		},
-		hexToBytes("304502210082235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c" +
-			"30a23b0afbb8d178abcf3022024bf68e256c534ddfaf966bf908deb94430" +
-			"5596f7bdcc38d69acad7f9c868724"),
-	}, {
-		// signature from bitcoin blockchain tx
-		// fda204502a3345e08afd6af27377c052e77f1fefeaeb31bdd45f1e1237ca5470
-		//
-		// Note that signatures with an S component that is > half the group
-		// order are neither allowed nor produced in Decred, so this has been
-		// modified to expect the equally valid low S signature variant.
-		"valid 3 - s most significant bit is one",
-		&Signature{
-			r: *hexToModNScalar("1cadddc2838598fee7dc35a12b340c6bde8b389f7bfd19a1252a17c4b5ed2d71"),
-			s: *hexToModNScalar("c1a251bbecb14b058a8bd77f65de87e51c47e95904f4c0e9d52eddc21c1415ac"),
-		},
-		hexToBytes("304402201cadddc2838598fee7dc35a12b340c6bde8b389f7bfd1" +
-			"9a1252a17c4b5ed2d7102203e5dae44134eb4fa757428809a2178199e66f" +
-			"38daa53df51eaa380cab4222b95"),
-	}, {
-		"zero signature",
-		&Signature{
-			r: *new(secp256k1.ModNScalar).SetInt(0),
-			s: *new(secp256k1.ModNScalar).SetInt(0),
-		},
-		hexToBytes("3006020100020100"),
-	}}
+	}
 	for i, test := range tests {
 		result := test.ecsig.Serialize()
 		if !bytes.Equal(result, test.expected) {
-			t.Errorf("Serialize #%d (%s) unexpected result:\n"+
-				"got:  %x\nwant: %x", i, test.name, result,
-				test.expected)
+			t.Errorf(
+				"Serialize #%d (%s) unexpected result:\n"+
+					"got:  %x\nwant: %x", i, test.name, result,
+				test.expected,
+			)
 		}
 	}
 }
@@ -605,9 +671,11 @@ func TestSignAndVerifyRandom(t *testing.T) {
 		sig := Sign(secKey, hash[:])
 		pubKey := secKey.PubKey()
 		if !sig.Verify(hash[:], pubKey) {
-			t.Fatalf("failed to verify signature\nsig: %x\nhash: %x\n"+
-				"secret key: %x\npublic key: %x", sig.Serialize(), hash,
-				secKey.Serialize(), pubKey.SerializeCompressed())
+			t.Fatalf(
+				"failed to verify signature\nsig: %x\nhash: %x\n"+
+					"secret key: %x\npublic key: %x", sig.Serialize(), hash,
+				secKey.Serialize(), pubKey.SerializeCompressed(),
+			)
 		}
 		// Change a random bit in the signature and ensure the bad signature
 		// fails to verify the original message.
@@ -624,9 +692,11 @@ func TestSignAndVerifyRandom(t *testing.T) {
 			badSig.s.SetBytes(&badSigBytes)
 		}
 		if badSig.Verify(hash[:], pubKey) {
-			t.Fatalf("verified bad signature\nsig: %x\nhash: %x\n"+
-				"secret key: %x\npublic key: %x", badSig.Serialize(), hash,
-				secKey.Serialize(), pubKey.SerializeCompressed())
+			t.Fatalf(
+				"verified bad signature\nsig: %x\nhash: %x\n"+
+					"secret key: %x\npublic key: %x", badSig.Serialize(), hash,
+				secKey.Serialize(), pubKey.SerializeCompressed(),
+			)
 		}
 		// Change a random bit in the hash that was originally signed and ensure
 		// the original good signature fails to verify the new bad message.
@@ -636,9 +706,11 @@ func TestSignAndVerifyRandom(t *testing.T) {
 		randBit = rng.Intn(7)
 		badHash[randByte] ^= 1 << randBit
 		if sig.Verify(badHash[:], pubKey) {
-			t.Fatalf("verified signature for bad hash\nsig: %x\nhash: %x\n"+
-				"pubkey: %x", sig.Serialize(), badHash,
-				pubKey.SerializeCompressed())
+			t.Fatalf(
+				"verified signature for bad hash\nsig: %x\nhash: %x\n"+
+					"pubkey: %x", sig.Serialize(), badHash,
+				pubKey.SerializeCompressed(),
+			)
 		}
 	}
 }
@@ -653,17 +725,19 @@ func TestSignFailures(t *testing.T) {
 		key   string // hex encoded secret key
 		hash  string // hex encoded hash of the message to sign
 		nonce string // hex encoded nonce to use in the signature calculation
-	}{{
-		name:  "zero R is invalid (forced by using zero nonce)",
-		key:   "0000000000000000000000000000000000000000000000000000000000000001",
-		hash:  "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		nonce: "0000000000000000000000000000000000000000000000000000000000000000",
-	}, {
-		name:  "zero S is invalid (forced by key/hash/nonce choice)",
-		key:   "0000000000000000000000000000000000000000000000000000000000000001",
-		hash:  "393bec84f1a04037751c0d6c2817f37953eaa204ac0898de7adb038c33a20438",
-		nonce: "4154324ecd4158938f1df8b5b659aeb639c7fbc36005934096e514af7d64bcc2",
-	}}
+	}{
+		{
+			name:  "zero R is invalid (forced by using zero nonce)",
+			key:   "0000000000000000000000000000000000000000000000000000000000000001",
+			hash:  "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			nonce: "0000000000000000000000000000000000000000000000000000000000000000",
+		}, {
+			name:  "zero S is invalid (forced by key/hash/nonce choice)",
+			key:   "0000000000000000000000000000000000000000000000000000000000000001",
+			hash:  "393bec84f1a04037751c0d6c2817f37953eaa204ac0898de7adb038c33a20438",
+			nonce: "4154324ecd4158938f1df8b5b659aeb639c7fbc36005934096e514af7d64bcc2",
+		},
+	}
 	for _, test := range tests {
 		secKey := hexToModNScalar(test.key)
 		hash := hexToBytes(test.hash)
@@ -671,8 +745,10 @@ func TestSignFailures(t *testing.T) {
 		// Ensure the signing is NOT successful.
 		sig, _, success := sign(secKey, nonce, hash[:])
 		if success {
-			t.Errorf("%s: unexpected success -- got sig %x", test.name,
-				sig.Serialize())
+			t.Errorf(
+				"%s: unexpected success -- got sig %x", test.name,
+				sig.Serialize(),
+			)
 			continue
 		}
 	}
@@ -688,31 +764,33 @@ func TestVerifyFailures(t *testing.T) {
 		key  string // hex encoded secret key
 		hash string // hex encoded hash of the message to sign
 		r, s string // hex encoded r and s components of signature to verify
-	}{{
-		name: "signature R is 0",
-		key:  "0000000000000000000000000000000000000000000000000000000000000001",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		r:    "0000000000000000000000000000000000000000000000000000000000000000",
-		s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
-	}, {
-		name: "signature S is 0",
-		key:  "0000000000000000000000000000000000000000000000000000000000000001",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		r:    "c6c4137b0e5fbfc88ae3f293d7e80c8566c43ae20340075d44f75b009c943d09",
-		s:    "0000000000000000000000000000000000000000000000000000000000000000",
-	}, {
-		name: "u1G + u2Q is the point at infinity",
-		key:  "0000000000000000000000000000000000000000000000000000000000000001",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		r:    "3cfe45621a29fac355260a14b9adc0fe43ac2f13e918fc9ddfa117e964b61a8a",
-		s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
-	}, {
-		name: "signature R < P-N, but invalid",
-		key:  "0000000000000000000000000000000000000000000000000000000000000001",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		r:    "000000000000000000000000000000014551231950b75fc4402da1722fc9baed",
-		s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
-	}}
+	}{
+		{
+			name: "signature R is 0",
+			key:  "0000000000000000000000000000000000000000000000000000000000000001",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			r:    "0000000000000000000000000000000000000000000000000000000000000000",
+			s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
+		}, {
+			name: "signature S is 0",
+			key:  "0000000000000000000000000000000000000000000000000000000000000001",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			r:    "c6c4137b0e5fbfc88ae3f293d7e80c8566c43ae20340075d44f75b009c943d09",
+			s:    "0000000000000000000000000000000000000000000000000000000000000000",
+		}, {
+			name: "u1G + u2Q is the point at infinity",
+			key:  "0000000000000000000000000000000000000000000000000000000000000001",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			r:    "3cfe45621a29fac355260a14b9adc0fe43ac2f13e918fc9ddfa117e964b61a8a",
+			s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
+		}, {
+			name: "signature R < P-N, but invalid",
+			key:  "0000000000000000000000000000000000000000000000000000000000000001",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			r:    "000000000000000000000000000000014551231950b75fc4402da1722fc9baed",
+			s:    "00ba213513572e35943d5acdd17215561b03f11663192a7252196cc8b2a99560",
+		},
+	}
 	for _, test := range tests {
 		secKey := hexToModNScalar(test.key)
 		hash := hexToBytes(test.hash)
@@ -722,8 +800,10 @@ func TestVerifyFailures(t *testing.T) {
 		// Ensure the verification is NOT successful.
 		pubKey := secp256k1.NewSecretKey(secKey).PubKey()
 		if sig.Verify(hash, pubKey) {
-			t.Errorf("%s: unexpected success for invalid signature: %x",
-				test.name, sig.Serialize())
+			t.Errorf(
+				"%s: unexpected success for invalid signature: %x",
+				test.name, sig.Serialize(),
+			)
 			continue
 		}
 	}
@@ -831,131 +911,133 @@ func TestRecoverCompactErrors(t *testing.T) {
 		sig  string // hex encoded signature to recover pubkey from
 		hash string // hex encoded hash of message
 		err  error  // expected error
-	}{{
-		name: "empty signature",
-		sig:  "",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigInvalidLen,
-	}, {
-		// Signature created from secret key 0x02, blake256(0x01020304).
-		name: "no compact sig recovery code (otherwise valid sig)",
-		sig: "e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigInvalidLen,
-	}, {
-		// Signature created from secret key 0x02, blake256(0x01020304).
-		name: "signature one byte too long (S padded with leading zero)",
-		sig: "1f" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"0044b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigInvalidLen,
-	}, {
-		// Signature created from secret key 0x02, blake256(0x01020304).
-		name: "compact sig recovery code too low (otherwise valid sig)",
-		sig: "1a" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigInvalidRecoveryCode,
-	}, {
-		// Signature created from secret key 0x02, blake256(0x01020304).
-		name: "compact sig recovery code too high (otherwise valid sig)",
-		sig: "23" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigInvalidRecoveryCode,
-	}, {
-		// Signature invented since finding a signature with an r value that is
-		// exactly the group order prior to the modular reduction is not
-		// calculable without breaking the underlying crypto.
-		name: "R == group order",
-		sig: "1f" +
-			"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigRTooBig,
-	}, {
-		// Signature invented since finding a signature with an r value that
-		// would be valid modulo the group order and is still 32 bytes is not
-		// calculable without breaking the underlying crypto.
-		name: "R > group order and still 32 bytes (order + 1)",
-		sig: "1f" +
-			"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364142" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigRTooBig,
-	}, {
-		// Signature invented since the only way a signature could have an r
-		// value of zero is if the nonce were zero which is invalid.
-		name: "R == 0",
-		sig: "1f" +
-			"0000000000000000000000000000000000000000000000000000000000000000" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigRIsZero,
-	}, {
-		// Signature invented since finding a signature with an s value that is
-		// exactly the group order prior to the modular reduction is not
-		// calculable without breaking the underlying crypto.
-		name: "S == group order",
-		sig: "1f" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigSTooBig,
-	}, {
-		// Signature invented since finding a signature with an s value that
-		// would be valid modulo the group order and is still 32 bytes is not
-		// calculable without breaking the underlying crypto.
-		name: "S > group order and still 32 bytes (order + 1)",
-		sig: "1f" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364142",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigSTooBig,
-	}, {
-		// Signature created by forcing the key/hash/nonce choices such that s
-		// is zero and is therefore invalid.  The signing code will not produce
-		// such a signature in practice.
-		name: "S == 0",
-		sig: "1f" +
-			"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
-			"0000000000000000000000000000000000000000000000000000000000000000",
-		hash: "393bec84f1a04037751c0d6c2817f37953eaa204ac0898de7adb038c33a20438",
-		err:  ErrSigSIsZero,
-	}, {
-		// Signature invented since finding a secret key needed to create a
-		// valid signature with an r value that is >= group order prior to the
-		// modular reduction is not possible without breaking the underlying
-		// crypto.
-		name: "R >= field prime minus group order with overflow bit",
-		sig: "21" +
-			"000000000000000000000000000000014551231950b75fc4402da1722fc9baee" +
-			"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrSigOverflowsPrime,
-	}, {
-		// Signature created from secret key 0x01, blake256(0x0102030407) over
-		// the secp256r1 curve (note the r1 instead of k1).
-		name: "pubkey not on the curve, signature valid for secp256r1 instead",
-		sig: "1f" +
-			"2a81d1b3facc22185267d3f8832c5104902591bc471253f1cfc5eb25f4f740f2" +
-			"72e65d019f9b09d769149e2be0b55de9b0224d34095bddc6a5dba90bfda33c45",
-		hash: "9165e957708bc95cf62d020769c150b2d7b08e7ab7981860815b1eaabd41d695",
-		err:  ErrPointNotOnCurve,
-	}, {
-		// Signature created from secret key 0x01, blake256(0x01020304) and
-		// manually setting s = -e*k^-1.
-		name: "calculated pubkey point at infinity",
-		sig: "1f" +
-			"c6c4137b0e5fbfc88ae3f293d7e80c8566c43ae20340075d44f75b009c943d09" +
-			"1281d8d90a5774045abd57b453c7eadbc830dbadec89ae8dd7639b9cc55641d0",
-		hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
-		err:  ErrPointNotOnCurve,
-	}}
+	}{
+		{
+			name: "empty signature",
+			sig:  "",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigInvalidLen,
+		}, {
+			// Signature created from secret key 0x02, blake256(0x01020304).
+			name: "no compact sig recovery code (otherwise valid sig)",
+			sig: "e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigInvalidLen,
+		}, {
+			// Signature created from secret key 0x02, blake256(0x01020304).
+			name: "signature one byte too long (S padded with leading zero)",
+			sig: "1f" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"0044b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigInvalidLen,
+		}, {
+			// Signature created from secret key 0x02, blake256(0x01020304).
+			name: "compact sig recovery code too low (otherwise valid sig)",
+			sig: "1a" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigInvalidRecoveryCode,
+		}, {
+			// Signature created from secret key 0x02, blake256(0x01020304).
+			name: "compact sig recovery code too high (otherwise valid sig)",
+			sig: "23" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigInvalidRecoveryCode,
+		}, {
+			// Signature invented since finding a signature with an r value that is
+			// exactly the group order prior to the modular reduction is not
+			// calculable without breaking the underlying crypto.
+			name: "R == group order",
+			sig: "1f" +
+				"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigRTooBig,
+		}, {
+			// Signature invented since finding a signature with an r value that
+			// would be valid modulo the group order and is still 32 bytes is not
+			// calculable without breaking the underlying crypto.
+			name: "R > group order and still 32 bytes (order + 1)",
+			sig: "1f" +
+				"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364142" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigRTooBig,
+		}, {
+			// Signature invented since the only way a signature could have an r
+			// value of zero is if the nonce were zero which is invalid.
+			name: "R == 0",
+			sig: "1f" +
+				"0000000000000000000000000000000000000000000000000000000000000000" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigRIsZero,
+		}, {
+			// Signature invented since finding a signature with an s value that is
+			// exactly the group order prior to the modular reduction is not
+			// calculable without breaking the underlying crypto.
+			name: "S == group order",
+			sig: "1f" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigSTooBig,
+		}, {
+			// Signature invented since finding a signature with an s value that
+			// would be valid modulo the group order and is still 32 bytes is not
+			// calculable without breaking the underlying crypto.
+			name: "S > group order and still 32 bytes (order + 1)",
+			sig: "1f" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364142",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigSTooBig,
+		}, {
+			// Signature created by forcing the key/hash/nonce choices such that s
+			// is zero and is therefore invalid.  The signing code will not produce
+			// such a signature in practice.
+			name: "S == 0",
+			sig: "1f" +
+				"e6f137b52377250760cc702e19b7aee3c63b0e7d95a91939b14ab3b5c4771e59" +
+				"0000000000000000000000000000000000000000000000000000000000000000",
+			hash: "393bec84f1a04037751c0d6c2817f37953eaa204ac0898de7adb038c33a20438",
+			err:  ErrSigSIsZero,
+		}, {
+			// Signature invented since finding a secret key needed to create a
+			// valid signature with an r value that is >= group order prior to the
+			// modular reduction is not possible without breaking the underlying
+			// crypto.
+			name: "R >= field prime minus group order with overflow bit",
+			sig: "21" +
+				"000000000000000000000000000000014551231950b75fc4402da1722fc9baee" +
+				"44b9bc4620afa158b7efdfea5234ff2d5f2f78b42886f02cf581827ee55318ea",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrSigOverflowsPrime,
+		}, {
+			// Signature created from secret key 0x01, blake256(0x0102030407) over
+			// the secp256r1 curve (note the r1 instead of k1).
+			name: "pubkey not on the curve, signature valid for secp256r1 instead",
+			sig: "1f" +
+				"2a81d1b3facc22185267d3f8832c5104902591bc471253f1cfc5eb25f4f740f2" +
+				"72e65d019f9b09d769149e2be0b55de9b0224d34095bddc6a5dba90bfda33c45",
+			hash: "9165e957708bc95cf62d020769c150b2d7b08e7ab7981860815b1eaabd41d695",
+			err:  ErrPointNotOnCurve,
+		}, {
+			// Signature created from secret key 0x01, blake256(0x01020304) and
+			// manually setting s = -e*k^-1.
+			name: "calculated pubkey point at infinity",
+			sig: "1f" +
+				"c6c4137b0e5fbfc88ae3f293d7e80c8566c43ae20340075d44f75b009c943d09" +
+				"1281d8d90a5774045abd57b453c7eadbc830dbadec89ae8dd7639b9cc55641d0",
+			hash: "c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7",
+			err:  ErrPointNotOnCurve,
+		},
+	}
 	for _, test := range tests {
 		// Parse test data.
 		hash := hexToBytes(test.hash)
@@ -963,8 +1045,10 @@ func TestRecoverCompactErrors(t *testing.T) {
 		// Ensure the expected error is hit.
 		_, _, err := RecoverCompact(sig, hash)
 		if !errors.Is(err, test.err) {
-			t.Errorf("%s: mismatched err -- got %v, want %v", test.name, err,
-				test.err)
+			t.Errorf(
+				"%s: mismatched err -- got %v, want %v", test.name, err,
+				test.err,
+			)
 			continue
 		}
 	}
@@ -1009,18 +1093,24 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 
 			gotPubKey, gotCompressed, err := RecoverCompact(gotSig, hash[:])
 			if chk.E(err) {
-				t.Fatalf("unexpected err: %v\nsig: %x\nhash: %x\nsecret key: %x",
-					err, gotSig, hash, secKey.Serialize())
+				t.Fatalf(
+					"unexpected err: %v\nsig: %x\nhash: %x\nsecret key: %x",
+					err, gotSig, hash, secKey.Serialize(),
+				)
 			}
 			if gotCompressed != compressed {
-				t.Fatalf("unexpected compressed flag: %v\nsig: %x\nhash: %x\n"+
-					"secret key: %x", gotCompressed, gotSig, hash,
-					secKey.Serialize())
+				t.Fatalf(
+					"unexpected compressed flag: %v\nsig: %x\nhash: %x\n"+
+						"secret key: %x", gotCompressed, gotSig, hash,
+					secKey.Serialize(),
+				)
 			}
 			if !gotPubKey.IsEqual(wantPubKey) {
-				t.Fatalf("unexpected recovered public key: %x\nsig: %x\nhash: "+
-					"%x\nsecret key: %x", gotPubKey.SerializeUncompressed(),
-					gotSig, hash, secKey.Serialize())
+				t.Fatalf(
+					"unexpected recovered public key: %x\nsig: %x\nhash: "+
+						"%x\nsecret key: %x", gotPubKey.SerializeUncompressed(),
+					gotSig, hash, secKey.Serialize(),
+				)
 			}
 			// Change a random bit in the signature and ensure the bad signature
 			// fails to recover the original public key.
@@ -1031,8 +1121,10 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 			badSig[randByte] ^= 1 << randBit
 			badPubKey, _, err := RecoverCompact(badSig, hash[:])
 			if !chk.E(err) && badPubKey.IsEqual(wantPubKey) {
-				t.Fatalf("recovered public key for bad sig: %x\nhash: %x\n"+
-					"secret key: %x", badSig, hash, secKey.Serialize())
+				t.Fatalf(
+					"recovered public key for bad sig: %x\nhash: %x\n"+
+						"secret key: %x", badSig, hash, secKey.Serialize(),
+				)
 			}
 			// Change a random bit in the hash that was originally signed and
 			// ensure the original good signature fails to recover the original
@@ -1044,8 +1136,10 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 			badHash[randByte] ^= 1 << randBit
 			badPubKey, _, err = RecoverCompact(gotSig, badHash[:])
 			if !chk.E(err) && badPubKey.IsEqual(wantPubKey) {
-				t.Fatalf("recovered public key for bad hash: %x\nsig: %x\n"+
-					"secret key: %x", badHash, gotSig, secKey.Serialize())
+				t.Fatalf(
+					"recovered public key for bad hash: %x\nsig: %x\n"+
+						"secret key: %x", badHash, gotSig, secKey.Serialize(),
+				)
 			}
 		}
 	}

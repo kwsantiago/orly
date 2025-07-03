@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/ec"
-	"github.com/mleku/realy.lol/ec/chainhash"
-	"github.com/mleku/realy.lol/ec/schnorr"
-	"github.com/mleku/realy.lol/ec/secp256k1"
+	"not.realy.lol/chk"
+	"not.realy.lol/ec"
+	"not.realy.lol/ec/chainhash"
+	"not.realy.lol/ec/schnorr"
+	"not.realy.lol/ec/secp256k1"
 )
 
 var (
@@ -88,9 +88,11 @@ func keyBytesEqual(a, b *btcec.PublicKey) bool {
 // aggregationCoefficient computes the key aggregation coefficient for the
 // specified target key. The coefficient is computed as:
 //   - H(tag=KeyAgg coefficient, keyHashFingerprint(pks) || pk)
-func aggregationCoefficient(keySet []*btcec.PublicKey,
+func aggregationCoefficient(
+	keySet []*btcec.PublicKey,
 	targetKey *btcec.PublicKey, keysHash []byte,
-	secondKeyIdx int) *btcec.ModNScalar {
+	secondKeyIdx int,
+) *btcec.ModNScalar {
 
 	var mu btcec.ModNScalar
 	// If this is the second key, then this coefficient is just one.
@@ -236,10 +238,12 @@ func hasEvenY(pJ btcec.JacobianPoint) bool {
 // includes the accumulate ration of the parity factor and the tweak multiplied
 // by the parity factor. The xOnly bool specifies if this is to be an x-only
 // tweak or not.
-func tweakKey(keyJ btcec.JacobianPoint, parityAcc btcec.ModNScalar,
+func tweakKey(
+	keyJ btcec.JacobianPoint, parityAcc btcec.ModNScalar,
 	tweak [32]byte,
 	tweakAcc btcec.ModNScalar,
-	xOnly bool) (btcec.JacobianPoint, btcec.ModNScalar, btcec.ModNScalar, error) {
+	xOnly bool,
+) (btcec.JacobianPoint, btcec.ModNScalar, btcec.ModNScalar, error) {
 
 	// First we'll compute the new parity factor for this key. If the key has
 	// an odd y coordinate (not even), then we'll need to negate it (multiply
@@ -299,9 +303,12 @@ type AggregateKey struct {
 // value can be passed for keyHash, which causes this function to re-derive it.
 // In addition to the combined public key, the parity accumulator and the tweak
 // accumulator are returned as well.
-func AggregateKeys(keys []*btcec.PublicKey, sort bool,
-	keyOpts ...KeyAggOption) (
-	*AggregateKey, *btcec.ModNScalar, *btcec.ModNScalar, error) {
+func AggregateKeys(
+	keys []*btcec.PublicKey, sort bool,
+	keyOpts ...KeyAggOption,
+) (
+	*AggregateKey, *btcec.ModNScalar, *btcec.ModNScalar, error,
+) {
 	// First, parse the set of optional signing options.
 	opts := defaultKeyAggOptions()
 	for _, option := range keyOpts {
@@ -355,9 +362,11 @@ func AggregateKeys(keys []*btcec.PublicKey, sort bool,
 	if opts.taprootTweak {
 		// Emulate the same behavior as txscript.ComputeTaprootOutputKey
 		// which only operates on the x-only public key.
-		key, _ := schnorr.ParsePubKey(schnorr.SerializePubKey(
-			combinedKey,
-		))
+		key, _ := schnorr.ParsePubKey(
+			schnorr.SerializePubKey(
+				combinedKey,
+			),
+		)
 		// We only use the actual tweak bytes if we're not committing
 		// to a BIP-0086 key only spend output. Otherwise, we just
 		// commit to the internal key and an empty byte slice as the

@@ -11,8 +11,8 @@ package btcec
 import (
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/chk"
+	"not.realy.lol/hex"
 )
 
 func FuzzParsePubKey(f *testing.F) {
@@ -35,13 +35,15 @@ func FuzzParsePubKey(f *testing.F) {
 		f.Add(seed)
 	}
 	// Now run the fuzzer.
-	f.Fuzz(func(t *testing.T, input []byte) {
-		key, err := ParsePubKey(input)
-		if key == nil && !chk.E(err) {
-			panic("key==nil && err==nil")
-		}
-		if key != nil && chk.E(err) {
-			panic("key!=nil yet err!=nil")
-		}
-	})
+	f.Fuzz(
+		func(t *testing.T, input []byte) {
+			key, err := ParsePubKey(input)
+			if key == nil && !chk.E(err) {
+				panic("key==nil && err==nil")
+			}
+			if key != nil && chk.E(err) {
+				panic("key!=nil yet err!=nil")
+			}
+		},
+	)
 }

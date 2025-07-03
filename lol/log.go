@@ -1,11 +1,13 @@
-// Package lol (log of location) is a simple logging library that prints a high precision unix
-// timestamp and the source location of a log print to make tracing errors simpler. Includes a
-// set of logging levels and the ability to filter out higher log levels for a more quiet
-// output.
+// Package lol (log of location) is a simple logging library the source location
+// of a log print to make tracing errors simpler.
+//
+// Includes a set of logging levels and the ability to filter out higher log
+// levels for a more quiet output.
 package lol
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"io"
 	"os"
 	"runtime"
@@ -14,7 +16,6 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/fatih/color"
 )
 
 const (
@@ -38,8 +39,8 @@ var LevelNames = []string{
 }
 
 type (
-	// LevelPrinter defines a set of terminal printing primitives that output with extra data,
-	// time, log logLevelList, and code location
+	// LevelPrinter defines a set of terminal printing primitives that output with
+	// extra data, time, log logLevelList, and code location
 
 	// Ln prints lists of interfaces with spaces in between
 	Ln func(a ...interface{})
@@ -47,10 +48,10 @@ type (
 	F func(format string, a ...interface{})
 	// S prints a spew.Sdump for an enveloper slice
 	S func(a ...interface{})
-	// C accepts a function so that the extra computation can be avoided if it is not being
-	// viewed
+	// C accepts a function so that the extra computation can be avoided if it is
+	// not being viewed
 	C func(closure func() string)
-	// Chk is a shortcut for printing if there is an error, or returning true
+	// Chk is a shortcut for printing if there is an error or returning true
 	Chk func(e error) bool
 	// Err is a pass-through function that uses fmt.Errorf to construct an error and returns the
 	// error after printing it to the log
@@ -73,7 +74,7 @@ type (
 		Colorizer func(a ...any) string
 	}
 
-	// Entry is a log entry to be printed as json to the log file
+	// Entry is a log entry to be printed as JSON to the log file
 	Entry struct {
 		Time         time.Time
 		Level        string
@@ -84,8 +85,9 @@ type (
 )
 
 var (
-	// Writer can be swapped out for any io.*Writer* that you want to use instead of stdout.
-	Writer io.Writer = os.Stderr
+	// Writer can be swapped out for any io.*Writer* that you want to use instead
+	// of stdout.
+	Writer io.Writer = os.Stdout
 
 	// LevelSpecs specifies the id, string name and color-printing function
 	LevelSpecs = []LevelSpec{
@@ -130,11 +132,14 @@ type Logger struct {
 // Level is the level that the logger is printing at.
 var Level atomic.Int32
 
+func GetLevel() string {
+	return LevelNames[Level.Load()]
+}
+
 // Main is the main logger.
 var Main = &Logger{}
 
 func init() {
-	// Main = &Logger{}
 	Main.Log, Main.Check, Main.Errorf = New(os.Stderr, 2)
 	ll := os.Getenv("LOG_LEVEL")
 	if ll == "" {
@@ -152,7 +157,6 @@ func init() {
 
 // SetLoggers configures a log level.
 func SetLoggers(level int) {
-	Main.Log.T.F("log level %s", LevelSpecs[level].Colorizer(LevelNames[level]))
 	Level.Store(int32(level))
 	if Level.Load() < Trace {
 		Tracer = noopTracer
@@ -182,7 +186,8 @@ func SetLogLevel(level string) {
 	SetLoggers(Trace)
 }
 
-// JoinStrings joins together anything into a set of strings with space separating the items.
+// JoinStrings joins together anything into a set of strings with space
+// separating the items.
 func JoinStrings(a ...any) (s string) {
 	for i := range a {
 		s += fmt.Sprint(a[i])
@@ -203,8 +208,9 @@ func getTracer() (fn func(funcName string, variables ...any)) {
 		for _, v := range variables {
 			vars += spew.Sdump(v)
 		}
-		fmt.Fprintf(Writer, "%s %s %s\n%s",
-			//TimeStamper(),
+		fmt.Fprintf(
+			Writer, "%s %s %s\n%s",
+			// TimeStamper(),
 			LevelSpecs[Trace].Colorizer(LevelSpecs[Trace].Name),
 			funcName,
 			loc,
@@ -228,7 +234,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -240,7 +247,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -252,7 +260,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -264,7 +273,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -277,7 +287,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 				return e != nil
 			}
 			if e != nil {
-				fmt.Fprintf(writer,
+				fmt.Fprintf(
+					writer,
 					"%s%s %s %s\n",
 					msgCol(TimeStamper()),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -290,7 +301,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 		},
 		Err: func(format string, a ...interface{}) error {
 			if Level.Load() >= l {
-				fmt.Fprintf(writer,
+				fmt.Fprintf(
+					writer,
 					"%s%s %s %s\n",
 					msgCol(TimeStamper()),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -311,7 +323,11 @@ func GetNullPrinter() LevelPrinter {
 		S:   func(a ...interface{}) {},
 		C:   func(closure func() string) {},
 		Chk: func(e error) bool { return e != nil },
-		Err: func(format string, a ...interface{}) error { return fmt.Errorf(format, a...) },
+		Err: func(format string, a ...interface{}) error {
+			return fmt.Errorf(
+				format, a...,
+			)
+		},
 	}
 }
 

@@ -9,10 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/sha256"
+	"not.realy.lol/chk"
+	"not.realy.lol/sha256"
 
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/hex"
 )
 
 const (
@@ -57,8 +57,10 @@ var (
 
 // ErrHashStrSize describes an error that indicates the caller specified a hash
 // string that has too many characters.
-var ErrHashStrSize = fmt.Errorf("max hash string length is %v bytes",
-	MaxHashStringSize)
+var ErrHashStrSize = fmt.Errorf(
+	"max hash string length is %v bytes",
+	MaxHashStringSize,
+)
 
 // Hash is used in several of the bitcoin messages and common structures.  It
 // typically represents the double sha256 of data.
@@ -89,8 +91,10 @@ func (hash *Hash) CloneBytes() []byte {
 func (hash *Hash) SetBytes(newHash []byte) error {
 	nhlen := len(newHash)
 	if nhlen != HashSize {
-		return fmt.Errorf("invalid hash length of %v, want %v", nhlen,
-			HashSize)
+		return fmt.Errorf(
+			"invalid hash length of %v, want %v", nhlen,
+			HashSize,
+		)
 	}
 	copy(hash[:], newHash)
 	return nil
@@ -197,8 +201,10 @@ func Decode(dst *Hash, src string) error {
 	}
 	// Hex decode the source bytes to a temporary destination.
 	var reversedHash Hash
-	_, err := hex.DecAppend(reversedHash[HashSize-hex.DecLen(len(srcBytes)):],
-		srcBytes)
+	_, err := hex.DecAppend(
+		reversedHash[HashSize-hex.DecLen(len(srcBytes)):],
+		srcBytes,
+	)
 	if chk.E(err) {
 		return err
 	}

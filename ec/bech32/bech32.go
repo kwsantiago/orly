@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/mleku/realy.lol/chk"
+	"not.realy.lol/chk"
 )
 
 // Charset is the set of characters used in the data section of bech32 strings.
@@ -122,8 +122,10 @@ func bech32Polymod(hrp []byte, values, checksum []byte) int {
 // and 126), otherwise the results are undefined.
 //
 // For more details on the checksum calculation, please refer to BIP 173.
-func writeBech32Checksum(hrp []byte, data []byte, bldr *bytes.Buffer,
-	version Version) {
+func writeBech32Checksum(
+	hrp []byte, data []byte, bldr *bytes.Buffer,
+	version Version,
+) {
 
 	bech32Const := int(VersionToConsts[version])
 	polymod := bech32Polymod(hrp, data, nil) ^ bech32Const
@@ -317,8 +319,10 @@ func EncodeM(hrp, data []byte) ([]byte, error) {
 
 // ConvertBits converts a byte slice where each byte is encoding fromBits bits,
 // to a byte slice where each byte is encoding toBits bits.
-func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) ([]byte,
-	error) {
+func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) (
+	[]byte,
+	error,
+) {
 
 	if fromBits < 1 || fromBits > 8 || toBits < 1 || toBits > 8 {
 		return nil, ErrInvalidBitGroups{}

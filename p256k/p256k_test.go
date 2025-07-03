@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mleku/realy.lol/chk"
-	"github.com/mleku/realy.lol/log"
-	"github.com/mleku/realy.lol/p256k"
-	"github.com/mleku/realy.lol/sha256"
-	realy "github.com/mleku/realy.lol/signer"
+	"not.realy.lol/chk"
+	"not.realy.lol/log"
+	"not.realy.lol/p256k"
+	"not.realy.lol/sha256"
+	realy "not.realy.lol/signer"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -93,13 +93,18 @@ func TestECDH(t *testing.T) {
 			}
 			if !bytes.Equal(secret1, secret2) {
 				counter++
-				t.Errorf("ECDH generation failed to work in both directions, %x %x", secret1,
-					secret2)
+				t.Errorf(
+					"ECDH generation failed to work in both directions, %x %x", secret1,
+					secret2,
+				)
 			}
 		}
 	}
 	a := time.Now()
 	duration := a.Sub(n)
-	log.I.Ln("errors", counter, "total", total*total, "time", duration, "time/op",
-		duration/total/total, "ops/sec", float64(time.Second)/float64(duration/total/total))
+	log.I.Ln(
+		"errors", counter, "total", total*total, "time", duration, "time/op",
+		duration/total/total, "ops/sec",
+		float64(time.Second)/float64(duration/total/total),
+	)
 }

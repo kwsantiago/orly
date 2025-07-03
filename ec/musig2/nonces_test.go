@@ -10,10 +10,10 @@ import (
 	"path"
 	"testing"
 
-	"github.com/mleku/realy.lol/chk"
 	"github.com/stretchr/testify/require"
+	"not.realy.lol/chk"
 
-	"github.com/mleku/realy.lol/hex"
+	"not.realy.lol/hex"
 )
 
 type nonceGenTestCase struct {
@@ -58,17 +58,21 @@ func TestMusig2NonceGenTestVectors(t *testing.T) {
 		if testCase.Msg != nil {
 			customOpts.msg = mustParseHex(*testCase.Msg)
 		}
-		t.Run(fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
-			nonce, err := GenNonces(withCustomOptions(customOpts))
-			if chk.E(err) {
-				t.Fatalf("err gen nonce aux bytes %v", err)
-			}
-			expectedBytes, _ := hex.Dec(testCase.Expected)
-			if !bytes.Equal(nonce.SecNonce[:], expectedBytes) {
-				t.Fatalf("nonces don't match: expected %x, got %x",
-					expectedBytes, nonce.SecNonce[:])
-			}
-		})
+		t.Run(
+			fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
+				nonce, err := GenNonces(withCustomOptions(customOpts))
+				if chk.E(err) {
+					t.Fatalf("err gen nonce aux bytes %v", err)
+				}
+				expectedBytes, _ := hex.Dec(testCase.Expected)
+				if !bytes.Equal(nonce.SecNonce[:], expectedBytes) {
+					t.Fatalf(
+						"nonces don't match: expected %x, got %x",
+						expectedBytes, nonce.SecNonce[:],
+					)
+				}
+			},
+		)
 	}
 }
 
@@ -120,13 +124,15 @@ func TestMusig2AggregateNoncesTestVectors(t *testing.T) {
 		for _, idx := range testCase.Indices {
 			testNonces = append(testNonces, nonces[idx])
 		}
-		t.Run(fmt.Sprintf("valid_case=%v", i), func(t *testing.T) {
-			aggregatedNonce, err := AggregateNonces(testNonces)
-			require.NoError(t, err)
-			var expectedNonce [PubNonceSize]byte
-			copy(expectedNonce[:], mustParseHex(testCase.Expected))
-			require.Equal(t, aggregatedNonce[:], expectedNonce[:])
-		})
+		t.Run(
+			fmt.Sprintf("valid_case=%v", i), func(t *testing.T) {
+				aggregatedNonce, err := AggregateNonces(testNonces)
+				require.NoError(t, err)
+				var expectedNonce [PubNonceSize]byte
+				copy(expectedNonce[:], mustParseHex(testCase.Expected))
+				require.Equal(t, aggregatedNonce[:], expectedNonce[:])
+			},
+		)
 	}
 
 	for i, testCase := range testCases.InvalidCases {
@@ -134,10 +140,12 @@ func TestMusig2AggregateNoncesTestVectors(t *testing.T) {
 		for _, idx := range testCase.Indices {
 			testNonces = append(testNonces, nonces[idx])
 		}
-		t.Run(fmt.Sprintf("invalid_case=%v", i), func(t *testing.T) {
-			_, err := AggregateNonces(testNonces)
-			require.True(t, chk.E(err))
-			require.Equal(t, testCase.ExpectedErr, err.Error())
-		})
+		t.Run(
+			fmt.Sprintf("invalid_case=%v", i), func(t *testing.T) {
+				_, err := AggregateNonces(testNonces)
+				require.True(t, chk.E(err))
+				require.Equal(t, testCase.ExpectedErr, err.Error())
+			},
+		)
 	}
 }

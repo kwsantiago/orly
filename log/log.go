@@ -2,7 +2,7 @@
 package log
 
 import (
-	"github.com/mleku/realy.lol/lol"
+	"not.realy.lol/lol"
 )
 
 var F, E, W, I, D, T lol.LevelPrinter
