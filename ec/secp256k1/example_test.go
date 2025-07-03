@@ -11,8 +11,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/minio/sha256-simd"
 	"not.realy.lol/chk"
-	"not.realy.lol/sha256"
 
 	"not.realy.lol/ec/secp256k1"
 	"not.realy.lol/hex"

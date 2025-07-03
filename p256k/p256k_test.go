@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/minio/sha256-simd"
 	"not.realy.lol/chk"
 	"not.realy.lol/log"
 	"not.realy.lol/p256k"
-	"not.realy.lol/sha256"
 	realy "not.realy.lol/signer"
 )
 
@@ -38,15 +38,15 @@ func TestSignerVerify(t *testing.T) {
 	}
 
 	// Sample message to sign
-	message := sha256.Sum256Bytes([]byte("Hello, world!"))
+	message := sha256.Sum256([]byte("Hello, world!"))
 	// Sign the message
-	signature, err := signer.Sign(message)
+	signature, err := signer.Sign(message[:])
 	if chk.E(err) {
 		t.Fatalf("Failed to sign message: %v", err)
 	}
 
 	// Verify the signature
-	valid, err := signer.Verify(message, signature)
+	valid, err := signer.Verify(message[:], signature)
 	if chk.E(err) {
 		t.Fatalf("Error verifying signature: %v", err)
 	}
@@ -57,8 +57,8 @@ func TestSignerVerify(t *testing.T) {
 	}
 
 	// Modify the message and verify again
-	tamperedMessage := sha256.Sum256Bytes([]byte("Hello, tampered world!"))
-	valid, err = signer.Verify(tamperedMessage, signature)
+	tamperedMessage := sha256.Sum256([]byte("Hello, tampered world!"))
+	valid, err = signer.Verify(tamperedMessage[:], signature)
 	if !chk.E(err) {
 		t.Fatalf("Error verifying tampered message: %v", err)
 	}

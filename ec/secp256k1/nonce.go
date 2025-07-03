@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"hash"
 
-	"not.realy.lol/sha256"
+	"github.com/minio/sha256-simd"
 )
 
 // References:

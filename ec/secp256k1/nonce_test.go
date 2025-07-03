@@ -9,8 +9,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/minio/sha256-simd"
 	"not.realy.lol/chk"
-	"not.realy.lol/sha256"
 
 	"not.realy.lol/hex"
 )

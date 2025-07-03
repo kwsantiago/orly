@@ -6,12 +6,12 @@ import (
 	"crypto/rand"
 	"unsafe"
 
+	"github.com/minio/sha256-simd"
 	"not.realy.lol/chk"
 	"not.realy.lol/ec/schnorr"
 	"not.realy.lol/ec/secp256k1"
 	"not.realy.lol/errorf"
 	"not.realy.lol/log"
-	"not.realy.lol/sha256"
 )
 
 /*
