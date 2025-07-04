@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="implement relayinfo">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="add HTTP handler to socketapi and refactor logging configuration">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lol/log.go" beforeDir="false" afterPath="$PROJECT_DIR$/lol/log.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servemux/serveMux.go" beforeDir="false" afterPath="$PROJECT_DIR$/servemux/serveMux.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/socketapi/socketapi.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/socketapi.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version/version.go" beforeDir="false" afterPath="$PROJECT_DIR$/version/version.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +155,8 @@
     <MESSAGE value="the rest of the working things&#10;&#10;might be some more yet, not sure" />
     <MESSAGE value="getting started on the server" />
     <MESSAGE value="implement relayinfo" />
-    <option name="LAST_COMMIT_MESSAGE" value="implement relayinfo" />
+    <MESSAGE value="add HTTP handler to socketapi and refactor logging configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="add HTTP handler to socketapi and refactor logging configuration" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

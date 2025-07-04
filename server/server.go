@@ -45,13 +45,14 @@ func (s *S) Start() (err error) {
 		IdleTimeout:       28 * time.Second,
 	}
 	if s.Cfg.DNS != "" {
-		log.I.F("listening on %s", s.Cfg.DNS)
+		log.I.F("listening on %s http://%s", s.Cfg.DNS, s.Addr)
 	} else {
 		log.I.F("listening on http://%s\n", s.Addr)
 	}
 	if err = s.HTTPServer.Serve(listener); errors.Is(
 		err, http.ErrServerClosed,
 	) {
+		err = nil
 		return
 	} else if chk.E(err) {
 		return

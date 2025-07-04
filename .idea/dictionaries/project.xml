@@ -3,6 +3,7 @@
     <words>
       <w>nostr</w>
       <w>okenvelope</w>
+      <w>relayinfo</w>
     </words>
   </dictionary>
 </component>
