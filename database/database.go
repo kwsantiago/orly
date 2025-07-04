@@ -83,11 +83,6 @@ func (d *D) DeleteEvent(
 	panic("implement me")
 }
 
-func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (d *D) Import(r io.Reader) {
 	// TODO implement me
 	panic("implement me")
