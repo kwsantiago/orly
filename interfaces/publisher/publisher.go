@@ -2,16 +2,13 @@ package publisher
 
 import (
 	"not.realy.lol/event"
+	"not.realy.lol/interfaces/typer"
 )
 
-type Message interface {
-	Type() string
-}
-
 type I interface {
-	Message
+	typer.T
 	Deliver(ev *event.E)
-	Receive(msg Message)
+	Receive(msg typer.T)
 }
 
 type Publishers []I

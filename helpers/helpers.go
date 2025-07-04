@@ -24,6 +24,7 @@ func GetRemoteFromReq(r *http.Request) (rr string) {
 		remoteAddress = r.Header.Get("Forwarded")
 		if remoteAddress == "" {
 			rr = r.RemoteAddr
+			return
 		} else {
 			splitted := strings.Split(remoteAddress, ", ")
 			if len(splitted) >= 1 {

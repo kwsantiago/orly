@@ -20,11 +20,11 @@ import (
 
 // I am a type for a persistence layer for nostr events handled by a relay.
 type I interface {
-	Initer
 	Pather
 	io.Closer
 	Pather
 	Wiper
+	Querier
 	Querent
 	Deleter
 	Saver
@@ -33,17 +33,6 @@ type I interface {
 	Syncer
 	LogLeveler
 	EventIdSerialer
-	Accountant
-}
-
-type Initer interface {
-	// Init is called at the very beginning by [Server.Start], after
-	// [relay.Init], allowing a storage to initialize its internal resources.
-	//
-	// The parameters can be used by the database implementations to set custom
-	// parameters such as cache management and other relevant parameters to the
-	// specific implementation.
-	Init(path string) (err error)
 }
 
 type Pather interface {

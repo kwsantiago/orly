@@ -8,6 +8,7 @@ import (
 	"not.realy.lol/chk"
 	"not.realy.lol/config"
 	"not.realy.lol/context"
+	"not.realy.lol/database"
 	"not.realy.lol/interrupt"
 	"not.realy.lol/log"
 	"not.realy.lol/lol"
@@ -51,6 +52,12 @@ func main() {
 	wg := &sync.WaitGroup{}
 	c, cancel := context.Cancel(context.Bg())
 	interrupt.AddHandler(func() { cancel() })
+	var sto *database.D
+	if sto, err = database.New(
+		c, cancel, cfg.DataDir, cfg.LogLevel,
+	); chk.E(err) {
+		return
+	}
 	serveMux := servemux.New()
 	s := &server.S{
 		Ctx:    c,
@@ -59,10 +66,11 @@ func main() {
 		Addr:   net.JoinHostPort(cfg.Listen, strconv.Itoa(cfg.Port)),
 		Mux:    serveMux,
 		Cfg:    cfg,
+		Store:  sto,
 	}
 	wg.Add(1)
 	interrupt.AddHandler(func() { s.Shutdown() })
-	socketapi.New(s, "/{$}", serveMux)
+	socketapi.New(s, "/{$}", serveMux, socketapi.DefaultSocketParams())
 	if err = s.Start(); chk.E(err) {
 		os.Exit(1)
 	}

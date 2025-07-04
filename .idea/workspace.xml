@@ -4,13 +4,32 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="add HTTP handler to socketapi and refactor logging configuration">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="enhance socketapi with HTTP handler, update project name, and refine logging">
+      <change afterPath="$PROJECT_DIR$/database/database.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/logger.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/interfaces/listener/listener.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/interfaces/typer/typer.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reason/reason.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/socketapi/handleMessage.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/socketapi/ok.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/socketapi/publisher.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ws/connection.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ws/listener.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/servemux/serveMux.go" beforeDir="false" afterPath="$PROJECT_DIR$/servemux/serveMux.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helpers/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/helpers/helpers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interfaces/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/server/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/publish/publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/publish/publisher.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/publish/publisher/interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/publisher/publisher.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/socketapi/socketapi.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/socketapi.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version/version.go" beforeDir="false" afterPath="$PROJECT_DIR$/version/version.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/alias.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/alias.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/errors.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/errors.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/store_interface.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +95,7 @@
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/david/src/not.realy.lol",
+    "last_opened_file_path": "/home/david/src/not.realy.lol/database",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
@@ -84,8 +103,17 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="GoMoveDeclarationDialog.RECENT_KEY">
+      <recent name="$PROJECT_DIR$/server" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/database" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/socketapi" />
+      <recent name="$PROJECT_DIR$/interfaces" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/interfaces" />
     </key>
   </component>
   <component name="RunManager" selected="Go Build.go build not.realy.lol">
@@ -156,7 +184,8 @@
     <MESSAGE value="getting started on the server" />
     <MESSAGE value="implement relayinfo" />
     <MESSAGE value="add HTTP handler to socketapi and refactor logging configuration" />
-    <option name="LAST_COMMIT_MESSAGE" value="add HTTP handler to socketapi and refactor logging configuration" />
+    <MESSAGE value="enhance socketapi with HTTP handler, update project name, and refine logging" />
+    <option name="LAST_COMMIT_MESSAGE" value="enhance socketapi with HTTP handler, update project name, and refine logging" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

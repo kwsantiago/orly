@@ -9,10 +9,9 @@ import (
 	"not.realy.lol/chk"
 	"not.realy.lol/config"
 	"not.realy.lol/context"
-	"not.realy.lol/helpers"
+	"not.realy.lol/interfaces/store"
 	"not.realy.lol/log"
 	"not.realy.lol/servemux"
-	"not.realy.lol/store"
 	"sync"
 	"time"
 )
@@ -28,6 +27,8 @@ type S struct {
 	Store      store.I
 	huma.API
 }
+
+func (s *S) Storage() store.I { return s.Store }
 
 func (s *S) Init() {}
 
@@ -62,8 +63,6 @@ func (s *S) Start() (err error) {
 
 // ServeHTTP is the server http.Handler.
 func (s *S) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	remote := helpers.GetRemoteFromReq(r)
-	log.T.F("server.S.ServeHTTP to %s", remote)
 	s.Mux.ServeHTTP(w, r)
 }
 
@@ -76,3 +75,5 @@ func (s *S) Shutdown() {
 	chk.E(s.HTTPServer.Shutdown(s.Ctx))
 	s.WG.Done()
 }
+
+func (s *S) Context() context.T { return s.Ctx }
