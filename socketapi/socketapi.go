@@ -12,6 +12,7 @@ import (
 type A struct {
 	Ctx context.T
 	server.I
+	Web http.Handler
 }
 
 func New(s server.I, path string, sm *servemux.S) {
@@ -30,12 +31,11 @@ func (a *A) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Header.Get("Upgrade") != "websocket" {
 		// for now just serve relay info on the /
-		a.I.HandleRelayInfo(w, r)
-		// // todo: we can put a website here
-		// 	http.Error(
-		// 		w, http.StatusText(http.StatusUpgradeRequired),
-		// 		http.StatusUpgradeRequired,
-		// 	)
+		if a.Web == nil {
+			a.I.HandleRelayInfo(w, r)
+		} else {
+			a.Web.ServeHTTP(w, r)
+		}
 		return
 	}
 }

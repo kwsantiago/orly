@@ -11,7 +11,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"strings"
 	"sync/atomic"
 	"time"
 
@@ -99,8 +98,6 @@ var (
 		{Debug, "DBG", color.New(color.FgHiBlue).Sprint},
 		{Trace, "TRC", color.New(color.FgHiMagenta).Sprint},
 	}
-	NoTimeStamp atomic.Bool
-	ShortLoc    atomic.Bool
 )
 
 // NoSprint is a noop for sprint (it returns nothing no matter what is given to it).
@@ -237,7 +234,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			fmt.Fprintf(
 				writer,
 				"%s%s %s %s\n",
-				msgCol(TimeStamper()),
+				TimeStamper(),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 				JoinStrings(a...),
 				msgCol(GetLoc(skip)),
@@ -250,7 +247,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			fmt.Fprintf(
 				writer,
 				"%s%s %s %s\n",
-				msgCol(TimeStamper()),
+				TimeStamper(),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 				fmt.Sprintf(format, a...),
 				msgCol(GetLoc(skip)),
@@ -263,7 +260,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			fmt.Fprintf(
 				writer,
 				"%s%s %s %s\n",
-				msgCol(TimeStamper()),
+				TimeStamper(),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 				spew.Sdump(a...),
 				msgCol(GetLoc(skip)),
@@ -276,7 +273,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			fmt.Fprintf(
 				writer,
 				"%s%s %s %s\n",
-				msgCol(TimeStamper()),
+				TimeStamper(),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 				closure(),
 				msgCol(GetLoc(skip)),
@@ -290,7 +287,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 				fmt.Fprintf(
 					writer,
 					"%s%s %s %s\n",
-					msgCol(TimeStamper()),
+					TimeStamper(),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 					e.Error(),
 					msgCol(GetLoc(skip)),
@@ -304,7 +301,7 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 				fmt.Fprintf(
 					writer,
 					"%s%s %s %s\n",
-					msgCol(TimeStamper()),
+					TimeStamper(),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
 					fmt.Sprintf(format, a...),
 					msgCol(GetLoc(skip)),
@@ -365,10 +362,18 @@ func New(writer io.Writer, skip int) (l *Log, c *Check, errorf *Errorf) {
 
 // TimeStamper generates the timestamp for logs.
 func TimeStamper() (s string) {
-	if NoTimeStamp.Load() {
-		return
-	}
-	return time.Now().Format("2006-01-02T15:04:05Z07:00.000 ")
+	ts := time.Now().Format("150405.000000")
+	ds := time.Now().Format("2006-01-02")
+	s += color.New(color.FgBlue).Sprint(ds[0:4])
+	s += color.New(color.FgHiBlue).Sprint(ds[5:7])
+	s += color.New(color.FgBlue).Sprint(ds[8:])
+	s += color.New(color.FgHiBlue).Sprint(ts[0:2])
+	s += color.New(color.FgBlue).Sprint(ts[2:4])
+	s += color.New(color.FgHiBlue).Sprint(ts[4:6])
+	s += color.New(color.FgBlue).Sprint(ts[7:])
+	// s = color.New(color.Faint).Sprint(s)
+	s += " "
+	return
 }
 
 // var wd, _ = os.Getwd()
@@ -415,14 +420,14 @@ func init() {
 // GetLoc returns the code location of the caller.
 func GetLoc(skip int) (output string) {
 	_, file, line, _ := runtime.Caller(skip)
-	if strings.Contains(file, "pkg/mod/") || !ShortLoc.Load() {
-	} else {
-		var split []string
-		split = strings.Split(file, prefix)
-		if len(split) > 1 {
-			file = split[1]
-		}
-	}
+	// if strings.Contains(file, "pkg/mod/") {
+	// } else {
+	// 	var split []string
+	// 	split = strings.Split(file, prefix)
+	// 	if len(split) > 1 {
+	// 		file = split[1]
+	// 	}
+	// }
 	output = fmt.Sprintf("%s:%d", file, line)
 	return
 }

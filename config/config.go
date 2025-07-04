@@ -33,7 +33,6 @@ type C struct {
 	Listen     string `env:"REALY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
 	DNS        string `env:"REALY_DNS" usage:"external DNS name that points at the relay"`
 	Port       int    `env:"REALY_PORT" default:"3334" usage:"port to listen on"`
-	Timestamps bool   `env:"REALY_TIMESTAMPS" default:"true" usage:"enable timestamps in log output"`
 	LogLevel   string `env:"REALY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
 	DbLogLevel string `env:"REALY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
 	Pprof      bool   `env:"REALY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
@@ -56,7 +55,6 @@ func New() (cfg *C, err error) {
 	}
 	envPath := filepath.Join(cfg.Config, ".env")
 	if apputil.FileExists(envPath) {
-		log.I.F("loading configuration from %s", envPath)
 		var e env2.Env
 		if e, err = env2.GetEnv(envPath); chk.T(err) {
 			return
@@ -66,8 +64,8 @@ func New() (cfg *C, err error) {
 		); chk.E(err) {
 			return
 		}
-		lol.NoTimeStamp.Store(cfg.Timestamps)
 		lol.SetLogLevel(cfg.LogLevel)
+		log.I.F("loaded configuration from %s", envPath)
 		// var owners []string
 		// // remove empties if any
 		// for _, o := range cfg.Owners {
