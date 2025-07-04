@@ -3,6 +3,7 @@ package event
 import (
 	"bufio"
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
 	var rem, out []byte
 	var err error
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	ea, eb := New(), New()
 	now := time.Now()
 	var counter int

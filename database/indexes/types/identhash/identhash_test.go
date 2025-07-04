@@ -2,6 +2,7 @@ package identhash
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"github.com/minio/sha256-simd"
@@ -25,7 +26,10 @@ func TestFromIdent(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
-		t.Errorf("FromIdent did not set the hash correctly: got %v, want %v", i.Bytes(), expected)
+		t.Errorf(
+			"FromIdent did not set the hash correctly: got %v, want %v",
+			i.Bytes(), expected,
+		)
 	}
 }
 
@@ -39,7 +43,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err = i1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

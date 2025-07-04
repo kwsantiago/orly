@@ -3,6 +3,7 @@ package varint
 import (
 	"bytes"
 	"math"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"lukechampine.com/frand"
@@ -14,7 +15,7 @@ func TestEncode_Decode(t *testing.T) {
 	var v uint64
 	for range 10000000 {
 		v = uint64(frand.Intn(math.MaxInt64))
-		buf1 := new(bytes.Buffer)
+		buf1 := codecbuf.Get()
 		Encode(buf1, v)
 		buf2 := bytes.NewBuffer(buf1.Bytes())
 		u, err := Decode(buf2)

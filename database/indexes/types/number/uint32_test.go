@@ -3,6 +3,7 @@ package number
 import (
 	"bytes"
 	"math"
+	"not.realy.lol/codecbuf"
 	"reflect"
 	"testing"
 
@@ -42,7 +43,7 @@ func TestUint32(t *testing.T) {
 		}
 
 		// Test encoding to []byte and decoding back
-		bufEnc := new(bytes.Buffer)
+		bufEnc := codecbuf.Get()
 
 		// MarshalWrite
 		err := codec.MarshalWrite(bufEnc)

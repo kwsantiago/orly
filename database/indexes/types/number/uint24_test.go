@@ -1,7 +1,7 @@
 package number
 
 import (
-	"bytes"
+	"not.realy.lol/codecbuf"
 	"reflect"
 	"testing"
 
@@ -46,7 +46,7 @@ func TestUint24(t *testing.T) {
 				}
 
 				// Test MarshalWrite and UnmarshalRead
-				buf := new(bytes.Buffer)
+				buf := codecbuf.Get()
 
 				// MarshalWrite directly to the buffer
 				if err := codec.MarshalWrite(buf); chk.E(err) {
@@ -142,7 +142,8 @@ func TestUint24sSetOperations(t *testing.T) {
 			) {
 				t.Errorf(
 					"Difference failed: expected %v, got %v",
-					getUint24Values(expectedDifference), getUint24Values(result),
+					getUint24Values(expectedDifference),
+					getUint24Values(result),
 				)
 			}
 		},

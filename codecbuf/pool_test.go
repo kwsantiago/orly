@@ -24,7 +24,9 @@ func TestPool(t *testing.T) {
 
 	// Verify the buffer contains the expected data
 	if buf.String() != testData {
-		t.Fatalf("Expected buffer to contain %q, got %q", testData, buf.String())
+		t.Fatalf(
+			"Expected buffer to contain %q, got %q", testData, buf.String(),
+		)
 	}
 
 	// Put the buffer back in the pool
@@ -50,7 +52,9 @@ func TestPool(t *testing.T) {
 
 	// Verify the buffer contains the new data
 	if buf2.String() != testData2 {
-		t.Fatalf("Expected buffer to contain %q, got %q", testData2, buf2.String())
+		t.Fatalf(
+			"Expected buffer to contain %q, got %q", testData2, buf2.String(),
+		)
 	}
 }
 
@@ -70,7 +74,9 @@ func TestDefaultPool(t *testing.T) {
 
 	// Verify the buffer contains the expected data
 	if buf.String() != testData {
-		t.Fatalf("Expected buffer to contain %q, got %q", testData, buf.String())
+		t.Fatalf(
+			"Expected buffer to contain %q, got %q", testData, buf.String(),
+		)
 	}
 
 	// Put the buffer back in the pool

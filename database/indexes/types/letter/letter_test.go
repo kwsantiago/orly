@@ -2,6 +2,7 @@ package letter
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"not.realy.lol/chk"
@@ -14,7 +15,9 @@ func TestNew(t *testing.T) {
 		t.Fatal("New() returned nil")
 	}
 	if l.Letter() != 'A' {
-		t.Errorf("New('A') created a T with letter %c, want %c", l.Letter(), 'A')
+		t.Errorf(
+			"New('A') created a T with letter %c, want %c", l.Letter(), 'A',
+		)
 	}
 }
 
@@ -25,7 +28,10 @@ func TestSet(t *testing.T) {
 	// Test Set
 	l.Set('B')
 	if l.Letter() != 'B' {
-		t.Errorf("Set('B') did not set the letter correctly: got %c, want %c", l.Letter(), 'B')
+		t.Errorf(
+			"Set('B') did not set the letter correctly: got %c, want %c",
+			l.Letter(), 'B',
+		)
 	}
 }
 
@@ -44,7 +50,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	l1 := New('A')
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := l1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -89,15 +95,22 @@ func TestEdgeCases(t *testing.T) {
 	// Test with maximum value (255)
 	l2 := New(255)
 	if l2.Letter() != 255 {
-		t.Errorf("New(255) created a T with letter %d, want %d", l2.Letter(), 255)
+		t.Errorf(
+			"New(255) created a T with letter %d, want %d", l2.Letter(), 255,
+		)
 	}
 
 	// Test with special characters
-	specialChars := []byte{'\n', '\t', '\r', ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/'}
+	specialChars := []byte{
+		'\n', '\t', '\r', ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')',
+		'*', '+', ',', '-', '.', '/',
+	}
 	for _, c := range specialChars {
 		l := New(c)
 		if l.Letter() != c {
-			t.Errorf("New(%d) created a T with letter %d, want %d", c, l.Letter(), c)
+			t.Errorf(
+				"New(%d) created a T with letter %d, want %d", c, l.Letter(), c,
+			)
 		}
 	}
 }

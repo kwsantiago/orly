@@ -2,6 +2,7 @@ package timestamp
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 	"time"
 
@@ -14,21 +15,30 @@ func TestFromInt(t *testing.T) {
 	ts := &T{}
 	ts.FromInt(12345)
 	if ts.val != 12345 {
-		t.Errorf("FromInt(12345) did not set the value correctly: got %d, want %d", ts.val, 12345)
+		t.Errorf(
+			"FromInt(12345) did not set the value correctly: got %d, want %d",
+			ts.val, 12345,
+		)
 	}
 
 	// Test with a negative value
 	ts = &T{}
 	ts.FromInt(-12345)
 	if ts.val != -12345 {
-		t.Errorf("FromInt(-12345) did not set the value correctly: got %d, want %d", ts.val, -12345)
+		t.Errorf(
+			"FromInt(-12345) did not set the value correctly: got %d, want %d",
+			ts.val, -12345,
+		)
 	}
 
 	// Test with zero
 	ts = &T{}
 	ts.FromInt(0)
 	if ts.val != 0 {
-		t.Errorf("FromInt(0) did not set the value correctly: got %d, want %d", ts.val, 0)
+		t.Errorf(
+			"FromInt(0) did not set the value correctly: got %d, want %d",
+			ts.val, 0,
+		)
 	}
 }
 
@@ -37,21 +47,30 @@ func TestFromInt64(t *testing.T) {
 	ts := &T{}
 	ts.FromInt64(12345)
 	if ts.val != 12345 {
-		t.Errorf("FromInt64(12345) did not set the value correctly: got %d, want %d", ts.val, 12345)
+		t.Errorf(
+			"FromInt64(12345) did not set the value correctly: got %d, want %d",
+			ts.val, 12345,
+		)
 	}
 
 	// Test with a negative value
 	ts = &T{}
 	ts.FromInt64(-12345)
 	if ts.val != -12345 {
-		t.Errorf("FromInt64(-12345) did not set the value correctly: got %d, want %d", ts.val, -12345)
+		t.Errorf(
+			"FromInt64(-12345) did not set the value correctly: got %d, want %d",
+			ts.val, -12345,
+		)
 	}
 
 	// Test with zero
 	ts = &T{}
 	ts.FromInt64(0)
 	if ts.val != 0 {
-		t.Errorf("FromInt64(0) did not set the value correctly: got %d, want %d", ts.val, 0)
+		t.Errorf(
+			"FromInt64(0) did not set the value correctly: got %d, want %d",
+			ts.val, 0,
+		)
 	}
 
 	// Test with a large value
@@ -59,7 +78,10 @@ func TestFromInt64(t *testing.T) {
 	largeValue := int64(1) << 60
 	ts.FromInt64(largeValue)
 	if ts.val != largeValue {
-		t.Errorf("FromInt64(%d) did not set the value correctly: got %d, want %d", largeValue, ts.val, largeValue)
+		t.Errorf(
+			"FromInt64(%d) did not set the value correctly: got %d, want %d",
+			largeValue, ts.val, largeValue,
+		)
 	}
 }
 
@@ -69,7 +91,7 @@ func TestFromBytes(t *testing.T) {
 	v.Set(12345)
 
 	// Marshal it to bytes
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := v.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -81,7 +103,10 @@ func TestFromBytes(t *testing.T) {
 		t.Fatalf("FromBytes failed: %v", err)
 	}
 	if ts.val != 12345 {
-		t.Errorf("FromBytes did not set the value correctly: got %d, want %d", ts.val, 12345)
+		t.Errorf(
+			"FromBytes did not set the value correctly: got %d, want %d",
+			ts.val, 12345,
+		)
 	}
 
 	// Test with invalid bytes
@@ -140,7 +165,7 @@ func TestBytes(t *testing.T) {
 func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	// Test with a positive value
 	ts1 := &T{val: 12345}
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := ts1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -160,7 +185,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 
 	// Test with a negative value
 	ts1 = &T{val: -12345}
-	buf = new(bytes.Buffer)
+	buf = codecbuf.Get()
 	err = ts1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -189,7 +214,10 @@ func TestWithCurrentTime(t *testing.T) {
 
 	// Verify the value
 	if ts.val != now {
-		t.Errorf("FromInt64(%d) did not set the value correctly: got %d, want %d", now, ts.val, now)
+		t.Errorf(
+			"FromInt64(%d) did not set the value correctly: got %d, want %d",
+			now, ts.val, now,
+		)
 	}
 
 	// Test ToTimestamp
@@ -199,7 +227,7 @@ func TestWithCurrentTime(t *testing.T) {
 	}
 
 	// Test MarshalWrite and UnmarshalRead
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := ts.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

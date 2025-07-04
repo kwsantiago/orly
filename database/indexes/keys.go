@@ -6,7 +6,6 @@ import (
 
 	"not.realy.lol/chk"
 	"not.realy.lol/database/indexes/types/fullid"
-	"not.realy.lol/database/indexes/types/fulltext"
 	"not.realy.lol/database/indexes/types/identhash"
 	"not.realy.lol/database/indexes/types/idhash"
 	. "not.realy.lol/database/indexes/types/number"
@@ -64,8 +63,6 @@ func Prefix(prf int) (i I) {
 		return "ptc"
 	case TagCreatedAt:
 		return "itc"
-	case FulltextWord:
-		return "ftw"
 	case Kind:
 		return "iki"
 	case KindCreatedAt:
@@ -416,23 +413,4 @@ func KindPubkeyTagCreatedAtDec(
 	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, p, k, v, ca, ser)
-}
-
-// FulltextWord is a fulltext word index; the index contains the whole word, and
-// its sequence in the content field.
-//
-// [ prefix ][ full word, zero terminated ][ 3 bytes word position in content field ][ 8 serial ]
-var FulltextWord = next()
-
-func FullTextWordVars() (fw *fulltext.T, pos *Uint24, ser *Uint40) {
-	fw = fulltext.New()
-	pos = new(Uint24)
-	ser = new(Uint40)
-	return
-}
-func FullTextWordEnc(fw *fulltext.T, pos *Uint24, ser *Uint40) (enc *T) {
-	return New(NewPrefix(FulltextWord), fw, pos, ser)
-}
-func FullTextWordDec(fw *fulltext.T, pos *Uint24, ser *Uint40) (enc *T) {
-	return New(NewPrefix(), fw, pos, ser)
 }

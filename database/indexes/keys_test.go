@@ -2,10 +2,10 @@ package indexes
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"not.realy.lol/chk"
-	"not.realy.lol/database/indexes/types/fulltext"
 	"not.realy.lol/database/indexes/types/idhash"
 	. "not.realy.lol/database/indexes/types/number"
 )
@@ -43,7 +43,6 @@ func TestPrefix(t *testing.T) {
 		{"CreatedAt", CreatedAt, "ica"},
 		{"PubkeyTagCreatedAt", PubkeyTagCreatedAt, "ptc"},
 		{"TagCreatedAt", TagCreatedAt, "itc"},
-		{"FulltextWord", FulltextWord, "ftw"},
 		{"Kind", Kind, "iki"},
 		{"KindCreatedAt", KindCreatedAt, "kca"},
 		{"KindPubkey", KindPubkey, "kpk"},
@@ -55,12 +54,16 @@ func TestPrefix(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := Prefix(tt.prf)
-			if result != tt.expected {
-				t.Errorf("Prefix(%d) = %s, want %s", tt.prf, result, tt.expected)
-			}
-		})
+		t.Run(
+			tt.name, func(t *testing.T) {
+				result := Prefix(tt.prf)
+				if result != tt.expected {
+					t.Errorf(
+						"Prefix(%d) = %s, want %s", tt.prf, result, tt.expected,
+					)
+				}
+			},
+		)
 	}
 }
 
@@ -84,7 +87,7 @@ func TestPMarshalWriteUnmarshalRead(t *testing.T) {
 	p := NewPrefix(Event)
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := p.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -102,7 +105,9 @@ func TestPMarshalWriteUnmarshalRead(t *testing.T) {
 
 	// Verify the unmarshaled value matches the original
 	if !bytes.Equal(p.val, p2.val) {
-		t.Errorf("Unmarshaled value %v does not match original %v", p2.val, p.val)
+		t.Errorf(
+			"Unmarshaled value %v does not match original %v", p2.val, p.val,
+		)
 	}
 }
 
@@ -111,7 +116,7 @@ func TestIWrite(t *testing.T) {
 	i := I("test")
 
 	// Test Write
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	n, err := i.Write(buf)
 	if chk.E(err) {
 		t.Fatalf("Write failed: %v", err)
@@ -137,7 +142,7 @@ func TestTMarshalWriteUnmarshalRead(t *testing.T) {
 	enc := EventEnc(ser)
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -156,7 +161,10 @@ func TestTMarshalWriteUnmarshalRead(t *testing.T) {
 
 	// Verify the unmarshaled value matches the original
 	if ser2.Get() != ser.Get() {
-		t.Errorf("Unmarshaled value %d does not match original %d", ser2.Get(), ser.Get())
+		t.Errorf(
+			"Unmarshaled value %d does not match original %d", ser2.Get(),
+			ser.Get(),
+		)
 	}
 }
 
@@ -177,7 +185,7 @@ func TestEventFunctions(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -199,7 +207,10 @@ func TestEventFunctions(t *testing.T) {
 
 	// Verify the unmarshaled value matches the original
 	if ser2.Get() != ser.Get() {
-		t.Errorf("Unmarshaled value %d does not match original %d", ser2.Get(), ser.Get())
+		t.Errorf(
+			"Unmarshaled value %d does not match original %d", ser2.Get(),
+			ser.Get(),
+		)
 	}
 }
 
@@ -224,7 +235,7 @@ func TestIdFunctions(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -253,64 +264,15 @@ func TestIdFunctions(t *testing.T) {
 
 	// Verify the unmarshaled values match the originals
 	if !bytes.Equal(id2.Bytes(), id.Bytes()) {
-		t.Errorf("Unmarshaled id %v does not match original %v", id2.Bytes(), id.Bytes())
+		t.Errorf(
+			"Unmarshaled id %v does not match original %v", id2.Bytes(),
+			id.Bytes(),
+		)
 	}
 	if ser2.Get() != ser.Get() {
-		t.Errorf("Unmarshaled ser %d does not match original %d", ser2.Get(), ser.Get())
+		t.Errorf(
+			"Unmarshaled ser %d does not match original %d", ser2.Get(),
+			ser.Get(),
+		)
 	}
 }
-
-func TestFullTextWordFunctions(t *testing.T) {
-	// Test FullTextWordVars
-	fw, pos, ser := FullTextWordVars()
-	if fw == nil || pos == nil || ser == nil {
-		t.Fatal("FullTextWordVars() returned nil")
-	}
-
-	// Set values
-	fw.FromWord([]byte("testword"))
-	pos.Set(123)
-	ser.Set(12345)
-
-	// Test FullTextWordEnc
-	enc := FullTextWordEnc(fw, pos, ser)
-	if enc == nil {
-		t.Fatal("FullTextWordEnc() returned nil")
-	}
-
-	// Test MarshalWrite
-	buf := new(bytes.Buffer)
-	err := enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Test FullTextWordDec
-	fw2 := fulltext.New()
-	pos2 := new(Uint24)
-	ser2 := new(Uint40)
-	dec := FullTextWordDec(fw2, pos2, ser2)
-	if dec == nil {
-		t.Fatal("FullTextWordDec() returned nil")
-	}
-
-	// Test UnmarshalRead
-	buf2 := bytes.NewBuffer(buf.Bytes())
-	err = dec.UnmarshalRead(buf2)
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the unmarshaled values match the originals
-	if string(fw2.Bytes()) != string(fw.Bytes()) {
-		t.Errorf("Unmarshaled fw %s does not match original %s", string(fw2.Bytes()), string(fw.Bytes()))
-	}
-	if pos2.Get() != pos.Get() {
-		t.Errorf("Unmarshaled pos %d does not match original %d", pos2.Get(), pos.Get())
-	}
-	if ser2.Get() != ser.Get() {
-		t.Errorf("Unmarshaled ser %d does not match original %d", ser2.Get(), ser.Get())
-	}
-}
-
-// Add more tests for other index types as needed

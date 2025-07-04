@@ -3,6 +3,7 @@ package idhash
 import (
 	"bytes"
 	"encoding/base64"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"github.com/minio/sha256-simd"
@@ -16,7 +17,9 @@ func TestNew(t *testing.T) {
 		t.Fatal("New() returned nil")
 	}
 	if len(i.val) != Len {
-		t.Errorf("New() created a T with val length %d, want %d", len(i.val), Len)
+		t.Errorf(
+			"New() created a T with val length %d, want %d", len(i.val), Len,
+		)
 	}
 }
 
@@ -43,7 +46,10 @@ func TestFromId(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
-		t.Errorf("FromId did not set the hash correctly: got %v, want %v", i.Bytes(), expected)
+		t.Errorf(
+			"FromId did not set the hash correctly: got %v, want %v", i.Bytes(),
+			expected,
+		)
 	}
 
 	// Test with invalid ID
@@ -77,7 +83,10 @@ func TestFromIdBase64(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
-		t.Errorf("FromIdBase64 did not set the hash correctly: got %v, want %v", i.Bytes(), expected)
+		t.Errorf(
+			"FromIdBase64 did not set the hash correctly: got %v, want %v",
+			i.Bytes(), expected,
+		)
 	}
 
 	// Test with invalid base64 ID
@@ -111,7 +120,10 @@ func TestFromIdHex(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
-		t.Errorf("FromIdHex did not set the hash correctly: got %v, want %v", i.Bytes(), expected)
+		t.Errorf(
+			"FromIdHex did not set the hash correctly: got %v, want %v",
+			i.Bytes(), expected,
+		)
 	}
 
 	// Test with invalid hex ID (wrong size)
@@ -142,7 +154,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err = i1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

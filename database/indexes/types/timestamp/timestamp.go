@@ -3,6 +3,7 @@ package timestamp
 import (
 	"bytes"
 	"io"
+	"not.realy.lol/codecbuf"
 
 	"not.realy.lol/chk"
 	"not.realy.lol/database/indexes/types/number"
@@ -30,7 +31,7 @@ func (ts *T) ToTimestamp() (timestamp int64) {
 func (ts *T) Bytes() (b []byte, err error) {
 	v := new(number.Uint64)
 	v.Set(uint64(ts.val))
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	if err = v.MarshalWrite(buf); chk.E(err) {
 		return
 	}

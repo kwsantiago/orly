@@ -2,6 +2,7 @@ package fullid
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"github.com/minio/sha256-simd"
@@ -27,7 +28,10 @@ func TestFromId(t *testing.T) {
 
 	// Verify the ID was set correctly
 	if !bytes.Equal(fi.Bytes(), validId) {
-		t.Errorf("FromId did not set the ID correctly: got %v, want %v", fi.Bytes(), validId)
+		t.Errorf(
+			"FromId did not set the ID correctly: got %v, want %v", fi.Bytes(),
+			validId,
+		)
 	}
 
 	// Test with invalid ID
@@ -51,7 +55,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err = fi1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

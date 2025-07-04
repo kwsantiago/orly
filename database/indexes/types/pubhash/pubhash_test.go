@@ -2,6 +2,7 @@ package pubhash
 
 import (
 	"bytes"
+	"not.realy.lol/codecbuf"
 	"testing"
 
 	"github.com/minio/sha256-simd"
@@ -33,7 +34,10 @@ func TestFromPubkey(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(ph.Bytes(), expected) {
-		t.Errorf("FromPubkey did not set the hash correctly: got %v, want %v", ph.Bytes(), expected)
+		t.Errorf(
+			"FromPubkey did not set the hash correctly: got %v, want %v",
+			ph.Bytes(), expected,
+		)
 	}
 
 	// Test with invalid pubkey
@@ -67,7 +71,10 @@ func TestFromPubkeyHex(t *testing.T) {
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(ph.Bytes(), expected) {
-		t.Errorf("FromPubkeyHex did not set the hash correctly: got %v, want %v", ph.Bytes(), expected)
+		t.Errorf(
+			"FromPubkeyHex did not set the hash correctly: got %v, want %v",
+			ph.Bytes(), expected,
+		)
 	}
 
 	// Test with invalid hex pubkey (wrong size)
@@ -98,7 +105,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := new(bytes.Buffer)
+	buf := codecbuf.Get()
 	err = ph1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

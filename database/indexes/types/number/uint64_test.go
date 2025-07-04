@@ -3,6 +3,7 @@ package number
 import (
 	"bytes"
 	"math"
+	"not.realy.lol/codecbuf"
 	"reflect"
 	"testing"
 
@@ -42,7 +43,7 @@ func TestUint64(t *testing.T) {
 		}
 
 		// Test encoding to []byte and decoding back
-		bufEnc := new(bytes.Buffer)
+		bufEnc := codecbuf.Get()
 
 		// MarshalWrite
 		err := codec.MarshalWrite(bufEnc)
@@ -140,7 +141,8 @@ func TestUint64sSetOperations(t *testing.T) {
 			) {
 				t.Errorf(
 					"Difference failed: expected %v, got %v",
-					getUint64Values(expectedDifference), getUint64Values(result),
+					getUint64Values(expectedDifference),
+					getUint64Values(result),
 				)
 			}
 		},
