@@ -4,29 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests">
-      <change afterPath="$PROJECT_DIR$/database/generate-indexes.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/generate-indexes_test.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codecbuf/pool_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/codecbuf/pool_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/fullid/fullid_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/fullid/fullid_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/identhash/identhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/identhash/identhash_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/idhash/idhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/idhash/idhash_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/letter/letter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/letter/letter_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint16_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/number/uint16_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint24_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/number/uint24_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint32_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/number/uint32_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint40_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/number/uint40_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint64_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/number/uint64_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/pubhash/pubhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/pubhash/pubhash_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/binary_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/binary_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lol/log_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/lol/log_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/varint/varint_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/varint/varint_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/generate-indexes.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/generate-indexes.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,7 +179,8 @@
     <MESSAGE value="starting with database stuff" />
     <MESSAGE value="add indexes codecs and stubs for store interface methods" />
     <MESSAGE value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
+    <MESSAGE value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
+    <option name="LAST_COMMIT_MESSAGE" value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
