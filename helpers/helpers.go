@@ -17,18 +17,32 @@ func GenerateDescription(text string, scopes []string) string {
 }
 
 func GetRemoteFromReq(r *http.Request) (rr string) {
-	// reverse proxy should populate this field so we see the remote not the proxy
-	rem := r.Header.Get("X-Forwarded-For")
-	if rem == "" {
-		rr = r.RemoteAddr
-	} else {
-		splitted := strings.Split(rem, " ")
-		if len(splitted) == 1 {
-			rr = splitted[0]
+	// reverse proxy should populate this field so we see the remote not the
+	// proxy
+	remoteAddress := r.Header.Get("X-Forwarded-For")
+	if remoteAddress == "" {
+		remoteAddress = r.Header.Get("Forwarded")
+		if remoteAddress == "" {
+			rr = r.RemoteAddr
+		} else {
+			splitted := strings.Split(remoteAddress, ", ")
+			if len(splitted) >= 1 {
+				forwarded := strings.Split(splitted[0], "=")
+				if len(forwarded) == 2 {
+					// by the standard this should be the address of the client.
+					rr = splitted[1]
+				}
+				return
+			}
 		}
-		if len(splitted) == 2 {
-			rr = splitted[1]
-		}
+	}
+	splitted := strings.Split(remoteAddress, " ")
+	if len(splitted) == 1 {
+		rr = splitted[0]
+	}
+	if len(splitted) == 2 {
+		sp := strings.Split(splitted[0], ",")
+		rr = sp[0]
 	}
 	return
 }

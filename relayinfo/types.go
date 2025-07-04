@@ -66,7 +66,7 @@ var (
 		"Nostr Marketplace (for resilient marketplaces)", 15,
 	}
 	NIP15                          = NostrMarketplace
-	EventTreatment                 = NIP{"EVent Treatment", 16}
+	EventTreatment                 = NIP{"Event Treatment", 16}
 	NIP16                          = EventTreatment
 	Reposts                        = NIP{"Reposts", 18}
 	NIP18                          = Reposts

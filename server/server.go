@@ -7,7 +7,9 @@ import (
 	"net"
 	"net/http"
 	"not.realy.lol/chk"
+	"not.realy.lol/config"
 	"not.realy.lol/context"
+	"not.realy.lol/helpers"
 	"not.realy.lol/log"
 	"not.realy.lol/servemux"
 	"not.realy.lol/store"
@@ -18,10 +20,11 @@ import (
 type S struct {
 	Ctx        context.T
 	Cancel     context.F
-	WG         sync.WaitGroup
+	WG         *sync.WaitGroup
 	Addr       string
-	mux        *servemux.S
-	httpServer *http.Server
+	Cfg        *config.C
+	Mux        *servemux.S
+	HTTPServer *http.Server
 	Store      store.I
 	huma.API
 }
@@ -29,19 +32,24 @@ type S struct {
 func (s *S) Init() {}
 
 func (s *S) Start() (err error) {
+	s.WG.Add(1)
 	s.Init()
 	var listener net.Listener
 	if listener, err = net.Listen("tcp", s.Addr); chk.E(err) {
 		return
 	}
-	s.httpServer = &http.Server{
+	s.HTTPServer = &http.Server{
 		Handler:           cors.Default().Handler(s),
 		Addr:              s.Addr,
 		ReadHeaderTimeout: 7 * time.Second,
 		IdleTimeout:       28 * time.Second,
 	}
-	log.I.F("listening on %s", s.Addr)
-	if err = s.httpServer.Serve(listener); errors.Is(
+	if s.Cfg.DNS != "" {
+		log.I.F("listening on %s", s.Cfg.DNS)
+	} else {
+		log.I.F("listening on http://%s\n", s.Addr)
+	}
+	if err = s.HTTPServer.Serve(listener); errors.Is(
 		err, http.ErrServerClosed,
 	) {
 		return
@@ -53,14 +61,17 @@ func (s *S) Start() (err error) {
 
 // ServeHTTP is the server http.Handler.
 func (s *S) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mux.ServeHTTP(w, r)
+	remote := helpers.GetRemoteFromReq(r)
+	log.T.F("server.S.ServeHTTP to %s", remote)
+	s.Mux.ServeHTTP(w, r)
 }
 
 func (s *S) Shutdown() {
 	log.W.Ln("shutting down relay")
 	s.Cancel()
-	log.W.Ln("closing event store")
-	chk.E(s.Store.Close())
+	// log.W.Ln("closing event store")
+	// chk.E(s.Store.Close())
 	log.W.Ln("shutting down relay listener")
-	chk.E(s.httpServer.Shutdown(s.Ctx))
+	chk.E(s.HTTPServer.Shutdown(s.Ctx))
+	s.WG.Done()
 }

@@ -7,6 +7,7 @@ import (
 	"io"
 	"not.realy.lol/chk"
 	env2 "not.realy.lol/env"
+	"not.realy.lol/log"
 	"not.realy.lol/lol"
 	"not.realy.lol/version"
 	"os"
@@ -25,11 +26,12 @@ import (
 // C is the configuration for realy relay. These are read from the environment if present, or if
 // a .env file is found in ~/.config/realy/ that is read instead and overrides anything else.
 type C struct {
-	AppName    string `env:"REALY_APP_NAME" default:"realy"`
+	AppName    string `env:"REALY_APP_NAME" default:"not.realy.lol"`
 	Config     string `env:"REALY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
 	State      string `env:"REALY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces"`
 	DataDir    string `env:"REALY_DATA_DIR" usage:"storage location for the ratel event store"`
 	Listen     string `env:"REALY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
+	DNS        string `env:"REALY_DNS" usage:"external DNS name that points at the relay"`
 	Port       int    `env:"REALY_PORT" default:"3334" usage:"port to listen on"`
 	Timestamps bool   `env:"REALY_TIMESTAMPS" default:"true" usage:"enable timestamps in log output"`
 	LogLevel   string `env:"REALY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
@@ -54,11 +56,14 @@ func New() (cfg *C, err error) {
 	}
 	envPath := filepath.Join(cfg.Config, ".env")
 	if apputil.FileExists(envPath) {
+		log.I.F("loading configuration from %s", envPath)
 		var e env2.Env
 		if e, err = env2.GetEnv(envPath); chk.T(err) {
 			return
 		}
-		if err = env.Load(cfg, &env.Options{SliceSep: ",", Source: e}); chk.E(err) {
+		if err = env.Load(
+			cfg, &env.Options{SliceSep: ",", Source: e},
+		); chk.E(err) {
 			return
 		}
 		lol.NoTimeStamp.Store(cfg.Timestamps)
