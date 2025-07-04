@@ -13,9 +13,6 @@ import (
 // GenerateIndexes creates all the indexes for an event.E instance as defined in keys.go.
 // It returns a slice of indexes.T that can be used to store the event in the database.
 func GenerateIndexes(ev *event.E, serial uint64) (allIndexes []*indexes.T) {
-	// Create a slice to hold all the indexes
-	allIndexes = make([]*indexes.T, 0)
-
 	// Convert serial to Uint40
 	ser := new(Uint40)
 	ser.Set(serial)

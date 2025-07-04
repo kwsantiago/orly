@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="refactor GenerateIndexes to use named return values">
+      <change afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/database.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/database.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/generate-indexes.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/generate-indexes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/add-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +184,8 @@
     <MESSAGE value="add indexes codecs and stubs for store interface methods" />
     <MESSAGE value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
     <MESSAGE value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
-    <option name="LAST_COMMIT_MESSAGE" value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
+    <MESSAGE value="refactor GenerateIndexes to use named return values" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor GenerateIndexes to use named return values" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

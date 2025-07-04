@@ -9,7 +9,6 @@ import (
 	"not.realy.lol/eventid"
 	"not.realy.lol/eventidserial"
 	"not.realy.lol/filter"
-	"not.realy.lol/interfaces/store"
 	"not.realy.lol/log"
 	"not.realy.lol/lol"
 	"not.realy.lol/units"
@@ -65,13 +64,6 @@ func (d *D) Wipe() (err error) {
 }
 
 func (d *D) QueryEvents(c context.T, f *filter.T) (evs event.S, err error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (d *D) QueryForIds(c context.T, f *filter.T) (
-	evs []store.IdTsPk, err error,
-) {
 	// TODO implement me
 	panic("implement me")
 }
