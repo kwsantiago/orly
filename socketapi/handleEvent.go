@@ -20,7 +20,7 @@ import (
 
 func (a *A) HandleEvent(r []byte, s server.I, remote string) (msg []byte) {
 
-	log.T.F("%s handleEvent %s", remote, r)
+	log.T.F("%s handleEvent %s %d bytes", remote, r, len(r)-1)
 	var err error
 	var ok bool
 	var rem []byte

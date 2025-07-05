@@ -59,6 +59,7 @@ const (
 	IdPrefix                     = I("eid")
 	IdPubkeyCreatedAtPrefix      = I("ipc")
 	PubkeyPrefix                 = I("ipk")
+	PubkeyTagPrefix              = I("pkt")
 	PubkeyCreatedAtPrefix        = I("pca")
 	CreatedAtPrefix              = I("ica")
 	PubkeyTagCreatedAtPrefix     = I("ptc")
@@ -85,6 +86,8 @@ func Prefix(prf int) (i I) {
 		return IdPubkeyCreatedAtPrefix
 	case Pubkey:
 		return PubkeyPrefix
+	case PubkeyTag:
+		return PubkeyTagPrefix
 	case PubkeyCreatedAt:
 		return PubkeyCreatedAtPrefix
 	case CreatedAt:
@@ -265,10 +268,31 @@ func PubkeyVars() (p *t.PubHash, ser *t.Uint40) {
 	return new(t.PubHash), new(t.Uint40)
 }
 func PubkeyEnc(p *t.PubHash, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(PubkeyCreatedAt), p, ser)
+	return New(NewPrefix(Pubkey), p, ser)
 }
 func PubkeyDec(p *t.PubHash, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), p, ser)
+}
+
+// PubkeyTag allows searching for a pubkey, tag and timestamp.
+//
+//	3 prefix|8 pubkey hash|1 key letter|8 value hash|5 serial
+var PubkeyTag = next()
+
+func PubkeyTagVars() (
+	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
+) {
+	return new(t.PubHash), new(t.Letter), new(t.Ident), new(t.Uint40)
+}
+func PubkeyTagEnc(
+	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
+) (enc *T) {
+	return New(NewPrefix(PubkeyTagCreatedAt), p, k, v, ser)
+}
+func PubkeyTagDec(
+	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
+) (enc *T) {
+	return New(NewPrefix(), p, k, v, ser)
 }
 
 // PubkeyCreatedAt is a composite index that allows search by pubkey
@@ -318,7 +342,7 @@ func TagVars() (k *t.Letter, v *t.Ident, ser *t.Uint40) {
 	return new(t.Letter), new(t.Ident), new(t.Uint40)
 }
 func TagEnc(k *t.Letter, v *t.Ident, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(TagCreatedAt), k, v, ser)
+	return New(NewPrefix(Tag), k, v, ser)
 }
 func TagDec(k *t.Letter, v *t.Ident, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), k, v, ser)

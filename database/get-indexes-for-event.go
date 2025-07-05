@@ -74,6 +74,11 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	if err = appendIndexBytes(&idxs, createdAtIndex); chk.E(err) {
 		return
 	}
+	// Pubkey index
+	pubkeyIndex := indexes.PubkeyEnc(pubHash, ser)
+	if err = appendIndexBytes(&idxs, pubkeyIndex); chk.E(err) {
+		return
+	}
 	// PubkeyCreatedAt index
 	pubkeyCreatedAtIndex := indexes.PubkeyCreatedAtEnc(pubHash, createdAt, ser)
 	if err = appendIndexBytes(&idxs, pubkeyCreatedAtIndex); chk.E(err) {
@@ -92,47 +97,68 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 					continue
 				}
 				valueBytes := tag.B(1)
-				// Create identhash for key and value
-				keyHash := new(Letter)
-				keyHash.Set(keyBytes[0])
+				// Create tag key and value
+				key := new(Letter)
+				key.Set(keyBytes[0])
 				valueHash := new(Ident)
 				valueHash.FromIdent(valueBytes)
 				// PubkeyTagCreatedAt index
 				pubkeyTagCreatedAtIndex := indexes.PubkeyTagCreatedAtEnc(
-					pubHash, keyHash, valueHash, createdAt, ser,
+					pubHash, key, valueHash, createdAt, ser,
 				)
-				if err = appendIndexBytes(&idxs, pubkeyTagCreatedAtIndex); chk.E(err) {
+				if err = appendIndexBytes(
+					&idxs, pubkeyTagCreatedAtIndex,
+				); chk.E(err) {
+					return
+				}
+				pubkeyTagIndex := indexes.PubkeyTagEnc(
+					pubHash, key, valueHash, ser,
+				)
+				if err = appendIndexBytes(
+					&idxs, pubkeyTagIndex,
+				); chk.E(err) {
+					return
+				}
+				// Tag index
+				tagIndex := indexes.TagEnc(key, valueHash, ser)
+				if err = appendIndexBytes(&idxs, tagIndex); chk.E(err) {
 					return
 				}
 				// TagCreatedAt index
 				tagCreatedAtIndex := indexes.TagCreatedAtEnc(
-					keyHash, valueHash, createdAt, ser,
+					key, valueHash, createdAt, ser,
 				)
-				if err = appendIndexBytes(&idxs, tagCreatedAtIndex); chk.E(err) {
+				if err = appendIndexBytes(
+					&idxs, tagCreatedAtIndex,
+				); chk.E(err) {
 					return
 				}
 				// Kind-related tag indexes
 				kind := new(Uint16)
-				kind.Set(uint16(ev.Kind.K))
+				kind.Set(ev.Kind.K)
 				// KindTag index
 				kindTagIndex := indexes.KindTagEnc(
-					kind, keyHash, valueHash, ser,
+					kind, key, valueHash, ser,
 				)
 				if err = appendIndexBytes(&idxs, kindTagIndex); chk.E(err) {
 					return
 				}
 				// KindTagCreatedAt index
 				kindTagCreatedAtIndex := indexes.KindTagCreatedAtEnc(
-					kind, keyHash, valueHash, createdAt, ser,
+					kind, key, valueHash, createdAt, ser,
 				)
-				if err = appendIndexBytes(&idxs, kindTagCreatedAtIndex); chk.E(err) {
+				if err = appendIndexBytes(
+					&idxs, kindTagCreatedAtIndex,
+				); chk.E(err) {
 					return
 				}
 				// KindPubkeyTagCreatedAt index
 				kindPubkeyTagCreatedAtIndex := indexes.KindPubkeyTagCreatedAtEnc(
-					kind, pubHash, keyHash, valueHash, createdAt, ser,
+					kind, pubHash, key, valueHash, createdAt, ser,
 				)
-				if err = appendIndexBytes(&idxs, kindPubkeyTagCreatedAtIndex); chk.E(err) {
+				if err = appendIndexBytes(
+					&idxs, kindPubkeyTagCreatedAtIndex,
+				); chk.E(err) {
 					return
 				}
 			}

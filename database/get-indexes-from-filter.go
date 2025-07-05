@@ -11,7 +11,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	// Id
 	//
 	// If there is any Ids in the filter, none of the other fields matter. It
-	// should be an error but convention just ignores it.
+	// should be an error, but convention just ignores it.
 	if f.Ids.Len() > 0 {
 		for _, id := range f.Ids.ToSliceOfBytes() {
 			if err = func() (err error) {

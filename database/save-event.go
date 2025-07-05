@@ -29,6 +29,10 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 		return
 	}
 	log.I.S(idxs)
+	var total int
+	for _, v := range idxs {
+		total += len(v)
+	}
 	// Start a transaction to save the event and all its indexes
 	err = d.Update(
 		func(txn *badger.Txn) (err error) {
@@ -60,6 +64,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 			defer codecbuf.Put(v)
 			ev.MarshalBinary(v)
 			kb, vb := k.Bytes(), v.Bytes()
+			total += len(kb) + len(vb)
 			log.I.S(kb, vb)
 			if err = txn.Set(kb, vb); chk.E(err) {
 				return
@@ -67,5 +72,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 			return
 		},
 	)
+	log.T.F("total data written: %d bytes", total)
 	return
 }

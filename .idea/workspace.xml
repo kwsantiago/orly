@@ -4,21 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay">
-      <change afterPath="$PROJECT_DIR$/event/examples/out.jsonl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/event/json_whitespace_test.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="update more orly stuff, make json codec handle whitespace, fix indexes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/binary_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/binary_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/canonical.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/canonical.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/event.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/json.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/handle-relayinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/handle-relayinfo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tag/tag.go" beforeDir="false" afterPath="$PROJECT_DIR$/tag/tag.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tags/tags.go" beforeDir="false" afterPath="$PROJECT_DIR$/tags/tags.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version/version.go" beforeDir="false" afterPath="$PROJECT_DIR$/version/version.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -236,7 +228,8 @@
     <MESSAGE value="remove unused letter package, rename and refactor core types, update filters and test logic" />
     <MESSAGE value="move to new orly.dev; implement indexes properly" />
     <MESSAGE value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
-    <option name="LAST_COMMIT_MESSAGE" value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
+    <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
+    <option name="LAST_COMMIT_MESSAGE" value="update more orly stuff, make json codec handle whitespace, fix indexes" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
