@@ -28,7 +28,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 	if idxs, err = GetIndexesForEvent(ev, serial); chk.E(err) {
 		return
 	}
-	log.I.S(idxs)
+	log.T.S(idxs)
 	var total int
 	for _, v := range idxs {
 		total += len(v)
@@ -65,7 +65,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 			ev.MarshalBinary(v)
 			kb, vb := k.Bytes(), v.Bytes()
 			total += len(kb) + len(vb)
-			log.I.S(kb, vb)
+			log.T.S(kb, vb)
 			if err = txn.Set(kb, vb); chk.E(err) {
 				return
 			}

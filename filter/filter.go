@@ -36,8 +36,8 @@ import (
 
 // T is the primary query form for requesting events from a nostr relay.
 //
-// The ordering of fields of filters is not specified as in the protocol there
-// is no requirement to generate a hash for fast recognition of identical
+// The ordering of the fields of filters is not specified as in the protocol
+// there is no requirement to generate a hash for fast recognition of identical
 // filters.
 //
 // However, for internal use in a relay, by applying a consistent sort order,
@@ -47,14 +47,17 @@ import (
 // This is to facilitate the deduplication of filters so an effective identical
 // match is not performed on an identical filter.
 type T struct {
-	Ids     *tag.T       `json:"ids,omitempty"`
-	Kinds   *kinds.T     `json:"kinds,omitempty"`
-	Authors *tag.T       `json:"authors,omitempty"`
-	Tags    *tags.T      `json:"-,omitempty"`
-	Since   *timestamp.T `json:"since,omitempty"`
-	Until   *timestamp.T `json:"until,omitempty"`
-	Search  []byte       `json:"search,omitempty"`
-	Limit   *uint        `json:"limit,omitempty"`
+	Ids     *tag.T   `json:"ids,omitempty"`
+	Kinds   *kinds.T `json:"kinds,omitempty"`
+	Authors *tag.T   `json:"authors,omitempty"`
+	// Tags are internally stored with the key being prefixed with # and a-zA-Z
+	// as the second character in the first field of a tag.T, but when marshaled
+	// render as an object key that if not present is not rendered.
+	Tags   *tags.T      `json:"-,omitempty"`
+	Since  *timestamp.T `json:"since,omitempty"`
+	Until  *timestamp.T `json:"until,omitempty"`
+	Search []byte       `json:"search,omitempty"`
+	Limit  *uint        `json:"limit,omitempty"`
 }
 
 // New creates a new, reasonably initialized filter that will be ready for most
@@ -157,8 +160,8 @@ func (f *T) Marshal(dst []byte) (b []byte) {
 		// 	first = true
 		// }
 		//
-		// tags are stored as tags with the initial element the "#a" and the rest
-		// the list in each element of the tags list. eg:
+		// tags are stored as tags with the initial element the "#a" and the
+		// rest the list in each element of the tags list. eg:
 		//
 		//     [["#p","<pubkey1>","<pubkey3"],["#t","hashtag","stuff"]]
 		//
