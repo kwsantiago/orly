@@ -3,11 +3,11 @@ package indexes
 import (
 	"bytes"
 	"not.realy.lol/codecbuf"
+	. "not.realy.lol/database/indexes/types"
 	"testing"
 
 	"not.realy.lol/chk"
 	"not.realy.lol/database/indexes/types/idhash"
-	. "not.realy.lol/database/indexes/types/number"
 )
 
 func TestNext(t *testing.T) {
@@ -138,7 +138,7 @@ func TestTMarshalWriteUnmarshalRead(t *testing.T) {
 	ser := new(Uint40)
 	ser.Set(12345)
 
-	// Create a T
+	// Create a IdHash
 	enc := EventEnc(ser)
 
 	// Test MarshalWrite
@@ -148,7 +148,7 @@ func TestTMarshalWriteUnmarshalRead(t *testing.T) {
 		t.Fatalf("MarshalWrite failed: %v", err)
 	}
 
-	// Create a new T for unmarshaling
+	// Create a new IdHash for unmarshaling
 	ser2 := new(Uint40)
 	enc2 := EventDec(ser2)
 

@@ -1,4 +1,4 @@
-package fullid
+package types
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ func TestFromId(t *testing.T) {
 	invalidId := make([]byte, sha256.Size-1)
 
 	// Test with valid ID
-	fi := &T{}
+	fi := &Id{}
 	err := fi.FromId(validId)
 	if chk.E(err) {
 		t.Fatalf("FromId failed with valid ID: %v", err)
@@ -35,16 +35,16 @@ func TestFromId(t *testing.T) {
 	}
 
 	// Test with invalid ID
-	fi = &T{}
+	fi = &Id{}
 	err = fi.FromId(invalidId)
 	if err == nil {
 		t.Errorf("FromId should have failed with invalid ID size")
 	}
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a T with a known value
-	fi1 := &T{}
+func TestIdMarshalWriteUnmarshalRead(t *testing.T) {
+	// Create a Id with a known value
+	fi1 := &Id{}
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
 		validId[i] = byte(i)
@@ -67,7 +67,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	fi2 := &T{}
+	fi2 := &Id{}
 	err = fi2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -79,9 +79,9 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 }
 
-func TestUnmarshalReadWithCorruptedData(t *testing.T) {
-	// Create a T with a known value
-	fi1 := &T{}
+func TestIdUnmarshalReadWithCorruptedData(t *testing.T) {
+	// Create a Id with a known value
+	fi1 := &Id{}
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
 		validId[i] = byte(i)
@@ -91,8 +91,8 @@ func TestUnmarshalReadWithCorruptedData(t *testing.T) {
 		t.Fatalf("FromId failed: %v", err)
 	}
 
-	// Create a second T with a different value
-	fi2 := &T{}
+	// Create a second Id with a different value
+	fi2 := &Id{}
 	differentId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
 		differentId[i] = byte(sha256.Size - i - 1)

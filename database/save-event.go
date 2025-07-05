@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/dgraph-io/badger/v4"
 	"not.realy.lol/chk"
 	"not.realy.lol/codecbuf"
@@ -21,7 +22,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 		return
 	}
 	// Generate all indexes for the event
-	indexes := GenerateIndexes(ev, serial)
+	indexes := GetIndexesForEvent(ev, serial)
 	// Start a transaction to save the event and all its indexes
 	err = d.Update(
 		func(txn *badger.Txn) (err error) {
@@ -31,12 +32,17 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 					// Get a buffer from the pool for each index
 					idxBuf := codecbuf.Get()
 					defer codecbuf.Put(idxBuf)
+					// Ensure the buffer is empty before use
+					idxBuf.Reset()
 					// Marshal the index to binary
 					if err = idx.MarshalWrite(idxBuf); chk.E(err) {
 						return err
 					}
+					// Debug: Print the key that's being saved
+					key := idxBuf.Bytes()
+					fmt.Printf("Saving key: %v\n", key)
 					// Save the index to the database
-					if err = txn.Set(idxBuf.Bytes(), buf.Bytes()); chk.E(err) {
+					if err = txn.Set(key, buf.Bytes()); chk.E(err) {
 						return err
 					}
 					return

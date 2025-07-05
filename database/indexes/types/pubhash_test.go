@@ -1,4 +1,4 @@
-package pubhash
+package types
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"not.realy.lol/hex"
 )
 
-func TestFromPubkey(t *testing.T) {
+func TestPubHash_FromPubkey(t *testing.T) {
 	// Create a valid pubkey (32 bytes)
 	validPubkey := make([]byte, schnorr.PubKeyBytesLen)
 	for i := 0; i < schnorr.PubKeyBytesLen; i++ {
@@ -22,7 +22,7 @@ func TestFromPubkey(t *testing.T) {
 	invalidPubkey := make([]byte, schnorr.PubKeyBytesLen-1)
 
 	// Test with valid pubkey
-	ph := &T{}
+	ph := &PubHash{}
 	err := ph.FromPubkey(validPubkey)
 	if chk.E(err) {
 		t.Fatalf("FromPubkey failed with valid pubkey: %v", err)
@@ -30,7 +30,7 @@ func TestFromPubkey(t *testing.T) {
 
 	// Calculate the expected hash
 	pkh := sha256.Sum256(validPubkey)
-	expected := pkh[:Len]
+	expected := pkh[:PubHashLen]
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(ph.Bytes(), expected) {
@@ -41,14 +41,14 @@ func TestFromPubkey(t *testing.T) {
 	}
 
 	// Test with invalid pubkey
-	ph = &T{}
+	ph = &PubHash{}
 	err = ph.FromPubkey(invalidPubkey)
 	if err == nil {
 		t.Errorf("FromPubkey should have failed with invalid pubkey size")
 	}
 }
 
-func TestFromPubkeyHex(t *testing.T) {
+func TestPubHash_FromPubkeyHex(t *testing.T) {
 	// Create a valid pubkey (32 bytes)
 	validPubkey := make([]byte, schnorr.PubKeyBytesLen)
 	for i := 0; i < schnorr.PubKeyBytesLen; i++ {
@@ -59,7 +59,7 @@ func TestFromPubkeyHex(t *testing.T) {
 	validPubkeyHex := hex.Enc(validPubkey)
 
 	// Test with valid hex pubkey
-	ph := &T{}
+	ph := &PubHash{}
 	err := ph.FromPubkeyHex(validPubkeyHex)
 	if chk.E(err) {
 		t.Fatalf("FromPubkeyHex failed with valid pubkey: %v", err)
@@ -67,7 +67,7 @@ func TestFromPubkeyHex(t *testing.T) {
 
 	// Calculate the expected hash
 	pkh := sha256.Sum256(validPubkey)
-	expected := pkh[:Len]
+	expected := pkh[:PubHashLen]
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(ph.Bytes(), expected) {
@@ -78,23 +78,23 @@ func TestFromPubkeyHex(t *testing.T) {
 	}
 
 	// Test with invalid hex pubkey (wrong size)
-	ph = &T{}
+	ph = &PubHash{}
 	err = ph.FromPubkeyHex(validPubkeyHex[:len(validPubkeyHex)-2])
 	if err == nil {
 		t.Errorf("FromPubkeyHex should have failed with invalid pubkey size")
 	}
 
 	// Test with invalid hex pubkey (not hex)
-	ph = &T{}
+	ph = &PubHash{}
 	err = ph.FromPubkeyHex("invalid-hex")
 	if err == nil {
 		t.Errorf("FromPubkeyHex should have failed with invalid hex")
 	}
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a T with a known value
-	ph1 := &T{}
+func TestPubHash_MarshalWriteUnmarshalRead(t *testing.T) {
+	// Create a PubHash with a known value
+	ph1 := &PubHash{}
 	validPubkey := make([]byte, schnorr.PubKeyBytesLen)
 	for i := 0; i < schnorr.PubKeyBytesLen; i++ {
 		validPubkey[i] = byte(i)
@@ -117,7 +117,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	ph2 := &T{}
+	ph2 := &PubHash{}
 	err = ph2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -129,9 +129,9 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 }
 
-func TestUnmarshalReadWithCorruptedData(t *testing.T) {
-	// Create a T with a known value
-	ph1 := &T{}
+func TestPubHash_UnmarshalReadWithCorruptedData(t *testing.T) {
+	// Create a PubHash with a known value
+	ph1 := &PubHash{}
 	validPubkey1 := make([]byte, schnorr.PubKeyBytesLen)
 	for i := 0; i < schnorr.PubKeyBytesLen; i++ {
 		validPubkey1[i] = byte(i)
@@ -141,8 +141,8 @@ func TestUnmarshalReadWithCorruptedData(t *testing.T) {
 		t.Fatalf("FromPubkey failed: %v", err)
 	}
 
-	// Create a second T with a different value
-	ph2 := &T{}
+	// Create a second PubHash with a different value
+	ph2 := &PubHash{}
 	validPubkey2 := make([]byte, schnorr.PubKeyBytesLen)
 	for i := 0; i < schnorr.PubKeyBytesLen; i++ {
 		validPubkey2[i] = byte(schnorr.PubKeyBytesLen - i - 1)
@@ -152,8 +152,8 @@ func TestUnmarshalReadWithCorruptedData(t *testing.T) {
 		t.Fatalf("FromPubkey failed: %v", err)
 	}
 
-	// Test UnmarshalRead with corrupted data (less than Len bytes)
-	corruptedData := make([]byte, Len/2)
+	// Test UnmarshalRead with corrupted data (less than PubHashLen bytes)
+	corruptedData := make([]byte, PubHashLen/2)
 	ph2.UnmarshalRead(bytes.NewBuffer(corruptedData))
 
 	// The UnmarshalRead method should not have copied the original data to itself

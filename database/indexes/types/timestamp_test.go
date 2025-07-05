@@ -1,4 +1,4 @@
-package timestamp
+package types
 
 import (
 	"bytes"
@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"not.realy.lol/chk"
-	"not.realy.lol/database/indexes/types/number"
 )
 
-func TestFromInt(t *testing.T) {
+func TestTimestamp_FromInt(t *testing.T) {
 	// Test with a positive value
-	ts := &T{}
+	ts := &Timestamp{}
 	ts.FromInt(12345)
 	if ts.val != 12345 {
 		t.Errorf(
@@ -22,7 +21,7 @@ func TestFromInt(t *testing.T) {
 	}
 
 	// Test with a negative value
-	ts = &T{}
+	ts = &Timestamp{}
 	ts.FromInt(-12345)
 	if ts.val != -12345 {
 		t.Errorf(
@@ -32,7 +31,7 @@ func TestFromInt(t *testing.T) {
 	}
 
 	// Test with zero
-	ts = &T{}
+	ts = &Timestamp{}
 	ts.FromInt(0)
 	if ts.val != 0 {
 		t.Errorf(
@@ -42,9 +41,9 @@ func TestFromInt(t *testing.T) {
 	}
 }
 
-func TestFromInt64(t *testing.T) {
+func TestTimestamp_FromInt64(t *testing.T) {
 	// Test with a positive value
-	ts := &T{}
+	ts := &Timestamp{}
 	ts.FromInt64(12345)
 	if ts.val != 12345 {
 		t.Errorf(
@@ -54,7 +53,7 @@ func TestFromInt64(t *testing.T) {
 	}
 
 	// Test with a negative value
-	ts = &T{}
+	ts = &Timestamp{}
 	ts.FromInt64(-12345)
 	if ts.val != -12345 {
 		t.Errorf(
@@ -64,7 +63,7 @@ func TestFromInt64(t *testing.T) {
 	}
 
 	// Test with zero
-	ts = &T{}
+	ts = &Timestamp{}
 	ts.FromInt64(0)
 	if ts.val != 0 {
 		t.Errorf(
@@ -74,7 +73,7 @@ func TestFromInt64(t *testing.T) {
 	}
 
 	// Test with a large value
-	ts = &T{}
+	ts = &Timestamp{}
 	largeValue := int64(1) << 60
 	ts.FromInt64(largeValue)
 	if ts.val != largeValue {
@@ -85,9 +84,9 @@ func TestFromInt64(t *testing.T) {
 	}
 }
 
-func TestFromBytes(t *testing.T) {
+func TestTimestamp_FromBytes(t *testing.T) {
 	// Create a number.Uint64 with a known value
-	v := new(number.Uint64)
+	v := new(Uint64)
 	v.Set(12345)
 
 	// Marshal it to bytes
@@ -116,39 +115,39 @@ func TestFromBytes(t *testing.T) {
 	}
 }
 
-func TestToTimestamp(t *testing.T) {
+func TestTimestamp_ToTimestamp(t *testing.T) {
 	// Test with a positive value
-	ts := &T{val: 12345}
+	ts := &Timestamp{val: 12345}
 	timestamp := ts.ToTimestamp()
 	if timestamp != 12345 {
 		t.Errorf("ToTimestamp() returned %d, want %d", timestamp, 12345)
 	}
 
 	// Test with a negative value
-	ts = &T{val: -12345}
+	ts = &Timestamp{val: -12345}
 	timestamp = ts.ToTimestamp()
 	if timestamp != -12345 {
 		t.Errorf("ToTimestamp() returned %d, want %d", timestamp, -12345)
 	}
 
 	// Test with zero
-	ts = &T{val: 0}
+	ts = &Timestamp{val: 0}
 	timestamp = ts.ToTimestamp()
 	if timestamp != 0 {
 		t.Errorf("ToTimestamp() returned %d, want %d", timestamp, 0)
 	}
 }
 
-func TestBytes(t *testing.T) {
+func TestTimestamp_Bytes(t *testing.T) {
 	// Test with a positive value
-	ts := &T{val: 12345}
+	ts := &Timestamp{val: 12345}
 	b, err := ts.Bytes()
 	if chk.E(err) {
 		t.Fatalf("Bytes() failed: %v", err)
 	}
 
 	// Verify the bytes
-	v := new(number.Uint64)
+	v := new(Uint64)
 	err = v.UnmarshalRead(bytes.NewBuffer(b))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -162,9 +161,9 @@ func TestBytes(t *testing.T) {
 	// in the TestMarshalWriteUnmarshalRead function
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
+func TestTimestamp_MarshalWriteUnmarshalRead(t *testing.T) {
 	// Test with a positive value
-	ts1 := &T{val: 12345}
+	ts1 := &Timestamp{val: 12345}
 	buf := codecbuf.Get()
 	err := ts1.MarshalWrite(buf)
 	if chk.E(err) {
@@ -172,7 +171,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	ts2 := &T{}
+	ts2 := &Timestamp{}
 	err = ts2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -184,7 +183,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test with a negative value
-	ts1 = &T{val: -12345}
+	ts1 = &Timestamp{val: -12345}
 	buf = codecbuf.Get()
 	err = ts1.MarshalWrite(buf)
 	if chk.E(err) {
@@ -192,7 +191,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	ts2 = &T{}
+	ts2 = &Timestamp{}
 	err = ts2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -204,12 +203,12 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 }
 
-func TestWithCurrentTime(t *testing.T) {
+func TestTimestamp_WithCurrentTime(t *testing.T) {
 	// Get the current time
 	now := time.Now().Unix()
 
 	// Create a timestamp with the current time
-	ts := &T{}
+	ts := &Timestamp{}
 	ts.FromInt64(now)
 
 	// Verify the value
@@ -233,7 +232,7 @@ func TestWithCurrentTime(t *testing.T) {
 		t.Fatalf("MarshalWrite failed: %v", err)
 	}
 
-	ts2 := &T{}
+	ts2 := &Timestamp{}
 	err = ts2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)

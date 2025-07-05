@@ -47,7 +47,7 @@ import (
 // This is to facilitate the deduplication of filters so an effective identical
 // match is not performed on an identical filter.
 type T struct {
-	IDs     *tag.T       `json:"ids,omitempty"`
+	Ids     *tag.T       `json:"ids,omitempty"`
 	Kinds   *kinds.T     `json:"kinds,omitempty"`
 	Authors *tag.T       `json:"authors,omitempty"`
 	Tags    *tags.T      `json:"-,omitempty"`
@@ -61,13 +61,13 @@ type T struct {
 // uses without further allocations.
 func New() (f *T) {
 	return &T{
-		IDs:     tag.NewWithCap(10),
+		Ids:     tag.NewWithCap(10),
 		Kinds:   kinds.NewWithCap(10),
 		Authors: tag.NewWithCap(10),
 		Tags:    tags.New(),
-		// Since:   timestamp.New(),
-		// Until:   timestamp.New(),
-		Search: nil,
+		Since:   new(timestamp.T),
+		Until:   new(timestamp.T),
+		Search:  nil,
 	}
 }
 
@@ -78,7 +78,7 @@ func New() (f *T) {
 func (f *T) Clone() (clone *T) {
 	lim := new(uint)
 	*lim = 1
-	_IDs := *f.IDs
+	_IDs := *f.Ids
 	_Kinds := *f.Kinds
 	_Authors := *f.Authors
 	_Tags := *f.Tags.Clone()
@@ -87,7 +87,7 @@ func (f *T) Clone() (clone *T) {
 	_Search := make([]byte, len(f.Search))
 	copy(Search, f.Search)
 	return &T{
-		IDs:     &_IDs,
+		Ids:     &_IDs,
 		Kinds:   &_Kinds,
 		Authors: &_Authors,
 		Tags:    &_Tags,
@@ -126,10 +126,10 @@ func (f *T) Marshal(dst []byte) (b []byte) {
 	f.Sort()
 	// open parentheses
 	dst = append(dst, '{')
-	if f.IDs != nil && f.IDs.Len() > 0 {
+	if f.Ids != nil && f.Ids.Len() > 0 {
 		first = true
 		dst = text.JSONKey(dst, IDs)
-		dst = text.MarshalHexArray(dst, f.IDs.ToSliceOfBytes())
+		dst = text.MarshalHexArray(dst, f.Ids.ToSliceOfBytes())
 	}
 	if f.Kinds.Len() > 0 {
 		if first {
@@ -340,10 +340,12 @@ func (f *T) Unmarshal(b []byte) (r []byte, err error) {
 					goto invalid
 				}
 				var ff [][]byte
-				if ff, r, err = text.UnmarshalHexArray(r, sha256.Size); chk.E(err) {
+				if ff, r, err = text.UnmarshalHexArray(
+					r, sha256.Size,
+				); chk.E(err) {
 					return
 				}
-				f.IDs = tag.New(ff...)
+				f.Ids = tag.New(ff...)
 				state = betweenKV
 			case Kinds[0]:
 				if len(key) < len(Kinds) {
@@ -450,7 +452,7 @@ func (f *T) Matches(ev *event.E) bool {
 	if ev == nil {
 		return false
 	}
-	if f.IDs.Len() > 0 && !f.IDs.Contains(ev.Id) {
+	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.Id) {
 		return false
 	}
 	if f.Kinds.Len() > 0 && !f.Kinds.Contains(ev.Kind) {
@@ -492,8 +494,8 @@ func (f *T) Fingerprint() (fp uint64, err error) {
 // Sort the fields of a filter so a fingerprint on a filter that has the same
 // set of content produces the same fingerprint.
 func (f *T) Sort() {
-	if f.IDs != nil {
-		sort.Sort(f.IDs)
+	if f.Ids != nil {
+		sort.Sort(f.Ids)
 	}
 	if f.Kinds != nil {
 		sort.Sort(f.Kinds)
@@ -522,7 +524,7 @@ func (f *T) Equal(b *T) bool {
 	// sort the fields so they come out the same
 	f.Sort()
 	if !f.Kinds.Equals(b.Kinds) ||
-		!f.IDs.Equal(b.IDs) ||
+		!f.Ids.Equal(b.Ids) ||
 		!f.Authors.Equal(b.Authors) ||
 		f.Tags.Len() != b.Tags.Len() ||
 		!arePointerValuesEqual(f.Since, b.Since) ||
@@ -541,7 +543,7 @@ func GenFilter() (f *T, err error) {
 	for _ = range n {
 		id := make([]byte, sha256.Size)
 		_, _ = frand.Read(id)
-		f.IDs = f.IDs.Append(id)
+		f.Ids = f.Ids.Append(id)
 	}
 	n = frand.Intn(16)
 	for _ = range n {

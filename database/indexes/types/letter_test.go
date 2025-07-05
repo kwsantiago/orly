@@ -1,4 +1,4 @@
-package letter
+package types
 
 import (
 	"bytes"
@@ -8,22 +8,25 @@ import (
 	"not.realy.lol/chk"
 )
 
-func TestNew(t *testing.T) {
+func TestLetter_New(t *testing.T) {
 	// Test with a valid letter
-	l := New('A')
+	l := new(Letter)
+	l.Set('A')
 	if l == nil {
 		t.Fatal("New() returned nil")
 	}
 	if l.Letter() != 'A' {
 		t.Errorf(
-			"New('A') created a T with letter %c, want %c", l.Letter(), 'A',
+			"New('A') created a Letter with letter %c, want %c", l.Letter(),
+			'A',
 		)
 	}
 }
 
-func TestSet(t *testing.T) {
-	// Create a T with a known value
-	l := New('A')
+func TestLetter_Set(t *testing.T) {
+	// Create a Letter with a known value
+	l := new(Letter)
+	l.Set('A')
 
 	// Test Set
 	l.Set('B')
@@ -36,8 +39,9 @@ func TestSet(t *testing.T) {
 }
 
 func TestLetter(t *testing.T) {
-	// Create a T with a known value
-	l := New('A')
+	// Create a Letter with a known value
+	l := new(Letter)
+	l.Set('A')
 
 	// Test Letter
 	if l.Letter() != 'A' {
@@ -45,10 +49,10 @@ func TestLetter(t *testing.T) {
 	}
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a T with a known value
-	l1 := New('A')
-
+func TestLetter_MarshalWriteUnmarshalRead(t *testing.T) {
+	// Create a Letter with a known value
+	l1 := new(Letter)
+	l1.Set('A')
 	// Test MarshalWrite
 	buf := codecbuf.Get()
 	err := l1.MarshalWrite(buf)
@@ -62,7 +66,8 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	l2 := New('B') // Start with a different value
+	l2 := new(Letter)
+	l2.Set('B') // Start with a different value
 	err = l2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -74,9 +79,10 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 }
 
-func TestUnmarshalReadWithEmptyReader(t *testing.T) {
-	// Create a T with a known value
-	l := New('A')
+func TestLetter_UnmarshalReadWithEmptyReader(t *testing.T) {
+	// Create a Letter with a known value
+	l := new(Letter)
+	l.Set('A')
 
 	// Test UnmarshalRead with an empty reader
 	err := l.UnmarshalRead(bytes.NewBuffer([]byte{}))
@@ -85,18 +91,22 @@ func TestUnmarshalReadWithEmptyReader(t *testing.T) {
 	}
 }
 
-func TestEdgeCases(t *testing.T) {
+func TestLetter_EdgeCases(t *testing.T) {
 	// Test with minimum value (0)
-	l1 := New(0)
+	l1 := new(Letter)
 	if l1.Letter() != 0 {
-		t.Errorf("New(0) created a T with letter %d, want %d", l1.Letter(), 0)
+		t.Errorf(
+			"New(0) created a Letter with letter %d, want %d", l1.Letter(), 0,
+		)
 	}
 
 	// Test with maximum value (255)
-	l2 := New(255)
+	l2 := new(Letter)
+	l2.Set(255)
 	if l2.Letter() != 255 {
 		t.Errorf(
-			"New(255) created a T with letter %d, want %d", l2.Letter(), 255,
+			"New(255) created a Letter with letter %d, want %d", l2.Letter(),
+			255,
 		)
 	}
 
@@ -106,10 +116,12 @@ func TestEdgeCases(t *testing.T) {
 		'*', '+', ',', '-', '.', '/',
 	}
 	for _, c := range specialChars {
-		l := New(c)
+		l := new(Letter)
+		l.Set(c)
 		if l.Letter() != c {
 			t.Errorf(
-				"New(%d) created a T with letter %d, want %d", c, l.Letter(), c,
+				"New(%d) created a Letter with letter %d, want %d", c,
+				l.Letter(), c,
 			)
 		}
 	}

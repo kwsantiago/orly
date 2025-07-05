@@ -2,18 +2,19 @@ package indexes
 
 import (
 	"io"
+	"not.realy.lol/database/indexes/types"
 	"reflect"
 
 	"not.realy.lol/chk"
-	"not.realy.lol/database/indexes/types/fullid"
-	"not.realy.lol/database/indexes/types/identhash"
-	"not.realy.lol/database/indexes/types/idhash"
-	. "not.realy.lol/database/indexes/types/number"
-	"not.realy.lol/database/indexes/types/pubhash"
 	"not.realy.lol/interfaces/codec"
 )
 
 var counter int
+
+func init() {
+	// Initialize counter to ensure it starts from 0
+	counter = 0
+}
 
 func next() int { counter++; return counter - 1 }
 
@@ -23,7 +24,12 @@ type P struct {
 
 func NewPrefix(prf ...int) (p *P) {
 	if len(prf) > 0 {
-		return &P{[]byte(Prefix(prf[0]))}
+		prefix := Prefix(prf[0])
+		if prefix == "" {
+			// If the prefix is empty, use a default prefix
+			return &P{[]byte("def")}
+		}
+		return &P{[]byte(prefix)}
 	} else {
 		return &P{[]byte{0, 0, 0}}
 	}
@@ -37,6 +43,10 @@ func (p *P) MarshalWrite(w io.Writer) (err error) {
 }
 
 func (p *P) UnmarshalRead(r io.Reader) (err error) {
+	// Allocate a buffer for val if it's nil or empty
+	if p.val == nil || len(p.val) == 0 {
+		p.val = make([]byte, 3) // Prefixes are 3 bytes
+	}
 	_, err = r.Read(p.val)
 	return
 }
@@ -95,9 +105,8 @@ func New(encoders ...codec.I) (i *T) { return &T{encoders} }
 func (t *T) MarshalWrite(w io.Writer) (err error) {
 	for _, e := range t.Encs {
 		if e == nil || reflect.ValueOf(e).IsNil() {
-			// allow a field to be empty, as is needed for search indexes to
-			// create search
-			return
+			// Skip nil encoders instead of returning early
+			continue
 		}
 		if err = e.MarshalWrite(w); chk.E(err) {
 			return
@@ -120,14 +129,14 @@ func (t *T) UnmarshalRead(r io.Reader) (err error) {
 //	[ prefix ][ 8 byte serial ] [ event in binary format ]
 var Event = next()
 
-func EventVars() (ser *Uint40) {
-	ser = new(Uint40)
+func EventVars() (ser *types.Uint40) {
+	ser = new(types.Uint40)
 	return
 }
-func EventEnc(ser *Uint40) (enc *T) {
+func EventEnc(ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(Event), ser)
 }
-func EventDec(ser *Uint40) (enc *T) {
+func EventDec(ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(), ser)
 }
 
@@ -137,18 +146,18 @@ func EventDec(ser *Uint40) (enc *T) {
 // [ prefix ][ 8 bytes truncated hash of Id ][ 8 serial ]
 var Id = next()
 
-func IdVars() (id *idhash.T, ser *Uint40) {
-	id = idhash.New()
-	ser = new(Uint40)
+func IdVars() (id *types.IdHash, ser *types.Uint40) {
+	id = new(types.IdHash)
+	ser = new(types.Uint40)
 	return
 }
-func IdEnc(id *idhash.T, ser *Uint40) (enc *T) {
+func IdEnc(id *types.IdHash, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(Id), id, ser)
 }
-func IdSearch(id *idhash.T) (enc *T) {
+func IdSearch(id *types.IdHash) (enc *T) {
 	return New(NewPrefix(Id), id)
 }
-func IdDec(id *idhash.T, ser *Uint40) (enc *T) {
+func IdDec(id *types.IdHash, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(), id, ser)
 }
 
@@ -159,24 +168,24 @@ func IdDec(id *idhash.T, ser *Uint40) (enc *T) {
 var IdPubkeyCreatedAt = next()
 
 func IdPubkeyCreatedAtVars() (
-	ser *Uint40, t *fullid.T, p *pubhash.T, ca *Uint64,
+	ser *types.Uint40, t *types.Id, p *types.PubHash, ca *types.Uint64,
 ) {
-	ser = new(Uint40)
-	t = new(fullid.T)
-	p = new(pubhash.T)
-	ca = new(Uint64)
+	ser = new(types.Uint40)
+	t = new(types.Id)
+	p = new(types.PubHash)
+	ca = new(types.Uint64)
 	return
 }
 func IdPubkeyCreatedAtEnc(
-	ser *Uint40, t *fullid.T, p *pubhash.T, ca *Uint64,
+	ser *types.Uint40, t *types.Id, p *types.PubHash, ca *types.Uint64,
 ) (enc *T) {
 	return New(NewPrefix(IdPubkeyCreatedAt), ser, t, p, ca)
 }
-func IdPubkeyCreatedAtSearch(ser *Uint40) (enc *T) {
+func IdPubkeyCreatedAtSearch(ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(IdPubkeyCreatedAt), ser)
 }
 func IdPubkeyCreatedAtDec(
-	ser *Uint40, t *fullid.T, p *pubhash.T, ca *Uint64,
+	ser *types.Uint40, t *types.Id, p *types.PubHash, ca *types.Uint64,
 ) (enc *T) {
 	return New(NewPrefix(), ser, t, p, ca)
 }
@@ -186,15 +195,15 @@ func IdPubkeyCreatedAtDec(
 // [ prefix ][ timestamp 8 bytes timestamp ][ 8 serial ]
 var CreatedAt = next()
 
-func CreatedAtVars() (ca *Uint64, ser *Uint40) {
-	ca = new(Uint64)
-	ser = new(Uint40)
+func CreatedAtVars() (ca *types.Uint64, ser *types.Uint40) {
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
-func CreatedAtEnc(ca *Uint64, ser *Uint40) (enc *T) {
+func CreatedAtEnc(ca *types.Uint64, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(CreatedAt), ca, ser)
 }
-func CreatedAtDec(ca *Uint64, ser *Uint40) (enc *T) {
+func CreatedAtDec(ca *types.Uint64, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(), ca, ser)
 }
 
@@ -204,16 +213,22 @@ func CreatedAtDec(ca *Uint64, ser *Uint40) (enc *T) {
 // [ prefix ][ 8 bytes truncated hash of pubkey ][ 8 bytes timestamp ][ 8 serial ]
 var PubkeyCreatedAt = next()
 
-func PubkeyCreatedAtVars() (p *pubhash.T, ca *Uint64, ser *Uint40) {
-	p = new(pubhash.T)
-	ca = new(Uint64)
-	ser = new(Uint40)
+func PubkeyCreatedAtVars() (
+	p *types.PubHash, ca *types.Uint64, ser *types.Uint40,
+) {
+	p = new(types.PubHash)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
-func PubkeyCreatedAtEnc(p *pubhash.T, ca *Uint64, ser *Uint40) (enc *T) {
+func PubkeyCreatedAtEnc(
+	p *types.PubHash, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(PubkeyCreatedAt), p, ca, ser)
 }
-func PubkeyCreatedAtDec(p *pubhash.T, ca *Uint64, ser *Uint40) (enc *T) {
+func PubkeyCreatedAtDec(
+	p *types.PubHash, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(), p, ca, ser)
 }
 
@@ -223,22 +238,25 @@ func PubkeyCreatedAtDec(p *pubhash.T, ca *Uint64, ser *Uint40) (enc *T) {
 var PubkeyTagCreatedAt = next()
 
 func PubkeyTagCreatedAtVars() (
-	p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	p *types.PubHash, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) {
-	p = new(pubhash.T)
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ca = new(Uint64)
-	ser = new(Uint40)
+	p = new(types.PubHash)
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
 func PubkeyTagCreatedAtEnc(
-	p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	p *types.PubHash, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(PubkeyTagCreatedAt), p, k, v, ca, ser)
 }
 func PubkeyTagCreatedAtDec(
-	p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	p *types.PubHash, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), p, k, v, ca, ser)
 }
@@ -248,17 +266,23 @@ func PubkeyTagCreatedAtDec(
 // [ prefix ][ 8 bytes truncated hash of pubkey ][ 8 bytes truncated hash of value ][ 8 bytes timestamp ][ 8 serial ]
 var TagCreatedAt = next()
 
-func TagCreatedAtVars() (k, v *identhash.T, ca *Uint64, ser *Uint40) {
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ca = new(Uint64)
-	ser = new(Uint40)
+func TagCreatedAtVars() (
+	k *types.Letter, v *types.Ident, ca *types.Uint64, ser *types.Uint40,
+) {
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
-func TagCreatedAtEnc(k, v *identhash.T, ca *Uint64, ser *Uint40) (enc *T) {
+func TagCreatedAtEnc(
+	k *types.Letter, v *types.Ident, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(TagCreatedAt), k, v, ca, ser)
 }
-func TagCreatedAtDec(k, v *identhash.T, ca *Uint64, ser *Uint40) (enc *T) {
+func TagCreatedAtDec(
+	k *types.Letter, v *types.Ident, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(), k, v, ca, ser)
 }
 
@@ -267,16 +291,16 @@ func TagCreatedAtDec(k, v *identhash.T, ca *Uint64, ser *Uint40) (enc *T) {
 // [ prefix ][ 2 byte kind ][ 8 byte serial ]
 var Kind = next()
 
-func KindVars() (ki *Uint16, ser *Uint40) {
-	ki = new(Uint16)
-	ser = new(Uint40)
+func KindVars() (ki *types.Uint16, ser *types.Uint40) {
+	ki = new(types.Uint16)
+	ser = new(types.Uint40)
 	return
 }
-func KindEnc(ki *Uint16, ser *Uint40) (enc *T) {
+func KindEnc(ki *types.Uint16, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(Kind), ki, ser)
 
 }
-func KindDec(ki *Uint16, ser *Uint40) (enc *T) {
+func KindDec(ki *types.Uint16, ser *types.Uint40) (enc *T) {
 	return New(NewPrefix(), ki, ser)
 }
 
@@ -285,16 +309,20 @@ func KindDec(ki *Uint16, ser *Uint40) (enc *T) {
 // [ prefix ][ 2 byte kind ][ 8 bytes truncated hash of pubkey ][ 8 byte serial ]
 var KindPubkey = next()
 
-func KindPubkeyVars() (ki *Uint16, p *pubhash.T, ser *Uint40) {
-	ki = new(Uint16)
-	p = new(pubhash.T)
-	ser = new(Uint40)
+func KindPubkeyVars() (ki *types.Uint16, p *types.PubHash, ser *types.Uint40) {
+	ki = new(types.Uint16)
+	p = new(types.PubHash)
+	ser = new(types.Uint40)
 	return
 }
-func KindPubkeyEnc(ki *Uint16, p *pubhash.T, ser *Uint40) (enc *T) {
+func KindPubkeyEnc(
+	ki *types.Uint16, p *types.PubHash, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(KindPubkey), ki, p, ser)
 }
-func KindPubkeyDec(ki *Uint16, p *pubhash.T, ser *Uint40) (enc *T) {
+func KindPubkeyDec(
+	ki *types.Uint16, p *types.PubHash, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(), ki, p, ser)
 }
 
@@ -303,17 +331,23 @@ func KindPubkeyDec(ki *Uint16, p *pubhash.T, ser *Uint40) (enc *T) {
 // [ prefix ][ 2 byte kind ][ 8 bytes timestamp ][ 8 byte serial ]
 var KindCreatedAt = next()
 
-func KindCreatedAtVars() (ki *Uint16, ca *Uint64, ser *Uint40) {
-	ki = new(Uint16)
-	ca = new(Uint64)
-	ser = new(Uint40)
+func KindCreatedAtVars() (
+	ki *types.Uint16, ca *types.Uint64, ser *types.Uint40,
+) {
+	ki = new(types.Uint16)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
-func KindCreatedAtEnc(ki *Uint16, ca *Uint64, ser *Uint40) (enc *T) {
+func KindCreatedAtEnc(
+	ki *types.Uint16, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(KindCreatedAt), ki, ca, ser)
 
 }
-func KindCreatedAtDec(ki *Uint16, ca *Uint64, ser *Uint40) (enc *T) {
+func KindCreatedAtDec(
+	ki *types.Uint16, ca *types.Uint64, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(), ki, ca, ser)
 
 }
@@ -323,17 +357,23 @@ func KindCreatedAtDec(ki *Uint16, ca *Uint64, ser *Uint40) (enc *T) {
 // [ prefix ][ 2 byte kind ][ 8 bytes truncated hash of key ][ 8 bytes truncated hash of value ][ 8 byte serial ]
 var KindTag = next()
 
-func KindTagVars() (ki *Uint16, k, v *identhash.T, ser *Uint40) {
-	ki = new(Uint16)
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ser = new(Uint40)
+func KindTagVars() (
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ser *types.Uint40,
+) {
+	ki = new(types.Uint16)
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ser = new(types.Uint40)
 	return
 }
-func KindTagEnc(ki *Uint16, k, v *identhash.T, ser *Uint40) (enc *T) {
+func KindTagEnc(
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(KindTag), ki, k, v, ser)
 }
-func KindTagDec(ki *Uint16, k, v *identhash.T, ser *Uint40) (enc *T) {
+func KindTagDec(
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ser *types.Uint40,
+) (enc *T) {
 	return New(NewPrefix(), ki, k, v, ser)
 }
 
@@ -343,21 +383,25 @@ func KindTagDec(ki *Uint16, k, v *identhash.T, ser *Uint40) (enc *T) {
 var KindTagCreatedAt = next()
 
 func KindTagCreatedAtVars() (
-	ki *Uint16, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) {
-	ki = new(Uint16)
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ser = new(Uint40)
+	ki = new(types.Uint16)
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
 func KindTagCreatedAtEnc(
-	ki *Uint16, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(KindTagCreatedAt), ki, k, v, ca, ser)
 }
 func KindTagCreatedAtDec(
-	ki *Uint16, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, k *types.Letter, v *types.Ident, ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, k, v, ca, ser)
 }
@@ -368,25 +412,30 @@ func KindTagCreatedAtDec(
 var KindPubkeyCreatedAt = next()
 
 func KindPubkeyCreatedAtVars() (
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) {
-	ki = new(Uint16)
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ca = new(Uint64)
-	ser = new(Uint40)
+	ki = new(types.Uint16)
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
 func KindPubkeyCreatedAtEnc(
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(KindPubkeyCreatedAt), ki, p, k, v, ser)
-
+	return New(NewPrefix(KindPubkeyCreatedAt), ki, p, k, v, ca, ser)
 }
 func KindPubkeyCreatedAtDec(
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(), ki, p, k, v, ser)
+	return New(NewPrefix(), ki, p, k, v, ca, ser)
 }
 
 // KindPubkeyTagCreatedAt
@@ -395,22 +444,28 @@ func KindPubkeyCreatedAtDec(
 var KindPubkeyTagCreatedAt = next()
 
 func KindPubkeyTagCreatedAtVars() (
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) {
-	ki = new(Uint16)
-	k = new(identhash.T)
-	v = new(identhash.T)
-	ca = new(Uint64)
-	ser = new(Uint40)
+	ki = new(types.Uint16)
+	k = new(types.Letter)
+	v = new(types.Ident)
+	ca = new(types.Uint64)
+	ser = new(types.Uint40)
 	return
 }
 func KindPubkeyTagCreatedAtEnc(
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(KindPubkeyTagCreatedAt), ki, p, k, v, ca, ser)
 }
 func KindPubkeyTagCreatedAtDec(
-	ki *Uint16, p *pubhash.T, k, v *identhash.T, ca *Uint64, ser *Uint40,
+	ki *types.Uint16, p *types.PubHash, k *types.Letter, v *types.Ident,
+	ca *types.Uint64,
+	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, p, k, v, ca, ser)
 }

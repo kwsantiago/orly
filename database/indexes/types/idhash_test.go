@@ -1,4 +1,4 @@
-package idhash
+package types
 
 import (
 	"bytes"
@@ -11,19 +11,7 @@ import (
 	"not.realy.lol/hex"
 )
 
-func TestNew(t *testing.T) {
-	i := New()
-	if i == nil {
-		t.Fatal("New() returned nil")
-	}
-	if len(i.val) != Len {
-		t.Errorf(
-			"New() created a T with val length %d, want %d", len(i.val), Len,
-		)
-	}
-}
-
-func TestFromId(t *testing.T) {
+func TestFromIdHash(t *testing.T) {
 	// Create a valid ID (32 bytes)
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
@@ -34,7 +22,7 @@ func TestFromId(t *testing.T) {
 	invalidId := make([]byte, sha256.Size-1)
 
 	// Test with valid ID
-	i := New()
+	i := new(IdHash)
 	err := i.FromId(validId)
 	if chk.E(err) {
 		t.Fatalf("FromId failed with valid ID: %v", err)
@@ -42,7 +30,7 @@ func TestFromId(t *testing.T) {
 
 	// Calculate the expected hash
 	idh := sha256.Sum256(validId)
-	expected := idh[:Len]
+	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
@@ -53,7 +41,7 @@ func TestFromId(t *testing.T) {
 	}
 
 	// Test with invalid ID
-	i = New()
+	i = new(IdHash)
 	err = i.FromId(invalidId)
 	if err == nil {
 		t.Errorf("FromId should have failed with invalid ID size")
@@ -71,7 +59,7 @@ func TestFromIdBase64(t *testing.T) {
 	validIdBase64 := base64.RawURLEncoding.EncodeToString(validId)
 
 	// Test with valid base64 ID
-	i := New()
+	i := new(IdHash)
 	err := i.FromIdBase64(validIdBase64)
 	if chk.E(err) {
 		t.Fatalf("FromIdBase64 failed with valid ID: %v", err)
@@ -79,7 +67,7 @@ func TestFromIdBase64(t *testing.T) {
 
 	// Calculate the expected hash
 	idh := sha256.Sum256(validId)
-	expected := idh[:Len]
+	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
@@ -90,7 +78,7 @@ func TestFromIdBase64(t *testing.T) {
 	}
 
 	// Test with invalid base64 ID
-	i = New()
+	i = new(IdHash)
 	err = i.FromIdBase64("invalid-base64")
 	if err == nil {
 		t.Errorf("FromIdBase64 should have failed with invalid base64")
@@ -108,7 +96,7 @@ func TestFromIdHex(t *testing.T) {
 	validIdHex := hex.Enc(validId)
 
 	// Test with valid hex ID
-	i := New()
+	i := new(IdHash)
 	err := i.FromIdHex(validIdHex)
 	if chk.E(err) {
 		t.Fatalf("FromIdHex failed with valid ID: %v", err)
@@ -116,7 +104,7 @@ func TestFromIdHex(t *testing.T) {
 
 	// Calculate the expected hash
 	idh := sha256.Sum256(validId)
-	expected := idh[:Len]
+	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
 	if !bytes.Equal(i.Bytes(), expected) {
@@ -127,23 +115,23 @@ func TestFromIdHex(t *testing.T) {
 	}
 
 	// Test with invalid hex ID (wrong size)
-	i = New()
+	i = new(IdHash)
 	err = i.FromIdHex(validIdHex[:len(validIdHex)-2])
 	if err == nil {
 		t.Errorf("FromIdHex should have failed with invalid ID size")
 	}
 
 	// Test with invalid hex ID (not hex)
-	i = New()
+	i = new(IdHash)
 	err = i.FromIdHex("invalid-hex")
 	if err == nil {
 		t.Errorf("FromIdHex should have failed with invalid hex")
 	}
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a T with a known value
-	i1 := New()
+func TestIdHashMarshalWriteUnmarshalRead(t *testing.T) {
+	// Create a IdHash with a known value
+	i1 := new(IdHash)
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
 		validId[i] = byte(i)
@@ -166,7 +154,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	i2 := New()
+	i2 := new(IdHash)
 	err = i2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -179,46 +167,8 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 }
 
 func TestUnmarshalReadWithEmptyVal(t *testing.T) {
-	// Create a T with an empty val
-	i := &T{val: []byte{}}
-
-	// Create some test data
-	testData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
-
-	// Test UnmarshalRead
-	err := i.UnmarshalRead(bytes.NewBuffer(testData))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the read value
-	if !bytes.Equal(i.Bytes(), testData) {
-		t.Errorf("UnmarshalRead read %v, want %v", i.Bytes(), testData)
-	}
-}
-
-func TestUnmarshalReadWithSmallerVal(t *testing.T) {
-	// Create a T with a val smaller than Len
-	i := &T{val: make([]byte, Len-1)}
-
-	// Create some test data
-	testData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
-
-	// Test UnmarshalRead
-	err := i.UnmarshalRead(bytes.NewBuffer(testData))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the read value
-	if !bytes.Equal(i.Bytes(), testData) {
-		t.Errorf("UnmarshalRead read %v, want %v", i.Bytes(), testData)
-	}
-}
-
-func TestUnmarshalReadWithLargerVal(t *testing.T) {
-	// Create a T with a val larger than Len
-	i := &T{val: make([]byte, Len+1)}
+	// Create a IdHash with an empty val
+	i := new(IdHash)
 
 	// Create some test data
 	testData := []byte{1, 2, 3, 4, 5, 6, 7, 8}

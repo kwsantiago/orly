@@ -4,13 +4,45 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="refactor GenerateIndexes to use named return values">
-      <change afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic">
+      <change afterPath="$PROJECT_DIR$/database/filter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/indexes/types/letter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/database.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/database.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/generate-indexes.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/generate-indexes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/generate-indexes_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/fullid/fullid.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/fullid.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/fullid/fullid_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/fullid_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/fulltext/fulltext.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/word.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/fulltext/fulltext_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/word_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/identhash/identhash.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/identhash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/identhash/identhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/identhash_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/idhash/idhash.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/idhash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/idhash/idhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/idhash_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/letter/letter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/letter/letter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/letter_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint16.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint16.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint16_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint16_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint24.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint24.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint24_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint24_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint32.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint32.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint32_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint32_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint40.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint40.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint40_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint40_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint64.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint64.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/number/uint64_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/uint64_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/pubhash/pubhash.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/pubhash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/pubhash/pubhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/pubhash_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/timestamp.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/timestamp/timestamp_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/timestamp_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/add-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filter/filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/filter/filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +95,9 @@
     "DefaultGoTemplateProperty": "Go File",
     "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
     "Go Build.go build not.realy.lol.executor": "Run",
+    "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
+    "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
+    "Go Test.go test not.realy.lol/database/indexes/types.executor": "Run",
     "Go Test.gobench not.realy.lol/codecbuf.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.GoLinterPluginOnboarding": "true",
@@ -81,7 +116,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.sourceCode.Go"
+    "settings.editor.selected.configurable": "MTTitleBarConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -96,19 +131,12 @@
       <recent name="$PROJECT_DIR$/socketapi" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/database/indexes/types" />
+      <recent name="$PROJECT_DIR$/database" />
       <recent name="$PROJECT_DIR$/interfaces" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.gobench not.realy.lol/codecbuf">
-    <configuration name="go build github.com/mleku/realy.lol" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
-      <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="github.com/mleku/realy.lol" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/main.go" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Go Test.go test not.realy.lol/database/indexes/types">
     <configuration name="go build not.realy.lol" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="not.realy.lol" />
       <working_directory value="$PROJECT_DIR$" />
@@ -116,6 +144,41 @@
       <package value="not.realy.lol" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGenerateIndexes in not.realy.lol/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="not.realy.lol" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="not.realy.lol/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGenerateIndexes\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestT in not.realy.lol/database/indexes/types" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="not.realy.lol" />
+      <working_directory value="$PROJECT_DIR$/database/indexes/types" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="not.realy.lol/database/indexes/types" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestT\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go test not.realy.lol/database/indexes/types" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="not.realy.lol" />
+      <working_directory value="$PROJECT_DIR$/database/indexes/types" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="not.realy.lol/database/indexes/types" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="gobench not.realy.lol/codecbuf" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -131,9 +194,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.go test not.realy.lol/database/indexes/types" />
+        <item itemvalue="Go Test.TestT in not.realy.lol/database/indexes/types" />
+        <item itemvalue="Go Test.TestGenerateIndexes in not.realy.lol/database" />
         <item itemvalue="Go Test.gobench not.realy.lol/codecbuf" />
         <item itemvalue="Go Build.go build not.realy.lol" />
-        <item itemvalue="Go Build.go build github.com/mleku/realy.lol" />
       </list>
     </recent_temporary>
   </component>
@@ -185,7 +250,8 @@
     <MESSAGE value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
     <MESSAGE value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
     <MESSAGE value="refactor GenerateIndexes to use named return values" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor GenerateIndexes to use named return values" />
+    <MESSAGE value="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

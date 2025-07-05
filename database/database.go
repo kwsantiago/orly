@@ -5,10 +5,8 @@ import (
 	"io"
 	"not.realy.lol/chk"
 	"not.realy.lol/context"
-	"not.realy.lol/event"
 	"not.realy.lol/eventid"
 	"not.realy.lol/eventidserial"
-	"not.realy.lol/filter"
 	"not.realy.lol/log"
 	"not.realy.lol/lol"
 	"not.realy.lol/units"
@@ -59,11 +57,6 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 func (d *D) Path() string { return d.dataDir }
 
 func (d *D) Wipe() (err error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (d *D) QueryEvents(c context.T, f *filter.T) (evs event.S, err error) {
 	// TODO implement me
 	panic("implement me")
 }

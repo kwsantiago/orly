@@ -1,11 +1,11 @@
-package fulltext_test
+package types_test
 
 import (
 	"bytes"
+	"not.realy.lol/database/indexes/types"
 	"testing"
 
 	"not.realy.lol/chk"
-	"not.realy.lol/database/indexes/types/fulltext"
 )
 
 func TestT(t *testing.T) {
@@ -23,7 +23,7 @@ func TestT(t *testing.T) {
 
 	for _, tt := range tests {
 		// Create a new object and set the word
-		ft := fulltext.New()
+		ft := new(types.Word)
 		ft.FromWord(tt.word)
 
 		// Ensure Bytes() returns the correct raw word
@@ -49,8 +49,10 @@ func TestT(t *testing.T) {
 		}
 
 		// Test UnmarshalRead
-		newFt := fulltext.New()
-		if err := newFt.UnmarshalRead(&buf); chk.E(err) {
+		newFt := new(types.Word)
+		// Create a new reader from the buffer to reset the read position
+		reader := bytes.NewReader(buf.Bytes())
+		if err := newFt.UnmarshalRead(reader); chk.E(err) {
 			t.Fatalf("UnmarshalRead failed: %v", err)
 		}
 
@@ -69,7 +71,7 @@ func TestUnmarshalReadHandlesMissingZeroByte(t *testing.T) {
 	data := []byte("incomplete") // No zero-byte at the end
 	reader := bytes.NewReader(data)
 
-	ft := fulltext.New()
+	ft := new(types.Word)
 	err := ft.UnmarshalRead(reader)
 
 	// Expect an EOF or similar handling

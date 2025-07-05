@@ -1,4 +1,4 @@
-package pubhash
+package types
 
 import (
 	"io"
@@ -10,11 +10,11 @@ import (
 	"not.realy.lol/hex"
 )
 
-const Len = 8
+const PubHashLen = 8
 
-type T struct{ val [Len]byte }
+type PubHash struct{ val [PubHashLen]byte }
 
-func (ph *T) FromPubkey(pk []byte) (err error) {
+func (ph *PubHash) FromPubkey(pk []byte) (err error) {
 	if len(pk) != schnorr.PubKeyBytesLen {
 		err = errorf.E(
 			"invalid Pubkey length, got %d require %d",
@@ -23,11 +23,11 @@ func (ph *T) FromPubkey(pk []byte) (err error) {
 		return
 	}
 	pkh := sha256.Sum256(pk)
-	copy(ph.val[:], pkh[:Len])
+	copy(ph.val[:], pkh[:PubHashLen])
 	return
 }
 
-func (ph *T) FromPubkeyHex(pk string) (err error) {
+func (ph *PubHash) FromPubkeyHex(pk string) (err error) {
 	if len(pk) != schnorr.PubKeyBytesLen*2 {
 		err = errorf.E(
 			"invalid Pubkey length, got %d require %d",
@@ -40,19 +40,19 @@ func (ph *T) FromPubkeyHex(pk string) (err error) {
 		return
 	}
 	h := sha256.Sum256(pkb)
-	copy(ph.val[:], h[:Len])
+	copy(ph.val[:], h[:PubHashLen])
 	return
 }
 
-func (ph *T) Bytes() (b []byte) { return ph.val[:] }
+func (ph *PubHash) Bytes() (b []byte) { return ph.val[:] }
 
-func (ph *T) MarshalWrite(w io.Writer) (err error) {
+func (ph *PubHash) MarshalWrite(w io.Writer) (err error) {
 	_, err = w.Write(ph.val[:])
 	return
 }
 
-func (ph *T) UnmarshalRead(r io.Reader) (err error) {
-	copy(ph.val[:], ph.val[:Len])
+func (ph *PubHash) UnmarshalRead(r io.Reader) (err error) {
+	copy(ph.val[:], ph.val[:PubHashLen])
 	_, err = r.Read(ph.val[:])
 	return
 }

@@ -1,4 +1,4 @@
-package identhash
+package types
 
 import (
 	"bytes"
@@ -15,10 +15,10 @@ func TestFromIdent(t *testing.T) {
 
 	// Calculate the expected hash
 	idh := sha256.Sum256(testIdent)
-	expected := idh[:Len]
+	expected := idh[:IdentLen]
 
 	// Test FromIdent
-	i := &T{}
+	i := &Ident{}
 	err := i.FromIdent(testIdent)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
@@ -33,9 +33,9 @@ func TestFromIdent(t *testing.T) {
 	}
 }
 
-func TestMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a T with a known value
-	i1 := &T{}
+func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
+	// Create a Ident with a known value
+	i1 := &Ident{}
 	testIdent := []byte("test-identity")
 	err := i1.FromIdent(testIdent)
 	if chk.E(err) {
@@ -55,7 +55,7 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test UnmarshalRead
-	i2 := &T{}
+	i2 := &Ident{}
 	err = i2.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
@@ -67,25 +67,25 @@ func TestMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 }
 
-func TestUnmarshalReadWithCorruptedData(t *testing.T) {
-	// Create a T with a known value
-	i1 := &T{}
+func TestIdent_UnmarshalReadWithCorruptedData(t *testing.T) {
+	// Create a Ident with a known value
+	i1 := &Ident{}
 	testIdent1 := []byte("test-identity-1")
 	err := i1.FromIdent(testIdent1)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
 
-	// Create a second T with a different value
-	i2 := &T{}
+	// Create a second Ident with a different value
+	i2 := &Ident{}
 	testIdent2 := []byte("test-identity-2")
 	err = i2.FromIdent(testIdent2)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
 
-	// Test UnmarshalRead with corrupted data (less than Len bytes)
-	corruptedData := make([]byte, Len/2)
+	// Test UnmarshalRead with corrupted data (less than IdentLen bytes)
+	corruptedData := make([]byte, IdentLen/2)
 	i2.UnmarshalRead(bytes.NewBuffer(corruptedData))
 
 	// The UnmarshalRead method should not have copied the original data to itself

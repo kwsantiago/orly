@@ -1,4 +1,4 @@
-package number
+package types
 
 import (
 	"errors"
