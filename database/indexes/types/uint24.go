@@ -4,7 +4,7 @@ import (
 	"errors"
 	"io"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // MaxUint24 is the maximum value of a 24-bit unsigned integer: 2^24 - 1.

@@ -3,11 +3,11 @@ package json
 import (
 	"bytes"
 
-	"not.realy.lol/bech32encoding"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/bech32"
-	"not.realy.lol/errorf"
-	"not.realy.lol/text"
+	"orly.dev/bech32encoding"
+	"orly.dev/chk"
+	"orly.dev/ec/bech32"
+	"orly.dev/errorf"
+	"orly.dev/text"
 )
 
 // Bech32 is a string encoded in bech32 format including a human-readable prefix and base32

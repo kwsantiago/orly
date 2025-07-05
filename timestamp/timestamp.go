@@ -9,9 +9,9 @@ import (
 
 	"golang.org/x/exp/constraints"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/ints"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/ints"
 )
 
 // T is a convenience type for UNIX 64 bit timestamps of 1 second

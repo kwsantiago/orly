@@ -8,8 +8,8 @@ package secp256k1
 import (
 	"math/bits"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 // References:

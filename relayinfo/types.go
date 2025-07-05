@@ -7,11 +7,11 @@ import (
 	"sort"
 	"sync"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/kinds"
-	"not.realy.lol/log"
-	"not.realy.lol/number"
-	"not.realy.lol/timestamp"
+	"orly.dev/chk"
+	"orly.dev/kinds"
+	"orly.dev/log"
+	"orly.dev/number"
+	"orly.dev/timestamp"
 )
 
 // NIP is a number and description of a nostr "improvement" possibility.

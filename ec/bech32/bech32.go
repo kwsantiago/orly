@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"strings"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // Charset is the set of characters used in the data section of bech32 strings.

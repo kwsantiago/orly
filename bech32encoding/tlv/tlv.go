@@ -6,7 +6,7 @@ package tlv
 import (
 	"io"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 const (

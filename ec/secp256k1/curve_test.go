@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 var (

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 func ExampleBool_Marshal() {

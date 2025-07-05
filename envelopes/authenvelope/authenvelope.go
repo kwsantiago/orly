@@ -5,13 +5,13 @@ package authenvelope
 import (
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	envs "not.realy.lol/envelopes"
-	"not.realy.lol/errorf"
-	"not.realy.lol/event"
-	"not.realy.lol/log"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	envs "orly.dev/envelopes"
+	"orly.dev/errorf"
+	"orly.dev/event"
+	"orly.dev/log"
+	"orly.dev/text"
 )
 
 // L is the label associated with this type of codec.Envelope.

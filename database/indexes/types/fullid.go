@@ -5,7 +5,7 @@ import (
 
 	"github.com/minio/sha256-simd"
 
-	"not.realy.lol/errorf"
+	"orly.dev/errorf"
 )
 
 const IdLen = sha256.Size

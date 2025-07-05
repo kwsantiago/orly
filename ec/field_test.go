@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 // TestIsZero ensures that checking if a field IsZero works as expected.

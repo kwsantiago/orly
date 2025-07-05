@@ -8,13 +8,13 @@ import (
 	"io"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/errorf"
-	"not.realy.lol/eventid"
-	"not.realy.lol/log"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	"orly.dev/envelopes"
+	"orly.dev/errorf"
+	"orly.dev/eventid"
+	"orly.dev/log"
+	"orly.dev/text"
 )
 
 // L is the label associated with this type of codec.Envelope.

@@ -10,11 +10,11 @@ import (
 	"os"
 	"strings"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event"
-	"not.realy.lol/interrupt"
-	"not.realy.lol/log"
-	"not.realy.lol/units"
+	"orly.dev/chk"
+	"orly.dev/event"
+	"orly.dev/interrupt"
+	"orly.dev/log"
+	"orly.dev/units"
 )
 
 func main() {

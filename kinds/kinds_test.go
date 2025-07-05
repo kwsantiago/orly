@@ -5,8 +5,8 @@ import (
 
 	"lukechampine.com/frand"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/kind"
+	"orly.dev/chk"
+	"orly.dev/kind"
 )
 
 func TestUnmarshalKindsArray(t *testing.T) {

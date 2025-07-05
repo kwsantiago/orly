@@ -5,11 +5,11 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/event"
-	"not.realy.lol/event/examples"
-	"not.realy.lol/subscription"
+	"orly.dev/chk"
+	"orly.dev/envelopes"
+	"orly.dev/event"
+	"orly.dev/event/examples"
+	"orly.dev/subscription"
 )
 
 func TestSubmission(t *testing.T) {
@@ -73,7 +73,9 @@ func TestResult(t *testing.T) {
 			)
 		}
 		var ea *Result
-		if ea, err = NewResultWith(subscription.NewStd().String(), ev); chk.E(err) {
+		if ea, err = NewResultWith(
+			subscription.NewStd().String(), ev,
+		); chk.E(err) {
 			t.Fatal(err)
 		}
 		rem = ea.Marshal(rem)

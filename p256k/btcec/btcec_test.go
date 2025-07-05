@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/log"
-	"not.realy.lol/p256k/btcec"
+	"orly.dev/chk"
+	"orly.dev/log"
+	"orly.dev/p256k/btcec"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -57,7 +57,8 @@ func TestBTCECECDH(t *testing.T) {
 			if !bytes.Equal(secret1, secret2) {
 				counter++
 				t.Errorf(
-					"ECDH generation failed to work in both directions, %x %x", secret1,
+					"ECDH generation failed to work in both directions, %x %x",
+					secret1,
 					secret2,
 				)
 			}

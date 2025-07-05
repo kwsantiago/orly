@@ -4,12 +4,12 @@ package p256k
 
 import "C"
 import (
-	"not.realy.lol/chk"
-	btcec "not.realy.lol/ec"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
-	realy "not.realy.lol/signer"
+	"orly.dev/chk"
+	btcec "orly.dev/ec"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/errorf"
+	"orly.dev/log"
+	realy "orly.dev/signer"
 )
 
 func init() {

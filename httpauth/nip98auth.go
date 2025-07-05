@@ -6,14 +6,14 @@ import (
 	"net/url"
 	"strings"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
-	"not.realy.lol/signer"
-	"not.realy.lol/tag"
-	"not.realy.lol/tags"
-	"not.realy.lol/timestamp"
+	"orly.dev/chk"
+	"orly.dev/event"
+	"orly.dev/kind"
+	"orly.dev/log"
+	"orly.dev/signer"
+	"orly.dev/tag"
+	"orly.dev/tags"
+	"orly.dev/timestamp"
 )
 
 const (

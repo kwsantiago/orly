@@ -3,9 +3,9 @@
 package publish
 
 import (
-	"not.realy.lol/event"
-	"not.realy.lol/interfaces/publisher"
-	"not.realy.lol/interfaces/typer"
+	"orly.dev/event"
+	"orly.dev/interfaces/publisher"
+	"orly.dev/interfaces/typer"
 )
 
 var P = &S{}

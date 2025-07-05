@@ -14,7 +14,7 @@ import (
 	"os"
 	"strconv"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 var (

@@ -5,16 +5,16 @@ import (
 	"encoding/binary"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/bech32encoding/pointers"
-	"not.realy.lol/bech32encoding/tlv"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/bech32"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/errorf"
-	"not.realy.lol/eventid"
-	"not.realy.lol/hex"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
+	"orly.dev/bech32encoding/pointers"
+	"orly.dev/bech32encoding/tlv"
+	"orly.dev/chk"
+	"orly.dev/ec/bech32"
+	"orly.dev/ec/schnorr"
+	"orly.dev/errorf"
+	"orly.dev/eventid"
+	"orly.dev/hex"
+	"orly.dev/kind"
+	"orly.dev/log"
 )
 
 var (
@@ -60,7 +60,9 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 		bytes.Equal(prefix, NsecHRP) ||
 		bytes.Equal(prefix, NoteHRP):
 		if len(data) < 32 {
-			return prefix, nil, errorf.E("data is less than 32 bytes (%d)", len(data))
+			return prefix, nil, errorf.E(
+				"data is less than 32 bytes (%d)", len(data),
+			)
 		}
 		b := make([]byte, schnorr.PubKeyBytesLen*2)
 		hex.EncBytes(b, data[:32])
@@ -105,7 +107,9 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 			switch t {
 			case tlv.Default:
 				if len(v) < 32 {
-					return prefix, nil, errorf.E("id is less than 32 bytes (%d)", len(v))
+					return prefix, nil, errorf.E(
+						"id is less than 32 bytes (%d)", len(v),
+					)
 				}
 				result.ID = eventid.NewWith(v)
 			case tlv.Relay:

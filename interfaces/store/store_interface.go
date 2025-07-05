@@ -9,13 +9,13 @@ package store
 import (
 	"io"
 
-	"not.realy.lol/config"
-	"not.realy.lol/context"
-	"not.realy.lol/event"
-	"not.realy.lol/eventid"
-	"not.realy.lol/eventidserial"
-	"not.realy.lol/filter"
-	"not.realy.lol/tag"
+	"orly.dev/config"
+	"orly.dev/context"
+	"orly.dev/event"
+	"orly.dev/eventid"
+	"orly.dev/eventidserial"
+	"orly.dev/filter"
+	"orly.dev/tag"
 )
 
 // I am a type for a persistence layer for nostr events handled by a relay.

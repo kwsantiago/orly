@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func main() {

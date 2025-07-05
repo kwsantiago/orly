@@ -3,10 +3,10 @@ package database
 import (
 	"fmt"
 	"github.com/dgraph-io/badger/v4"
-	"not.realy.lol/chk"
-	"not.realy.lol/codecbuf"
-	"not.realy.lol/context"
-	"not.realy.lol/event"
+	"orly.dev/chk"
+	"orly.dev/codecbuf"
+	"orly.dev/context"
+	"orly.dev/event"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -22,7 +22,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 		return
 	}
 	// Generate all indexes for the event
-	indexes := GetIndexesForEvent(ev, serial)
+	indexes, _ := GetIndexesForEvent(ev, serial)
 	// Start a transaction to save the event and all its indexes
 	err = d.Update(
 		func(txn *badger.Txn) (err error) {

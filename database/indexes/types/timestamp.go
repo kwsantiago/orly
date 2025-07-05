@@ -3,8 +3,8 @@ package types
 import (
 	"bytes"
 	"io"
-	"not.realy.lol/chk"
-	"not.realy.lol/codecbuf"
+	"orly.dev/chk"
+	"orly.dev/codecbuf"
 )
 
 const TimestampLen = 8

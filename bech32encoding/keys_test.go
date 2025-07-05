@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
 )
 
 func TestConvertBits(t *testing.T) {
@@ -100,7 +100,9 @@ func TestPublicKeyToNpub(t *testing.T) {
 			)
 		}
 		if reNpub, err = PublicKeyToNpub(rePub); chk.E(err) {
-			t.Fatalf("error recovered secret key from converted to nsec: %s", err)
+			t.Fatalf(
+				"error recovered secret key from converted to nsec: %s", err,
+			)
 		}
 		if !bytes.Equal(reNpub, npub) {
 			t.Fatalf(

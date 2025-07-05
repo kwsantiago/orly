@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // EnsureDir checks if a file could be written to a path and creates the necessary

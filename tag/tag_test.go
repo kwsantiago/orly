@@ -6,8 +6,8 @@ import (
 
 	"lukechampine.com/frand"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/log"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

@@ -3,13 +3,13 @@ package database
 import (
 	"github.com/dgraph-io/badger/v4"
 	"io"
-	"not.realy.lol/chk"
-	"not.realy.lol/context"
-	"not.realy.lol/eventid"
-	"not.realy.lol/eventidserial"
-	"not.realy.lol/log"
-	"not.realy.lol/lol"
-	"not.realy.lol/units"
+	"orly.dev/chk"
+	"orly.dev/context"
+	"orly.dev/eventid"
+	"orly.dev/eventidserial"
+	"orly.dev/log"
+	"orly.dev/lol"
+	"orly.dev/units"
 )
 
 type D struct {

@@ -3,8 +3,8 @@ package chaincfg
 import (
 	"time"
 
-	"not.realy.lol/ec/chainhash"
-	"not.realy.lol/ec/wire"
+	"orly.dev/ec/chainhash"
+	"orly.dev/ec/wire"
 )
 
 var (

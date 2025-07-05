@@ -7,8 +7,8 @@ package base58_test
 import (
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/base58"
+	"orly.dev/chk"
+	"orly.dev/ec/base58"
 )
 
 var checkEncodingStringTests = []struct {

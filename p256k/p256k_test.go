@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/log"
-	"not.realy.lol/p256k"
-	realy "not.realy.lol/signer"
+	"orly.dev/chk"
+	"orly.dev/log"
+	"orly.dev/p256k"
+	realy "orly.dev/signer"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -94,7 +94,8 @@ func TestECDH(t *testing.T) {
 			if !bytes.Equal(secret1, secret2) {
 				counter++
 				t.Errorf(
-					"ECDH generation failed to work in both directions, %x %x", secret1,
+					"ECDH generation failed to work in both directions, %x %x",
+					secret1,
 					secret2,
 				)
 			}

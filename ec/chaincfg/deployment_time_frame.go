@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/wire"
+	"orly.dev/chk"
+	"orly.dev/ec/wire"
 )
 
 var (

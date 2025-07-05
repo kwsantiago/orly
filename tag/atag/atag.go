@@ -5,10 +5,10 @@ package atag
 import (
 	"bytes"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
-	"not.realy.lol/ints"
-	"not.realy.lol/kind"
+	"orly.dev/chk"
+	"orly.dev/hex"
+	"orly.dev/ints"
+	"orly.dev/kind"
 )
 
 // T is a data structure for what is found in an `a` tag: kind:pubkey:arbitrary data

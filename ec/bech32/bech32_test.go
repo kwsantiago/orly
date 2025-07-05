@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // TestBech32 tests whether decoding and re-encoding the valid BIP-173 test
@@ -525,7 +525,9 @@ func TestBech32Base256(t *testing.T) {
 		// Encode the same data with the HRP converted to all uppercase and
 		// ensure the result is the lowercase version of the original encoded
 		// bech32 string.
-		gotEncoded, err := EncodeFromBase256(bytes.ToUpper([]byte(test.hrp)), data)
+		gotEncoded, err := EncodeFromBase256(
+			bytes.ToUpper([]byte(test.hrp)), data,
+		)
 		if chk.E(err) {
 			t.Errorf(
 				"%q: unexpected uppercase HRP encode error: %v", test.name,
@@ -542,7 +544,9 @@ func TestBech32Base256(t *testing.T) {
 		// Encode the same data with the HRP converted to all lowercase and
 		// ensure the result is the lowercase version of the original encoded
 		// bech32 string.
-		gotEncoded, err = EncodeFromBase256(bytes.ToLower([]byte(test.hrp)), data)
+		gotEncoded, err = EncodeFromBase256(
+			bytes.ToLower([]byte(test.hrp)), data,
+		)
 		if chk.E(err) {
 			t.Errorf(
 				"%q: unexpected lowercase HRP encode error: %v", test.name,

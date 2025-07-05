@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
-	"not.realy.lol/tag"
-	"not.realy.lol/tags"
-	"not.realy.lol/timestamp"
+	"orly.dev/chk"
+	"orly.dev/event"
+	"orly.dev/kind"
+	"orly.dev/log"
+	"orly.dev/tag"
+	"orly.dev/tags"
+	"orly.dev/timestamp"
 )
 
 // GenerateChallenge creates a reasonable, 96 byte base64 challenge string

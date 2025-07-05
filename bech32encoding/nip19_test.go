@@ -5,12 +5,12 @@ import (
 	"reflect"
 	"testing"
 
-	"not.realy.lol/bech32encoding/pointers"
-	"not.realy.lol/chk"
-	"not.realy.lol/eventid"
-	"not.realy.lol/hex"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
+	"orly.dev/bech32encoding/pointers"
+	"orly.dev/chk"
+	"orly.dev/eventid"
+	"orly.dev/hex"
+	"orly.dev/kind"
+	"orly.dev/log"
 )
 
 func TestEncodeNpub(t *testing.T) {

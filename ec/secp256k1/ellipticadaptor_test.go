@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // randBytes returns a byte slice of the required size created from a random

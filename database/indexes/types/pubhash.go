@@ -4,10 +4,10 @@ import (
 	"io"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/errorf"
+	"orly.dev/hex"
 )
 
 const PubHashLen = 8

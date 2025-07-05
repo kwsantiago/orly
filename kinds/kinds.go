@@ -3,11 +3,11 @@
 package kinds
 
 import (
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/ints"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/ints"
+	"orly.dev/kind"
+	"orly.dev/log"
 )
 
 // T is an array of kind.T, used in filter.T and filter.S for searches.

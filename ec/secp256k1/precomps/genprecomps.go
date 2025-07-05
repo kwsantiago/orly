@@ -13,9 +13,9 @@ import (
 	"math/big"
 	"os"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/log"
 )
 
 // curveParams houses the secp256k1 curve parameters for convenient access.

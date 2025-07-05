@@ -1,8 +1,8 @@
 package json
 
 import (
-	"not.realy.lol/chk"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/text"
 )
 
 // String is a regular string. Must be escaped as per nip-01. Bytes stored in it are not

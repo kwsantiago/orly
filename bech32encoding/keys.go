@@ -3,13 +3,13 @@ package bech32encoding
 import (
 	"bytes"
 
-	"not.realy.lol/chk"
-	btcec "not.realy.lol/ec"
-	"not.realy.lol/ec/bech32"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	btcec "orly.dev/ec"
+	"orly.dev/ec/bech32"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
+	"orly.dev/log"
 )
 
 const (

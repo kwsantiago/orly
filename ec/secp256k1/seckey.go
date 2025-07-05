@@ -9,7 +9,7 @@ import (
 	"crypto/rand"
 	"io"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // SecretKey provides facilities for working with secp256k1 secret keys within

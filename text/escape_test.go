@@ -6,7 +6,7 @@ import (
 	"lukechampine.com/frand"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestUnescapeByteString(t *testing.T) {

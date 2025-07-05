@@ -8,8 +8,8 @@ package schnorr
 import (
 	"fmt"
 
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/ec"
+	"orly.dev/ec/secp256k1"
 )
 
 // These constants define the lengths of serialized public keys.

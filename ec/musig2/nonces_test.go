@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/hex"
+	"orly.dev/hex"
 )
 
 type nonceGenTestCase struct {

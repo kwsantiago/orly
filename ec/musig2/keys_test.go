@@ -11,12 +11,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/ec"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 const (

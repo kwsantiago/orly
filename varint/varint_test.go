@@ -3,12 +3,12 @@ package varint
 import (
 	"bytes"
 	"math"
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 	"testing"
 
 	"lukechampine.com/frand"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestEncode_Decode(t *testing.T) {

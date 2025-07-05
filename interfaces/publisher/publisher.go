@@ -1,8 +1,8 @@
 package publisher
 
 import (
-	"not.realy.lol/event"
-	"not.realy.lol/interfaces/typer"
+	"orly.dev/event"
+	"orly.dev/interfaces/typer"
 )
 
 type I interface {

@@ -10,7 +10,7 @@ import (
 	"errors"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // TestParsePubKey ensures that public keys are properly parsed according

@@ -12,7 +12,7 @@ import (
 	"math/big"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the
@@ -259,7 +259,8 @@ func TestAddJacobian(t *testing.T) {
 		if !r.X.Equals(&want.X) || !r.Y.Equals(&want.Y) || !r.Z.Equals(&want.Z) {
 			t.Errorf(
 				"#%d wrong result\ngot: (%v, %v, %v)\n"+
-					"want: (%v, %v, %v)", i, r.X, r.Y, r.Z, want.X, want.Y, want.Z,
+					"want: (%v, %v, %v)", i, r.X, r.Y, r.Z, want.X, want.Y,
+				want.Z,
 			)
 			continue
 		}

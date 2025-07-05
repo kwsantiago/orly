@@ -6,14 +6,14 @@ import (
 	"io"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
-	"not.realy.lol/kind"
-	"not.realy.lol/tags"
-	"not.realy.lol/text"
-	"not.realy.lol/timestamp"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/errorf"
+	"orly.dev/hex"
+	"orly.dev/kind"
+	"orly.dev/tags"
+	"orly.dev/text"
+	"orly.dev/timestamp"
 )
 
 var (

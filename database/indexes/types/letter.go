@@ -2,7 +2,7 @@ package types
 
 import (
 	"io"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 const LetterLen = 1

@@ -6,9 +6,9 @@ import (
 	_ "embed"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event/examples"
-	"not.realy.lol/p256k"
+	"orly.dev/chk"
+	"orly.dev/event/examples"
+	"orly.dev/p256k"
 )
 
 func TestTMarshal_Unmarshal(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/bech32"
-	"not.realy.lol/ec/chaincfg"
+	"orly.dev/chk"
+	"orly.dev/ec/bech32"
+	"orly.dev/ec/chaincfg"
 )
 
 // AddressSegWit is the base address type for all SegWit addresses.

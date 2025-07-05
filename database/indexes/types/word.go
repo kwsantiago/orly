@@ -2,9 +2,9 @@ package types
 
 import (
 	"io"
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 var zero = []byte{0x00}

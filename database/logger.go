@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"go.uber.org/atomic"
-	"not.realy.lol/log"
-	"not.realy.lol/lol"
+	"orly.dev/log"
+	"orly.dev/lol"
 )
 
 // NewLogger creates a new badger logger.

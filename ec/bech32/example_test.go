@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // This example demonstrates how to decode a bech32 encoded string.

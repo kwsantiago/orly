@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestT_MarshalUnmarshal(t *testing.T) {

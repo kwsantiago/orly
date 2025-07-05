@@ -6,14 +6,14 @@ import (
 	"bytes"
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/errorf"
-	"not.realy.lol/filters"
-	"not.realy.lol/ints"
-	"not.realy.lol/subscription"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	"orly.dev/envelopes"
+	"orly.dev/errorf"
+	"orly.dev/filters"
+	"orly.dev/ints"
+	"orly.dev/subscription"
+	"orly.dev/text"
 )
 
 // L is the label associated with this type of codec.Envelope.

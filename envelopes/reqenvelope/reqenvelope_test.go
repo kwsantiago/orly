@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/filters"
-	"not.realy.lol/subscription"
+	"orly.dev/chk"
+	"orly.dev/envelopes"
+	"orly.dev/filters"
+	"orly.dev/subscription"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

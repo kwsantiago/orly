@@ -8,9 +8,9 @@ package ecdsa
 import (
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 // hexToModNScalar converts the passed hex string into a ModNScalar and will

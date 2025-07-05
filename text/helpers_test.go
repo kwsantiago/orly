@@ -7,8 +7,8 @@ import (
 	"lukechampine.com/frand"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 func TestUnmarshalHexArray(t *testing.T) {

@@ -3,7 +3,7 @@
 package config
 
 import (
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 	"os"
 	"strings"
 )

@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/ec/secp256k1"
 )
 
 // GenerateSharedSecret generates a shared secret based on a secret key and a

@@ -2,9 +2,9 @@ package server
 
 import (
 	"net/http"
-	"not.realy.lol/context"
-	"not.realy.lol/event"
-	"not.realy.lol/interfaces/store"
+	"orly.dev/context"
+	"orly.dev/event"
+	"orly.dev/interfaces/store"
 )
 
 type I interface {

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 //go:generate go run genprecomps.go

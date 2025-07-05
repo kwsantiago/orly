@@ -5,11 +5,11 @@ package config
 import (
 	"fmt"
 	"io"
-	"not.realy.lol/chk"
-	env2 "not.realy.lol/env"
-	"not.realy.lol/log"
-	"not.realy.lol/lol"
-	"not.realy.lol/version"
+	"orly.dev/chk"
+	env2 "orly.dev/env"
+	"orly.dev/log"
+	"orly.dev/lol"
+	"orly.dev/version"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -20,13 +20,13 @@ import (
 	"github.com/adrg/xdg"
 	"go-simpler.org/env"
 
-	"not.realy.lol/apputil"
+	"orly.dev/apputil"
 )
 
 // C is the configuration for realy relay. These are read from the environment if present, or if
 // a .env file is found in ~/.config/realy/ that is read instead and overrides anything else.
 type C struct {
-	AppName    string `env:"REALY_APP_NAME" default:"not.realy.lol"`
+	AppName    string `env:"REALY_APP_NAME" default:"orly.dev"`
 	Config     string `env:"REALY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
 	State      string `env:"REALY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces"`
 	DataDir    string `env:"REALY_DATA_DIR" usage:"storage location for the ratel event store"`

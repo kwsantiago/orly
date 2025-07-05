@@ -14,10 +14,10 @@ import (
 	"github.com/gobwas/ws/wsflate"
 	"github.com/gobwas/ws/wsutil"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/context"
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/context"
+	"orly.dev/errorf"
+	"orly.dev/log"
 )
 
 // Connection is an outbound client -> relay connection.

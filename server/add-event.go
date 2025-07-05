@@ -2,9 +2,9 @@ package server
 
 import (
 	"net/http"
-	"not.realy.lol/chk"
-	"not.realy.lol/context"
-	"not.realy.lol/event"
+	"orly.dev/chk"
+	"orly.dev/context"
+	"orly.dev/event"
 )
 
 func (s *S) AddEvent(

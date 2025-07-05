@@ -2,12 +2,12 @@
 package btcec
 
 import (
-	"not.realy.lol/chk"
-	ec "not.realy.lol/ec"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/errorf"
-	"not.realy.lol/signer"
+	"orly.dev/chk"
+	ec "orly.dev/ec"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/errorf"
+	"orly.dev/signer"
 )
 
 // Signer is an implementation of signer.I that uses the btcec library.

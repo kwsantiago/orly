@@ -10,11 +10,11 @@ import (
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/ec"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there

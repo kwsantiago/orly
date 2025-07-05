@@ -2,10 +2,10 @@ package types
 
 import (
 	"bytes"
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestLetter_New(t *testing.T) {

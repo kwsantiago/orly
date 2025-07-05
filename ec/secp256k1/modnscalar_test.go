@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 // SetHex interprets the provided hex string as a 256-bit big-endian unsigned
@@ -200,9 +200,11 @@ func TestModNScalarSetBytes(t *testing.T) {
 			expected: [8]uint32{0xd0364141, 0xbfd25e8c, 0, 0, 0, 0, 0, 0},
 			overflow: false,
 		}, {
-			name:     "group order words zero, one, and two",
-			in:       "af48a03bbfd25e8cd0364141",
-			expected: [8]uint32{0xd0364141, 0xbfd25e8c, 0xaf48a03b, 0, 0, 0, 0, 0},
+			name: "group order words zero, one, and two",
+			in:   "af48a03bbfd25e8cd0364141",
+			expected: [8]uint32{
+				0xd0364141, 0xbfd25e8c, 0xaf48a03b, 0, 0, 0, 0, 0,
+			},
 			overflow: false,
 		}, {
 			name:     "overflow in word one",

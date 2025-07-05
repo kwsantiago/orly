@@ -12,11 +12,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/ec"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 const (
@@ -182,7 +182,9 @@ func TestMusig2SignVerify(t *testing.T) {
 				err = partialSig.Decode(
 					bytes.NewReader(mustParseHex(testCase.Sig)),
 				)
-				if chk.E(err) && strings.Contains(testCase.Comment, "group size") {
+				if chk.E(err) && strings.Contains(
+					testCase.Comment, "group size",
+				) {
 					require.ErrorIs(t, err, ErrPartialSigInvalid)
 				}
 				err = verifyPartialSig(

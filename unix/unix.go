@@ -3,7 +3,7 @@ package unix
 import (
 	"time"
 
-	"not.realy.lol/ints"
+	"orly.dev/ints"
 )
 
 type Time struct{ time.Time }

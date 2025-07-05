@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/chainhash"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/chk"
+	"orly.dev/ec"
+	"orly.dev/ec/chainhash"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"golang.org/x/exp/constraints"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func Encode[V constraints.Integer](w io.Writer, v V) {

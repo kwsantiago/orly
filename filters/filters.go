@@ -2,10 +2,10 @@
 package filters
 
 import (
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/event"
-	"not.realy.lol/filter"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/event"
+	"orly.dev/filter"
 )
 
 // T is a wrapper around an array of pointers to filter.T.

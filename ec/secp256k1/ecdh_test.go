@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestGenerateSharedSecret(t *testing.T) {

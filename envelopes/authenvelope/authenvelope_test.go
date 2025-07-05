@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/auth"
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/p256k"
+	"orly.dev/auth"
+	"orly.dev/chk"
+	"orly.dev/envelopes"
+	"orly.dev/p256k"
 )
 
 const relayURL = "wss://example.com"

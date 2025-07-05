@@ -7,7 +7,7 @@ package secp256k1
 import (
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // BenchmarkSecretKeyGenerate benchmarks generating new cryptographically

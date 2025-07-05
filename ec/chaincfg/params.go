@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/chainhash"
-	"not.realy.lol/ec/wire"
+	"orly.dev/chk"
+	"orly.dev/ec/chainhash"
+	"orly.dev/ec/wire"
 )
 
 var (

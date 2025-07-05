@@ -3,11 +3,11 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-	"not.realy.lol/chk"
-	"not.realy.lol/helpers"
-	"not.realy.lol/log"
-	"not.realy.lol/relayinfo"
-	"not.realy.lol/version"
+	"orly.dev/chk"
+	"orly.dev/helpers"
+	"orly.dev/log"
+	"orly.dev/relayinfo"
+	"orly.dev/version"
 	"sort"
 )
 
@@ -39,7 +39,7 @@ func (s *S) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 		Name:        s.Cfg.AppName,
 		Description: version.Description,
 		Nips:        supportedNIPs,
-		Software:    "https://not.realy.lol",
+		Software:    "https://orly.dev",
 		Version:     version.V,
 		Limitation:  relayinfo.Limits{
 			// MaxLimit: s.MaxLimit,

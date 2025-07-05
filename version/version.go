@@ -5,6 +5,6 @@ import _ "embed"
 //go:embed version
 var V string
 
-var Name = "not.realy.lol"
+var Name = "orly.dev"
 
 var Description = "fast, simple nostr relay"

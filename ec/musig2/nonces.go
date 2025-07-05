@@ -9,10 +9,10 @@ import (
 	"errors"
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/chainhash"
-	"not.realy.lol/ec/schnorr"
+	"orly.dev/chk"
+	"orly.dev/ec"
+	"orly.dev/ec/chainhash"
+	"orly.dev/ec/schnorr"
 )
 
 const (

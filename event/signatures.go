@@ -3,11 +3,11 @@ package event
 import (
 	"bytes"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
-	"not.realy.lol/p256k"
-	"not.realy.lol/signer"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/log"
+	"orly.dev/p256k"
+	"orly.dev/signer"
 )
 
 // Sign the event using the signer.I. Uses github.com/bitcoin-core/secp256k1 if

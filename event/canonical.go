@@ -3,16 +3,16 @@ package event
 import (
 	"reflect"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
-	"not.realy.lol/json"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
-	"not.realy.lol/tags"
-	"not.realy.lol/text"
-	"not.realy.lol/timestamp"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	"orly.dev/errorf"
+	"orly.dev/hex"
+	"orly.dev/json"
+	"orly.dev/kind"
+	"orly.dev/log"
+	"orly.dev/tags"
+	"orly.dev/text"
+	"orly.dev/timestamp"
 )
 
 // ToCanonical converts the event to the canonical encoding used to derive the
@@ -93,7 +93,9 @@ func (ev *E) FromCanonical(b []byte) (rem []byte, err error) {
 	ev.Id = id
 	// unwrap the pubkey
 	if v, ok := x[1].(*json.Hex); !ok {
-		err = errorf.E("failed to decode pubkey from canonical form of event %s", b)
+		err = errorf.E(
+			"failed to decode pubkey from canonical form of event %s", b,
+		)
 		return
 	} else {
 		ev.Pubkey = v.V

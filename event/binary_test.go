@@ -3,12 +3,12 @@ package event
 import (
 	"bufio"
 	"bytes"
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event/examples"
+	"orly.dev/chk"
+	"orly.dev/event/examples"
 )
 
 func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {

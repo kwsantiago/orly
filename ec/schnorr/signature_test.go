@@ -13,10 +13,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/ec"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 type bip340Test struct {

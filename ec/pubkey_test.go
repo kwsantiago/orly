@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 type pubKeyTest struct {

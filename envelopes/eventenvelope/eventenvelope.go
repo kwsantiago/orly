@@ -5,12 +5,12 @@ package eventenvelope
 import (
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/errorf"
-	"not.realy.lol/event"
-	"not.realy.lol/subscription"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	"orly.dev/envelopes"
+	"orly.dev/errorf"
+	"orly.dev/event"
+	"orly.dev/subscription"
 )
 
 // L is the label associated with this type of codec.Envelope.

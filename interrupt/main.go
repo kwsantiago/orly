@@ -10,7 +10,7 @@ import (
 	"runtime"
 
 	"go.uber.org/atomic"
-	"not.realy.lol/log"
+	"orly.dev/log"
 )
 
 // HandlerWithSource is an interrupt handling closure and the source location that it was sent
@@ -53,7 +53,10 @@ func Listener() {
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
-			log.T.F("running callback %d from %s", idx, interruptCallbackSources[idx])
+			log.T.F(
+				"running callback %d from %s", idx,
+				interruptCallbackSources[idx],
+			)
 			interruptCallbacks[idx]()
 		}
 		log.D.Ln("interrupt handlers finished")

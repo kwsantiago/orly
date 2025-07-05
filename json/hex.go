@@ -1,10 +1,10 @@
 package json
 
 import (
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/hex"
+	"orly.dev/text"
 )
 
 // Hex is a string representing binary data encoded as hexadecimal.

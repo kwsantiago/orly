@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/envelopes/messages"
-	"not.realy.lol/eventid"
+	"orly.dev/chk"
+	"orly.dev/envelopes"
+	"orly.dev/envelopes/messages"
+	"orly.dev/eventid"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

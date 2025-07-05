@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/ec/base58"
+	"orly.dev/ec/base58"
 )
 
 var (

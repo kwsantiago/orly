@@ -1,11 +1,10 @@
 package database
 
 import (
-	"not.realy.lol/chk"
-	"not.realy.lol/codecbuf"
-	"not.realy.lol/database/indexes"
-	"not.realy.lol/database/indexes/types/idhash"
-	"not.realy.lol/filter"
+	"orly.dev/chk"
+	"orly.dev/codecbuf"
+	"orly.dev/database/indexes/types"
+	"orly.dev/filter"
 )
 
 func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
@@ -16,13 +15,13 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	if f.Ids.Len() > 0 {
 		for _, id := range f.Ids.ToSliceOfBytes() {
 			if err = func() (err error) {
-				i := idhash.New()
+				i := new(types.IdHash)
 				if err = i.FromId(id); chk.E(err) {
 					return
 				}
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
-				err = indexes.IdSearch(i).MarshalWrite(buf)
+				err = i.MarshalWrite(buf)
 				return
 			}(); chk.E(err) {
 				return

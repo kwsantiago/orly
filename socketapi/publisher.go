@@ -1,18 +1,18 @@
 package socketapi
 
 import (
-	"not.realy.lol/interfaces/listener"
-	"not.realy.lol/interfaces/typer"
-	"not.realy.lol/log"
+	"orly.dev/interfaces/listener"
+	"orly.dev/interfaces/typer"
+	"orly.dev/log"
 	"regexp"
 	"sync"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes/eventenvelope"
-	"not.realy.lol/event"
-	"not.realy.lol/filters"
-	"not.realy.lol/interfaces/publisher"
-	"not.realy.lol/publish"
+	"orly.dev/chk"
+	"orly.dev/envelopes/eventenvelope"
+	"orly.dev/event"
+	"orly.dev/filters"
+	"orly.dev/interfaces/publisher"
+	"orly.dev/publish"
 )
 
 const Type = "socketapi"

@@ -3,8 +3,8 @@ package json
 import (
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
+	"orly.dev/chk"
+	"orly.dev/codec"
 )
 
 // An Object is an (not necessarily) ordered list of KeyValue.

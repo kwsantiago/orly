@@ -10,9 +10,9 @@ import (
 	"fmt"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/hex"
+	"orly.dev/hex"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/event/examples"
+	"orly.dev/chk"
+	"orly.dev/event/examples"
 )
 
 func TestFromCanonical(t *testing.T) {
@@ -22,7 +22,9 @@ func TestFromCanonical(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(rem) != 0 {
-			t.Fatalf("some of input remaining after marshal/unmarshal: '%s'", rem)
+			t.Fatalf(
+				"some of input remaining after marshal/unmarshal: '%s'", rem,
+			)
 		}
 		can = ea.ToCanonical(can)
 		ea.Sig = ea.Sig[:0]

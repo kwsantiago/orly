@@ -7,11 +7,11 @@ import (
 
 	"lukechampine.com/frand"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/hex"
-	"not.realy.lol/kind"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/hex"
+	"orly.dev/kind"
+	"orly.dev/log"
 )
 
 func TestT_Marshal_Unmarshal(t *testing.T) {

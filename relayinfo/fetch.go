@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/context"
-	"not.realy.lol/errorf"
-	"not.realy.lol/normalize"
+	"orly.dev/chk"
+	"orly.dev/context"
+	"orly.dev/errorf"
+	"orly.dev/normalize"
 )
 
 // Fetch fetches the NIP-11 Info.

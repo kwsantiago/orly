@@ -12,10 +12,10 @@ import (
 	"fmt"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/hex"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/hex"
 )
 
 // This example demonstrates use of GenerateSharedSecret to encrypt a message

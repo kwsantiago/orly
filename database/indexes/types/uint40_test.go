@@ -1,11 +1,11 @@
 package types
 
 import (
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 	"reflect"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestUint40(t *testing.T) {

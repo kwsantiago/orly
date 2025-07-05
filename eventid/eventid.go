@@ -6,10 +6,10 @@ import (
 	"lukechampine.com/frand"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/hex"
+	"orly.dev/log"
 )
 
 // T is the SHA256 hash in hexadecimal of the canonical form of an event as

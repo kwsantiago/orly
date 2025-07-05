@@ -2,13 +2,13 @@ package types
 
 import (
 	"bytes"
-	"not.realy.lol/codecbuf"
+	"orly.dev/codecbuf"
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/hex"
 )
 
 func TestPubHash_FromPubkey(t *testing.T) {

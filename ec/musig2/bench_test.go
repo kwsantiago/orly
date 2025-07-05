@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"testing"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/ec"
+	"orly.dev/ec/schnorr"
+	"orly.dev/hex"
 )
 
 var (

@@ -12,7 +12,7 @@ import (
 	"math/big"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // TestGenerateSecretKey ensures the key generation works as expected.

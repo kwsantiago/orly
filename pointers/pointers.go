@@ -3,7 +3,7 @@ package pointers
 import (
 	"time"
 
-	"not.realy.lol/unix"
+	"orly.dev/unix"
 )
 
 // PointerToValue is a generic interface to refer to any pointer to almost any kind of common

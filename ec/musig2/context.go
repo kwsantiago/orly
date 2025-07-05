@@ -5,9 +5,9 @@ package musig2
 import (
 	"fmt"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec"
-	"not.realy.lol/ec/schnorr"
+	"orly.dev/chk"
+	"orly.dev/ec"
+	"orly.dev/ec/schnorr"
 )
 
 var (

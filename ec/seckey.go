@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/ec/secp256k1"
 )
 
 // SecretKey wraps an ecdsa.SecretKey as a convenience mainly for signing things with the secret key without having to

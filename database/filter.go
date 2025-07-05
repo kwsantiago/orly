@@ -1,9 +1,9 @@
 package database
 
 import (
-	"not.realy.lol/context"
-	"not.realy.lol/database/indexes/types"
-	"not.realy.lol/filter"
+	"orly.dev/context"
+	"orly.dev/database/indexes/types"
+	"orly.dev/filter"
 )
 
 // QueryForSerials takes a filter and returns the events that match, sorted in

@@ -7,11 +7,11 @@ import (
 	"unsafe"
 
 	"github.com/minio/sha256-simd"
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/ec/secp256k1"
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/errorf"
+	"orly.dev/log"
 )
 
 /*
@@ -408,7 +408,9 @@ func (k *Keygen) Generate() (
 	if _, err = rand.Read(k.secBytes); chk.E(err) {
 		return
 	}
-	if res := C.secp256k1_keypair_create(ctx, &k.sec.Key, k.secUchar); res != 1 {
+	if res := C.secp256k1_keypair_create(
+		ctx, &k.sec.Key, k.secUchar,
+	); res != 1 {
 		err = errorf.E("failed to create secp256k1 keypair")
 		return
 	}

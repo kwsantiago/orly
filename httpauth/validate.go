@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/event"
-	"not.realy.lol/ints"
-	"not.realy.lol/kind"
-	"not.realy.lol/tag"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/event"
+	"orly.dev/ints"
+	"orly.dev/kind"
+	"orly.dev/tag"
 
-	"not.realy.lol/log"
+	"orly.dev/log"
 )
 
 var ErrMissingKey = fmt.Errorf(
@@ -56,7 +56,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		}
 		if len(split) > 2 {
 			err = errorf.E(
-				"extraneous content after second field space separated: %s", val,
+				"extraneous content after second field space separated: %s",
+				val,
 			)
 			return
 		}
@@ -78,7 +79,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		if !ev.Kind.Equal(kind.HTTPAuth) {
 			err = errorf.E(
 				"invalid kind %d %s in nip-98 http auth event, require %d %s",
-				ev.Kind.K, ev.Kind.Name(), kind.HTTPAuth.K, kind.HTTPAuth.Name(),
+				ev.Kind.K, ev.Kind.Name(), kind.HTTPAuth.K,
+				kind.HTTPAuth.Name(),
 			)
 			return
 		}
@@ -86,7 +88,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		exp := ev.Tags.GetAll(tag.New("expiration"))
 		if exp.Len() > 1 {
 			err = errorf.E(
-				"more than one \"expiration\" tag found: '%s'", exp.MarshalTo(nil),
+				"more than one \"expiration\" tag found: '%s'",
+				exp.MarshalTo(nil),
 			)
 			return
 		}
@@ -121,7 +124,9 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		}
 		ut := ev.Tags.GetAll(tag.New("u"))
 		if ut.Len() > 1 {
-			err = errorf.E("more than one \"u\" tag found: '%s'", ut.MarshalTo(nil))
+			err = errorf.E(
+				"more than one \"u\" tag found: '%s'", ut.MarshalTo(nil),
+			)
 			return
 		}
 		uts := ut.ToSliceOfTags()
@@ -161,7 +166,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			mt := ev.Tags.GetAll(tag.New("method"))
 			if mt.Len() != 1 {
 				err = errorf.E(
-					"more than one \"method\" tag found: '%s'", mt.MarshalTo(nil),
+					"more than one \"method\" tag found: '%s'",
+					mt.MarshalTo(nil),
 				)
 				return
 			}

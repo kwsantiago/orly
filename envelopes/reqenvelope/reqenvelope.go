@@ -5,12 +5,12 @@ package reqenvelope
 import (
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/codec"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/filters"
-	"not.realy.lol/subscription"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/codec"
+	"orly.dev/envelopes"
+	"orly.dev/filters"
+	"orly.dev/subscription"
+	"orly.dev/text"
 )
 
 // L is the label associated with this type of codec.Envelope.

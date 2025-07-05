@@ -3,8 +3,8 @@
 package p256k
 
 import (
-	"not.realy.lol/log"
-	"not.realy.lol/p256k/btcec"
+	"orly.dev/log"
+	"orly.dev/p256k/btcec"
 )
 
 func init() {

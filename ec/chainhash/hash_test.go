@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 // mainNetGenesisHash is the hash of the first block in the block chain for the

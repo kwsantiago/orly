@@ -7,8 +7,8 @@ import (
 
 	"github.com/templexxx/xhex"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 )
 
 var Enc = hex.EncodeToString

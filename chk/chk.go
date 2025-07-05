@@ -2,7 +2,7 @@
 package chk
 
 import (
-	"not.realy.lol/lol"
+	"orly.dev/lol"
 )
 
 var F, E, W, I, D, T lol.Chk

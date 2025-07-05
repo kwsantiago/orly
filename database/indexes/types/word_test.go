@@ -2,10 +2,10 @@ package types_test
 
 import (
 	"bytes"
-	"not.realy.lol/database/indexes/types"
+	"orly.dev/database/indexes/types"
 	"testing"
 
-	"not.realy.lol/chk"
+	"orly.dev/chk"
 )
 
 func TestT(t *testing.T) {

@@ -8,7 +8,7 @@ package ecdsa
 import (
 	"fmt"
 
-	"not.realy.lol/ec/secp256k1"
+	"orly.dev/ec/secp256k1"
 )
 
 // References:
@@ -837,7 +837,8 @@ func RecoverCompact(signature, hash []byte) (
 	if sigRecoveryCode < minValidCode || sigRecoveryCode > maxValidCode {
 		str := fmt.Sprintf(
 			"invalid signature: public key recovery code %d is "+
-				"not in the valid range [%d, %d]", sigRecoveryCode, minValidCode,
+				"not in the valid range [%d, %d]", sigRecoveryCode,
+			minValidCode,
 			maxValidCode,
 		)
 		return nil, false, signatureError(ErrSigInvalidRecoveryCode, str)

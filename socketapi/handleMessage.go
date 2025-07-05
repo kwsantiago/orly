@@ -3,14 +3,14 @@ package socketapi
 import (
 	"fmt"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/envelopes"
-	"not.realy.lol/envelopes/authenvelope"
-	"not.realy.lol/envelopes/closeenvelope"
-	"not.realy.lol/envelopes/eventenvelope"
-	"not.realy.lol/envelopes/noticeenvelope"
-	"not.realy.lol/envelopes/reqenvelope"
-	"not.realy.lol/log"
+	"orly.dev/chk"
+	"orly.dev/envelopes"
+	"orly.dev/envelopes/authenvelope"
+	"orly.dev/envelopes/closeenvelope"
+	"orly.dev/envelopes/eventenvelope"
+	"orly.dev/envelopes/noticeenvelope"
+	"orly.dev/envelopes/reqenvelope"
+	"orly.dev/log"
 )
 
 func (a *A) HandleMessage(msg []byte, remote string) {

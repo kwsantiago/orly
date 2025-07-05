@@ -3,13 +3,13 @@ package event
 import (
 	"io"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/schnorr"
-	"not.realy.lol/kind"
-	"not.realy.lol/tag"
-	"not.realy.lol/tags"
-	"not.realy.lol/timestamp"
-	"not.realy.lol/varint"
+	"orly.dev/chk"
+	"orly.dev/ec/schnorr"
+	"orly.dev/kind"
+	"orly.dev/tag"
+	"orly.dev/tags"
+	"orly.dev/timestamp"
+	"orly.dev/varint"
 )
 
 // MarshalBinary writes a binary encoding of an event.

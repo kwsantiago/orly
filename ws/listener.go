@@ -3,7 +3,7 @@ package ws
 
 import (
 	"net/http"
-	"not.realy.lol/helpers"
+	"orly.dev/helpers"
 	"strings"
 	"sync"
 

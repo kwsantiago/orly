@@ -6,11 +6,11 @@ package subscription
 import (
 	"crypto/rand"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/bech32"
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/ec/bech32"
+	"orly.dev/errorf"
+	"orly.dev/log"
+	"orly.dev/text"
 )
 
 type Id struct {

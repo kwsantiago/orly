@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/base64"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/text"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/text"
 )
 
 // Base64 is a string representing binary data encoded as base64.

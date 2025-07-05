@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/hex"
 )
 
 // SetHex decodes the passed big-endian hex string into the internal field value
@@ -1824,7 +1824,8 @@ func TestFieldSquareRootRandom(t *testing.T) {
 		if bigIntHasSqrt != fValHasSqrt {
 			t.Fatalf(
 				"mismatched square root existence\nbig int in: %x\nfield "+
-					"in: %v\nbig int result: %v\nfield result %v", bigIntVal, fVal,
+					"in: %v\nbig int result: %v\nfield result %v", bigIntVal,
+				fVal,
 				bigIntHasSqrt, fValHasSqrt,
 			)
 		}

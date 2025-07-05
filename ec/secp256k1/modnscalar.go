@@ -7,7 +7,7 @@ package secp256k1
 import (
 	"math/big"
 
-	"not.realy.lol/hex"
+	"orly.dev/hex"
 )
 
 // References:

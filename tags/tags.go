@@ -12,10 +12,10 @@ import (
 
 	"golang.org/x/exp/constraints"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/log"
-	"not.realy.lol/lol"
-	"not.realy.lol/tag"
+	"orly.dev/chk"
+	"orly.dev/log"
+	"orly.dev/lol"
+	"orly.dev/tag"
 )
 
 // T is a list of tag.T - which are lists of string elements with ordering and no uniqueness

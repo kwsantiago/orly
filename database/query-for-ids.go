@@ -1,9 +1,9 @@
 package database
 
 import (
-	"not.realy.lol/context"
-	"not.realy.lol/filter"
-	"not.realy.lol/interfaces/store"
+	"orly.dev/context"
+	"orly.dev/filter"
+	"orly.dev/interfaces/store"
 )
 
 func (d *D) QueryForIds(c context.T, f *filter.T) (

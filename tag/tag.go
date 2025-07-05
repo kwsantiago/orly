@@ -8,10 +8,10 @@ import (
 
 	"golang.org/x/exp/constraints"
 
-	"not.realy.lol/errorf"
-	"not.realy.lol/log"
-	"not.realy.lol/normalize"
-	"not.realy.lol/text"
+	"orly.dev/errorf"
+	"orly.dev/log"
+	"orly.dev/normalize"
+	"orly.dev/text"
 )
 
 // The tag position meanings, so they are clear when reading.

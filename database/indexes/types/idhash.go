@@ -6,14 +6,21 @@ import (
 
 	"github.com/minio/sha256-simd"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/errorf"
-	"not.realy.lol/hex"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/hex"
 )
 
 const IdHashLen = 8
 
 type IdHash struct{ val [IdHashLen]byte }
+
+func (i *IdHash) Set(idh []byte) {
+	if len(idh) != IdHashLen {
+		panic("invalid IdHash length")
+	}
+	copy(i.val[:], idh)
+}
 
 func (i *IdHash) FromId(id []byte) (err error) {
 	if len(id) != sha256.Size {

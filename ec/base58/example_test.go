@@ -7,8 +7,8 @@ package base58_test
 import (
 	"fmt"
 
-	"not.realy.lol/chk"
-	"not.realy.lol/ec/base58"
+	"orly.dev/chk"
+	"orly.dev/ec/base58"
 )
 
 // This example demonstrates how to decode modified base58 encoded data.
