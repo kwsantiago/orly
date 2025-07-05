@@ -353,6 +353,36 @@ func (t *T) Marshal(dst []byte) (b []byte) {
 	return
 }
 
+// MarshalWithWhitespace encodes a tags.T appended to a provided byte slice in JSON form.
+func (t *T) MarshalWithWhitespace(dst []byte) (b []byte) {
+	b = dst
+	b = append(b, '[')
+	if t == nil || t.element == nil {
+		b = append(b, ']')
+		return
+	}
+	b = append(b, '\n')
+	b = append(b, '\t')
+	if len(t.element) == 0 {
+		b = append(b, '[', ']')
+	}
+	for i, s := range t.element {
+		if i > 0 {
+			b = append(b, ',')
+			b = append(b, '\n')
+			b = append(b, '\t')
+			b = append(b, '\t')
+		} else {
+			b = append(b, '\t')
+		}
+		b = s.MarshalWithWhitespace(b)
+	}
+	b = append(b, '\n')
+	b = append(b, '\t')
+	b = append(b, ']')
+	return
+}
+
 // Unmarshal a tags.T from a provided byte slice and return what remains after the end of the
 // array.
 func (t *T) Unmarshal(b []byte) (r []byte, err error) {

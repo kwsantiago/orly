@@ -39,7 +39,7 @@ func (s *S) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 		Name:        s.Cfg.AppName,
 		Description: version.Description,
 		Nips:        supportedNIPs,
-		Software:    "https://orly.dev",
+		Software:    version.URL,
 		Version:     version.V,
 		Limitation:  relayinfo.Limits{
 			// MaxLimit: s.MaxLimit,

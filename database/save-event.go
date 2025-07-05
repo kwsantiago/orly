@@ -1,12 +1,14 @@
 package database
 
 import (
-	"fmt"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/chk"
 	"orly.dev/codecbuf"
 	"orly.dev/context"
+	"orly.dev/database/indexes"
+	"orly.dev/database/indexes/types"
 	"orly.dev/event"
+	"orly.dev/log"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -22,27 +24,21 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 		return
 	}
 	// Generate all indexes for the event
-	indexes, _ := GetIndexesForEvent(ev, serial)
+	var idxs [][]byte
+	if idxs, err = GetIndexesForEvent(ev, serial); chk.E(err) {
+		return
+	}
+	log.I.S(idxs)
 	// Start a transaction to save the event and all its indexes
 	err = d.Update(
 		func(txn *badger.Txn) (err error) {
 			// Save each index
-			for _, idx := range indexes {
+			for _, key := range idxs {
 				if err = func() (err error) {
-					// Get a buffer from the pool for each index
-					idxBuf := codecbuf.Get()
-					defer codecbuf.Put(idxBuf)
-					// Ensure the buffer is empty before use
-					idxBuf.Reset()
-					// Marshal the index to binary
-					if err = idx.MarshalWrite(idxBuf); chk.E(err) {
-						return err
-					}
-					// Debug: Print the key that's being saved
-					key := idxBuf.Bytes()
-					fmt.Printf("Saving key: %v\n", key)
+					buf2 := codecbuf.Get()
+					defer codecbuf.Put(buf2)
 					// Save the index to the database
-					if err = txn.Set(key, buf.Bytes()); chk.E(err) {
+					if err = txn.Set(key, buf2.Bytes()); chk.E(err) {
 						return err
 					}
 					return
@@ -50,7 +46,25 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 					return
 				}
 			}
-			return nil
+			// write the event
+			k := codecbuf.Get()
+			defer codecbuf.Put(k)
+			ser := new(types.Uint40)
+			if err = ser.Set(serial); chk.E(err) {
+				return
+			}
+			if err = indexes.EventEnc(ser).MarshalWrite(k); chk.E(err) {
+				return
+			}
+			v := codecbuf.Get()
+			defer codecbuf.Put(v)
+			ev.MarshalBinary(v)
+			kb, vb := k.Bytes(), v.Bytes()
+			log.I.S(kb, vb)
+			if err = txn.Set(kb, vb); chk.E(err) {
+				return
+			}
+			return
 		},
 	)
 	return

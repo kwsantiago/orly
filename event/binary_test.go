@@ -13,6 +13,7 @@ import (
 
 func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var rem, out []byte
 	var err error
 	buf := codecbuf.Get()
@@ -20,7 +21,9 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 	now := time.Now()
 	var counter int
 	for scanner.Scan() {
+		chk.E(scanner.Err())
 		b := scanner.Bytes()
+		// log.I.F("%s", b)
 		c := make([]byte, 0, len(b))
 		c = append(c, b...)
 		if rem, err = ea.Unmarshal(c); chk.E(err) {
@@ -44,6 +47,7 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 		out = out[:0]
 		// break
 	}
+	chk.E(scanner.Err())
 	t.Logf(
 		"unmarshaled json, marshaled binary, unmarshaled binary, %d events in %v av %v per event",
 		counter, time.Since(now), time.Since(now)/time.Duration(counter),

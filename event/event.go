@@ -75,7 +75,7 @@ func (ev *E) Serialize() (b []byte) { return ev.Marshal(nil) }
 
 // SerializeIndented renders an event.E into nicely readable whitespaced JSON.
 func (ev *E) SerializeIndented() (b []byte) {
-	return ev.marshalWithWhitespace(nil, true)
+	return ev.MarshalWithWhitespace(nil, true)
 }
 
 // EventId returns the event.E Id as an eventid.T.
@@ -85,7 +85,7 @@ func (ev *E) EventId() (eid *eventid.T) {
 
 // stringy/numbery functions for retarded other libraries
 
-// IdString returns the event Id as a hex encoded string.
+// IdString returns the event Id as a hex-encoded string.
 func (ev *E) IdString() (s string) { return hex.Enc(ev.Id) }
 
 // CreatedAtInt64 returns the created_at timestamp as a standard int64.

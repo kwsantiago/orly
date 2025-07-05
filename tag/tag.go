@@ -260,6 +260,20 @@ func (t *T) Marshal(dst []byte) (b []byte) {
 	return dst
 }
 
+// MarshalWithWhitespace encodes a tag.T as standard minified JSON array of strings.
+func (t *T) MarshalWithWhitespace(dst []byte) (b []byte) {
+	dst = append(dst, '[')
+	for i, s := range t.field {
+		if i > 0 {
+			dst = append(dst, ',')
+			dst = append(dst, ' ')
+		}
+		dst = text.AppendQuote(dst, s, text.NostrEscape)
+	}
+	dst = append(dst, ']')
+	return dst
+}
+
 // Unmarshal decodes a standard minified JSON array of strings to a tags.T.
 func (t *T) Unmarshal(b []byte) (r []byte, err error) {
 	var inQuotes, openedBracket bool

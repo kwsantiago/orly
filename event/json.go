@@ -2,10 +2,8 @@ package event
 
 import (
 	"bytes"
-	"encoding/json"
-	"io"
-
 	"github.com/minio/sha256-simd"
+	"io"
 	"orly.dev/chk"
 	"orly.dev/ec/schnorr"
 	"orly.dev/errorf"
@@ -28,13 +26,13 @@ var (
 
 // Marshal appends an event.E to a provided destination slice.
 func (ev *E) Marshal(dst []byte) (b []byte) {
-	b = ev.marshalWithWhitespace(dst, false)
+	b = ev.MarshalWithWhitespace(dst, false)
 	return
 }
 
-// marshalWithWhitespace adds tabs and newlines to make the JSON more readable
+// MarshalWithWhitespace adds tabs and newlines to make the JSON more readable
 // for humans, if the on flag is set to true.
-func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
+func (ev *E) MarshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	// open parentheses
 	dst = append(dst, '{')
 	// Id
@@ -42,6 +40,9 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 		dst = append(dst, '\n', '\t')
 	}
 	dst = text.JSONKey(dst, jId)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = text.AppendQuote(dst, ev.Id, hex.EncAppend)
 	dst = append(dst, ',')
 	// Pubkey
@@ -49,6 +50,9 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 		dst = append(dst, '\n', '\t')
 	}
 	dst = text.JSONKey(dst, jPubkey)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = text.AppendQuote(dst, ev.Pubkey, hex.EncAppend)
 	dst = append(dst, ',')
 	if on {
@@ -56,6 +60,9 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	}
 	// CreatedAt
 	dst = text.JSONKey(dst, jCreatedAt)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = ev.CreatedAt.Marshal(dst)
 	dst = append(dst, ',')
 	if on {
@@ -63,6 +70,9 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	}
 	// Kind
 	dst = text.JSONKey(dst, jKind)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = ev.Kind.Marshal(dst)
 	dst = append(dst, ',')
 	if on {
@@ -70,13 +80,23 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	}
 	// Tags
 	dst = text.JSONKey(dst, jTags)
-	dst = ev.Tags.Marshal(dst)
+	if on {
+		dst = append(dst, ' ')
+	}
+	if on {
+		dst = ev.Tags.MarshalWithWhitespace(dst)
+	} else {
+		dst = ev.Tags.Marshal(dst)
+	}
 	dst = append(dst, ',')
 	if on {
 		dst = append(dst, '\n', '\t')
 	}
 	// Content
 	dst = text.JSONKey(dst, jContent)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = text.AppendQuote(dst, ev.Content, text.NostrEscape)
 	dst = append(dst, ',')
 	if on {
@@ -84,6 +104,9 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	}
 	// jSig
 	dst = text.JSONKey(dst, jSig)
+	if on {
+		dst = append(dst, ' ')
+	}
 	dst = text.AppendQuote(dst, ev.Sig, hex.EncAppend)
 	if on {
 		dst = append(dst, '\n')
@@ -98,29 +121,16 @@ func (ev *E) marshalWithWhitespace(dst []byte, on bool) (b []byte) {
 // except you explicitly specify the receiver.
 func Marshal(ev *E, dst []byte) (b []byte) { return ev.Marshal(dst) }
 
-// Unmarshal an event from minified JSON into an event.E.
+// Unmarshal an event from JSON into an event.E.
+// This function handles both minified and whitespace-formatted JSON.
 func (ev *E) Unmarshal(b []byte) (r []byte, err error) {
-	// this parser does not cope with whitespaces in valid places in json, so we
-	// scan first for linebreaks, as these indicate that it is probably not gona work and fall back to json.Unmarshal
-	for _, v := range b {
-		if v == '\n' {
-			// revert to json.Unmarshal
-			var j J
-			if err = json.Unmarshal(b, &j); chk.E(err) {
-				return
-			}
-			var e *E
-			if e, err = j.ToEvent(); chk.E(err) {
-				return
-			}
-			*ev = *e
-			return
-		}
-	}
-
 	key := make([]byte, 0, 9)
 	r = b
 	for ; len(r) > 0; r = r[1:] {
+		// Skip whitespace
+		if isWhitespace(r[0]) {
+			continue
+		}
 		if r[0] == '{' {
 			r = r[1:]
 			goto BetweenKeys
@@ -129,6 +139,10 @@ func (ev *E) Unmarshal(b []byte) (r []byte, err error) {
 	goto eof
 BetweenKeys:
 	for ; len(r) > 0; r = r[1:] {
+		// Skip whitespace
+		if isWhitespace(r[0]) {
+			continue
+		}
 		if r[0] == '"' {
 			r = r[1:]
 			goto InKey
@@ -146,6 +160,10 @@ InKey:
 	goto eof
 InKV:
 	for ; len(r) > 0; r = r[1:] {
+		// Skip whitespace
+		if isWhitespace(r[0]) {
+			continue
+		}
 		if r[0] == ':' {
 			r = r[1:]
 			goto InVal
@@ -153,6 +171,11 @@ InKV:
 	}
 	goto eof
 InVal:
+	// Skip whitespace before value
+	for len(r) > 0 && isWhitespace(r[0]) {
+		r = r[1:]
+	}
+
 	switch key[0] {
 	case jId[0]:
 		if !bytes.Equal(jId, key) {
@@ -250,6 +273,11 @@ InVal:
 BetweenKV:
 	key = key[:0]
 	for ; len(r) > 0; r = r[1:] {
+		// Skip whitespace
+		if isWhitespace(r[0]) {
+			continue
+		}
+
 		switch {
 		case len(r) == 0:
 			return
@@ -266,6 +294,10 @@ BetweenKV:
 	}
 	goto eof
 AfterClose:
+	// Skip any trailing whitespace
+	for len(r) > 0 && isWhitespace(r[0]) {
+		r = r[1:]
+	}
 	return
 invalid:
 	err = errorf.E(
@@ -276,6 +308,11 @@ invalid:
 eof:
 	err = io.EOF
 	return
+}
+
+// isWhitespace returns true if the byte is a whitespace character (space, tab, newline, carriage return).
+func isWhitespace(b byte) bool {
+	return b == ' ' || b == '\t' || b == '\n' || b == '\r'
 }
 
 // Unmarshal is the same as the event.E Unmarshal method except you give it the

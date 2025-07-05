@@ -4,11 +4,21 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="move to new orly.dev; implement indexes properly">
-      <change afterPath="$PROJECT_DIR$/orly.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay">
+      <change afterPath="$PROJECT_DIR$/event/examples/out.jsonl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/event/json_whitespace_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/binary_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/binary_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/canonical.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/canonical.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/event.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/handle-relayinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/handle-relayinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tag/tag.go" beforeDir="false" afterPath="$PROJECT_DIR$/tag/tag.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tags/tags.go" beforeDir="false" afterPath="$PROJECT_DIR$/tags/tags.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version/version.go" beforeDir="false" afterPath="$PROJECT_DIR$/version/version.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,8 +34,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Go Application" />
         <option value="Go File" />
+        <option value="Go Application" />
       </list>
     </option>
   </component>
@@ -56,36 +66,41 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build github.com/mleku/realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build not.realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestGenerateIndexes in not.realy.lol/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestT in not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test not.realy.lol/database/indexes.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.gobench not.realy.lol/codecbuf.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/david/src/not.realy.lol&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go Application",
+    "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
+    "Go Build.go build not.realy.lol.executor": "Run",
+    "Go Build.go build orly.dev/event/examples/filter.executor": "Run",
+    "Go Build.go build sample.go.executor": "Run",
+    "Go Test.TestFromCanonical in orly.dev/event.executor": "Run",
+    "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
+    "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
+    "Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor": "Run",
+    "Go Test.go test not.realy.lol/database/indexes.executor": "Run",
+    "Go Test.go test not.realy.lol/database/indexes/types.executor": "Run",
+    "Go Test.go test orly.dev/event.executor": "Run",
+    "Go Test.gobench not.realy.lol/codecbuf.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.GoLinterPluginOnboarding": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/david/src/orly.dev",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="GoMoveDeclarationDialog.RECENT_KEY">
       <recent name="$PROJECT_DIR$/database" />
@@ -98,76 +113,74 @@
       <recent name="$PROJECT_DIR$/socketapi" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/event/examples" />
+      <recent name="$PROJECT_DIR$/event/examples/filter" />
       <recent name="$PROJECT_DIR$/database/indexes/types" />
       <recent name="$PROJECT_DIR$/database" />
       <recent name="$PROJECT_DIR$/interfaces" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.go test not.realy.lol/database/indexes">
-    <configuration name="TestGenerateIndexes in not.realy.lol/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.go test orly.dev/event">
+    <configuration name="go build orly.dev/event/examples/filter" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$/database" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/event/examples/filter" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/event/examples/filter/filter.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build sample.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="not.realy.lol" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <package value="orly.dev" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$APPLICATION_CONFIG_DIR$/scratches/sample.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestFromCanonical in orly.dev/event" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="not.realy.lol" />
+      <working_directory value="$PROJECT_DIR$/event" />
       <root_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <package value="not.realy.lol/database" />
+      <package value="orly.dev/event" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestGenerateIndexes\E$" />
+      <pattern value="^\QTestFromCanonical\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestT in not.realy.lol/database/indexes/types" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestTMarshalBinary_UnmarshalBinary in orly.dev/event" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$/database/indexes/types" />
+      <working_directory value="$PROJECT_DIR$/event" />
       <root_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <package value="not.realy.lol/database/indexes/types" />
+      <package value="orly.dev/event" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestT\E$" />
+      <pattern value="^\QTestTMarshalBinary_UnmarshalBinary\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="go test not.realy.lol/database/indexes" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="go test orly.dev/event" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$/database/indexes" />
+      <working_directory value="$PROJECT_DIR$/event" />
       <root_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <package value="not.realy.lol/database/indexes" />
+      <package value="orly.dev/event" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <method v="2" />
-    </configuration>
-    <configuration name="go test not.realy.lol/database/indexes/types" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$/database/indexes/types" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="not.realy.lol/database/indexes/types" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <method v="2" />
-    </configuration>
-    <configuration name="gobench not.realy.lol/codecbuf" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="not.realy.lol" />
-      <working_directory value="$PROJECT_DIR$/codecbuf" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="not.realy.lol/codecbuf" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gobench" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.go test not.realy.lol/database/indexes" />
-        <item itemvalue="Go Test.go test not.realy.lol/database/indexes/types" />
-        <item itemvalue="Go Test.TestT in not.realy.lol/database/indexes/types" />
-        <item itemvalue="Go Test.TestGenerateIndexes in not.realy.lol/database" />
-        <item itemvalue="Go Test.gobench not.realy.lol/codecbuf" />
+        <item itemvalue="Go Test.go test orly.dev/event" />
+        <item itemvalue="Go Test.TestFromCanonical in orly.dev/event" />
+        <item itemvalue="Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event" />
+        <item itemvalue="Go Build.go build orly.dev/event/examples/filter" />
+        <item itemvalue="Go Build.go build sample.go" />
       </list>
     </recent_temporary>
   </component>
@@ -222,7 +235,8 @@
     <MESSAGE value="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic" />
     <MESSAGE value="remove unused letter package, rename and refactor core types, update filters and test logic" />
     <MESSAGE value="move to new orly.dev; implement indexes properly" />
-    <option name="LAST_COMMIT_MESSAGE" value="move to new orly.dev; implement indexes properly" />
+    <MESSAGE value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
+    <option name="LAST_COMMIT_MESSAGE" value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
