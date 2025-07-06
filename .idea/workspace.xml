@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="remove all indexes that don't end in a timestamp">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +112,7 @@
       <recent name="$PROJECT_DIR$/interfaces" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.go test orly.dev/database/indexes">
+  <component name="RunManager" selected="Go Test.TestGetIndexesFromFilter in orly.dev/database">
     <configuration name="TestFromCanonical in orly.dev/event" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="not.realy.lol" />
       <working_directory value="$PROJECT_DIR$/event" />
@@ -175,9 +172,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.go test orly.dev/database/indexes" />
-        <item itemvalue="Go Test.go test orly.dev/database" />
         <item itemvalue="Go Test.TestGetIndexesFromFilter in orly.dev/database" />
+        <item itemvalue="Go Test.go test orly.dev/database" />
+        <item itemvalue="Go Test.go test orly.dev/database/indexes" />
         <item itemvalue="Go Test.go test orly.dev/event" />
         <item itemvalue="Go Test.TestFromCanonical in orly.dev/event" />
       </list>

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"math"
 	"orly.dev/chk"
 	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
@@ -65,10 +66,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
 							ca := new(types.Uint64)
-							if f.Since != nil {
+							if f.Since != nil && f.Since.V != 0 {
 								ca.Set(uint64(f.Since.V))
-							} else if f.Until != nil {
+							} else if f.Until != nil && f.Until.V != 0 {
 								ca.Set(uint64(f.Until.V))
+							} else if f.Until != nil {
+								ca.Set(uint64(math.MaxInt64))
 							}
 							ser := new(types.Uint40)
 							idx := indexes.KindPubkeyTagEnc(
@@ -108,10 +111,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						ca := new(types.Uint64)
-						if f.Since != nil {
+						if f.Since != nil && f.Since.V != 0 {
 							ca.Set(uint64(f.Since.V))
-						} else if f.Until != nil {
+						} else if f.Until != nil && f.Until.V != 0 {
 							ca.Set(uint64(f.Until.V))
+						} else if f.Until != nil {
+							ca.Set(uint64(math.MaxInt64))
 						}
 						ser := new(types.Uint40)
 						idx := indexes.KindTagEnc(
@@ -147,10 +152,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						return
 					}
 					ca := new(types.Uint64)
-					if f.Since != nil {
+					if f.Since != nil && f.Since.V != 0 {
 						ca.Set(uint64(f.Since.V))
-					} else if f.Until != nil {
+					} else if f.Until != nil && f.Until.V != 0 {
 						ca.Set(uint64(f.Until.V))
+					} else if f.Until != nil {
+						ca.Set(uint64(math.MaxInt64))
 					}
 					ser := new(types.Uint40)
 					idx := indexes.KindPubkeyEnc(kind, p, ca, ser)
@@ -188,10 +195,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						ca := new(types.Uint64)
-						if f.Since != nil {
+						if f.Since != nil && f.Since.V != 0 {
 							ca.Set(uint64(f.Since.V))
-						} else if f.Until != nil {
+						} else if f.Until != nil && f.Until.V != 0 {
 							ca.Set(uint64(f.Until.V))
+						} else if f.Until != nil {
+							ca.Set(uint64(math.MaxInt64))
 						}
 						ser := new(types.Uint40)
 						idx := indexes.PubkeyTagEnc(
@@ -227,10 +236,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					valueHash := new(types.Ident)
 					valueHash.FromIdent(valueBytes)
 					ca := new(types.Uint64)
-					if f.Since != nil {
+					if f.Since != nil && f.Since.V != 0 {
 						ca.Set(uint64(f.Since.V))
-					} else if f.Until != nil {
+					} else if f.Until != nil && f.Until.V != 0 {
 						ca.Set(uint64(f.Until.V))
+					} else if f.Until != nil {
+						ca.Set(uint64(math.MaxInt64))
 					}
 					ser := new(types.Uint40)
 					idx := indexes.TagEnc(key, valueHash, ca, ser)
@@ -258,10 +269,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 				kind := new(types.Uint16)
 				kind.Set(k)
 				ca := new(types.Uint64)
-				if f.Since != nil {
+				if f.Since != nil && f.Since.V != 0 {
 					ca.Set(uint64(f.Since.V))
-				} else if f.Until != nil {
+				} else if f.Until != nil && f.Until.V != 0 {
 					ca.Set(uint64(f.Until.V))
+				} else if f.Until != nil {
+					ca.Set(uint64(math.MaxInt64))
 				}
 				ser := new(types.Uint40)
 				idx := indexes.KindEnc(kind, ca, ser)
@@ -290,10 +303,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					return
 				}
 				ca := new(types.Uint64)
-				if f.Since != nil {
+				if f.Since != nil && f.Since.V != 0 {
 					ca.Set(uint64(f.Since.V))
-				} else if f.Until != nil {
+				} else if f.Until != nil && f.Until.V != 0 {
 					ca.Set(uint64(f.Until.V))
+				} else if f.Until != nil {
+					ca.Set(uint64(math.MaxInt64))
 				}
 				ser := new(types.Uint40)
 				idx := indexes.PubkeyEnc(p, ca, ser)
@@ -317,10 +332,12 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	if ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		if err = func() (err error) {
 			ca := new(types.Uint64)
-			if f.Since != nil {
+			if f.Since != nil && f.Since.V != 0 {
 				ca.Set(uint64(f.Since.V))
-			} else if f.Until != nil {
+			} else if f.Until != nil && f.Until.V != 0 {
 				ca.Set(uint64(f.Until.V))
+			} else if f.Until != nil {
+				ca.Set(uint64(math.MaxInt64))
 			}
 			ser := new(types.Uint40)
 			idx := indexes.CreatedAtEnc(ca, ser)

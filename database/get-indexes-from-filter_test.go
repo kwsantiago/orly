@@ -22,6 +22,7 @@ func TestGetIndexesFromFilter(t *testing.T) {
 	t.Run("Id", testIdFilter)
 	t.Run("Pubkey", testPubkeyFilter)
 	t.Run("CreatedAt", testCreatedAtFilter)
+	t.Run("CreatedAtUntil", testCreatedAtUntilFilter)
 	t.Run("PubkeyTag", testPubkeyTagFilter)
 	t.Run("Tag", testTagFilter)
 	t.Run("Kind", testKindFilter)
@@ -83,7 +84,7 @@ func testIdFilter(t *testing.T) {
 
 // Test Pubkey filter
 func testPubkeyFilter(t *testing.T) {
-	// Create a filter with an Author and Since
+	// Create a filter with an Author, Since, and Until
 	f := filter.New()
 	pubkey := make([]byte, 32)
 	for i := range pubkey {
@@ -91,6 +92,7 @@ func testPubkeyFilter(t *testing.T) {
 	}
 	f.Authors = f.Authors.Append(pubkey)
 	f.Since = timestamp.FromUnix(12345)
+	f.Until = timestamp.FromUnix(67890)  // Added Until field
 
 	// Generate indexes
 	idxs, err := GetIndexesFromFilter(f)
@@ -105,7 +107,7 @@ func testPubkeyFilter(t *testing.T) {
 		t.Fatalf("Failed to create PubHash: %v", err)
 	}
 	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
+	ca.Set(uint64(f.Since.V))  // Since takes precedence over Until
 	ser := new(types.Uint40)
 	expectedIdx := indexes.PubkeyEnc(p, ca, ser)
 
@@ -128,6 +130,28 @@ func testCreatedAtFilter(t *testing.T) {
 	// Create the expected index
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
+	ser := new(types.Uint40)
+	expectedIdx := indexes.CreatedAtEnc(ca, ser)
+
+	// Verify the generated index
+	verifyIndex(t, idxs, expectedIdx)
+}
+
+// Test CreatedAt filter with Until
+func testCreatedAtUntilFilter(t *testing.T) {
+	// Create a filter with Until
+	f := filter.New()
+	f.Until = timestamp.FromUnix(67890)
+
+	// Generate indexes
+	idxs, err := GetIndexesFromFilter(f)
+	if chk.E(err) {
+		t.Fatalf("GetIndexesFromFilter failed: %v", err)
+	}
+
+	// Create the expected index
+	ca := new(types.Uint64)
+	ca.Set(uint64(f.Until.V))
 	ser := new(types.Uint40)
 	expectedIdx := indexes.CreatedAtEnc(ca, ser)
 
