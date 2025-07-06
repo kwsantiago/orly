@@ -6,10 +6,10 @@ import (
 	"io"
 
 	"orly.dev/chk"
-	"orly.dev/codec"
 	envs "orly.dev/envelopes"
 	"orly.dev/errorf"
 	"orly.dev/event"
+	"orly.dev/interfaces/codec"
 	"orly.dev/log"
 	"orly.dev/text"
 )

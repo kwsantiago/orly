@@ -4,10 +4,22 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="remove all indexes that don't end in a timestamp">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="handle `Until` filter in `GetIndexesFromFilter` and update tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codec/codec.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/authenvelope/authenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/authenvelope/authenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/closedenvelope/closedenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/closedenvelope/closedenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/closeenvelope/closeenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/closeenvelope/closeenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/countenvelope/countenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/countenvelope/countenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/noticeenvelope/noticeenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/noticeenvelope/noticeenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/okenvelope/okenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/okenvelope/okenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/reqenvelope/reqenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/reqenvelope/reqenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/canonical.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/canonical.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interfaces/codec/codec.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/codec/codec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/array.go" beforeDir="false" afterPath="$PROJECT_DIR$/json/array.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/keyvalue.go" beforeDir="false" afterPath="$PROJECT_DIR$/json/keyvalue.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,11 +117,11 @@
       <recent name="$PROJECT_DIR$/socketapi" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/interfaces" />
       <recent name="$PROJECT_DIR$/event/examples" />
       <recent name="$PROJECT_DIR$/event/examples/filter" />
       <recent name="$PROJECT_DIR$/database/indexes/types" />
       <recent name="$PROJECT_DIR$/database" />
-      <recent name="$PROJECT_DIR$/interfaces" />
     </key>
   </component>
   <component name="RunManager" selected="Go Test.TestGetIndexesFromFilter in orly.dev/database">
@@ -235,7 +247,8 @@
     <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
     <MESSAGE value="complete set of indexes, log data size of data stored vs size of received event" />
     <MESSAGE value="remove all indexes that don't end in a timestamp" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove all indexes that don't end in a timestamp" />
+    <MESSAGE value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

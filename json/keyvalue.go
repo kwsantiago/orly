@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"orly.dev/chk"
-	"orly.dev/codec"
+	"orly.dev/interfaces/codec"
 )
 
 // An Object is an (not necessarily) ordered list of KeyValue.

@@ -9,10 +9,10 @@ import (
 
 	"github.com/minio/sha256-simd"
 	"orly.dev/chk"
-	"orly.dev/codec"
 	"orly.dev/envelopes"
 	"orly.dev/errorf"
 	"orly.dev/eventid"
+	"orly.dev/interfaces/codec"
 	"orly.dev/log"
 	"orly.dev/text"
 )

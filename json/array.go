@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"orly.dev/chk"
-	"orly.dev/codec"
+	"orly.dev/interfaces/codec"
 )
 
 // An Array is an ordered list of values. Each field is typed, to deal with the javascript

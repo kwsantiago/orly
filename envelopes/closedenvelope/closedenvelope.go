@@ -7,8 +7,8 @@ import (
 	"io"
 
 	"orly.dev/chk"
-	"orly.dev/codec"
 	"orly.dev/envelopes"
+	"orly.dev/interfaces/codec"
 	"orly.dev/subscription"
 	"orly.dev/text"
 )

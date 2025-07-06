@@ -4,9 +4,9 @@ import (
 	"reflect"
 
 	"orly.dev/chk"
-	"orly.dev/codec"
 	"orly.dev/errorf"
 	"orly.dev/hex"
+	"orly.dev/interfaces/codec"
 	"orly.dev/json"
 	"orly.dev/kind"
 	"orly.dev/log"
