@@ -52,7 +52,7 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	if err = appendIndexBytes(&idxs, idIndex); chk.E(err) {
 		return
 	}
-	// IdPubkeyCreatedAt index
+	// IdPubkey index
 	fullID := new(Id)
 	if err = fullID.FromId(ev.Id); chk.E(err) {
 		return
@@ -63,10 +63,10 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	}
 	createdAt := new(Uint64)
 	createdAt.Set(uint64(ev.CreatedAt.V))
-	idPubkeyCreatedAtIndex := indexes.IdPubkeyCreatedAtEnc(
+	idPubkeyIndex := indexes.IdPubkeyEnc(
 		ser, fullID, pubHash, createdAt,
 	)
-	if err = appendIndexBytes(&idxs, idPubkeyCreatedAtIndex); chk.E(err) {
+	if err = appendIndexBytes(&idxs, idPubkeyIndex); chk.E(err) {
 		return
 	}
 	// CreatedAt index
@@ -75,8 +75,8 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 		return
 	}
 	// PubkeyCreatedAt index
-	pubkeyCreatedAtIndex := indexes.PubkeyCreatedAtEnc(pubHash, createdAt, ser)
-	if err = appendIndexBytes(&idxs, pubkeyCreatedAtIndex); chk.E(err) {
+	pubkeyIndex := indexes.PubkeyEnc(pubHash, createdAt, ser)
+	if err = appendIndexBytes(&idxs, pubkeyIndex); chk.E(err) {
 		return
 	}
 	// Process tags for tag-related indexes
@@ -97,42 +97,42 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 				key.Set(keyBytes[0])
 				valueHash := new(Ident)
 				valueHash.FromIdent(valueBytes)
-				// PubkeyTagCreatedAt index
-				pubkeyTagCreatedAtIndex := indexes.PubkeyTagCreatedAtEnc(
+				// PubkeyTag index
+				pubkeyTagIndex := indexes.PubkeyTagEnc(
 					pubHash, key, valueHash, createdAt, ser,
 				)
 				if err = appendIndexBytes(
-					&idxs, pubkeyTagCreatedAtIndex,
+					&idxs, pubkeyTagIndex,
 				); chk.E(err) {
 					return
 				}
-				// TagCreatedAt index
-				tagCreatedAtIndex := indexes.TagCreatedAtEnc(
+				// Tag index
+				tagIndex := indexes.TagEnc(
 					key, valueHash, createdAt, ser,
 				)
 				if err = appendIndexBytes(
-					&idxs, tagCreatedAtIndex,
+					&idxs, tagIndex,
 				); chk.E(err) {
 					return
 				}
 				// Kind-related tag indexes
 				kind := new(Uint16)
 				kind.Set(ev.Kind.K)
-				// KindTagCreatedAt index
-				kindTagCreatedAtIndex := indexes.KindTagCreatedAtEnc(
+				// KindTag index
+				kindTagIndex := indexes.KindTagEnc(
 					kind, key, valueHash, createdAt, ser,
 				)
 				if err = appendIndexBytes(
-					&idxs, kindTagCreatedAtIndex,
+					&idxs, kindTagIndex,
 				); chk.E(err) {
 					return
 				}
-				// KindPubkeyTagCreatedAt index
-				kindPubkeyTagCreatedAtIndex := indexes.KindPubkeyTagCreatedAtEnc(
+				// KindPubkeyTag index
+				kindPubkeyTagIndex := indexes.KindPubkeyTagEnc(
 					kind, pubHash, key, valueHash, createdAt, ser,
 				)
 				if err = appendIndexBytes(
-					&idxs, kindPubkeyTagCreatedAtIndex,
+					&idxs, kindPubkeyTagIndex,
 				); chk.E(err) {
 					return
 				}
@@ -141,17 +141,17 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	}
 	kind := new(Uint16)
 	kind.Set(uint16(ev.Kind.K))
-	// KindCreatedAt index
-	kindCreatedAtIndex := indexes.KindCreatedAtEnc(kind, createdAt, ser)
-	if err = appendIndexBytes(&idxs, kindCreatedAtIndex); chk.E(err) {
+	// Kind index
+	kindIndex := indexes.KindEnc(kind, createdAt, ser)
+	if err = appendIndexBytes(&idxs, kindIndex); chk.E(err) {
 		return
 	}
-	// KindPubkeyCreatedAt index
+	// KindPubkey index
 	// Using the correct parameters based on the function signature
-	kindPubkeyCreatedAtIndex := indexes.KindPubkeyCreatedAtEnc(
+	kindPubkeyIndex := indexes.KindPubkeyEnc(
 		kind, pubHash, createdAt, ser,
 	)
-	if err = appendIndexBytes(&idxs, kindPubkeyCreatedAtIndex); chk.E(err) {
+	if err = appendIndexBytes(&idxs, kindPubkeyIndex); chk.E(err) {
 		return
 	}
 	return

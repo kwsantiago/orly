@@ -45,7 +45,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// KindPubkeyTagCreatedAt
+	// KindPubkeyTag
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
@@ -71,7 +71,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 								ca.Set(uint64(f.Until.V))
 							}
 							ser := new(types.Uint40)
-							idx := indexes.KindPubkeyTagCreatedAtEnc(
+							idx := indexes.KindPubkeyTagEnc(
 								kind, p, key, valueHash, ca, ser,
 							)
 							buf := codecbuf.Get()
@@ -93,7 +93,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// KindTagCreatedAt
+	// KindTag
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -114,7 +114,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 							ca.Set(uint64(f.Until.V))
 						}
 						ser := new(types.Uint40)
-						idx := indexes.KindTagCreatedAtEnc(
+						idx := indexes.KindTagEnc(
 							kind, key, valueHash, ca, ser,
 						)
 						buf := codecbuf.Get()
@@ -135,7 +135,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// KindPubkeyCreatedAt
+	// KindPubkey
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
@@ -153,7 +153,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						ca.Set(uint64(f.Until.V))
 					}
 					ser := new(types.Uint40)
-					idx := indexes.KindPubkeyCreatedAtEnc(kind, p, ca, ser)
+					idx := indexes.KindPubkeyEnc(kind, p, ca, ser)
 					buf := codecbuf.Get()
 					defer codecbuf.Put(buf)
 					if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -171,7 +171,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// PubkeyTagCreatedAt
+	// PubkeyTag
 	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -194,7 +194,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 							ca.Set(uint64(f.Until.V))
 						}
 						ser := new(types.Uint40)
-						idx := indexes.PubkeyTagCreatedAtEnc(
+						idx := indexes.PubkeyTagEnc(
 							p, key, valueHash, ca, ser,
 						)
 						buf := codecbuf.Get()
@@ -215,7 +215,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// TagCreatedAt
+	// Tag
 	if f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
@@ -233,7 +233,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						ca.Set(uint64(f.Until.V))
 					}
 					ser := new(types.Uint40)
-					idx := indexes.TagCreatedAtEnc(key, valueHash, ca, ser)
+					idx := indexes.TagEnc(key, valueHash, ca, ser)
 					buf := codecbuf.Get()
 					defer codecbuf.Put(buf)
 					if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -251,7 +251,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// KindCreatedAt
+	// Kind
 	if f.Kinds != nil && f.Kinds.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		for _, k := range f.Kinds.ToUint16() {
 			if err = func() (err error) {
@@ -264,7 +264,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					ca.Set(uint64(f.Until.V))
 				}
 				ser := new(types.Uint40)
-				idx := indexes.KindCreatedAtEnc(kind, ca, ser)
+				idx := indexes.KindEnc(kind, ca, ser)
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -281,7 +281,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// PubkeyCreatedAt
+	// Pubkey
 	if f.Authors != nil && f.Authors.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			if err = func() (err error) {
@@ -296,7 +296,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					ca.Set(uint64(f.Until.V))
 				}
 				ser := new(types.Uint40)
-				idx := indexes.PubkeyCreatedAtEnc(p, ca, ser)
+				idx := indexes.PubkeyEnc(p, ca, ser)
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="complete set of indexes, log data size of data stored vs size of received event">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="remove all indexes that don't end in a timestamp">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
@@ -237,7 +237,8 @@
     <MESSAGE value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
     <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
     <MESSAGE value="complete set of indexes, log data size of data stored vs size of received event" />
-    <option name="LAST_COMMIT_MESSAGE" value="complete set of indexes, log data size of data stored vs size of received event" />
+    <MESSAGE value="remove all indexes that don't end in a timestamp" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove all indexes that don't end in a timestamp" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

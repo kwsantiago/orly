@@ -20,14 +20,14 @@ import (
 func TestGetIndexesFromFilter(t *testing.T) {
 	// Test cases for each filter type
 	t.Run("Id", testIdFilter)
-	t.Run("PubkeyCreatedAt", testPubkeyCreatedAtFilter)
+	t.Run("Pubkey", testPubkeyFilter)
 	t.Run("CreatedAt", testCreatedAtFilter)
-	t.Run("PubkeyTagCreatedAt", testPubkeyTagCreatedAtFilter)
-	t.Run("TagCreatedAt", testTagCreatedAtFilter)
-	t.Run("KindCreatedAt", testKindCreatedAtFilter)
-	t.Run("KindPubkeyCreatedAt", testKindPubkeyCreatedAtFilter)
-	t.Run("KindTagCreatedAt", testKindTagCreatedAtFilter)
-	t.Run("KindPubkeyTagCreatedAt", testKindPubkeyTagCreatedAtFilter)
+	t.Run("PubkeyTag", testPubkeyTagFilter)
+	t.Run("Tag", testTagFilter)
+	t.Run("Kind", testKindFilter)
+	t.Run("KindPubkey", testKindPubkeyFilter)
+	t.Run("KindTag", testKindTagFilter)
+	t.Run("KindPubkeyTag", testKindPubkeyTagFilter)
 }
 
 // Helper function to verify that the generated index matches the expected index
@@ -81,8 +81,8 @@ func testIdFilter(t *testing.T) {
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test PubkeyCreatedAt filter
-func testPubkeyCreatedAtFilter(t *testing.T) {
+// Test Pubkey filter
+func testPubkeyFilter(t *testing.T) {
 	// Create a filter with an Author and Since
 	f := filter.New()
 	pubkey := make([]byte, 32)
@@ -107,7 +107,7 @@ func testPubkeyCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.PubkeyCreatedAtEnc(p, ca, ser)
+	expectedIdx := indexes.PubkeyEnc(p, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -135,8 +135,8 @@ func testCreatedAtFilter(t *testing.T) {
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test PubkeyTagCreatedAt filter
-func testPubkeyTagCreatedAtFilter(t *testing.T) {
+// Test PubkeyTag filter
+func testPubkeyTagFilter(t *testing.T) {
 	// Create a filter with an Author, a Tag, and Since
 	f := filter.New()
 	pubkey := make([]byte, 32)
@@ -172,14 +172,14 @@ func testPubkeyTagCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.PubkeyTagCreatedAtEnc(p, key, valueHash, ca, ser)
+	expectedIdx := indexes.PubkeyTagEnc(p, key, valueHash, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test TagCreatedAt filter
-func testTagCreatedAtFilter(t *testing.T) {
+// Test Tag filter
+func testTagFilter(t *testing.T) {
 	// Create a filter with a Tag and Since
 	f := filter.New()
 
@@ -205,14 +205,14 @@ func testTagCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.TagCreatedAtEnc(key, valueHash, ca, ser)
+	expectedIdx := indexes.TagEnc(key, valueHash, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test KindCreatedAt filter
-func testKindCreatedAtFilter(t *testing.T) {
+// Test Kind filter
+func testKindFilter(t *testing.T) {
 	// Create a filter with a Kind and Since
 	f := filter.New()
 	f.Kinds = kinds.New(kind.New(1))
@@ -230,14 +230,14 @@ func testKindCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.KindCreatedAtEnc(kind, ca, ser)
+	expectedIdx := indexes.KindEnc(kind, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test KindPubkeyCreatedAt filter
-func testKindPubkeyCreatedAtFilter(t *testing.T) {
+// Test KindPubkey filter
+func testKindPubkeyFilter(t *testing.T) {
 	// Create a filter with a Kind, an Author, and Since
 	f := filter.New()
 	f.Kinds = kinds.New(kind.New(1))
@@ -265,14 +265,14 @@ func testKindPubkeyCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.KindPubkeyCreatedAtEnc(kind, p, ca, ser)
+	expectedIdx := indexes.KindPubkeyEnc(kind, p, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test KindTagCreatedAt filter
-func testKindTagCreatedAtFilter(t *testing.T) {
+// Test KindTag filter
+func testKindTagFilter(t *testing.T) {
 	// Create a filter with a Kind, a Tag, and Since
 	f := filter.New()
 	f.Kinds = kinds.New(kind.New(1))
@@ -301,14 +301,14 @@ func testKindTagCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.KindTagCreatedAtEnc(kind, key, valueHash, ca, ser)
+	expectedIdx := indexes.KindTagEnc(kind, key, valueHash, ca, ser)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
 }
 
-// Test KindPubkeyTagCreatedAt filter
-func testKindPubkeyTagCreatedAtFilter(t *testing.T) {
+// Test KindPubkeyTag filter
+func testKindPubkeyTagFilter(t *testing.T) {
 	// Create a filter with a Kind, an Author, a Tag, and Since
 	f := filter.New()
 	f.Kinds = kinds.New(kind.New(1))
@@ -347,7 +347,7 @@ func testKindPubkeyTagCreatedAtFilter(t *testing.T) {
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
 	ser := new(types.Uint40)
-	expectedIdx := indexes.KindPubkeyTagCreatedAtEnc(
+	expectedIdx := indexes.KindPubkeyTagEnc(
 		kind, p, key, valueHash, ca, ser,
 	)
 

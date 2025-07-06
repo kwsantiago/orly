@@ -55,17 +55,17 @@ type I string
 func (i I) Write(w io.Writer) (n int, err error) { return w.Write([]byte(i)) }
 
 const (
-	EventPrefix                  = I("evt")
-	IdPrefix                     = I("eid")
-	IdPubkeyCreatedAtPrefix      = I("ipc")
-	PubkeyCreatedAtPrefix        = I("pca")
-	CreatedAtPrefix              = I("ica")
-	PubkeyTagCreatedAtPrefix     = I("ptc")
-	TagCreatedAtPrefix           = I("itc")
-	KindCreatedAtPrefix          = I("kca")
-	KindPubkeyCreatedAtPrefix    = I("kpc")
-	KindTagCreatedAtPrefix       = I("ktc")
-	KindPubkeyTagCreatedAtPrefix = I("kpt")
+	EventPrefix         = I("evt")
+	IdPrefix            = I("eid")
+	IdPubkeyPrefix      = I("ipc")
+	PubkeyPrefix        = I("pca")
+	CreatedAtPrefix     = I("ica")
+	PubkeyTagPrefix     = I("ptc")
+	TagPrefix           = I("itc")
+	KindPrefix          = I("kca")
+	KindPubkeyPrefix    = I("kpc")
+	KindTagPrefix       = I("ktc")
+	KindPubkeyTagPrefix = I("kpt")
 )
 
 // Prefix returns the three byte human-readable prefixes that go in front of
@@ -76,24 +76,24 @@ func Prefix(prf int) (i I) {
 		return EventPrefix
 	case Id:
 		return IdPrefix
-	case IdPubkeyCreatedAt:
-		return IdPubkeyCreatedAtPrefix
-	case PubkeyCreatedAt:
-		return PubkeyCreatedAtPrefix
+	case IdPubkey:
+		return IdPubkeyPrefix
+	case Pubkey:
+		return PubkeyPrefix
 	case CreatedAt:
 		return CreatedAtPrefix
-	case PubkeyTagCreatedAt:
-		return PubkeyTagCreatedAtPrefix
-	case TagCreatedAt:
-		return TagCreatedAtPrefix
-	case KindCreatedAt:
-		return KindCreatedAtPrefix
-	case KindPubkeyCreatedAt:
-		return KindPubkeyCreatedAtPrefix
-	case KindTagCreatedAt:
-		return KindTagCreatedAtPrefix
-	case KindPubkeyTagCreatedAt:
-		return KindPubkeyTagCreatedAtPrefix
+	case PubkeyTag:
+		return PubkeyTagPrefix
+	case Tag:
+		return TagPrefix
+	case Kind:
+		return KindPrefix
+	case KindPubkey:
+		return KindPubkeyPrefix
+	case KindTag:
+		return KindTagPrefix
+	case KindPubkeyTag:
+		return KindPubkeyTagPrefix
 	}
 	return
 }
@@ -112,24 +112,24 @@ func Identify(r io.Reader) (i int, err error) {
 		i = Event
 	case IdPrefix:
 		i = Id
-	case IdPubkeyCreatedAtPrefix:
-		i = IdPubkeyCreatedAt
-	case PubkeyCreatedAtPrefix:
-		i = PubkeyCreatedAt
+	case IdPubkeyPrefix:
+		i = IdPubkey
+	case PubkeyPrefix:
+		i = Pubkey
 	case CreatedAtPrefix:
 		i = CreatedAt
-	case PubkeyTagCreatedAtPrefix:
-		i = PubkeyTagCreatedAt
-	case TagCreatedAtPrefix:
-		i = TagCreatedAt
-	case KindCreatedAtPrefix:
-		i = KindCreatedAt
-	case KindPubkeyCreatedAtPrefix:
-		i = KindPubkeyCreatedAt
-	case KindTagCreatedAtPrefix:
-		i = KindTagCreatedAt
-	case KindPubkeyTagCreatedAtPrefix:
-		i = KindPubkeyTagCreatedAt
+	case PubkeyTagPrefix:
+		i = PubkeyTag
+	case TagPrefix:
+		i = Tag
+	case KindPrefix:
+		i = Kind
+	case KindPubkeyPrefix:
+		i = KindPubkey
+	case KindTagPrefix:
+		i = KindTag
+	case KindPubkeyTagPrefix:
+		i = KindPubkeyTag
 	}
 	return
 }
@@ -194,23 +194,23 @@ func IdDec(id *t.IdHash, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), id, ser)
 }
 
-// IdPubkeyCreatedAt is an index designed to enable sorting and filtering of
+// IdPubkey is an index designed to enable sorting and filtering of
 // results found via other indexes, without having to decode the event.
 //
 //	3 prefix|5 serial|32 Id|8 pubkey hash|8 timestamp
-var IdPubkeyCreatedAt = next()
+var IdPubkey = next()
 
-func IdPubkeyCreatedAtVars() (
+func IdPubkeyVars() (
 	ser *t.Uint40, fid *t.Id, p *t.PubHash, ca *t.Uint64,
 ) {
 	return new(t.Uint40), new(t.Id), new(t.PubHash), new(t.Uint64)
 }
-func IdPubkeyCreatedAtEnc(
+func IdPubkeyEnc(
 	ser *t.Uint40, fid *t.Id, p *t.PubHash, ca *t.Uint64,
 ) (enc *T) {
-	return New(NewPrefix(IdPubkeyCreatedAt), ser, fid, p, ca)
+	return New(NewPrefix(IdPubkey), ser, fid, p, ca)
 }
-func IdPubkeyCreatedAtDec(
+func IdPubkeyDec(
 	ser *t.Uint40, fid *t.Id, p *t.PubHash, ca *t.Uint64,
 ) (enc *T) {
 	return New(NewPrefix(), ser, fid, p, ca)
@@ -231,142 +231,142 @@ func CreatedAtDec(ca *t.Uint64, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), ca, ser)
 }
 
-// PubkeyCreatedAt is a composite index that allows search by pubkey
+// Pubkey is a composite index that allows search by pubkey
 // filtered by timestamp.
 //
 //	3 prefix|8 pubkey hash|8 timestamp|5 serial
-var PubkeyCreatedAt = next()
+var Pubkey = next()
 
-func PubkeyCreatedAtVars() (p *t.PubHash, ca *t.Uint64, ser *t.Uint40) {
+func PubkeyVars() (p *t.PubHash, ca *t.Uint64, ser *t.Uint40) {
 	return new(t.PubHash), new(t.Uint64), new(t.Uint40)
 }
-func PubkeyCreatedAtEnc(p *t.PubHash, ca *t.Uint64, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(PubkeyCreatedAt), p, ca, ser)
+func PubkeyEnc(p *t.PubHash, ca *t.Uint64, ser *t.Uint40) (enc *T) {
+	return New(NewPrefix(Pubkey), p, ca, ser)
 }
-func PubkeyCreatedAtDec(p *t.PubHash, ca *t.Uint64, ser *t.Uint40) (enc *T) {
+func PubkeyDec(p *t.PubHash, ca *t.Uint64, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), p, ca, ser)
 }
 
-// PubkeyTagCreatedAt allows searching for a pubkey, tag and timestamp.
+// PubkeyTag allows searching for a pubkey, tag and timestamp.
 //
 //	3 prefix|8 pubkey hash|1 key letter|8 value hash|8 timestamp|5 serial
-var PubkeyTagCreatedAt = next()
+var PubkeyTag = next()
 
-func PubkeyTagCreatedAtVars() (
+func PubkeyTagVars() (
 	p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) {
 	return new(t.PubHash), new(t.Letter), new(t.Ident), new(t.Uint64),
 		new(t.Uint40)
 }
-func PubkeyTagCreatedAtEnc(
+func PubkeyTagEnc(
 	p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(PubkeyTagCreatedAt), p, k, v, ca, ser)
+	return New(NewPrefix(PubkeyTag), p, k, v, ca, ser)
 }
-func PubkeyTagCreatedAtDec(
+func PubkeyTagDec(
 	p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), p, k, v, ca, ser)
 }
 
-// TagCreatedAt allows searching for a tag and filter by timestamp.
+// Tag allows searching for a tag and filter by timestamp.
 //
 //	3 prefix|1 key letter|8 value hash|8 timestamp|5 serial
-var TagCreatedAt = next()
+var Tag = next()
 
-func TagCreatedAtVars() (
+func TagVars() (
 	k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) {
 	return new(t.Letter), new(t.Ident), new(t.Uint64), new(t.Uint40)
 }
-func TagCreatedAtEnc(
+func TagEnc(
 	k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(TagCreatedAt), k, v, ca, ser)
+	return New(NewPrefix(Tag), k, v, ca, ser)
 }
-func TagCreatedAtDec(
+func TagDec(
 	k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), k, v, ca, ser)
 }
 
-// KindCreatedAt
+// Kind
 //
 //	3 prefix|2 kind|8 timestamp|5 serial
-var KindCreatedAt = next()
+var Kind = next()
 
-func KindCreatedAtVars() (ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) {
+func KindVars() (ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) {
 	return new(t.Uint16), new(t.Uint64), new(t.Uint40)
 }
-func KindCreatedAtEnc(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(KindCreatedAt), ki, ca, ser)
+func KindEnc(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
+	return New(NewPrefix(Kind), ki, ca, ser)
 }
-func KindCreatedAtDec(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
+func KindDec(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), ki, ca, ser)
 }
 
-// KindTagCreatedAt
+// KindTag
 //
 //	3 prefix|2 kind|1 key letter|8 value hash|8 timestamp|5 serial
-var KindTagCreatedAt = next()
+var KindTag = next()
 
-func KindTagCreatedAtVars() (
+func KindTagVars() (
 	ki *t.Uint16, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) {
 	return new(t.Uint16), new(t.Letter), new(t.Ident), new(t.Uint64),
 		new(t.Uint40)
 }
-func KindTagCreatedAtEnc(
+func KindTagEnc(
 	ki *t.Uint16, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(KindTagCreatedAt), ki, k, v, ca, ser)
+	return New(NewPrefix(KindTag), ki, k, v, ca, ser)
 }
-func KindTagCreatedAtDec(
+func KindTagDec(
 	ki *t.Uint16, k *t.Letter, v *t.Ident, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, k, v, ca, ser)
 }
 
-// KindPubkeyCreatedAt
+// KindPubkey
 //
 //	3 prefix|2 kind|8 pubkey hash|8 timestamp|5 serial
-var KindPubkeyCreatedAt = next()
+var KindPubkey = next()
 
-func KindPubkeyCreatedAtVars() (
+func KindPubkeyVars() (
 	ki *t.Uint16, p *t.PubHash, ca *t.Uint64, ser *t.Uint40,
 ) {
 	return new(t.Uint16), new(t.PubHash), new(t.Uint64), new(t.Uint40)
 }
-func KindPubkeyCreatedAtEnc(
+func KindPubkeyEnc(
 	ki *t.Uint16, p *t.PubHash, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(KindPubkeyCreatedAt), ki, p, ca, ser)
+	return New(NewPrefix(KindPubkey), ki, p, ca, ser)
 }
-func KindPubkeyCreatedAtDec(
+func KindPubkeyDec(
 	ki *t.Uint16, p *t.PubHash, ca *t.Uint64, ser *t.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, p, ca, ser)
 }
 
-// KindPubkeyTagCreatedAt
+// KindPubkeyTag
 //
 //	3 prefix|2 kind|8 pubkey hash|1 key letter|8 value hash|8 bytes timestamp|5 byte serial
-var KindPubkeyTagCreatedAt = next()
+var KindPubkeyTag = next()
 
-func KindPubkeyTagCreatedAtVars() (
+func KindPubkeyTagVars() (
 	ki *t.Uint16, p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64,
 	ser *t.Uint40,
 ) {
 	return new(t.Uint16), new(t.PubHash), new(t.Letter), new(t.Ident),
 		new(t.Uint64), new(t.Uint40)
 }
-func KindPubkeyTagCreatedAtEnc(
+func KindPubkeyTagEnc(
 	ki *t.Uint16, p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64,
 	ser *t.Uint40,
 ) (enc *T) {
-	return New(NewPrefix(KindPubkeyTagCreatedAt), ki, p, k, v, ca, ser)
+	return New(NewPrefix(KindPubkeyTag), ki, p, k, v, ca, ser)
 }
-func KindPubkeyTagCreatedAtDec(
+func KindPubkeyTagDec(
 	ki *t.Uint16, p *t.PubHash, k *t.Letter, v *t.Ident, ca *t.Uint64,
 	ser *t.Uint40,
 ) (enc *T) {
