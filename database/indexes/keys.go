@@ -58,18 +58,12 @@ const (
 	EventPrefix                  = I("evt")
 	IdPrefix                     = I("eid")
 	IdPubkeyCreatedAtPrefix      = I("ipc")
-	PubkeyPrefix                 = I("ipk")
-	PubkeyTagPrefix              = I("pkt")
 	PubkeyCreatedAtPrefix        = I("pca")
 	CreatedAtPrefix              = I("ica")
 	PubkeyTagCreatedAtPrefix     = I("ptc")
-	TagPrefix                    = I("tag")
 	TagCreatedAtPrefix           = I("itc")
-	KindPrefix                   = I("iki")
 	KindCreatedAtPrefix          = I("kca")
-	KindPubkeyPrefix             = I("kpk")
 	KindPubkeyCreatedAtPrefix    = I("kpc")
-	KindTagPrefix                = I("ikt")
 	KindTagCreatedAtPrefix       = I("ktc")
 	KindPubkeyTagCreatedAtPrefix = I("kpt")
 )
@@ -84,30 +78,18 @@ func Prefix(prf int) (i I) {
 		return IdPrefix
 	case IdPubkeyCreatedAt:
 		return IdPubkeyCreatedAtPrefix
-	case Pubkey:
-		return PubkeyPrefix
-	case PubkeyTag:
-		return PubkeyTagPrefix
 	case PubkeyCreatedAt:
 		return PubkeyCreatedAtPrefix
 	case CreatedAt:
 		return CreatedAtPrefix
 	case PubkeyTagCreatedAt:
 		return PubkeyTagCreatedAtPrefix
-	case Tag:
-		return TagPrefix
 	case TagCreatedAt:
 		return TagCreatedAtPrefix
-	case Kind:
-		return KindPrefix
 	case KindCreatedAt:
 		return KindCreatedAtPrefix
-	case KindPubkey:
-		return KindPubkeyPrefix
 	case KindPubkeyCreatedAt:
 		return KindPubkeyCreatedAtPrefix
-	case KindTag:
-		return KindTagPrefix
 	case KindTagCreatedAt:
 		return KindTagCreatedAtPrefix
 	case KindPubkeyTagCreatedAt:
@@ -132,28 +114,18 @@ func Identify(r io.Reader) (i int, err error) {
 		i = Id
 	case IdPubkeyCreatedAtPrefix:
 		i = IdPubkeyCreatedAt
-	case PubkeyPrefix:
-		i = Pubkey
 	case PubkeyCreatedAtPrefix:
 		i = PubkeyCreatedAt
 	case CreatedAtPrefix:
 		i = CreatedAt
 	case PubkeyTagCreatedAtPrefix:
 		i = PubkeyTagCreatedAt
-	case TagPrefix:
-		i = Tag
 	case TagCreatedAtPrefix:
 		i = TagCreatedAt
-	case KindPrefix:
-		i = Kind
 	case KindCreatedAtPrefix:
 		i = KindCreatedAt
-	case KindPubkeyPrefix:
-		i = KindPubkey
 	case KindPubkeyCreatedAtPrefix:
 		i = KindPubkeyCreatedAt
-	case KindTagPrefix:
-		i = KindTag
 	case KindTagCreatedAtPrefix:
 		i = KindTagCreatedAt
 	case KindPubkeyTagCreatedAtPrefix:
@@ -259,42 +231,6 @@ func CreatedAtDec(ca *t.Uint64, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), ca, ser)
 }
 
-// Pubkey is an index that allows search by pubkey.
-//
-//	3 prefix|8 pubkey hash|5 serial
-var Pubkey = next()
-
-func PubkeyVars() (p *t.PubHash, ser *t.Uint40) {
-	return new(t.PubHash), new(t.Uint40)
-}
-func PubkeyEnc(p *t.PubHash, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(Pubkey), p, ser)
-}
-func PubkeyDec(p *t.PubHash, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(), p, ser)
-}
-
-// PubkeyTag allows searching for a pubkey, tag and timestamp.
-//
-//	3 prefix|8 pubkey hash|1 key letter|8 value hash|5 serial
-var PubkeyTag = next()
-
-func PubkeyTagVars() (
-	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) {
-	return new(t.PubHash), new(t.Letter), new(t.Ident), new(t.Uint40)
-}
-func PubkeyTagEnc(
-	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) (enc *T) {
-	return New(NewPrefix(PubkeyTagCreatedAt), p, k, v, ser)
-}
-func PubkeyTagDec(
-	p *t.PubHash, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) (enc *T) {
-	return New(NewPrefix(), p, k, v, ser)
-}
-
 // PubkeyCreatedAt is a composite index that allows search by pubkey
 // filtered by timestamp.
 //
@@ -333,21 +269,6 @@ func PubkeyTagCreatedAtDec(
 	return New(NewPrefix(), p, k, v, ca, ser)
 }
 
-// Tag allows searching for a tag.
-//
-//	3 prefix|1 key letter|8 value hash|5 serial
-var Tag = next()
-
-func TagVars() (k *t.Letter, v *t.Ident, ser *t.Uint40) {
-	return new(t.Letter), new(t.Ident), new(t.Uint40)
-}
-func TagEnc(k *t.Letter, v *t.Ident, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(Tag), k, v, ser)
-}
-func TagDec(k *t.Letter, v *t.Ident, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(), k, v, ser)
-}
-
 // TagCreatedAt allows searching for a tag and filter by timestamp.
 //
 //	3 prefix|1 key letter|8 value hash|8 timestamp|5 serial
@@ -369,36 +290,6 @@ func TagCreatedAtDec(
 	return New(NewPrefix(), k, v, ca, ser)
 }
 
-// Kind
-//
-//	3 prefix|2 kind|5 serial
-var Kind = next()
-
-func KindVars() (ki *t.Uint16, ser *t.Uint40) {
-	return new(t.Uint16), new(t.Uint40)
-}
-func KindEnc(ki *t.Uint16, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(Kind), ki, ser)
-}
-func KindDec(ki *t.Uint16, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(), ki, ser)
-}
-
-// KindPubkey
-//
-//	3 prefix|2 kind|8 pubkey hash|5 serial
-var KindPubkey = next()
-
-func KindPubkeyVars() (ki *t.Uint16, p *t.PubHash, ser *t.Uint40) {
-	return new(t.Uint16), new(t.PubHash), new(t.Uint40)
-}
-func KindPubkeyEnc(ki *t.Uint16, p *t.PubHash, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(KindPubkey), ki, p, ser)
-}
-func KindPubkeyDec(ki *t.Uint16, p *t.PubHash, ser *t.Uint40) (enc *T) {
-	return New(NewPrefix(), ki, p, ser)
-}
-
 // KindCreatedAt
 //
 //	3 prefix|2 kind|8 timestamp|5 serial
@@ -412,27 +303,6 @@ func KindCreatedAtEnc(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
 }
 func KindCreatedAtDec(ki *t.Uint16, ca *t.Uint64, ser *t.Uint40) (enc *T) {
 	return New(NewPrefix(), ki, ca, ser)
-}
-
-// KindTag
-//
-//	3 prefix|2 byte kind|1 key letter|8 value hash|5 serial
-var KindTag = next()
-
-func KindTagVars() (
-	ki *t.Uint16, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) {
-	return new(t.Uint16), new(t.Letter), new(t.Ident), new(t.Uint40)
-}
-func KindTagEnc(
-	ki *t.Uint16, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) (enc *T) {
-	return New(NewPrefix(KindTag), ki, k, v, ser)
-}
-func KindTagDec(
-	ki *t.Uint16, k *t.Letter, v *t.Ident, ser *t.Uint40,
-) (enc *T) {
-	return New(NewPrefix(), ki, k, v, ser)
 }
 
 // KindTagCreatedAt

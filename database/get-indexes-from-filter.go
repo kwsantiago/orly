@@ -215,106 +215,6 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// KindTag
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
-		for _, k := range f.Kinds.ToUint16() {
-			for _, tag := range f.Tags.ToSliceOfTags() {
-				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-					if err = func() (err error) {
-						kind := new(types.Uint16)
-						kind.Set(k)
-						keyBytes := tag.B(0)
-						valueBytes := tag.B(1)
-						key := new(types.Letter)
-						key.Set(keyBytes[0])
-						valueHash := new(types.Ident)
-						valueHash.FromIdent(valueBytes)
-						ser := new(types.Uint40)
-						idx := indexes.KindTagEnc(kind, key, valueHash, ser)
-						buf := codecbuf.Get()
-						defer codecbuf.Put(buf)
-						if err = idx.MarshalWrite(buf); chk.E(err) {
-							return
-						}
-						bytes := make([]byte, buf.Len())
-						copy(bytes, buf.Bytes())
-						idxs = append(idxs, bytes)
-						return
-					}(); chk.E(err) {
-						return
-					}
-				}
-			}
-		}
-		return
-	}
-
-	// KindPubkey
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
-		for _, k := range f.Kinds.ToUint16() {
-			for _, author := range f.Authors.ToSliceOfBytes() {
-				if err = func() (err error) {
-					kind := new(types.Uint16)
-					kind.Set(k)
-					p := new(types.PubHash)
-					if err = p.FromPubkey(author); chk.E(err) {
-						return
-					}
-					ser := new(types.Uint40)
-					idx := indexes.KindPubkeyEnc(kind, p, ser)
-					buf := codecbuf.Get()
-					defer codecbuf.Put(buf)
-					if err = idx.MarshalWrite(buf); chk.E(err) {
-						return
-					}
-					bytes := make([]byte, buf.Len())
-					copy(bytes, buf.Bytes())
-					idxs = append(idxs, bytes)
-					return
-				}(); chk.E(err) {
-					return
-				}
-			}
-		}
-		return
-	}
-
-	// PubkeyTag
-	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
-		for _, author := range f.Authors.ToSliceOfBytes() {
-			for _, tag := range f.Tags.ToSliceOfTags() {
-				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-					if err = func() (err error) {
-						p := new(types.PubHash)
-						if err = p.FromPubkey(author); chk.E(err) {
-							return
-						}
-						keyBytes := tag.B(0)
-						valueBytes := tag.B(1)
-						key := new(types.Letter)
-						key.Set(keyBytes[0])
-						valueHash := new(types.Ident)
-						valueHash.FromIdent(valueBytes)
-						ser := new(types.Uint40)
-						idx := indexes.PubkeyTagEnc(p, key, valueHash, ser)
-						buf := codecbuf.Get()
-						defer codecbuf.Put(buf)
-						if err = idx.MarshalWrite(buf); chk.E(err) {
-							return
-						}
-						bytes := make([]byte, buf.Len())
-						copy(bytes, buf.Bytes())
-						idxs = append(idxs, bytes)
-						return
-					}(); chk.E(err) {
-						return
-					}
-				}
-			}
-		}
-		return
-	}
-
 	// TagCreatedAt
 	if f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
@@ -413,60 +313,6 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	// Tag
-	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
-		for _, tag := range f.Tags.ToSliceOfTags() {
-			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-				if err = func() (err error) {
-					keyBytes := tag.B(0)
-					valueBytes := tag.B(1)
-					key := new(types.Letter)
-					key.Set(keyBytes[0])
-					valueHash := new(types.Ident)
-					valueHash.FromIdent(valueBytes)
-					ser := new(types.Uint40)
-					idx := indexes.TagEnc(key, valueHash, ser)
-					buf := codecbuf.Get()
-					defer codecbuf.Put(buf)
-					if err = idx.MarshalWrite(buf); chk.E(err) {
-						return
-					}
-					bytes := make([]byte, buf.Len())
-					copy(bytes, buf.Bytes())
-					idxs = append(idxs, bytes)
-					return
-				}(); chk.E(err) {
-					return
-				}
-			}
-		}
-		return
-	}
-
-	// Kind
-	if f.Kinds != nil && f.Kinds.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
-		for _, k := range f.Kinds.ToUint16() {
-			if err = func() (err error) {
-				kind := new(types.Uint16)
-				kind.Set(k)
-				ser := new(types.Uint40)
-				idx := indexes.KindEnc(kind, ser)
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
-				if err = idx.MarshalWrite(buf); chk.E(err) {
-					return
-				}
-				bytes := make([]byte, buf.Len())
-				copy(bytes, buf.Bytes())
-				idxs = append(idxs, bytes)
-				return
-			}(); chk.E(err) {
-				return
-			}
-		}
-		return
-	}
-
 	// CreatedAt
 	if ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		if err = func() (err error) {
@@ -489,32 +335,6 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 			return
 		}(); chk.E(err) {
 			return
-		}
-		return
-	}
-
-	// Pubkey
-	if f.Authors != nil && f.Authors.Len() > 0 {
-		for _, author := range f.Authors.ToSliceOfBytes() {
-			if err = func() (err error) {
-				p := new(types.PubHash)
-				if err = p.FromPubkey(author); chk.E(err) {
-					return
-				}
-				ser := new(types.Uint40)
-				idx := indexes.PubkeyEnc(p, ser)
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
-				if err = idx.MarshalWrite(buf); chk.E(err) {
-					return
-				}
-				bytes := make([]byte, buf.Len())
-				copy(bytes, buf.Bytes())
-				idxs = append(idxs, bytes)
-				return
-			}(); chk.E(err) {
-				return
-			}
 		}
 		return
 	}

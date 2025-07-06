@@ -85,17 +85,12 @@ func TestPrefixFunction(t *testing.T) {
 		{"Event", Event, EventPrefix},
 		{"Id", Id, IdPrefix},
 		{"IdPubkeyCreatedAt", IdPubkeyCreatedAt, IdPubkeyCreatedAtPrefix},
-		{"Pubkey", Pubkey, PubkeyPrefix},
 		{"PubkeyCreatedAt", PubkeyCreatedAt, PubkeyCreatedAtPrefix},
 		{"CreatedAt", CreatedAt, CreatedAtPrefix},
 		{"PubkeyTagCreatedAt", PubkeyTagCreatedAt, PubkeyTagCreatedAtPrefix},
-		{"Tag", Tag, TagPrefix},
 		{"TagCreatedAt", TagCreatedAt, TagCreatedAtPrefix},
-		{"Kind", Kind, KindPrefix},
 		{"KindCreatedAt", KindCreatedAt, KindCreatedAtPrefix},
-		{"KindPubkey", KindPubkey, KindPubkeyPrefix},
 		{"KindPubkeyCreatedAt", KindPubkeyCreatedAt, KindPubkeyCreatedAtPrefix},
-		{"KindTag", KindTag, KindTagPrefix},
 		{"KindTagCreatedAt", KindTagCreatedAt, KindTagCreatedAtPrefix},
 		{
 			"KindPubkeyTagCreatedAt", KindPubkeyTagCreatedAt,
@@ -129,17 +124,12 @@ func TestIdentify(t *testing.T) {
 		{"Event", EventPrefix, Event},
 		{"Id", IdPrefix, Id},
 		{"IdPubkeyCreatedAt", IdPubkeyCreatedAtPrefix, IdPubkeyCreatedAt},
-		{"Pubkey", PubkeyPrefix, Pubkey},
 		{"PubkeyCreatedAt", PubkeyCreatedAtPrefix, PubkeyCreatedAt},
 		{"CreatedAt", CreatedAtPrefix, CreatedAt},
 		{"PubkeyTagCreatedAt", PubkeyTagCreatedAtPrefix, PubkeyTagCreatedAt},
-		{"Tag", TagPrefix, Tag},
 		{"TagCreatedAt", TagCreatedAtPrefix, TagCreatedAt},
-		{"Kind", KindPrefix, Kind},
 		{"KindCreatedAt", KindCreatedAtPrefix, KindCreatedAt},
-		{"KindPubkey", KindPubkeyPrefix, KindPubkey},
 		{"KindPubkeyCreatedAt", KindPubkeyCreatedAtPrefix, KindPubkeyCreatedAt},
-		{"KindTag", KindTagPrefix, KindTag},
 		{"KindTagCreatedAt", KindTagCreatedAtPrefix, KindTagCreatedAt},
 		{
 			"KindPubkeyTagCreatedAt", KindPubkeyTagCreatedAtPrefix,
@@ -486,67 +476,6 @@ func TestCreatedAtFunctions(t *testing.T) {
 	}
 }
 
-// TestPubkeyFunctions tests the Pubkey-related functions
-func TestPubkeyFunctions(t *testing.T) {
-	// Test PubkeyVars
-	p, ser := PubkeyVars()
-	if p == nil || ser == nil {
-		t.Fatalf("PubkeyVars should return non-nil values")
-	}
-
-	// Set values
-	err := p.FromPubkey(
-		[]byte{
-			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-			20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-		},
-	)
-	if chk.E(err) {
-		t.Fatalf("FromPubkey failed: %v", err)
-	}
-	ser.Set(12345)
-
-	// Test PubkeyEnc
-	enc := PubkeyEnc(p, ser)
-	if len(enc.Encs) != 3 {
-		t.Errorf(
-			"PubkeyEnc should create T with 3 encoders, got %d", len(enc.Encs),
-		)
-	}
-
-	// Test PubkeyDec
-	dec := PubkeyDec(p, ser)
-	if len(dec.Encs) != 3 {
-		t.Errorf(
-			"PubkeyDec should create T with 3 encoders, got %d", len(dec.Encs),
-		)
-	}
-
-	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
-	err = enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Create new variables for decoding
-	newP, newSer := PubkeyVars()
-	newDec := PubkeyDec(newP, newSer)
-
-	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the decoded values
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
-		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
-	}
-	if newSer.Get() != ser.Get() {
-		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
-	}
-}
-
 // TestPubkeyCreatedAtFunctions tests the PubkeyCreatedAt-related functions
 func TestPubkeyCreatedAtFunctions(t *testing.T) {
 	// Test PubkeyCreatedAtVars
@@ -694,68 +623,6 @@ func TestPubkeyTagCreatedAtFunctions(t *testing.T) {
 	}
 }
 
-// TestTagFunctions tests the Tag-related functions
-func TestTagFunctions(t *testing.T) {
-	// Test TagVars
-	k, v, ser := TagVars()
-	if k == nil || v == nil || ser == nil {
-		t.Fatalf("TagVars should return non-nil values")
-	}
-
-	// Set values
-	k.Set('e')
-	err := v.FromIdent([]byte("test-value"))
-	if chk.E(err) {
-		t.Fatalf("FromIdent failed: %v", err)
-	}
-	ser.Set(12345)
-
-	// Test TagEnc
-	enc := TagEnc(k, v, ser)
-	if len(enc.Encs) != 4 {
-		t.Errorf(
-			"TagEnc should create T with 4 encoders, got %d", len(enc.Encs),
-		)
-	}
-
-	// Test TagDec
-	dec := TagDec(k, v, ser)
-	if len(dec.Encs) != 4 {
-		t.Errorf(
-			"TagDec should create T with 4 encoders, got %d", len(dec.Encs),
-		)
-	}
-
-	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
-	err = enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Create new variables for decoding
-	newK, newV, newSer := TagVars()
-	newDec := TagDec(newK, newV, newSer)
-
-	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the decoded values
-	if newK.Letter() != k.Letter() {
-		t.Errorf(
-			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
-		)
-	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
-		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
-	}
-	if newSer.Get() != ser.Get() {
-		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
-	}
-}
-
 // TestTagCreatedAtFunctions tests the TagCreatedAt-related functions
 func TestTagCreatedAtFunctions(t *testing.T) {
 	// Test TagCreatedAtVars
@@ -824,126 +691,6 @@ func TestTagCreatedAtFunctions(t *testing.T) {
 	}
 }
 
-// TestKindFunctions tests the Kind-related functions
-func TestKindFunctions(t *testing.T) {
-	// Test KindVars
-	ki, ser := KindVars()
-	if ki == nil || ser == nil {
-		t.Fatalf("KindVars should return non-nil values")
-	}
-
-	// Set values
-	ki.Set(1234)
-	ser.Set(12345)
-
-	// Test KindEnc
-	enc := KindEnc(ki, ser)
-	if len(enc.Encs) != 3 {
-		t.Errorf(
-			"KindEnc should create T with 3 encoders, got %d", len(enc.Encs),
-		)
-	}
-
-	// Test KindDec
-	dec := KindDec(ki, ser)
-	if len(dec.Encs) != 3 {
-		t.Errorf(
-			"KindDec should create T with 3 encoders, got %d", len(dec.Encs),
-		)
-	}
-
-	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
-	err := enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Create new variables for decoding
-	newKi, newSer := KindVars()
-	newDec := KindDec(newKi, newSer)
-
-	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the decoded values
-	if newKi.Get() != ki.Get() {
-		t.Errorf("Decoded kind %d, expected %d", newKi.Get(), ki.Get())
-	}
-	if newSer.Get() != ser.Get() {
-		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
-	}
-}
-
-// TestKindPubkeyFunctions tests the KindPubkey-related functions
-func TestKindPubkeyFunctions(t *testing.T) {
-	// Test KindPubkeyVars
-	ki, p, ser := KindPubkeyVars()
-	if ki == nil || p == nil || ser == nil {
-		t.Fatalf("KindPubkeyVars should return non-nil values")
-	}
-
-	// Set values
-	ki.Set(1234)
-	err := p.FromPubkey(
-		[]byte{
-			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-			20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-		},
-	)
-	if chk.E(err) {
-		t.Fatalf("FromPubkey failed: %v", err)
-	}
-	ser.Set(12345)
-
-	// Test KindPubkeyEnc
-	enc := KindPubkeyEnc(ki, p, ser)
-	if len(enc.Encs) != 4 {
-		t.Errorf(
-			"KindPubkeyEnc should create T with 4 encoders, got %d",
-			len(enc.Encs),
-		)
-	}
-
-	// Test KindPubkeyDec
-	dec := KindPubkeyDec(ki, p, ser)
-	if len(dec.Encs) != 4 {
-		t.Errorf(
-			"KindPubkeyDec should create T with 4 encoders, got %d",
-			len(dec.Encs),
-		)
-	}
-
-	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
-	err = enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Create new variables for decoding
-	newKi, newP, newSer := KindPubkeyVars()
-	newDec := KindPubkeyDec(newKi, newP, newSer)
-
-	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the decoded values
-	if newKi.Get() != ki.Get() {
-		t.Errorf("Decoded kind %d, expected %d", newKi.Get(), ki.Get())
-	}
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
-		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
-	}
-	if newSer.Get() != ser.Get() {
-		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
-	}
-}
-
 // TestKindCreatedAtFunctions tests the KindCreatedAt-related functions
 func TestKindCreatedAtFunctions(t *testing.T) {
 	// Test KindCreatedAtVars
@@ -997,72 +744,6 @@ func TestKindCreatedAtFunctions(t *testing.T) {
 	}
 	if newCa.Get() != ca.Get() {
 		t.Errorf("Decoded created at %d, expected %d", newCa.Get(), ca.Get())
-	}
-	if newSer.Get() != ser.Get() {
-		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
-	}
-}
-
-// TestKindTagFunctions tests the KindTag-related functions
-func TestKindTagFunctions(t *testing.T) {
-	// Test KindTagVars
-	ki, k, v, ser := KindTagVars()
-	if ki == nil || k == nil || v == nil || ser == nil {
-		t.Fatalf("KindTagVars should return non-nil values")
-	}
-
-	// Set values
-	ki.Set(1234)
-	k.Set('e')
-	err := v.FromIdent([]byte("test-value"))
-	if chk.E(err) {
-		t.Fatalf("FromIdent failed: %v", err)
-	}
-	ser.Set(12345)
-
-	// Test KindTagEnc
-	enc := KindTagEnc(ki, k, v, ser)
-	if len(enc.Encs) != 5 {
-		t.Errorf(
-			"KindTagEnc should create T with 5 encoders, got %d", len(enc.Encs),
-		)
-	}
-
-	// Test KindTagDec
-	dec := KindTagDec(ki, k, v, ser)
-	if len(dec.Encs) != 5 {
-		t.Errorf(
-			"KindTagDec should create T with 5 encoders, got %d", len(dec.Encs),
-		)
-	}
-
-	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
-	err = enc.MarshalWrite(buf)
-	if chk.E(err) {
-		t.Fatalf("MarshalWrite failed: %v", err)
-	}
-
-	// Create new variables for decoding
-	newKi, newK, newV, newSer := KindTagVars()
-	newDec := KindTagDec(newKi, newK, newV, newSer)
-
-	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
-	if chk.E(err) {
-		t.Fatalf("UnmarshalRead failed: %v", err)
-	}
-
-	// Verify the decoded values
-	if newKi.Get() != ki.Get() {
-		t.Errorf("Decoded kind %d, expected %d", newKi.Get(), ki.Get())
-	}
-	if newK.Letter() != k.Letter() {
-		t.Errorf(
-			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
-		)
-	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
-		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
 	}
 	if newSer.Get() != ser.Get() {
 		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())

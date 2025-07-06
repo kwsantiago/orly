@@ -74,11 +74,6 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	if err = appendIndexBytes(&idxs, createdAtIndex); chk.E(err) {
 		return
 	}
-	// Pubkey index
-	pubkeyIndex := indexes.PubkeyEnc(pubHash, ser)
-	if err = appendIndexBytes(&idxs, pubkeyIndex); chk.E(err) {
-		return
-	}
 	// PubkeyCreatedAt index
 	pubkeyCreatedAtIndex := indexes.PubkeyCreatedAtEnc(pubHash, createdAt, ser)
 	if err = appendIndexBytes(&idxs, pubkeyCreatedAtIndex); chk.E(err) {
@@ -111,19 +106,6 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 				); chk.E(err) {
 					return
 				}
-				pubkeyTagIndex := indexes.PubkeyTagEnc(
-					pubHash, key, valueHash, ser,
-				)
-				if err = appendIndexBytes(
-					&idxs, pubkeyTagIndex,
-				); chk.E(err) {
-					return
-				}
-				// Tag index
-				tagIndex := indexes.TagEnc(key, valueHash, ser)
-				if err = appendIndexBytes(&idxs, tagIndex); chk.E(err) {
-					return
-				}
 				// TagCreatedAt index
 				tagCreatedAtIndex := indexes.TagCreatedAtEnc(
 					key, valueHash, createdAt, ser,
@@ -136,13 +118,6 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 				// Kind-related tag indexes
 				kind := new(Uint16)
 				kind.Set(ev.Kind.K)
-				// KindTag index
-				kindTagIndex := indexes.KindTagEnc(
-					kind, key, valueHash, ser,
-				)
-				if err = appendIndexBytes(&idxs, kindTagIndex); chk.E(err) {
-					return
-				}
 				// KindTagCreatedAt index
 				kindTagCreatedAtIndex := indexes.KindTagCreatedAtEnc(
 					kind, key, valueHash, createdAt, ser,
@@ -164,18 +139,8 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 			}
 		}
 	}
-	// Kind index
 	kind := new(Uint16)
 	kind.Set(uint16(ev.Kind.K))
-	kindIndex := indexes.KindEnc(kind, ser)
-	if err = appendIndexBytes(&idxs, kindIndex); chk.E(err) {
-		return
-	}
-	// KindPubkey index
-	kindPubkeyIndex := indexes.KindPubkeyEnc(kind, pubHash, ser)
-	if err = appendIndexBytes(&idxs, kindPubkeyIndex); chk.E(err) {
-		return
-	}
 	// KindCreatedAt index
 	kindCreatedAtIndex := indexes.KindCreatedAtEnc(kind, createdAt, ser)
 	if err = appendIndexBytes(&idxs, kindCreatedAtIndex); chk.E(err) {
