@@ -75,8 +75,7 @@ func testIdFilter(t *testing.T) {
 	if chk.E(err) {
 		t.Fatalf("Failed to create IdHash: %v", err)
 	}
-	ser := new(types.Uint40)
-	expectedIdx := indexes.IdEnc(idHash, ser)
+	expectedIdx := indexes.IdEnc(idHash, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -92,7 +91,7 @@ func testPubkeyFilter(t *testing.T) {
 	}
 	f.Authors = f.Authors.Append(pubkey)
 	f.Since = timestamp.FromUnix(12345)
-	f.Until = timestamp.FromUnix(67890)  // Added Until field
+	f.Until = timestamp.FromUnix(67890) // Added Until field
 
 	// Generate indexes
 	idxs, err := GetIndexesFromFilter(f)
@@ -107,9 +106,8 @@ func testPubkeyFilter(t *testing.T) {
 		t.Fatalf("Failed to create PubHash: %v", err)
 	}
 	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))  // Since takes precedence over Until
-	ser := new(types.Uint40)
-	expectedIdx := indexes.PubkeyEnc(p, ca, ser)
+	ca.Set(uint64(f.Since.V)) // Since takes precedence over Until
+	expectedIdx := indexes.PubkeyEnc(p, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -130,8 +128,7 @@ func testCreatedAtFilter(t *testing.T) {
 	// Create the expected index
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.CreatedAtEnc(ca, ser)
+	expectedIdx := indexes.CreatedAtEnc(ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -152,8 +149,7 @@ func testCreatedAtUntilFilter(t *testing.T) {
 	// Create the expected index
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Until.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.CreatedAtEnc(ca, ser)
+	expectedIdx := indexes.CreatedAtEnc(ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -195,8 +191,7 @@ func testPubkeyTagFilter(t *testing.T) {
 	valueHash.FromIdent(tagValue)
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.PubkeyTagEnc(p, key, valueHash, ca, ser)
+	expectedIdx := indexes.PubkeyTagEnc(p, key, valueHash, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -228,8 +223,7 @@ func testTagFilter(t *testing.T) {
 	valueHash.FromIdent(tagValue)
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.TagEnc(key, valueHash, ca, ser)
+	expectedIdx := indexes.TagEnc(key, valueHash, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -253,8 +247,7 @@ func testKindFilter(t *testing.T) {
 	kind.Set(1)
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.KindEnc(kind, ca, ser)
+	expectedIdx := indexes.KindEnc(kind, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -288,8 +281,7 @@ func testKindPubkeyFilter(t *testing.T) {
 	}
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.KindPubkeyEnc(kind, p, ca, ser)
+	expectedIdx := indexes.KindPubkeyEnc(kind, p, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -324,8 +316,7 @@ func testKindTagFilter(t *testing.T) {
 	valueHash.FromIdent(tagValue)
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
-	expectedIdx := indexes.KindTagEnc(kind, key, valueHash, ca, ser)
+	expectedIdx := indexes.KindTagEnc(kind, key, valueHash, ca, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedIdx)
@@ -370,9 +361,8 @@ func testKindPubkeyTagFilter(t *testing.T) {
 	valueHash.FromIdent(tagValue)
 	ca := new(types.Uint64)
 	ca.Set(uint64(f.Since.V))
-	ser := new(types.Uint40)
 	expectedIdx := indexes.KindPubkeyTagEnc(
-		kind, p, key, valueHash, ca, ser,
+		kind, p, key, valueHash, ca, nil,
 	)
 
 	// Verify the generated index

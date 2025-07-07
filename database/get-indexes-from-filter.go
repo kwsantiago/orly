@@ -28,8 +28,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 				if err = i.FromId(id); chk.E(err) {
 					return
 				}
-				ser := new(types.Uint40)
-				idx := indexes.IdEnc(i, ser)
+				idx := indexes.IdEnc(i, nil)
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -44,6 +43,15 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 			}
 		}
 		return
+	}
+
+	ca := new(types.Uint64)
+	if f.Since != nil && f.Since.V != 0 {
+		ca.Set(uint64(f.Since.V))
+	} else if f.Until != nil && f.Until.V != 0 {
+		ca.Set(uint64(f.Until.V))
+	} else if f.Until != nil {
+		ca.Set(uint64(math.MaxInt64))
 	}
 
 	// KindPubkeyTag
@@ -65,17 +73,8 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 							key.Set(keyBytes[0])
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
-							ca := new(types.Uint64)
-							if f.Since != nil && f.Since.V != 0 {
-								ca.Set(uint64(f.Since.V))
-							} else if f.Until != nil && f.Until.V != 0 {
-								ca.Set(uint64(f.Until.V))
-							} else if f.Until != nil {
-								ca.Set(uint64(math.MaxInt64))
-							}
-							ser := new(types.Uint40)
 							idx := indexes.KindPubkeyTagEnc(
-								kind, p, key, valueHash, ca, ser,
+								kind, p, key, valueHash, ca, nil,
 							)
 							buf := codecbuf.Get()
 							defer codecbuf.Put(buf)
@@ -110,17 +109,8 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						key.Set(keyBytes[0])
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
-						ca := new(types.Uint64)
-						if f.Since != nil && f.Since.V != 0 {
-							ca.Set(uint64(f.Since.V))
-						} else if f.Until != nil && f.Until.V != 0 {
-							ca.Set(uint64(f.Until.V))
-						} else if f.Until != nil {
-							ca.Set(uint64(math.MaxInt64))
-						}
-						ser := new(types.Uint40)
 						idx := indexes.KindTagEnc(
-							kind, key, valueHash, ca, ser,
+							kind, key, valueHash, ca, nil,
 						)
 						buf := codecbuf.Get()
 						defer codecbuf.Put(buf)
@@ -151,16 +141,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					if err = p.FromPubkey(author); chk.E(err) {
 						return
 					}
-					ca := new(types.Uint64)
-					if f.Since != nil && f.Since.V != 0 {
-						ca.Set(uint64(f.Since.V))
-					} else if f.Until != nil && f.Until.V != 0 {
-						ca.Set(uint64(f.Until.V))
-					} else if f.Until != nil {
-						ca.Set(uint64(math.MaxInt64))
-					}
-					ser := new(types.Uint40)
-					idx := indexes.KindPubkeyEnc(kind, p, ca, ser)
+					idx := indexes.KindPubkeyEnc(kind, p, ca, nil)
 					buf := codecbuf.Get()
 					defer codecbuf.Put(buf)
 					if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -194,17 +175,8 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						key.Set(keyBytes[0])
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
-						ca := new(types.Uint64)
-						if f.Since != nil && f.Since.V != 0 {
-							ca.Set(uint64(f.Since.V))
-						} else if f.Until != nil && f.Until.V != 0 {
-							ca.Set(uint64(f.Until.V))
-						} else if f.Until != nil {
-							ca.Set(uint64(math.MaxInt64))
-						}
-						ser := new(types.Uint40)
 						idx := indexes.PubkeyTagEnc(
-							p, key, valueHash, ca, ser,
+							p, key, valueHash, ca, nil,
 						)
 						buf := codecbuf.Get()
 						defer codecbuf.Put(buf)
@@ -235,16 +207,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					key.Set(keyBytes[0])
 					valueHash := new(types.Ident)
 					valueHash.FromIdent(valueBytes)
-					ca := new(types.Uint64)
-					if f.Since != nil && f.Since.V != 0 {
-						ca.Set(uint64(f.Since.V))
-					} else if f.Until != nil && f.Until.V != 0 {
-						ca.Set(uint64(f.Until.V))
-					} else if f.Until != nil {
-						ca.Set(uint64(math.MaxInt64))
-					}
-					ser := new(types.Uint40)
-					idx := indexes.TagEnc(key, valueHash, ca, ser)
+					idx := indexes.TagEnc(key, valueHash, ca, nil)
 					buf := codecbuf.Get()
 					defer codecbuf.Put(buf)
 					if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -268,16 +231,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 			if err = func() (err error) {
 				kind := new(types.Uint16)
 				kind.Set(k)
-				ca := new(types.Uint64)
-				if f.Since != nil && f.Since.V != 0 {
-					ca.Set(uint64(f.Since.V))
-				} else if f.Until != nil && f.Until.V != 0 {
-					ca.Set(uint64(f.Until.V))
-				} else if f.Until != nil {
-					ca.Set(uint64(math.MaxInt64))
-				}
-				ser := new(types.Uint40)
-				idx := indexes.KindEnc(kind, ca, ser)
+				idx := indexes.KindEnc(kind, ca, nil)
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -302,16 +256,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 				if err = p.FromPubkey(author); chk.E(err) {
 					return
 				}
-				ca := new(types.Uint64)
-				if f.Since != nil && f.Since.V != 0 {
-					ca.Set(uint64(f.Since.V))
-				} else if f.Until != nil && f.Until.V != 0 {
-					ca.Set(uint64(f.Until.V))
-				} else if f.Until != nil {
-					ca.Set(uint64(math.MaxInt64))
-				}
-				ser := new(types.Uint40)
-				idx := indexes.PubkeyEnc(p, ca, ser)
+				idx := indexes.PubkeyEnc(p, ca, nil)
 				buf := codecbuf.Get()
 				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {
@@ -331,16 +276,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	// CreatedAt
 	if ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		if err = func() (err error) {
-			ca := new(types.Uint64)
-			if f.Since != nil && f.Since.V != 0 {
-				ca.Set(uint64(f.Since.V))
-			} else if f.Until != nil && f.Until.V != 0 {
-				ca.Set(uint64(f.Until.V))
-			} else if f.Until != nil {
-				ca.Set(uint64(math.MaxInt64))
-			}
-			ser := new(types.Uint40)
-			idx := indexes.CreatedAtEnc(ca, ser)
+			idx := indexes.CreatedAtEnc(ca, nil)
 			buf := codecbuf.Get()
 			defer codecbuf.Put(buf)
 			if err = idx.MarshalWrite(buf); chk.E(err) {
