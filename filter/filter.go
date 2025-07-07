@@ -34,7 +34,7 @@ import (
 	"orly.dev/timestamp"
 )
 
-// T is the primary query form for requesting events from a nostr relay.
+// F is the primary query form for requesting events from a nostr relay.
 //
 // The ordering of the fields of filters is not specified as in the protocol
 // there is no requirement to generate a hash for fast recognition of identical
@@ -46,7 +46,7 @@ import (
 //
 // This is to facilitate the deduplication of filters so an effective identical
 // match is not performed on an identical filter.
-type T struct {
+type F struct {
 	Ids     *tag.T   `json:"ids,omitempty"`
 	Kinds   *kinds.T `json:"kinds,omitempty"`
 	Authors *tag.T   `json:"authors,omitempty"`
@@ -62,8 +62,8 @@ type T struct {
 
 // New creates a new, reasonably initialized filter that will be ready for most
 // uses without further allocations.
-func New() (f *T) {
-	return &T{
+func New() (f *F) {
+	return &F{
 		Ids:     tag.NewWithCap(10),
 		Kinds:   kinds.NewWithCap(10),
 		Authors: tag.NewWithCap(10),
@@ -78,7 +78,7 @@ func New() (f *T) {
 // are immutable, basically, except setting the Limit field as 1, because it is
 // used in the subscription management code to act as a reference counter, and
 // making a clone implicitly means 1 reference.
-func (f *T) Clone() (clone *T) {
+func (f *F) Clone() (clone *F) {
 	lim := new(uint)
 	*lim = 1
 	_IDs := *f.Ids
@@ -89,7 +89,7 @@ func (f *T) Clone() (clone *T) {
 	_Until := *f.Until
 	_Search := make([]byte, len(f.Search))
 	copy(Search, f.Search)
-	return &T{
+	return &F{
 		Ids:     &_IDs,
 		Kinds:   &_Kinds,
 		Authors: &_Authors,
@@ -121,7 +121,7 @@ var (
 
 // Marshal a filter into raw JSON bytes, minified. The field ordering and sort
 // of fields is canonicalized so that a hash can identify the same filter.
-func (f *T) Marshal(dst []byte) (b []byte) {
+func (f *F) Marshal(dst []byte) (b []byte) {
 	var err error
 	_ = err
 	var first bool
@@ -251,8 +251,8 @@ func (f *T) Marshal(dst []byte) (b []byte) {
 	return
 }
 
-// Serialize a filter.T into raw minified JSON bytes.
-func (f *T) Serialize() (b []byte) { return f.Marshal(nil) }
+// Serialize a filter.F into raw minified JSON bytes.
+func (f *F) Serialize() (b []byte) { return f.Marshal(nil) }
 
 // states of the unmarshaler
 const (
@@ -268,7 +268,7 @@ const (
 // Unmarshal a filter from raw (minified) JSON bytes into the runtime format.
 //
 // todo: this does not tolerate whitespace, but it's bleeding fast.
-func (f *T) Unmarshal(b []byte) (r []byte, err error) {
+func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 	r = b[:]
 	var key []byte
 	var state int
@@ -451,7 +451,7 @@ invalid:
 }
 
 // Matches checks a filter against an event and determines if the event matches the filter.
-func (f *T) Matches(ev *event.E) bool {
+func (f *F) Matches(ev *event.E) bool {
 	if ev == nil {
 		return false
 	}
@@ -482,7 +482,7 @@ func (f *T) Matches(ev *event.E) bool {
 // This hash is generated via the JSON encoded form of the filter, with the
 // Limit field removed. This value should be set to zero after all results from
 // a query of stored events, as per NIP-01.
-func (f *T) Fingerprint() (fp uint64, err error) {
+func (f *F) Fingerprint() (fp uint64, err error) {
 	lim := f.Limit
 	f.Limit = nil
 	var b []byte
@@ -496,7 +496,7 @@ func (f *T) Fingerprint() (fp uint64, err error) {
 
 // Sort the fields of a filter so a fingerprint on a filter that has the same
 // set of content produces the same fingerprint.
-func (f *T) Sort() {
+func (f *F) Sort() {
 	if f.Ids != nil {
 		sort.Sort(f.Ids)
 	}
@@ -523,7 +523,7 @@ func arePointerValuesEqual[V comparable](a *V, b *V) bool {
 
 // Equal checks a filter against another filter to see if they are the same
 // filter.
-func (f *T) Equal(b *T) bool {
+func (f *F) Equal(b *F) bool {
 	// sort the fields so they come out the same
 	f.Sort()
 	if !f.Kinds.Equals(b.Kinds) ||
@@ -540,7 +540,7 @@ func (f *T) Equal(b *T) bool {
 }
 
 // GenFilter is a testing tool to create random arbitrary filters for tests.
-func GenFilter() (f *T, err error) {
+func GenFilter() (f *F, err error) {
 	f = New()
 	n := frand.Intn(16)
 	for _ = range n {

@@ -14,6 +14,7 @@ import (
 
 func TestSubmission(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var c, rem, out []byte
 	var err error
 	for scanner.Scan() {
@@ -58,6 +59,7 @@ func TestSubmission(t *testing.T) {
 
 func TestResult(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var c, rem, out []byte
 	var err error
 	for scanner.Scan() {

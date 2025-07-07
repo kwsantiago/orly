@@ -48,7 +48,7 @@ type Wiper interface {
 type Querent interface {
 	// QueryEvents is invoked upon a client's REQ as described in NIP-01. It
 	// returns the matching events in reverse chronological order in a slice.
-	QueryEvents(c context.T, f *filter.T) (evs event.S, err error)
+	QueryEvents(c context.T, f *filter.F) (evs event.S, err error)
 }
 
 type Accountant interface {
@@ -62,7 +62,7 @@ type IdTsPk struct {
 }
 
 type Querier interface {
-	QueryForIds(c context.T, f *filter.T) (evs []IdTsPk, err error)
+	QueryForIds(c context.T, f *filter.F) (evs []IdTsPk, err error)
 }
 
 type GetIdsWriter interface {

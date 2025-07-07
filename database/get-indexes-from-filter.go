@@ -1,13 +1,17 @@
 package database
 
 import (
+	"bytes"
 	"math"
 	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
 	"orly.dev/filter"
 )
+
+type Range struct {
+	Start, end []byte
+}
 
 // GetIndexesFromFilter returns encoded indexes based on the given filter.
 //
@@ -16,7 +20,7 @@ import (
 // The indexes are designed so that only one table needs to be iterated, being a
 // complete set of combinations of all fields in the event, thus there is no
 // need to decode events until they are to be delivered.
-func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
+func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	// Id
 	//
 	// If there is any Ids in the filter, none of the other fields matter. It
@@ -28,15 +32,14 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 				if err = i.FromId(id); chk.E(err) {
 					return
 				}
+				buf := new(bytes.Buffer)
 				idx := indexes.IdEnc(i, nil)
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
 				if err = idx.MarshalWrite(buf); chk.E(err) {
 					return
 				}
-				bytes := make([]byte, buf.Len())
-				copy(bytes, buf.Bytes())
-				idxs = append(idxs, bytes)
+				b := buf.Bytes()
+				r := Range{b, b}
+				idxs = append(idxs, r)
 				return
 			}(); chk.E(err) {
 				return
@@ -45,17 +48,25 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 		return
 	}
 
-	ca := new(types.Uint64)
+	caStart := new(types.Uint64)
+	caEnd := new(types.Uint64)
+
+	// Set the start of range (Since or default to zero)
 	if f.Since != nil && f.Since.V != 0 {
-		ca.Set(uint64(f.Since.V))
-	} else if f.Until != nil && f.Until.V != 0 {
-		ca.Set(uint64(f.Until.V))
-	} else if f.Until != nil {
-		ca.Set(uint64(math.MaxInt64))
+		caStart.Set(uint64(f.Since.V))
+	} else {
+		caStart.Set(uint64(0))
+	}
+
+	// Set the end of range (Until or default to math.MaxInt64)
+	if f.Until != nil && f.Until.V != 0 {
+		caEnd.Set(uint64(f.Until.V))
+	} else {
+		caEnd.Set(uint64(math.MaxInt64))
 	}
 
 	// KindPubkeyTag
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
+	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
 				for _, tag := range f.Tags.ToSliceOfTags() {
@@ -73,17 +84,24 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 							key.Set(keyBytes[0])
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
-							idx := indexes.KindPubkeyTagEnc(
-								kind, p, key, valueHash, ca, nil,
+							start, end := new(bytes.Buffer), new(bytes.Buffer)
+							idxS := indexes.KindPubkeyTagEnc(
+								kind, p, key, valueHash, caStart, nil,
 							)
-							buf := codecbuf.Get()
-							defer codecbuf.Put(buf)
-							if err = idx.MarshalWrite(buf); chk.E(err) {
+							if err = idxS.MarshalWrite(start); chk.E(err) {
 								return
 							}
-							bytes := make([]byte, buf.Len())
-							copy(bytes, buf.Bytes())
-							idxs = append(idxs, bytes)
+							idxE := indexes.KindPubkeyTagEnc(
+								kind, p, key, valueHash, caEnd, nil,
+							)
+							if err = idxE.MarshalWrite(end); chk.E(err) {
+								return
+							}
+							idxs = append(
+								idxs, Range{
+									start.Bytes(), end.Bytes(),
+								},
+							)
 							return
 						}(); chk.E(err) {
 							return
@@ -96,7 +114,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// KindTag
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
+	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
@@ -109,17 +127,24 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						key.Set(keyBytes[0])
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
-						idx := indexes.KindTagEnc(
-							kind, key, valueHash, ca, nil,
+						start, end := new(bytes.Buffer), new(bytes.Buffer)
+						idxS := indexes.KindTagEnc(
+							kind, key, valueHash, caStart, nil,
 						)
-						buf := codecbuf.Get()
-						defer codecbuf.Put(buf)
-						if err = idx.MarshalWrite(buf); chk.E(err) {
+						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
-						bytes := make([]byte, buf.Len())
-						copy(bytes, buf.Bytes())
-						idxs = append(idxs, bytes)
+						idxE := indexes.KindTagEnc(
+							kind, key, valueHash, caEnd, nil,
+						)
+						if err = idxE.MarshalWrite(end); chk.E(err) {
+							return
+						}
+						idxs = append(
+							idxs, Range{
+								start.Bytes(), end.Bytes(),
+							},
+						)
 						return
 					}(); chk.E(err) {
 						return
@@ -131,7 +156,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// KindPubkey
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
+	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
 				if err = func() (err error) {
@@ -141,15 +166,18 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					if err = p.FromPubkey(author); chk.E(err) {
 						return
 					}
-					idx := indexes.KindPubkeyEnc(kind, p, ca, nil)
-					buf := codecbuf.Get()
-					defer codecbuf.Put(buf)
-					if err = idx.MarshalWrite(buf); chk.E(err) {
+					start, end := new(bytes.Buffer), new(bytes.Buffer)
+					idxS := indexes.KindPubkeyEnc(kind, p, caStart, nil)
+					if err = idxS.MarshalWrite(start); chk.E(err) {
 						return
 					}
-					bytes := make([]byte, buf.Len())
-					copy(bytes, buf.Bytes())
-					idxs = append(idxs, bytes)
+					idxE := indexes.KindPubkeyEnc(kind, p, caEnd, nil)
+					if err = idxE.MarshalWrite(end); chk.E(err) {
+						return
+					}
+					idxs = append(
+						idxs, Range{start.Bytes(), end.Bytes()},
+					)
 					return
 				}(); chk.E(err) {
 					return
@@ -160,7 +188,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// PubkeyTag
-	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
+	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
@@ -175,17 +203,22 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 						key.Set(keyBytes[0])
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
-						idx := indexes.PubkeyTagEnc(
-							p, key, valueHash, ca, nil,
+						start, end := new(bytes.Buffer), new(bytes.Buffer)
+						idxS := indexes.PubkeyTagEnc(
+							p, key, valueHash, caStart, nil,
 						)
-						buf := codecbuf.Get()
-						defer codecbuf.Put(buf)
-						if err = idx.MarshalWrite(buf); chk.E(err) {
+						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
-						bytes := make([]byte, buf.Len())
-						copy(bytes, buf.Bytes())
-						idxs = append(idxs, bytes)
+						idxE := indexes.PubkeyTagEnc(
+							p, key, valueHash, caEnd, nil,
+						)
+						if err = idxE.MarshalWrite(end); chk.E(err) {
+							return
+						}
+						idxs = append(
+							idxs, Range{start.Bytes(), end.Bytes()},
+						)
 						return
 					}(); chk.E(err) {
 						return
@@ -197,7 +230,7 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// Tag
-	if f.Tags != nil && f.Tags.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
+	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
 				if err = func() (err error) {
@@ -207,15 +240,18 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 					key.Set(keyBytes[0])
 					valueHash := new(types.Ident)
 					valueHash.FromIdent(valueBytes)
-					idx := indexes.TagEnc(key, valueHash, ca, nil)
-					buf := codecbuf.Get()
-					defer codecbuf.Put(buf)
-					if err = idx.MarshalWrite(buf); chk.E(err) {
+					start, end := new(bytes.Buffer), new(bytes.Buffer)
+					idxS := indexes.TagEnc(key, valueHash, caStart, nil)
+					if err = idxS.MarshalWrite(start); chk.E(err) {
 						return
 					}
-					bytes := make([]byte, buf.Len())
-					copy(bytes, buf.Bytes())
-					idxs = append(idxs, bytes)
+					idxE := indexes.TagEnc(key, valueHash, caEnd, nil)
+					if err = idxE.MarshalWrite(end); chk.E(err) {
+						return
+					}
+					idxs = append(
+						idxs, Range{start.Bytes(), end.Bytes()},
+					)
 					return
 				}(); chk.E(err) {
 					return
@@ -226,20 +262,23 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// Kind
-	if f.Kinds != nil && f.Kinds.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
+	if f.Kinds != nil && f.Kinds.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		for _, k := range f.Kinds.ToUint16() {
 			if err = func() (err error) {
 				kind := new(types.Uint16)
 				kind.Set(k)
-				idx := indexes.KindEnc(kind, ca, nil)
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
-				if err = idx.MarshalWrite(buf); chk.E(err) {
+				start, end := new(bytes.Buffer), new(bytes.Buffer)
+				idxS := indexes.KindEnc(kind, caStart, nil)
+				if err = idxS.MarshalWrite(start); chk.E(err) {
 					return
 				}
-				bytes := make([]byte, buf.Len())
-				copy(bytes, buf.Bytes())
-				idxs = append(idxs, bytes)
+				idxE := indexes.KindEnc(kind, caEnd, nil)
+				if err = idxE.MarshalWrite(end); chk.E(err) {
+					return
+				}
+				idxs = append(
+					idxs, Range{start.Bytes(), end.Bytes()},
+				)
 				return
 			}(); chk.E(err) {
 				return
@@ -249,22 +288,25 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// Pubkey
-	if f.Authors != nil && f.Authors.Len() > 0 && ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) {
+	if f.Authors != nil && f.Authors.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			if err = func() (err error) {
 				p := new(types.PubHash)
 				if err = p.FromPubkey(author); chk.E(err) {
 					return
 				}
-				idx := indexes.PubkeyEnc(p, ca, nil)
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
-				if err = idx.MarshalWrite(buf); chk.E(err) {
+				start, end := new(bytes.Buffer), new(bytes.Buffer)
+				idxS := indexes.PubkeyEnc(p, caStart, nil)
+				if err = idxS.MarshalWrite(start); chk.E(err) {
 					return
 				}
-				bytes := make([]byte, buf.Len())
-				copy(bytes, buf.Bytes())
-				idxs = append(idxs, bytes)
+				idxE := indexes.PubkeyEnc(p, caEnd, nil)
+				if err = idxE.MarshalWrite(end); chk.E(err) {
+					return
+				}
+				idxs = append(
+					idxs, Range{start.Bytes(), end.Bytes()},
+				)
 				return
 			}(); chk.E(err) {
 				return
@@ -274,23 +316,17 @@ func GetIndexesFromFilter(f *filter.T) (idxs [][]byte, err error) {
 	}
 
 	// CreatedAt
-	if ((f.Since != nil && f.Since.V != 0) || (f.Until != nil && f.Until.V != 0)) && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
-		if err = func() (err error) {
-			idx := indexes.CreatedAtEnc(ca, nil)
-			buf := codecbuf.Get()
-			defer codecbuf.Put(buf)
-			if err = idx.MarshalWrite(buf); chk.E(err) {
-				return
-			}
-			bytes := make([]byte, buf.Len())
-			copy(bytes, buf.Bytes())
-			idxs = append(idxs, bytes)
-			return
-		}(); chk.E(err) {
-			return
-		}
+	start, end := new(bytes.Buffer), new(bytes.Buffer)
+	idxS := indexes.CreatedAtEnc(caStart, nil)
+	if err = idxS.MarshalWrite(start); chk.E(err) {
 		return
 	}
-
+	idxE := indexes.CreatedAtEnc(caEnd, nil)
+	if err = idxE.MarshalWrite(end); chk.E(err) {
+		return
+	}
+	idxs = append(
+		idxs, Range{start.Bytes(), end.Bytes()},
+	)
 	return
 }

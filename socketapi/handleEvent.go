@@ -95,7 +95,7 @@ func (a *A) CheckDelete(
 				if _, err = hex.DecBytes(evId, t.Value()); chk.E(err) {
 					continue
 				}
-				res, err = sto.QueryEvents(c, &filter.T{Ids: tag.New(evId)})
+				res, err = sto.QueryEvents(c, &filter.F{Ids: tag.New(evId)})
 				if err != nil {
 					if err = Ok.Error(
 						a, env, "failed to query for target event",

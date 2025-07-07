@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"math"
 	"testing"
 
 	"github.com/minio/sha256-simd"
@@ -31,25 +32,46 @@ func TestGetIndexesFromFilter(t *testing.T) {
 	t.Run("KindPubkeyTag", testKindPubkeyTagFilter)
 }
 
-// Helper function to verify that the generated index matches the expected index
-func verifyIndex(t *testing.T, idxs [][]byte, expectedIdx *indexes.T) {
+// Helper function to verify that the generated index matches the expected indexes
+func verifyIndex(t *testing.T, idxs []Range, expectedStartIdx, expectedEndIdx *indexes.T) {
 	if len(idxs) != 1 {
 		t.Fatalf("Expected 1 index, got %d", len(idxs))
 	}
 
-	// Marshal the expected index
-	buf := codecbuf.Get()
-	defer codecbuf.Put(buf)
-	err := expectedIdx.MarshalWrite(buf)
+	// Marshal the expected start index
+	startBuf := codecbuf.Get()
+	defer codecbuf.Put(startBuf)
+	err := expectedStartIdx.MarshalWrite(startBuf)
 	if chk.E(err) {
-		t.Fatalf("Failed to marshal expected index: %v", err)
+		t.Fatalf("Failed to marshal expected start index: %v", err)
 	}
 
-	// Compare the generated index with the expected index
-	if !bytes.Equal(idxs[0], buf.Bytes()) {
-		t.Errorf("Generated index does not match expected index")
-		t.Errorf("Generated: %v", idxs[0])
-		t.Errorf("Expected: %v", buf.Bytes())
+	// Compare the generated start index with the expected start index
+	if !bytes.Equal(idxs[0].Start, startBuf.Bytes()) {
+		t.Errorf("Generated start index does not match expected start index")
+		t.Errorf("Generated: %v", idxs[0].Start)
+		t.Errorf("Expected: %v", startBuf.Bytes())
+	}
+
+	// If expectedEndIdx is nil, use expectedStartIdx
+	endIdx := expectedEndIdx
+	if endIdx == nil {
+		endIdx = expectedStartIdx
+	}
+
+	// Marshal the expected end index
+	endBuf := codecbuf.Get()
+	defer codecbuf.Put(endBuf)
+	err = endIdx.MarshalWrite(endBuf)
+	if chk.E(err) {
+		t.Fatalf("Failed to marshal expected end index: %v", err)
+	}
+
+	// Compare the generated end index with the expected end index
+	if !bytes.Equal(idxs[0].end, endBuf.Bytes()) {
+		t.Errorf("Generated end index does not match expected end index")
+		t.Errorf("Generated: %v", idxs[0].end)
+		t.Errorf("Expected: %v", endBuf.Bytes())
 	}
 }
 
@@ -78,7 +100,8 @@ func testIdFilter(t *testing.T) {
 	expectedIdx := indexes.IdEnc(idHash, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	// For Id filter, both start and end indexes are the same
+	verifyIndex(t, idxs, expectedIdx, expectedIdx)
 }
 
 // Test Pubkey filter
@@ -99,18 +122,25 @@ func testPubkeyFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
+	// Create the expected indexes
 	p := new(types.PubHash)
 	err = p.FromPubkey(pubkey)
 	if chk.E(err) {
 		t.Fatalf("Failed to create PubHash: %v", err)
 	}
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V)) // Since takes precedence over Until
-	expectedIdx := indexes.PubkeyEnc(p, ca, nil)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.PubkeyEnc(p, caStart, nil)
+
+	// End index uses Until
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(f.Until.V))
+	expectedEndIdx := indexes.PubkeyEnc(p, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test CreatedAt filter
@@ -125,13 +155,18 @@ func testCreatedAtFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.CreatedAtEnc(ca, nil)
+	// Create the expected start index (using Since)
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.CreatedAtEnc(caStart, nil)
+
+	// Create the expected end index (using math.MaxInt64 since Until is not specified)
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.CreatedAtEnc(caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test CreatedAt filter with Until
@@ -146,13 +181,18 @@ func testCreatedAtUntilFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Until.V))
-	expectedIdx := indexes.CreatedAtEnc(ca, nil)
+	// Create the expected start index (using 0 since Since is not specified)
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(0))
+	expectedStartIdx := indexes.CreatedAtEnc(caStart, nil)
+
+	// Create the expected end index (using Until)
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(f.Until.V))
+	expectedEndIdx := indexes.CreatedAtEnc(caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test PubkeyTag filter
@@ -179,7 +219,7 @@ func testPubkeyTagFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
+	// Create the expected indexes
 	p := new(types.PubHash)
 	err = p.FromPubkey(pubkey)
 	if chk.E(err) {
@@ -189,12 +229,19 @@ func testPubkeyTagFilter(t *testing.T) {
 	key.Set(tagKey[0])
 	valueHash := new(types.Ident)
 	valueHash.FromIdent(tagValue)
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.PubkeyTagEnc(p, key, valueHash, ca, nil)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.PubkeyTagEnc(p, key, valueHash, caStart, nil)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.PubkeyTagEnc(p, key, valueHash, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test Tag filter
@@ -216,17 +263,24 @@ func testTagFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
+	// Create the expected indexes
 	key := new(types.Letter)
 	key.Set(tagKey[0])
 	valueHash := new(types.Ident)
 	valueHash.FromIdent(tagValue)
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.TagEnc(key, valueHash, ca, nil)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.TagEnc(key, valueHash, caStart, nil)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.TagEnc(key, valueHash, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test Kind filter
@@ -242,15 +296,22 @@ func testKindFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	kind := new(types.Uint16)
-	kind.Set(1)
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.KindEnc(kind, ca, nil)
+	// Create the expected indexes
+	k := new(types.Uint16)
+	k.Set(1)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.KindEnc(k, caStart, nil)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.KindEnc(k, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test KindPubkey filter
@@ -271,20 +332,27 @@ func testKindPubkeyFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	kind := new(types.Uint16)
-	kind.Set(1)
+	// Create the expected indexes
+	k := new(types.Uint16)
+	k.Set(1)
 	p := new(types.PubHash)
 	err = p.FromPubkey(pubkey)
 	if chk.E(err) {
 		t.Fatalf("Failed to create PubHash: %v", err)
 	}
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.KindPubkeyEnc(kind, p, ca, nil)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.KindPubkeyEnc(k, p, caStart, nil)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.KindPubkeyEnc(k, p, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test KindTag filter
@@ -307,19 +375,26 @@ func testKindTagFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	kind := new(types.Uint16)
-	kind.Set(1)
+	// Create the expected indexes
+	k := new(types.Uint16)
+	k.Set(1)
 	key := new(types.Letter)
 	key.Set(tagKey[0])
 	valueHash := new(types.Ident)
 	valueHash.FromIdent(tagValue)
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.KindTagEnc(kind, key, valueHash, ca, nil)
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.KindTagEnc(k, key, valueHash, caStart, nil)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.KindTagEnc(k, key, valueHash, caEnd, nil)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
 // Test KindPubkeyTag filter
@@ -347,9 +422,9 @@ func testKindPubkeyTagFilter(t *testing.T) {
 		t.Fatalf("GetIndexesFromFilter failed: %v", err)
 	}
 
-	// Create the expected index
-	kind := new(types.Uint16)
-	kind.Set(1)
+	// Create the expected indexes
+	k := new(types.Uint16)
+	k.Set(1)
 	p := new(types.PubHash)
 	err = p.FromPubkey(pubkey)
 	if chk.E(err) {
@@ -359,12 +434,21 @@ func testKindPubkeyTagFilter(t *testing.T) {
 	key.Set(tagKey[0])
 	valueHash := new(types.Ident)
 	valueHash.FromIdent(tagValue)
-	ca := new(types.Uint64)
-	ca.Set(uint64(f.Since.V))
-	expectedIdx := indexes.KindPubkeyTagEnc(
-		kind, p, key, valueHash, ca, nil,
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+	expectedStartIdx := indexes.KindPubkeyTagEnc(
+		k, p, key, valueHash, caStart, nil,
+	)
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+	expectedEndIdx := indexes.KindPubkeyTagEnc(
+		k, p, key, valueHash, caEnd, nil,
 	)
 
 	// Verify the generated index
-	verifyIndex(t, idxs, expectedIdx)
+	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }

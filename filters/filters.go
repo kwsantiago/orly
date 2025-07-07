@@ -8,13 +8,13 @@ import (
 	"orly.dev/filter"
 )
 
-// T is a wrapper around an array of pointers to filter.T.
+// T is a wrapper around an array of pointers to filter.F.
 type T struct {
-	F []*filter.T
+	F []*filter.F
 }
 
 // Make a new filters.T.
-func Make(l int) *T { return &T{F: make([]*filter.T, l)} }
+func Make(l int) *T { return &T{F: make([]*filter.F, l)} }
 
 // GetFingerprints returns a collection of fingerprints (64 bit digest) of a set of filters.T.
 func (f *T) GetFingerprints() (fps []uint64, err error) {
@@ -31,8 +31,8 @@ func (f *T) GetFingerprints() (fps []uint64, err error) {
 // Len returns the number of elements in a filters.T.
 func (f *T) Len() int { return len(f.F) }
 
-// New creates a new filters.T out of a variadic list of filter.T.
-func New(ff ...*filter.T) (f *T) { return &T{F: ff} }
+// New creates a new filters.T out of a variadic list of filter.F.
+func New(ff ...*filter.F) (f *T) { return &T{F: ff} }
 
 // Match checks if a set of filters.T matches on an event.E.
 func (f *T) Match(event *event.E) bool {
@@ -112,7 +112,7 @@ func (f *T) Unmarshal(b []byte) (r []byte, err error) {
 func GenFilters(n int) (ff *T, err error) {
 	ff = &T{}
 	for _ = range n {
-		var f *filter.T
+		var f *filter.F
 		if f, err = filter.GenFilter(); chk.E(err) {
 			return
 		}

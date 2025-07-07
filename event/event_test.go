@@ -13,6 +13,7 @@ import (
 
 func TestTMarshal_Unmarshal(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var rem, out []byte
 	var err error
 	for scanner.Scan() {
@@ -41,6 +42,7 @@ func TestTMarshal_Unmarshal(t *testing.T) {
 
 func TestT_CheckSignature(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var rem, out []byte
 	var err error
 	for scanner.Scan() {
@@ -97,6 +99,7 @@ func BenchmarkMarshal(bb *testing.B) {
 	var err error
 	evts := make([]*E, 0, 9999)
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	buf := make([]byte, 1_000_000)
 	scanner.Buffer(buf, len(buf))
 	for scanner.Scan() {
@@ -127,12 +130,14 @@ func BenchmarkUnmarshal(bb *testing.B) {
 	evts := make([]*E, 9999)
 	bb.ReportAllocs()
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	buf := make([]byte, 1_000_000)
 	scanner.Buffer(buf, len(buf))
 	var counter int
 	for i = 0; i < bb.N; i++ {
 		if !scanner.Scan() {
 			scanner = bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+			scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 			scanner.Scan()
 		}
 		b := scanner.Bytes()

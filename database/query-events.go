@@ -6,6 +6,6 @@ import (
 	"orly.dev/filter"
 )
 
-func (d *D) QueryEvents(c context.T, f *filter.T) (evs event.S, err error) {
+func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 	return
 }

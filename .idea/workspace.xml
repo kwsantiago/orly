@@ -4,15 +4,21 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="migrate `codec` package to `interfaces/codec` and update imports across the project">
-      <change afterPath="$PROJECT_DIR$/database/get-indexes-for-event_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/not.realy.lol.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/orly.dev.iml" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests">
+      <change afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-serials.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/event/event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/event_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filter/filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/filter/filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filters/filters.go" beforeDir="false" afterPath="$PROJECT_DIR$/filters/filters.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interfaces/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/store_interface.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,8 +34,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Go File" />
         <option value="Go Application" />
+        <option value="Go File" />
       </list>
     </option>
   </component>
@@ -71,6 +77,8 @@
     "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
     "Go Test.TestGetIndexesForEvent in orly.dev/database.executor": "Run",
     "Go Test.TestGetIndexesFromFilter in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForIds in orly.dev/database.executor": "Run",
+    "Go Test.TestSaveEvents in orly.dev/database.executor": "Run",
     "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
     "Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor": "Run",
     "Go Test.go test not.realy.lol/database/indexes.executor": "Run",
@@ -118,7 +126,7 @@
       <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestGetIndexesFromFilter in orly.dev/database">
+  <component name="RunManager" selected="Go Test.TestQueryForIds in orly.dev/database">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
@@ -151,6 +159,30 @@
       <pattern value="^\QTestGetIndexesFromFilter\E$" />
       <method v="2" />
     </configuration>
+    <configuration name="TestQueryForIds in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestQueryForIds\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestSaveEvents in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestSaveEvents\E$" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
@@ -171,35 +203,13 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
-    <configuration name="go test orly.dev/database/indexes" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/database/indexes" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/database/indexes" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <method v="2" />
-    </configuration>
-    <configuration name="go test orly.dev/event" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/event" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/event" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
         <item itemvalue="Go Test.TestGetIndexesFromFilter in orly.dev/database" />
+        <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
         <item itemvalue="Go Test.TestGetIndexesForEvent in orly.dev/database" />
         <item itemvalue="Go Test.go test orly.dev/database" />
-        <item itemvalue="Go Test.go test orly.dev/database/indexes" />
-        <item itemvalue="Go Test.go test orly.dev/event" />
       </list>
     </recent_temporary>
   </component>
@@ -260,7 +270,8 @@
     <MESSAGE value="remove all indexes that don't end in a timestamp" />
     <MESSAGE value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
     <MESSAGE value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
-    <option name="LAST_COMMIT_MESSAGE" value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
+    <MESSAGE value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
