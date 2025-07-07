@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups">
+      <change afterPath="$PROJECT_DIR$/database/get-serials-by-range.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
     </list>
@@ -22,8 +23,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Go File" />
         <option value="Go Application" />
+        <option value="Go File" />
       </list>
     </option>
   </component>
@@ -56,7 +57,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "DefaultGoTemplateProperty": "Go Application",
+    "DefaultGoTemplateProperty": "Go File",
     "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
     "Go Build.go build not.realy.lol.executor": "Run",
     "Go Build.go build orly.dev/event/examples/filter.executor": "Run",
@@ -132,6 +133,18 @@
       <filePath value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
+    <configuration name="TestQueryForAuthorsTags in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestQueryForAuthorsTags\E$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestQueryForCreatedAt in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
@@ -156,7 +169,7 @@
       <pattern value="^\QTestQueryForIds\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestQueryForKinds in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestSaveEvents in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
       <root_directory value="$PROJECT_DIR$" />
@@ -165,19 +178,7 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestQueryForKinds\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestQueryForTags in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/database" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/database" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestQueryForTags\E$" />
+      <pattern value="^\QTestSaveEvents\E$" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -203,10 +204,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Go Test.go test orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForAuthorsTags in orly.dev/database" />
+        <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForCreatedAt in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
-        <item itemvalue="Go Test.TestQueryForTags in orly.dev/database" />
-        <item itemvalue="Go Test.TestQueryForKinds in orly.dev/database" />
       </list>
     </recent_temporary>
   </component>
@@ -245,8 +246,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="getting started on the server" />
-    <MESSAGE value="implement relayinfo" />
     <MESSAGE value="add HTTP handler to socketapi and refactor logging configuration" />
     <MESSAGE value="enhance socketapi with HTTP handler, update project name, and refine logging" />
     <MESSAGE value="starting with database stuff" />
@@ -270,7 +269,9 @@
     <MESSAGE value="added comprehensive tests for QueryForIds" />
     <MESSAGE value="Ensure data directory creation in `database.go` using `os.MkdirAll` and `apputil.EnsureDir`." />
     <MESSAGE value="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups." />
+    <MESSAGE value="Improve timestamp filtering in `QueryForIds` and optimize key parsing logic." />
+    <MESSAGE value="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups" />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
