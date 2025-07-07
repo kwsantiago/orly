@@ -33,6 +33,7 @@ func TestQueryForKindsAuthors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -72,30 +73,30 @@ func TestQueryForKindsAuthors(t *testing.T) {
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
 	// Test querying by kind and author
-	var idTsPk []store.IdTsPk
-	
+	var idTsPk []store.IdPkTs
+
 	// Find an event with a specific kind and author
 	testKind := kind.New(1) // Kind 1 is typically text notes
 	kindFilter := kinds.New(testKind)
-	
+
 	// Use the author from events[1]
 	authorFilter := tag.New(events[1].Pubkey)
-	
+
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
-			Kinds: kindFilter,
+			Kinds:   kindFilter,
 			Authors: authorFilter,
 		},
 	)
 	if err != nil {
 		t.Fatalf("Failed to query for kinds and authors: %v", err)
 	}
-	
+
 	// Verify we got results
 	if len(idTsPk) == 0 {
 		t.Fatal("did not find any events with the specified kind and author")
 	}
-	
+
 	// Verify the results have the correct kind and author
 	for i, result := range idTsPk {
 		// Find the event with this ID

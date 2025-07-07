@@ -35,6 +35,7 @@ func TestQueryForIds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -73,7 +74,7 @@ func TestQueryForIds(t *testing.T) {
 
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
-	var idTsPk []store.IdTsPk
+	var idTsPk []store.IdPkTs
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
 			Ids: tag.New(events[3].Id),
@@ -227,7 +228,9 @@ func TestQueryForIds(t *testing.T) {
 					var hasTag bool
 					for _, tag := range ev.Tags.ToSliceOfTags() {
 						if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-							if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+							if bytes.Equal(
+								tag.B(0), testTag.B(0),
+							) && bytes.Equal(tag.B(1), testTag.B(1)) {
 								hasTag = true
 								break
 							}
@@ -245,14 +248,16 @@ func TestQueryForIds(t *testing.T) {
 				}
 			}
 			if !found {
-				t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+				t.Fatalf(
+					"result %d with ID %x not found in events", i, result.Id,
+				)
 			}
 		}
 
 		// Test querying by kind and author
 		idTsPk, err = db.QueryForIds(
 			ctx, &filter.F{
-				Kinds: kindFilter,
+				Kinds:   kindFilter,
 				Authors: tag.New(events[1].Pubkey),
 			},
 		)
@@ -285,7 +290,10 @@ func TestQueryForIds(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+					t.Fatalf(
+						"result %d with ID %x not found in events", i,
+						result.Id,
+					)
 				}
 			}
 		}
@@ -294,7 +302,7 @@ func TestQueryForIds(t *testing.T) {
 		idTsPk, err = db.QueryForIds(
 			ctx, &filter.F{
 				Kinds: kinds.New(testEvent.Kind),
-				Tags: tagsFilter,
+				Tags:  tagsFilter,
 			},
 		)
 		if err != nil {
@@ -324,7 +332,9 @@ func TestQueryForIds(t *testing.T) {
 					var hasTag bool
 					for _, tag := range ev.Tags.ToSliceOfTags() {
 						if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-							if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+							if bytes.Equal(
+								tag.B(0), testTag.B(0),
+							) && bytes.Equal(tag.B(1), testTag.B(1)) {
 								hasTag = true
 								break
 							}
@@ -342,16 +352,18 @@ func TestQueryForIds(t *testing.T) {
 				}
 			}
 			if !found {
-				t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+				t.Fatalf(
+					"result %d with ID %x not found in events", i, result.Id,
+				)
 			}
 		}
 
 		// Test querying by kind, author, and tag
 		idTsPk, err = db.QueryForIds(
 			ctx, &filter.F{
-				Kinds: kinds.New(testEvent.Kind),
+				Kinds:   kinds.New(testEvent.Kind),
 				Authors: tag.New(testEvent.Pubkey),
-				Tags: tagsFilter,
+				Tags:    tagsFilter,
 			},
 		)
 		if err != nil {
@@ -388,7 +400,9 @@ func TestQueryForIds(t *testing.T) {
 					var hasTag bool
 					for _, tag := range ev.Tags.ToSliceOfTags() {
 						if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-							if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+							if bytes.Equal(
+								tag.B(0), testTag.B(0),
+							) && bytes.Equal(tag.B(1), testTag.B(1)) {
 								hasTag = true
 								break
 							}
@@ -406,7 +420,9 @@ func TestQueryForIds(t *testing.T) {
 				}
 			}
 			if !found {
-				t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+				t.Fatalf(
+					"result %d with ID %x not found in events", i, result.Id,
+				)
 			}
 		}
 
@@ -414,7 +430,7 @@ func TestQueryForIds(t *testing.T) {
 		idTsPk, err = db.QueryForIds(
 			ctx, &filter.F{
 				Authors: tag.New(testEvent.Pubkey),
-				Tags: tagsFilter,
+				Tags:    tagsFilter,
 			},
 		)
 		if err != nil {
@@ -445,7 +461,9 @@ func TestQueryForIds(t *testing.T) {
 					var hasTag bool
 					for _, tag := range ev.Tags.ToSliceOfTags() {
 						if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-							if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+							if bytes.Equal(
+								tag.B(0), testTag.B(0),
+							) && bytes.Equal(tag.B(1), testTag.B(1)) {
 								hasTag = true
 								break
 							}
@@ -463,7 +481,9 @@ func TestQueryForIds(t *testing.T) {
 				}
 			}
 			if !found {
-				t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+				t.Fatalf(
+					"result %d with ID %x not found in events", i, result.Id,
+				)
 			}
 		}
 	}

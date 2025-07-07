@@ -32,6 +32,7 @@ func TestQueryForTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -101,11 +102,11 @@ func TestQueryForTags(t *testing.T) {
 	}
 
 	// Test querying by tag only
-	var idTsPk []store.IdTsPk
-	
+	var idTsPk []store.IdPkTs
+
 	// Create a tags filter with the test tag
 	tagsFilter := tags.New(testTag)
-	
+
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
 			Tags: tagsFilter,
@@ -114,12 +115,12 @@ func TestQueryForTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query for tags: %v", err)
 	}
-	
+
 	// Verify we got results
 	if len(idTsPk) == 0 {
 		t.Fatal("did not find any events with the specified tag")
 	}
-	
+
 	// Verify the results have the correct tag
 	for i, result := range idTsPk {
 		// Find the event with this ID
@@ -127,25 +128,27 @@ func TestQueryForTags(t *testing.T) {
 		for _, ev := range events {
 			if bytes.Equal(result.Id, ev.Id) {
 				found = true
-				
+
 				// Check if the event has the tag we're looking for
 				var hasTag bool
 				for _, tag := range ev.Tags.ToSliceOfTags() {
 					if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-						if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+						if bytes.Equal(
+							tag.B(0), testTag.B(0),
+						) && bytes.Equal(tag.B(1), testTag.B(1)) {
 							hasTag = true
 							break
 						}
 					}
 				}
-				
+
 				if !hasTag {
 					t.Fatalf(
 						"result %d does not have the expected tag",
 						i,
 					)
 				}
-				
+
 				break
 			}
 		}

@@ -32,6 +32,7 @@ func TestQueryForAuthorsTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -74,7 +75,8 @@ func TestQueryForAuthorsTags(t *testing.T) {
 	var testEvent *event.E
 	for _, ev := range events {
 		if ev.Tags != nil && ev.Tags.Len() > 0 {
-			// Find a tag with at least 2 elements and first element of length 1
+			// Find a tag with at least 2 elements and the first element of
+			// length 1
 			for _, tag := range ev.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.B(0)) == 1 {
 					testEvent = ev
@@ -101,29 +103,29 @@ func TestQueryForAuthorsTags(t *testing.T) {
 	}
 
 	// Test querying by author and tag
-	var idTsPk []store.IdTsPk
-	
+	var idTsPk []store.IdPkTs
+
 	// Use the author from the test event
 	authorFilter := tag.New(testEvent.Pubkey)
-	
+
 	// Create a tags filter with the test tag
 	tagsFilter := tags.New(testTag)
-	
+
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
 			Authors: authorFilter,
-			Tags: tagsFilter,
+			Tags:    tagsFilter,
 		},
 	)
 	if err != nil {
 		t.Fatalf("Failed to query for authors and tags: %v", err)
 	}
-	
+
 	// Verify we got results
 	if len(idTsPk) == 0 {
 		t.Fatal("did not find any events with the specified author and tag")
 	}
-	
+
 	// Verify the results have the correct author and tag
 	for i, result := range idTsPk {
 		// Find the event with this ID
@@ -131,32 +133,34 @@ func TestQueryForAuthorsTags(t *testing.T) {
 		for _, ev := range events {
 			if bytes.Equal(result.Id, ev.Id) {
 				found = true
-				
+
 				if !bytes.Equal(ev.Pubkey, testEvent.Pubkey) {
 					t.Fatalf(
 						"result %d has incorrect author, got %x, expected %x",
 						i, ev.Pubkey, testEvent.Pubkey,
 					)
 				}
-				
+
 				// Check if the event has the tag we're looking for
 				var hasTag bool
 				for _, tag := range ev.Tags.ToSliceOfTags() {
 					if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-						if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+						if bytes.Equal(
+							tag.B(0), testTag.B(0),
+						) && bytes.Equal(tag.B(1), testTag.B(1)) {
 							hasTag = true
 							break
 						}
 					}
 				}
-				
+
 				if !hasTag {
 					t.Fatalf(
 						"result %d does not have the expected tag",
 						i,
 					)
 				}
-				
+
 				break
 			}
 		}

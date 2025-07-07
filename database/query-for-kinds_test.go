@@ -32,6 +32,7 @@ func TestQueryForKinds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -71,7 +72,7 @@ func TestQueryForKinds(t *testing.T) {
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
 	// Test querying by kind
-	var idTsPk []store.IdTsPk
+	var idTsPk []store.IdPkTs
 	// Find an event with a specific kind
 	testKind := kind.New(1) // Kind 1 is typically text notes
 	kindFilter := kinds.New(testKind)

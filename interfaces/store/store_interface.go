@@ -55,14 +55,15 @@ type Accountant interface {
 	EventCount() (count uint64, err error)
 }
 
-type IdTsPk struct {
+type IdPkTs struct {
 	Id  []byte
 	Pub []byte
 	Ts  int64
+	Ser uint64
 }
 
 type Querier interface {
-	QueryForIds(c context.T, f *filter.F) (evs []IdTsPk, err error)
+	QueryForIds(c context.T, f *filter.F) (evs []IdPkTs, err error)
 }
 
 type GetIdsWriter interface {

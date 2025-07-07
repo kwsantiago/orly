@@ -31,6 +31,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -82,7 +83,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 	untilTime.V = middleEvent.CreatedAt.V + 3600 // 1 hour after middle event
 
 	// Test querying by created_at range
-	var idTsPk []store.IdTsPk
+	var idTsPk []store.IdPkTs
 
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
@@ -99,7 +100,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		t.Fatal("did not find any events in the specified time range")
 	}
 
-	// Verify the results exist in our events slice
+	// Verify the results exist in our events slice and are within the timestamp range
 	for i, result := range idTsPk {
 		// Find the event with this ID
 		var found bool
@@ -111,6 +112,12 @@ func TestQueryForCreatedAt(t *testing.T) {
 		}
 		if !found {
 			t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+		}
+
+		// Verify the timestamp is within the range
+		if result.Ts < sinceTime.V || result.Ts > untilTime.V {
+			t.Fatalf("result %d with ID %x has timestamp %d outside the range [%d, %d]", 
+				i, result.Id, result.Ts, sinceTime.V, untilTime.V)
 		}
 	}
 
@@ -129,7 +136,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		t.Fatal("did not find any events with Since filter")
 	}
 
-	// Verify the results exist in our events slice
+	// Verify the results exist in our events slice and are after the Since timestamp
 	for i, result := range idTsPk {
 		// Find the event with this ID
 		var found bool
@@ -141,6 +148,12 @@ func TestQueryForCreatedAt(t *testing.T) {
 		}
 		if !found {
 			t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+		}
+
+		// Verify the timestamp is after the Since timestamp
+		if result.Ts < sinceTime.V {
+			t.Fatalf("result %d with ID %x has timestamp %d before the Since timestamp %d", 
+				i, result.Id, result.Ts, sinceTime.V)
 		}
 	}
 
@@ -159,7 +172,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		t.Fatal("did not find any events with Until filter")
 	}
 
-	// Verify the results exist in our events slice
+	// Verify the results exist in our events slice and are before the Until timestamp
 	for i, result := range idTsPk {
 		// Find the event with this ID
 		var found bool
@@ -171,6 +184,12 @@ func TestQueryForCreatedAt(t *testing.T) {
 		}
 		if !found {
 			t.Fatalf("result %d with ID %x not found in events", i, result.Id)
+		}
+
+		// Verify the timestamp is before the Until timestamp
+		if result.Ts > untilTime.V {
+			t.Fatalf("result %d with ID %x has timestamp %d after the Until timestamp %d", 
+				i, result.Id, result.Ts, untilTime.V)
 		}
 	}
 }

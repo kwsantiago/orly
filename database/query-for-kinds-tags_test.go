@@ -33,6 +33,7 @@ func TestQueryForKindsTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -102,7 +103,7 @@ func TestQueryForKindsTags(t *testing.T) {
 	}
 
 	// Test querying by kind and tag
-	var idTsPk []store.IdTsPk
+	var idTsPk []store.IdPkTs
 
 	// Use the kind from the test event
 	testKind := testEvent.Kind
@@ -114,7 +115,7 @@ func TestQueryForKindsTags(t *testing.T) {
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
 			Kinds: kindFilter,
-			Tags: tagsFilter,
+			Tags:  tagsFilter,
 		},
 	)
 	if err != nil {
@@ -144,7 +145,9 @@ func TestQueryForKindsTags(t *testing.T) {
 				var hasTag bool
 				for _, tag := range ev.Tags.ToSliceOfTags() {
 					if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-						if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+						if bytes.Equal(
+							tag.B(0), testTag.B(0),
+						) && bytes.Equal(tag.B(1), testTag.B(1)) {
 							hasTag = true
 							break
 						}

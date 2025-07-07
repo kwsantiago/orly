@@ -33,6 +33,7 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
+	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -102,34 +103,34 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 	}
 
 	// Test querying by kind, author, and tag
-	var idTsPk []store.IdTsPk
-	
+	var idTsPk []store.IdPkTs
+
 	// Use the kind from the test event
 	testKind := testEvent.Kind
 	kindFilter := kinds.New(testKind)
-	
+
 	// Use the author from the test event
 	authorFilter := tag.New(testEvent.Pubkey)
-	
+
 	// Create a tags filter with the test tag
 	tagsFilter := tags.New(testTag)
-	
+
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
-			Kinds: kindFilter,
+			Kinds:   kindFilter,
 			Authors: authorFilter,
-			Tags: tagsFilter,
+			Tags:    tagsFilter,
 		},
 	)
 	if err != nil {
 		t.Fatalf("Failed to query for kinds, authors, and tags: %v", err)
 	}
-	
+
 	// Verify we got results
 	if len(idTsPk) == 0 {
 		t.Fatal("did not find any events with the specified kind, author, and tag")
 	}
-	
+
 	// Verify the results have the correct kind, author, and tag
 	for i, result := range idTsPk {
 		// Find the event with this ID
@@ -143,32 +144,34 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 						i, ev.Kind.K, testKind.K,
 					)
 				}
-				
+
 				if !bytes.Equal(ev.Pubkey, testEvent.Pubkey) {
 					t.Fatalf(
 						"result %d has incorrect author, got %x, expected %x",
 						i, ev.Pubkey, testEvent.Pubkey,
 					)
 				}
-				
+
 				// Check if the event has the tag we're looking for
 				var hasTag bool
 				for _, tag := range ev.Tags.ToSliceOfTags() {
 					if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-						if bytes.Equal(tag.B(0), testTag.B(0)) && bytes.Equal(tag.B(1), testTag.B(1)) {
+						if bytes.Equal(
+							tag.B(0), testTag.B(0),
+						) && bytes.Equal(tag.B(1), testTag.B(1)) {
 							hasTag = true
 							break
 						}
 					}
 				}
-				
+
 				if !hasTag {
 					t.Fatalf(
 						"result %d does not have the expected tag",
 						i,
 					)
 				}
-				
+
 				break
 			}
 		}

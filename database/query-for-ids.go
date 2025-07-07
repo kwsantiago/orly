@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/context"
-	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
 	"orly.dev/filter"
 	"orly.dev/interfaces/store"
@@ -14,79 +12,31 @@ import (
 )
 
 func (d *D) QueryForIds(c context.T, f *filter.F) (
-	evs []store.IdTsPk, err error,
+	evs []store.IdPkTs, err error,
 ) {
 	var idxs []Range
 	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
 		return
 	}
+
 	for _, idx := range idxs {
 		// Id searches are a special case as they don't require iteration
 		if bytes.Equal(idx.Start, idx.End) {
 			// this is an Id search
 			var ser *types.Uint40
-			if err = d.View(
-				func(txn *badger.Txn) (err error) {
-					it := txn.NewIterator(badger.DefaultIteratorOptions)
-					var key []byte
-					defer it.Close()
-					it.Seek(idx.Start)
-					if it.Valid() {
-						item := it.Item()
-						key = item.KeyCopy(nil)
-						ser = new(types.Uint40)
-						buf := bytes.NewBuffer(key[len(key)-5:])
-						if err = ser.UnmarshalRead(buf); chk.E(err) {
-							return
-						}
-					} else {
-						// just don't return what we don't have? others may be
-						// found tho.
-					}
-					return
-				},
-			); chk.E(err) {
+			if ser, err = d.GetSerialById(idx.Start); chk.E(err) {
 				return
 			}
-			// scan for the IdTsPk
-			if err = d.View(
-				func(txn *badger.Txn) (err error) {
-					buf := codecbuf.Get()
-					defer codecbuf.Put(buf)
-					if err = indexes.IdPubkeyEnc(
-						ser, nil, nil, nil,
-					).MarshalWrite(buf); chk.E(err) {
-						return
-					}
-					prf := buf.Bytes()
-					it := txn.NewIterator(
-						badger.IteratorOptions{
-							Prefix: prf,
-						},
-					)
-					defer it.Close()
-					it.Seek(prf)
-					if it.Valid() {
-						item := it.Item()
-						key := item.KeyCopy(nil)
-						ser, fid, p, ca := indexes.IdPubkeyVars()
-						buf2 := bytes.NewBuffer(key)
-						if err = indexes.IdPubkeyDec(
-							ser, fid, p, ca,
-						).UnmarshalRead(buf2); chk.E(err) {
-							return
-						}
-						idtspk := store.IdTsPk{
-							Id:  fid.Bytes(),
-							Pub: p.Bytes(),
-							Ts:  int64(ca.Get()),
-						}
-						evs = append(evs, idtspk)
-					}
-					return
-				},
-			); chk.E(err) {
+			// scan for the IdPkTs
+			var fidpk *store.IdPkTs
+			if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 				return
+			}
+
+			// Filter by timestamp if Since or Until is specified
+			if (f.Since == nil || fidpk.Ts >= f.Since.V) && 
+			   (f.Until == nil || fidpk.Ts <= f.Until.V) {
+				evs = append(evs, *fidpk)
 			}
 		} else {
 			prf := idx.End[:len(idx.End)-types.TimestampLen]
@@ -103,11 +53,14 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					for it.Rewind(); it.Valid(); it.Next() {
 						count++
 						item := it.Item()
-						var key, val []byte
-						_ = val
+						var key []byte
 						key = item.KeyCopy(nil)
 						if !bytes.HasPrefix(key, prf) {
 							continue
+						}
+						if bytes.Compare(key, idx.Start) < 0 {
+							// didn't find it
+							return
 						}
 						ser := new(types.Uint40)
 						buf := bytes.NewBuffer(key[len(key)-5:])
@@ -123,45 +76,16 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 			}
 			// fetch the events
 			for _, ser := range founds {
-				// scan for the IdTsPk
-				if err = d.View(
-					func(txn *badger.Txn) (err error) {
-						buf := codecbuf.Get()
-						defer codecbuf.Put(buf)
-						if err = indexes.IdPubkeyEnc(
-							ser, nil, nil, nil,
-						).MarshalWrite(buf); chk.E(err) {
-							return
-						}
-						prf := buf.Bytes()
-						it := txn.NewIterator(
-							badger.IteratorOptions{
-								Prefix: prf,
-							},
-						)
-						defer it.Close()
-						it.Seek(prf)
-						if it.Valid() {
-							item := it.Item()
-							key := item.KeyCopy(nil)
-							ser, fid, p, ca := indexes.IdPubkeyVars()
-							buf2 := bytes.NewBuffer(key)
-							if err = indexes.IdPubkeyDec(
-								ser, fid, p, ca,
-							).UnmarshalRead(buf2); chk.E(err) {
-								return
-							}
-							idtspk := store.IdTsPk{
-								Id:  fid.Bytes(),
-								Pub: p.Bytes(),
-								Ts:  int64(ca.Get()),
-							}
-							evs = append(evs, idtspk)
-						}
-						return
-					},
-				); chk.E(err) {
+				// scan for the IdPkTs
+				var fidpk *store.IdPkTs
+				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 					return
+				}
+
+				// Filter by timestamp if Since or Until is specified
+				if (f.Since == nil || fidpk.Ts >= f.Since.V) && 
+				   (f.Until == nil || fidpk.Ts <= f.Until.V) {
+					evs = append(evs, *fidpk)
 				}
 			}
 			// sort results by timestamp in reverse chronological order
