@@ -4,9 +4,18 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="partly implemented query for ids">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="log event processing duration and throughput in save-event test">
+      <change afterPath="$PROJECT_DIR$/database/query-for-authors-tags_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-created-at_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-kinds-authors-tags_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-kinds-authors_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-kinds-tags_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-kinds_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-tags_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/save-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-ids_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +75,7 @@
     "Go Test.TestGetIndexesForEvent in orly.dev/database.executor": "Run",
     "Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor": "Run",
     "Go Test.TestGetIndexesFromFilter in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForCreatedAt in orly.dev/database.executor": "Run",
     "Go Test.TestQueryForIds in orly.dev/database.executor": "Run",
     "Go Test.TestSaveEvents in orly.dev/database.executor": "Run",
     "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
@@ -94,7 +104,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.completion"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -116,7 +126,7 @@
       <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestSaveEvents in orly.dev/database">
+  <component name="RunManager" selected="Go Test.go test orly.dev/database">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
@@ -125,7 +135,7 @@
       <filePath value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestGetIndexesForEvent in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestQueryForKinds in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
       <root_directory value="$PROJECT_DIR$" />
@@ -134,10 +144,10 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestGetIndexesForEvent\E$" />
+      <pattern value="^\QTestQueryForKinds\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestGetIndexesForEvent/BasicEvent in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestQueryForKindsAuthors in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
       <root_directory value="$PROJECT_DIR$" />
@@ -146,10 +156,10 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestGetIndexesForEvent\E$/^\QBasicEvent\E$" />
+      <pattern value="^\QTestQueryForKindsAuthors\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestGetIndexesFromFilter in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestQueryForKindsTags in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
       <root_directory value="$PROJECT_DIR$" />
@@ -158,10 +168,10 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestGetIndexesFromFilter\E$" />
+      <pattern value="^\QTestQueryForKindsTags\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="TestQueryForIds in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="TestQueryForTags in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$/database" />
       <root_directory value="$PROJECT_DIR$" />
@@ -170,19 +180,7 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTestQueryForIds\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestSaveEvents in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/database" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/database" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestSaveEvents\E$" />
+      <pattern value="^\QTestQueryForTags\E$" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -194,13 +192,24 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
+    <configuration name="go test orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
-        <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
-        <item itemvalue="Go Test.TestGetIndexesFromFilter in orly.dev/database" />
-        <item itemvalue="Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database" />
-        <item itemvalue="Go Test.TestGetIndexesForEvent in orly.dev/database" />
+        <item itemvalue="Go Test.go test orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForTags in orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForKinds in orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForKindsTags in orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForKindsAuthors in orly.dev/database" />
       </list>
     </recent_temporary>
   </component>
@@ -239,7 +248,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Update project name and description in version.go" />
     <MESSAGE value="tidying things up and getting started" />
     <MESSAGE value="all the necessary things for events and filters&#10;&#10;these are all the fast things that work" />
     <MESSAGE value="the rest of the working things&#10;&#10;might be some more yet, not sure" />
@@ -264,7 +272,9 @@
     <MESSAGE value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
     <MESSAGE value="change filter indexes to be pairs with created_at ranges" />
     <MESSAGE value="partly implemented query for ids" />
-    <option name="LAST_COMMIT_MESSAGE" value="partly implemented query for ids" />
+    <MESSAGE value="log event processing duration and throughput in save-event test" />
+    <option name="LAST_COMMIT_MESSAGE" value="log event processing duration and throughput in save-event test" />
+    <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

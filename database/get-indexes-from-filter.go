@@ -21,7 +21,7 @@ type Range struct {
 // complete set of combinations of all fields in the event, thus there is no
 // need to decode events until they are to be delivered.
 func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
-	// Id
+	// Id eid
 	//
 	// If there is any Ids in the filter, none of the other fields matter. It
 	// should be an error, but convention just ignores it.
@@ -65,7 +65,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		caEnd.Set(uint64(math.MaxInt64))
 	}
 
-	// KindPubkeyTag
+	// KindPubkeyTag kpt
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
@@ -113,7 +113,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// KindTag
+	// KindTag ktc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -155,7 +155,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// KindPubkey
+	// KindPubkey kpc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
@@ -187,7 +187,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// PubkeyTag
+	// PubkeyTag ptc
 	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -229,7 +229,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Tag
+	// Tag  itc
 	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
@@ -261,7 +261,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Kind
+	// Kind kca
 	if f.Kinds != nil && f.Kinds.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		for _, k := range f.Kinds.ToUint16() {
 			if err = func() (err error) {
@@ -287,7 +287,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Pubkey
+	// Pubkey pca
 	if f.Authors != nil && f.Authors.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			if err = func() (err error) {
@@ -315,7 +315,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// CreatedAt
+	// CreatedAt ica
 	start, end := new(bytes.Buffer), new(bytes.Buffer)
 	idxS := indexes.CreatedAtEnc(caStart, nil)
 	if err = idxS.MarshalWrite(start); chk.E(err) {
