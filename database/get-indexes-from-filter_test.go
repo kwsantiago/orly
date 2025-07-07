@@ -33,7 +33,9 @@ func TestGetIndexesFromFilter(t *testing.T) {
 }
 
 // Helper function to verify that the generated index matches the expected indexes
-func verifyIndex(t *testing.T, idxs []Range, expectedStartIdx, expectedEndIdx *indexes.T) {
+func verifyIndex(
+	t *testing.T, idxs []Range, expectedStartIdx, expectedEndIdx *indexes.T,
+) {
 	if len(idxs) != 1 {
 		t.Fatalf("Expected 1 index, got %d", len(idxs))
 	}
@@ -64,13 +66,13 @@ func verifyIndex(t *testing.T, idxs []Range, expectedStartIdx, expectedEndIdx *i
 	defer codecbuf.Put(endBuf)
 	err = endIdx.MarshalWrite(endBuf)
 	if chk.E(err) {
-		t.Fatalf("Failed to marshal expected end index: %v", err)
+		t.Fatalf("Failed to marshal expected End index: %v", err)
 	}
 
 	// Compare the generated end index with the expected end index
-	if !bytes.Equal(idxs[0].end, endBuf.Bytes()) {
-		t.Errorf("Generated end index does not match expected end index")
-		t.Errorf("Generated: %v", idxs[0].end)
+	if !bytes.Equal(idxs[0].End, endBuf.Bytes()) {
+		t.Errorf("Generated End index does not match expected End index")
+		t.Errorf("Generated: %v", idxs[0].End)
 		t.Errorf("Expected: %v", endBuf.Bytes())
 	}
 }

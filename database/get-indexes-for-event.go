@@ -1,8 +1,8 @@
 package database
 
 import (
+	"bytes"
 	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	. "orly.dev/database/indexes/types"
 	"orly.dev/event"
@@ -10,11 +10,7 @@ import (
 
 // appendIndexBytes marshals an index to a byte slice and appends it to the idxs slice
 func appendIndexBytes(idxs *[][]byte, idx *indexes.T) (err error) {
-	// Get a buffer from the pool
-	buf := codecbuf.Get()
-	defer codecbuf.Put(buf)
-	// Ensure the buffer is empty
-	buf.Reset()
+	buf := new(bytes.Buffer)
 	// Marshal the index to the buffer
 	if err = idx.MarshalWrite(buf); chk.E(err) {
 		return

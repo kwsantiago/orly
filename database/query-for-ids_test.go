@@ -56,7 +56,7 @@ func TestQueryForIds(t *testing.T) {
 		events = append(events, ev)
 
 		// Save the event to the database
-		if err = db.SaveEvent(ctx, ev); err != nil {
+		if _, _, err = db.SaveEvent(ctx, ev); err != nil {
 			t.Fatalf("Failed to save event #%d: %v", eventCount+1, err)
 		}
 
@@ -73,8 +73,14 @@ func TestQueryForIds(t *testing.T) {
 	var idTsPk []store.IdTsPk
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
-			Authors: tag.New(events[0].Pubkey),
+			Ids: tag.New(events[3].Id),
 		},
 	)
 	log.I.S(idTsPk)
+	// idTsPk, err = db.QueryForIds(
+	// 	ctx, &filter.F{
+	// 		Authors: tag.New(events[0].Pubkey),
+	// 	},
+	// )
+	// log.I.S(idTsPk)
 }

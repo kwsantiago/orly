@@ -1,21 +1,19 @@
 package database
 
 import (
+	"bytes"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/context"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
 	"orly.dev/event"
-	"orly.dev/log"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
-func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
+func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 	// Get a buffer from the pool
-	buf := codecbuf.Get()
-	defer codecbuf.Put(buf)
+	buf := new(bytes.Buffer)
 	// Marshal the event to binary
 	ev.MarshalBinary(buf)
 	// Get the next sequence number for the event
@@ -28,10 +26,9 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 	if idxs, err = GetIndexesForEvent(ev, serial); chk.E(err) {
 		return
 	}
-	log.T.S(idxs)
-	var total int
-	for _, v := range idxs {
-		total += len(v)
+	// log.I.S(idxs)
+	for _, k := range idxs {
+		kc += len(k)
 	}
 	// Start a transaction to save the event and all its indexes
 	err = d.Update(
@@ -39,10 +36,8 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 			// Save each index
 			for _, key := range idxs {
 				if err = func() (err error) {
-					buf2 := codecbuf.Get()
-					defer codecbuf.Put(buf2)
 					// Save the index to the database
-					if err = txn.Set(key, buf2.Bytes()); chk.E(err) {
+					if err = txn.Set(key, nil); chk.E(err) {
 						return err
 					}
 					return
@@ -51,8 +46,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 				}
 			}
 			// write the event
-			k := codecbuf.Get()
-			defer codecbuf.Put(k)
+			k := new(bytes.Buffer)
 			ser := new(types.Uint40)
 			if err = ser.Set(serial); chk.E(err) {
 				return
@@ -60,18 +54,18 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (err error) {
 			if err = indexes.EventEnc(ser).MarshalWrite(k); chk.E(err) {
 				return
 			}
-			v := codecbuf.Get()
-			defer codecbuf.Put(v)
+			v := new(bytes.Buffer)
 			ev.MarshalBinary(v)
 			kb, vb := k.Bytes(), v.Bytes()
-			total += len(kb) + len(vb)
-			log.T.S(kb, vb)
+			kc += len(kb)
+			vc += len(vb)
+			// log.I.S(kb, vb)
 			if err = txn.Set(kb, vb); chk.E(err) {
 				return
 			}
 			return
 		},
 	)
-	log.T.F("total data written: %d bytes", total)
+	// log.T.F("total data written: %d bytes keys %d bytes values", kc, vc)
 	return
 }

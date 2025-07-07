@@ -56,9 +56,9 @@ type Accountant interface {
 }
 
 type IdTsPk struct {
-	Ts  int64
 	Id  []byte
 	Pub []byte
+	Ts  int64
 }
 
 type Querier interface {
@@ -76,7 +76,7 @@ type Deleter interface {
 
 type Saver interface {
 	// SaveEvent is called once relay.AcceptEvent reports true.
-	SaveEvent(c context.T, ev *event.E) (err error)
+	SaveEvent(c context.T, ev *event.E) (kc, vc int, err error)
 }
 
 type Importer interface {

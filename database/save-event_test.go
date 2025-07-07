@@ -38,10 +38,14 @@ func TestSaveEvents(t *testing.T) {
 	// Count the number of events processed
 	eventCount := 0
 
+	var original int
+	var kc, vc int
 	// Process each event
 	for scanner.Scan() {
 		chk.E(scanner.Err())
 		b := scanner.Bytes()
+		// log.T.F("%d bytes of raw JSON", len(b))
+		original += len(b)
 		ev := event.New()
 
 		// Unmarshal the event
@@ -50,10 +54,12 @@ func TestSaveEvents(t *testing.T) {
 		}
 
 		// Save the event to the database
-		if err = db.SaveEvent(ctx, ev); err != nil {
+		var k, v int
+		if k, v, err = db.SaveEvent(ctx, ev); err != nil {
 			t.Fatalf("Failed to save event #%d: %v", eventCount+1, err)
 		}
-
+		kc += k
+		vc += v
 		eventCount++
 	}
 
@@ -62,5 +68,9 @@ func TestSaveEvents(t *testing.T) {
 		t.Fatalf("Scanner error: %v", err)
 	}
 
-	t.Logf("Successfully saved %d events to the database", eventCount)
+	t.Logf(
+		"Successfully saved %d events %d bytes to the database, %d bytes keys, %d bytes values",
+		eventCount,
+		original, kc, vc,
+	)
 }

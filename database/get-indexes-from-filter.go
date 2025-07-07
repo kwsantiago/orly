@@ -10,7 +10,7 @@ import (
 )
 
 type Range struct {
-	Start, end []byte
+	Start, End []byte
 }
 
 // GetIndexesFromFilter returns encoded indexes based on the given filter.

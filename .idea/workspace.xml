@@ -4,21 +4,16 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests">
-      <change afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="change filter indexes to be pairs with created_at ranges">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-serials.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/eventenvelope/eventenvelope_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/event/event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/event/event_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filter/filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/filter/filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filters/filters.go" beforeDir="false" afterPath="$PROJECT_DIR$/filters/filters.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-ids_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/save-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/interfaces/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/store_interface.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,6 +71,7 @@
     "Go Test.TestFromCanonical in orly.dev/event.executor": "Run",
     "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
     "Go Test.TestGetIndexesForEvent in orly.dev/database.executor": "Run",
+    "Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor": "Run",
     "Go Test.TestGetIndexesFromFilter in orly.dev/database.executor": "Run",
     "Go Test.TestQueryForIds in orly.dev/database.executor": "Run",
     "Go Test.TestSaveEvents in orly.dev/database.executor": "Run",
@@ -94,6 +90,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
     "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
     "git-widget-placeholder": "main",
@@ -104,7 +101,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+    "settings.editor.selected.configurable": "editor.preferences.completion"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -126,7 +123,7 @@
       <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestQueryForIds in orly.dev/database">
+  <component name="RunManager" selected="Go Test.TestSaveEvents in orly.dev/database">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
@@ -145,6 +142,18 @@
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
       <pattern value="^\QTestGetIndexesForEvent\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetIndexesForEvent/BasicEvent in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestGetIndexesForEvent\E$/^\QBasicEvent\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestGetIndexesFromFilter in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -192,24 +201,13 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
-    <configuration name="go test orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/database" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/database" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
         <item itemvalue="Go Test.TestGetIndexesFromFilter in orly.dev/database" />
-        <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
+        <item itemvalue="Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database" />
         <item itemvalue="Go Test.TestGetIndexesForEvent in orly.dev/database" />
-        <item itemvalue="Go Test.go test orly.dev/database" />
       </list>
     </recent_temporary>
   </component>
@@ -220,6 +218,7 @@
       </set>
     </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="project-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="" />
@@ -271,8 +270,8 @@
     <MESSAGE value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
     <MESSAGE value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
     <MESSAGE value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
-    <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
+    <MESSAGE value="change filter indexes to be pairs with created_at ranges" />
+    <option name="LAST_COMMIT_MESSAGE" value="change filter indexes to be pairs with created_at ranges" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
