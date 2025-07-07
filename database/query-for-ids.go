@@ -32,14 +32,8 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 			if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 				return
 			}
-
-			// Filter by timestamp if Since or Until is specified
-			if (f.Since == nil || fidpk.Ts >= f.Since.V) && 
-			   (f.Until == nil || fidpk.Ts <= f.Until.V) {
-				evs = append(evs, *fidpk)
-			}
+			evs = append(evs, *fidpk)
 		} else {
-			prf := idx.End[:len(idx.End)-types.TimestampLen]
 			var founds types.Uint40s
 			if err = d.View(
 				func(txn *badger.Txn) (err error) {
@@ -50,18 +44,19 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					)
 					defer it.Close()
 					var count int
-					for it.Rewind(); it.Valid(); it.Next() {
+					for it.Seek(idx.End); it.Valid(); it.Next() {
 						count++
 						item := it.Item()
 						var key []byte
 						key = item.KeyCopy(nil)
-						if !bytes.HasPrefix(key, prf) {
-							continue
-						}
-						if bytes.Compare(key, idx.Start) < 0 {
-							// didn't find it
+						if bytes.Compare(
+							key[:len(key)-5],
+							idx.Start,
+						) < 0 {
+							// didn't find it within the timestamp range
 							return
 						}
+
 						ser := new(types.Uint40)
 						buf := bytes.NewBuffer(key[len(key)-5:])
 						if err = ser.UnmarshalRead(buf); chk.E(err) {
@@ -81,12 +76,7 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 					return
 				}
-
-				// Filter by timestamp if Since or Until is specified
-				if (f.Since == nil || fidpk.Ts >= f.Since.V) && 
-				   (f.Until == nil || fidpk.Ts <= f.Until.V) {
-					evs = append(evs, *fidpk)
-				}
+				evs = append(evs, *fidpk)
 			}
 			// sort results by timestamp in reverse chronological order
 			sort.Slice(

@@ -4,21 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Ensure data directory creation in `database.go` using `os.MkdirAll` and `apputil.EnsureDir`.">
-      <change afterPath="$PROJECT_DIR$/database/get-fullidpubkey-by-serial.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/get-serial-by-id.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-authors-tags_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-authors-tags_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-created-at_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-created-at_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-ids_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-kinds-authors-tags_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-kinds-authors-tags_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-kinds-authors_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-kinds-authors_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-kinds-tags_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-kinds-tags_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-kinds_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-kinds_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-tags_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-tags_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/save-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/store_interface.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +123,7 @@
       <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestQueryForCreatedAt in orly.dev/database">
+  <component name="RunManager" selected="Go Test.go test orly.dev/database">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
@@ -214,8 +202,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.TestQueryForCreatedAt in orly.dev/database" />
         <item itemvalue="Go Test.go test orly.dev/database" />
+        <item itemvalue="Go Test.TestQueryForCreatedAt in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForTags in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForKinds in orly.dev/database" />
@@ -257,7 +245,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="the rest of the working things&#10;&#10;might be some more yet, not sure" />
     <MESSAGE value="getting started on the server" />
     <MESSAGE value="implement relayinfo" />
     <MESSAGE value="add HTTP handler to socketapi and refactor logging configuration" />
@@ -282,7 +269,8 @@
     <MESSAGE value="log event processing duration and throughput in save-event test" />
     <MESSAGE value="added comprehensive tests for QueryForIds" />
     <MESSAGE value="Ensure data directory creation in `database.go` using `os.MkdirAll` and `apputil.EnsureDir`." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ensure data directory creation in `database.go` using `os.MkdirAll` and `apputil.EnsureDir`." />
+    <MESSAGE value="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
