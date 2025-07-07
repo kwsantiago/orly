@@ -3,6 +3,9 @@ package database
 import (
 	"github.com/dgraph-io/badger/v4"
 	"io"
+	"os"
+	"path/filepath"
+	"orly.dev/apputil"
 	"orly.dev/chk"
 	"orly.dev/context"
 	"orly.dev/eventid"
@@ -32,6 +35,18 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 		DB:      nil,
 		seq:     nil,
 	}
+
+	// Ensure the data directory exists
+	if err = os.MkdirAll(dataDir, 0755); chk.E(err) {
+		return
+	}
+
+	// Also ensure the directory exists using apputil.EnsureDir for any potential subdirectories
+	dummyFile := filepath.Join(dataDir, "dummy.sst")
+	if err = apputil.EnsureDir(dummyFile); chk.E(err) {
+		return
+	}
+
 	opts := badger.DefaultOptions(d.dataDir)
 	opts.BlockCacheSize = int64(units.Gb)
 	opts.BlockSize = units.Gb
