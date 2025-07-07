@@ -9,6 +9,7 @@ import (
 	"orly.dev/event/examples"
 	"os"
 	"testing"
+	"time"
 )
 
 // TestSaveEvents tests saving all events from examples.Cache to the database
@@ -40,6 +41,7 @@ func TestSaveEvents(t *testing.T) {
 
 	var original int
 	var kc, vc int
+	now := time.Now()
 	// Process each event
 	for scanner.Scan() {
 		chk.E(scanner.Err())
@@ -67,10 +69,14 @@ func TestSaveEvents(t *testing.T) {
 	if err = scanner.Err(); err != nil {
 		t.Fatalf("Scanner error: %v", err)
 	}
-
+	dur := time.Since(now)
 	t.Logf(
-		"Successfully saved %d events %d bytes to the database, %d bytes keys, %d bytes values",
+		"Successfully saved %d events %d bytes to the database, %d bytes keys, %d bytes values in %v (%v/ev; %f ev/s)",
 		eventCount,
-		original, kc, vc,
+		original,
+		kc, vc,
+		dur,
+		dur/time.Duration(eventCount),
+		float64(time.Second)/float64(dur/time.Duration(eventCount)),
 	)
 }

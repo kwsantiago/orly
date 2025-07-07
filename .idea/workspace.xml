@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="change filter indexes to be pairs with created_at ranges">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="partly implemented query for ids">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-ids_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/save-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/save-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/save-event_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/store/store_interface.go" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/store/store_interface.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -246,7 +239,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="initial commit" />
     <MESSAGE value="Update project name and description in version.go" />
     <MESSAGE value="tidying things up and getting started" />
     <MESSAGE value="all the necessary things for events and filters&#10;&#10;these are all the fast things that work" />
@@ -271,7 +263,8 @@
     <MESSAGE value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
     <MESSAGE value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
     <MESSAGE value="change filter indexes to be pairs with created_at ranges" />
-    <option name="LAST_COMMIT_MESSAGE" value="change filter indexes to be pairs with created_at ranges" />
+    <MESSAGE value="partly implemented query for ids" />
+    <option name="LAST_COMMIT_MESSAGE" value="partly implemented query for ids" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
