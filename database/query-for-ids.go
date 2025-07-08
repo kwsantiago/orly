@@ -17,7 +17,6 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
 		return
 	}
-
 	for _, idx := range idxs {
 		// Id searches are a special case as they don't require iteration
 		if bytes.Equal(idx.Start, idx.End) {
@@ -55,5 +54,4 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 		}
 	}
 	return
-
 }
