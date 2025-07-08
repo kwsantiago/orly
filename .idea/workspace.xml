@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups">
-      <change afterPath="$PROJECT_DIR$/database/fetch-event-by-serial.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting.">
+      <change afterPath="$PROJECT_DIR$/database/fetch-event-by-serial_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/get-serial-by-id_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/get-serials-by-range_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-events_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/query-for-serials_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-serials.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -248,7 +249,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="add HTTP handler to socketapi and refactor logging configuration" />
     <MESSAGE value="enhance socketapi with HTTP handler, update project name, and refine logging" />
     <MESSAGE value="starting with database stuff" />
     <MESSAGE value="add indexes codecs and stubs for store interface methods" />
@@ -273,7 +273,8 @@
     <MESSAGE value="Refactor `QueryForIds`: migrate to `IdPkTs` struct, improve timestamp filtering, and optimize index lookups." />
     <MESSAGE value="Improve timestamp filtering in `QueryForIds` and optimize key parsing logic." />
     <MESSAGE value="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups" />
+    <MESSAGE value="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
