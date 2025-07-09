@@ -8,6 +8,7 @@ import (
 	"orly.dev/event"
 	"orly.dev/filter"
 	"orly.dev/interfaces/store"
+	"orly.dev/log"
 	"sort"
 )
 
@@ -16,6 +17,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
 		return
 	}
+	log.T.S(idxs)
 	var idOnly bool
 	var idPkTs []store.IdPkTs
 	for _, idx := range idxs {
@@ -49,6 +51,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			}
 		}
 	}
+	log.I.S(evs)
 	if idOnly {
 		return
 	}

@@ -10,7 +10,7 @@ import (
 func (s *S) AddEvent(
 	c context.T, ev *event.E, hr *http.Request, remote string,
 ) (accepted bool, message []byte) {
-	if err := s.Store.SaveEvent(c, ev); chk.E(err) {
+	if _, _, err := s.Store.SaveEvent(c, ev); chk.E(err) {
 		message = []byte(err.Error())
 		return
 	}

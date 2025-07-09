@@ -3,8 +3,6 @@ package database
 import (
 	"github.com/dgraph-io/badger/v4"
 	"io"
-	"os"
-	"path/filepath"
 	"orly.dev/apputil"
 	"orly.dev/chk"
 	"orly.dev/context"
@@ -13,6 +11,8 @@ import (
 	"orly.dev/log"
 	"orly.dev/lol"
 	"orly.dev/units"
+	"os"
+	"path/filepath"
 )
 
 type D struct {
@@ -55,7 +55,7 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 	if d.DB, err = badger.Open(opts); chk.E(err) {
 		return
 	}
-	log.I.Ln("getting event sequence lease", d.dataDir)
+	log.T.Ln("getting event sequence lease", d.dataDir)
 	if d.seq, err = d.DB.GetSequence([]byte("EVENTS"), 1000); chk.E(err) {
 		return
 	}

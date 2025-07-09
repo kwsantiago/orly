@@ -5,16 +5,18 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/chk"
 	"orly.dev/database/indexes/types"
+	"orly.dev/log"
 )
 
 func (d *D) GetSerialById(idx []byte) (ser *types.Uint40, err error) {
+	log.T.S(idx)
 	if err = d.View(
 		func(txn *badger.Txn) (err error) {
 			it := txn.NewIterator(badger.DefaultIteratorOptions)
 			var key []byte
 			defer it.Close()
 			it.Seek(idx)
-			if it.Valid() {
+			if it.ValidForPrefix(idx) {
 				item := it.Item()
 				key = item.KeyCopy(nil)
 				ser = new(types.Uint40)

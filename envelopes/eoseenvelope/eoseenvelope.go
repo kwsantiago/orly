@@ -6,6 +6,7 @@ package eoseenvelope
 
 import (
 	"io"
+	"orly.dev/log"
 
 	"orly.dev/chk"
 	"orly.dev/envelopes"
@@ -39,6 +40,7 @@ func (en *T) Label() string { return L }
 
 // Write the  eoseenvelope.T to a provided io.Writer.
 func (en *T) Write(w io.Writer) (err error) {
+	log.I.F("writing EOSE to %s", en.Subscription.String())
 	_, err = w.Write(en.Marshal(nil))
 	return
 }

@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting.">
-      <change afterPath="$PROJECT_DIR$/database/fetch-event-by-serial_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/get-serial-by-id_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/get-serials-by-range_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/query-events_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/query-for-serials_test.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Add comprehensive tests for event querying and serial-based lookup methods (`FetchEventBySerial`, `QueryForSerials`, `GetSerialById`, `GetSerialsByRange`) to ensure correctness and improve coverage.">
+      <change afterPath="$PROJECT_DIR$/socketapi/handleClose.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/database.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/database.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-serial-by-id.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-serial-by-id.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope.go" beforeDir="false" afterPath="$PROJECT_DIR$/envelopes/eoseenvelope/eoseenvelope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/add-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleMessage.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleMessage.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -249,7 +252,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="enhance socketapi with HTTP handler, update project name, and refine logging" />
     <MESSAGE value="starting with database stuff" />
     <MESSAGE value="add indexes codecs and stubs for store interface methods" />
     <MESSAGE value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
@@ -274,7 +276,8 @@
     <MESSAGE value="Improve timestamp filtering in `QueryForIds` and optimize key parsing logic." />
     <MESSAGE value="Add comprehensive tests for numeric type endianness and lexicographical sorting; refine `QueryForIds` logic by removing redundant timestamp checks and optimizing index lookups" />
     <MESSAGE value="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting." />
+    <MESSAGE value="Add comprehensive tests for event querying and serial-based lookup methods (`FetchEventBySerial`, `QueryForSerials`, `GetSerialById`, `GetSerialsByRange`) to ensure correctness and improve coverage." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add comprehensive tests for event querying and serial-based lookup methods (`FetchEventBySerial`, `QueryForSerials`, `GetSerialById`, `GetSerialsByRange`) to ensure correctness and improve coverage." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

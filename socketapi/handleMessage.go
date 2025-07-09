@@ -5,7 +5,6 @@ import (
 
 	"orly.dev/chk"
 	"orly.dev/envelopes"
-	"orly.dev/envelopes/authenvelope"
 	"orly.dev/envelopes/closeenvelope"
 	"orly.dev/envelopes/eventenvelope"
 	"orly.dev/envelopes/noticeenvelope"
@@ -26,13 +25,13 @@ func (a *A) HandleMessage(msg []byte, remote string) {
 	case eventenvelope.L:
 		notice = a.HandleEvent(rem, a.I, remote)
 	case reqenvelope.L:
-		// notice = a.HandleReq(
-		// 	a.Context(), rem, a.Server, a.Listener.AuthedBytes(), remote,
-		// )
+		notice = a.HandleReq(
+			rem, a.I, remote,
+		)
 	case closeenvelope.L:
-		// notice = a.HandleClose(rem, a.Server)
-	case authenvelope.L:
-		// notice = a.HandleAuth(rem, a.Server)
+		notice = a.HandleClose(rem, a.I)
+	// case authenvelope.L:
+	// notice = a.HandleAuth(rem, a.Server)
 	default:
 		notice = []byte(fmt.Sprintf("unknown envelope type %s\n%s", t, rem))
 	}
