@@ -123,7 +123,7 @@ func testBasicEvent(t *testing.T) {
 	createdAt := new(types.Uint64)
 	createdAt.Set(uint64(ev.CreatedAt.V))
 
-	idPubkeyIndex := indexes.IdPubkeyEnc(ser, fullID, pubHash, createdAt)
+	idPubkeyIndex := indexes.FullIdPubkeyEnc(ser, fullID, pubHash, createdAt)
 	verifyIndexIncluded(t, idxs, idPubkeyIndex)
 
 	// 3. CreatedAt index
@@ -234,7 +234,7 @@ func testEventWithTags(t *testing.T) {
 
 	// Verify TagPubkey index for e tag
 	pubkeyTagIndex := indexes.TagPubkeyEnc(
-		pubHash, eKey, eValueHash, createdAt, ser,
+		eKey, eValueHash, pubHash, createdAt, ser,
 	)
 	verifyIndexIncluded(t, idxs, pubkeyTagIndex)
 
@@ -248,14 +248,12 @@ func testEventWithTags(t *testing.T) {
 	kind := new(types.Uint16)
 	kind.Set(uint16(ev.Kind.K))
 
-	kindTagIndex := indexes.TagKindEnc(
-		kind, eKey, eValueHash, createdAt, ser,
-	)
+	kindTagIndex := indexes.TagKindEnc(eKey, eValueHash, kind, createdAt, ser)
 	verifyIndexIncluded(t, idxs, kindTagIndex)
 
 	// Verify TagKindPubkey index for e tag
 	kindPubkeyTagIndex := indexes.TagKindPubkeyEnc(
-		kind, pubHash, eKey, eValueHash, createdAt, ser,
+		eKey, eValueHash, kind, pubHash, createdAt, ser,
 	)
 	verifyIndexIncluded(t, idxs, kindPubkeyTagIndex)
 }

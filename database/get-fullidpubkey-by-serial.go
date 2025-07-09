@@ -17,7 +17,7 @@ func (d *D) GetFullIdPubkeyBySerial(ser *types.Uint40) (
 		func(txn *badger.Txn) (err error) {
 			buf := codecbuf.Get()
 			defer codecbuf.Put(buf)
-			if err = indexes.IdPubkeyEnc(
+			if err = indexes.FullIdPubkeyEnc(
 				ser, nil, nil, nil,
 			).MarshalWrite(buf); chk.E(err) {
 				return
@@ -33,9 +33,9 @@ func (d *D) GetFullIdPubkeyBySerial(ser *types.Uint40) (
 			if it.Valid() {
 				item := it.Item()
 				key := item.KeyCopy(nil)
-				ser, fid, p, ca := indexes.IdPubkeyVars()
+				ser, fid, p, ca := indexes.FullIdPubkeyVars()
 				buf2 := bytes.NewBuffer(key)
-				if err = indexes.IdPubkeyDec(
+				if err = indexes.FullIdPubkeyDec(
 					ser, fid, p, ca,
 				).UnmarshalRead(buf2); chk.E(err) {
 					return

@@ -18,8 +18,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Handle `#` prefixed tag keys in `GetIndexesFromFilter` and improve limit validation in `HandleReq`.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update index naming conventions for clarity and consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Rename various indexes (`KindPubkeyTag` → `TagKindPubkey`, `KindTag` → `TagKind`, `PubkeyTag` → `TagPubkey`) for improved clarity and consistency; update corresponding logic.&#10;- **database/indexes/keys.go**: Modify index keys and constants to reflect new naming convention; adjust encoding/decoding functions correspondingly.&#10;- **database/get-indexes-for-event.go**: Align index references to updated names and handle related encoding changes.&#10;- **database/get-indexes-for-event_test.go**: Update test cases to reflect renamed indexes (`TagPubkey`, `TagKind`, `TagKindPubkey`) and validate correctness.&#10;- **database/get-indexes-from-filter_test.go**: Adjust test logic to verify renamed indexes and ensure proper filter behavior.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-fullidpubkey-by-serial.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-fullidpubkey-by-serial.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
@@ -264,8 +265,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic" />
-    <MESSAGE value="remove unused letter package, rename and refactor core types, update filters and test logic" />
     <MESSAGE value="move to new orly.dev; implement indexes properly" />
     <MESSAGE value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
     <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
@@ -289,7 +288,9 @@
     <MESSAGE value="Refine `GetSerialsByRange`, optimize `GetIndexesFromFilter`, and update `QueryEvents` with limit checks and enhanced sorting." />
     <MESSAGE value="Fix off-by-one error in `GetIndexesFromFilter` range logic." />
     <MESSAGE value="Remove redundant error handling in `GetIndexesFromFilter` and related tests." />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove redundant error handling in `GetIndexesFromFilter` and related tests." />
+    <MESSAGE value="Handle `#` prefixed tag keys in `GetIndexesFromFilter` and improve limit validation in `HandleReq`." />
+    <MESSAGE value="Update index naming conventions for clarity and consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Rename various indexes (`KindPubkeyTag` → `TagKindPubkey`, `KindTag` → `TagKind`, `PubkeyTag` → `TagPubkey`) for improved clarity and consistency; update corresponding logic.&#10;- **database/indexes/keys.go**: Modify index keys and constants to reflect new naming convention; adjust encoding/decoding functions correspondingly.&#10;- **database/get-indexes-for-event.go**: Align index references to updated names and handle related encoding changes.&#10;- **database/get-indexes-for-event_test.go**: Update test cases to reflect renamed indexes (`TagPubkey`, `TagKind`, `TagKindPubkey`) and validate correctness.&#10;- **database/get-indexes-from-filter_test.go**: Adjust test logic to verify renamed indexes and ensure proper filter behavior." />
+    <option name="LAST_COMMIT_MESSAGE" value="Update index naming conventions for clarity and consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Rename various indexes (`KindPubkeyTag` → `TagKindPubkey`, `KindTag` → `TagKind`, `PubkeyTag` → `TagPubkey`) for improved clarity and consistency; update corresponding logic.&#10;- **database/indexes/keys.go**: Modify index keys and constants to reflect new naming convention; adjust encoding/decoding functions correspondingly.&#10;- **database/get-indexes-for-event.go**: Align index references to updated names and handle related encoding changes.&#10;- **database/get-indexes-for-event_test.go**: Update test cases to reflect renamed indexes (`TagPubkey`, `TagKind`, `TagKindPubkey`) and validate correctness.&#10;- **database/get-indexes-from-filter_test.go**: Adjust test logic to verify renamed indexes and ensure proper filter behavior." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

@@ -94,13 +94,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 							valueHash.FromIdent(valueBytes)
 							start, end := new(bytes.Buffer), new(bytes.Buffer)
 							idxS := indexes.TagKindPubkeyEnc(
-								kind, p, key, valueHash, caStart, nil,
+								key, valueHash, kind, p, caStart, nil,
 							)
 							if err = idxS.MarshalWrite(start); chk.E(err) {
 								return
 							}
 							idxE := indexes.TagKindPubkeyEnc(
-								kind, p, key, valueHash, caEnd, nil,
+								key, valueHash, kind, p, caEnd, nil,
 							)
 							if err = idxE.MarshalWrite(end); chk.E(err) {
 								return
@@ -139,13 +139,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
 						idxS := indexes.TagKindEnc(
-							kind, key, valueHash, caStart, nil,
+							key, valueHash, kind, caStart, nil,
 						)
 						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
 						idxE := indexes.TagKindEnc(
-							kind, key, valueHash, caEnd, nil,
+							key, valueHash, kind, caEnd, nil,
 						)
 						if err = idxE.MarshalWrite(end); chk.E(err) {
 							return
@@ -217,13 +217,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
 						idxS := indexes.TagPubkeyEnc(
-							p, key, valueHash, caStart, nil,
+							key, valueHash, p, caStart, nil,
 						)
 						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
 						idxE := indexes.TagPubkeyEnc(
-							p, key, valueHash, caEnd, nil,
+							key, valueHash, p, caEnd, nil,
 						)
 						if err = idxE.MarshalWrite(end); chk.E(err) {
 							return
