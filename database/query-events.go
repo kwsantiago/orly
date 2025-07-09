@@ -40,7 +40,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
 				return
 			}
-			// fetch the events
+			// fetch the events full id indexes
 			for _, ser := range founds {
 				// scan for the IdPkTs
 				var fidpk *store.IdPkTs
@@ -51,7 +51,6 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			}
 		}
 	}
-	log.I.S(evs)
 	if idOnly {
 		return
 	}
@@ -61,6 +60,11 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			return idPkTs[i].Ts > idPkTs[j].Ts
 		},
 	)
+	// log.I.S(idPkTs)
+	if f.Limit != nil && len(idPkTs) > int(*f.Limit) {
+		idPkTs = idPkTs[:*f.Limit]
+	}
+	// log.I.S(idPkTs)
 	// fetch the events
 	for _, idpk := range idPkTs {
 		var ev *event.E
@@ -68,7 +72,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 		if err = ser.Set(idpk.Ser); chk.E(err) {
 			continue
 		}
-		if ev, err = d.FetchEventBySerial(ser); chk.E(err) {
+		if ev, err = d.FetchEventBySerial(ser); err != nil {
 			continue
 		}
 		evs = append(evs, ev)

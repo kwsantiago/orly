@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Integrate logging across multiple components (`database`, `socketapi`, `envelopes`) to improve debugging and traceability; implement `HandleReq` and `HandleClose` in `socketapi`.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Enhance `HandleReq` in `socketapi`: implement filter completion logic, reverse-sort events by creation time, and log subscription details.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/fetch-event-by-serial.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/fetch-event-by-serial.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-serials-by-range.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-serials-by-range.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -245,7 +248,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="add indexes codecs and stubs for store interface methods" />
     <MESSAGE value="introduce codecbuf package with a concurrent-safe bytes buffer pool and comprehensive tests" />
     <MESSAGE value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
     <MESSAGE value="refactor GenerateIndexes to use named return values" />
@@ -270,7 +272,8 @@
     <MESSAGE value="Add `FetchEventBySerial` method and enhance event querying logic in `QueryEvents` to support ID-based searches and reverse chronological sorting." />
     <MESSAGE value="Add comprehensive tests for event querying and serial-based lookup methods (`FetchEventBySerial`, `QueryForSerials`, `GetSerialById`, `GetSerialsByRange`) to ensure correctness and improve coverage." />
     <MESSAGE value="Integrate logging across multiple components (`database`, `socketapi`, `envelopes`) to improve debugging and traceability; implement `HandleReq` and `HandleClose` in `socketapi`." />
-    <option name="LAST_COMMIT_MESSAGE" value="Integrate logging across multiple components (`database`, `socketapi`, `envelopes`) to improve debugging and traceability; implement `HandleReq` and `HandleClose` in `socketapi`." />
+    <MESSAGE value="Enhance `HandleReq` in `socketapi`: implement filter completion logic, reverse-sort events by creation time, and log subscription details." />
+    <option name="LAST_COMMIT_MESSAGE" value="Enhance `HandleReq` in `socketapi`: implement filter completion logic, reverse-sort events by creation time, and log subscription details." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

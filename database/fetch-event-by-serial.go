@@ -32,7 +32,7 @@ func (d *D) FetchEventBySerial(ser *types.Uint40) (ev *event.E, err error) {
 			}
 			return
 		},
-	); chk.E(err) {
+	); err != nil {
 		return
 	}
 	return
