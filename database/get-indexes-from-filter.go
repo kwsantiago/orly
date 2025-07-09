@@ -74,16 +74,21 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 			for _, author := range f.Authors.ToSliceOfBytes() {
 				for _, tag := range f.Tags.ToSliceOfTags() {
 					log.I.S(tag)
-					if tag.Len() >= 2 && len(tag.S(0)) == 2 {
+					if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
 						kind := new(types.Uint16)
 						kind.Set(k)
 						p := new(types.PubHash)
 						if err = p.FromPubkey(author); chk.E(err) {
 							return
 						}
-						keyBytes := tag.B(0)[1:]
+						keyBytes := tag.B(0)
 						key := new(types.Letter)
-						key.Set(keyBytes[0])
+						// If the tag key starts with '#', use the second character as the key
+						if len(keyBytes) == 2 && keyBytes[0] == '#' {
+							key.Set(keyBytes[1])
+						} else {
+							key.Set(keyBytes[0])
+						}
 						for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
@@ -118,12 +123,17 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
-				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
+				if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
 					kind := new(types.Uint16)
 					kind.Set(k)
 					keyBytes := tag.B(0)
 					key := new(types.Letter)
-					key.Set(keyBytes[0])
+					// If the tag key starts with '#', use the second character as the key
+					if len(keyBytes) == 2 && keyBytes[0] == '#' {
+						key.Set(keyBytes[1])
+					} else {
+						key.Set(keyBytes[0])
+					}
 					for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
@@ -189,14 +199,19 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
-				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
+				if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
 					p := new(types.PubHash)
 					if err = p.FromPubkey(author); chk.E(err) {
 						return
 					}
 					keyBytes := tag.B(0)
 					key := new(types.Letter)
-					key.Set(keyBytes[0])
+					// If the tag key starts with '#', use the second character as the key
+					if len(keyBytes) == 2 && keyBytes[0] == '#' {
+						key.Set(keyBytes[1])
+					} else {
+						key.Set(keyBytes[0])
+					}
 					for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
@@ -227,10 +242,15 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	// Tag  itc
 	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
-			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
+			if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
 				keyBytes := tag.B(0)
 				key := new(types.Letter)
-				key.Set(keyBytes[0])
+				// If the tag key starts with '#', use the second character as the key
+				if len(keyBytes) == 2 && keyBytes[0] == '#' {
+					key.Set(keyBytes[1])
+				} else {
+					key.Set(keyBytes[0])
+				}
 				for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 					valueHash := new(types.Ident)
 					valueHash.FromIdent(valueBytes)
