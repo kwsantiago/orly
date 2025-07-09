@@ -24,12 +24,12 @@ func TestGetIndexesFromFilter(t *testing.T) {
 	t.Run("Pubkey", testPubkeyFilter)
 	t.Run("CreatedAt", testCreatedAtFilter)
 	t.Run("CreatedAtUntil", testCreatedAtUntilFilter)
-	t.Run("PubkeyTag", testPubkeyTagFilter)
+	t.Run("TagPubkey", testPubkeyTagFilter)
 	t.Run("Tag", testTagFilter)
 	t.Run("Kind", testKindFilter)
 	t.Run("KindPubkey", testKindPubkeyFilter)
-	t.Run("KindTag", testKindTagFilter)
-	t.Run("KindPubkeyTag", testKindPubkeyTagFilter)
+	t.Run("TagKind", testKindTagFilter)
+	t.Run("TagKindPubkey", testKindPubkeyTagFilter)
 }
 
 // Helper function to verify that the generated index matches the expected indexes
@@ -197,7 +197,7 @@ func testCreatedAtUntilFilter(t *testing.T) {
 	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
-// Test PubkeyTag filter
+// Test TagPubkey filter
 func testPubkeyTagFilter(t *testing.T) {
 	// Create a filter with an Author, a Tag, and Since
 	f := filter.New()
@@ -235,12 +235,12 @@ func testPubkeyTagFilter(t *testing.T) {
 	// Start index uses Since
 	caStart := new(types.Uint64)
 	caStart.Set(uint64(f.Since.V))
-	expectedStartIdx := indexes.PubkeyTagEnc(p, key, valueHash, caStart, nil)
+	expectedStartIdx := indexes.TagPubkeyEnc(p, key, valueHash, caStart, nil)
 
 	// End index uses math.MaxInt64 since Until is not specified
 	caEnd := new(types.Uint64)
 	caEnd.Set(uint64(math.MaxInt64))
-	expectedEndIdx := indexes.PubkeyTagEnc(p, key, valueHash, caEnd, nil)
+	expectedEndIdx := indexes.TagPubkeyEnc(p, key, valueHash, caEnd, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
@@ -357,7 +357,7 @@ func testKindPubkeyFilter(t *testing.T) {
 	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
-// Test KindTag filter
+// Test TagKind filter
 func testKindTagFilter(t *testing.T) {
 	// Create a filter with a Kind, a Tag, and Since
 	f := filter.New()
@@ -388,18 +388,18 @@ func testKindTagFilter(t *testing.T) {
 	// Start index uses Since
 	caStart := new(types.Uint64)
 	caStart.Set(uint64(f.Since.V))
-	expectedStartIdx := indexes.KindTagEnc(k, key, valueHash, caStart, nil)
+	expectedStartIdx := indexes.TagKindEnc(k, key, valueHash, caStart, nil)
 
 	// End index uses math.MaxInt64 since Until is not specified
 	caEnd := new(types.Uint64)
 	caEnd.Set(uint64(math.MaxInt64))
-	expectedEndIdx := indexes.KindTagEnc(k, key, valueHash, caEnd, nil)
+	expectedEndIdx := indexes.TagKindEnc(k, key, valueHash, caEnd, nil)
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
 }
 
-// Test KindPubkeyTag filter
+// Test TagKindPubkey filter
 func testKindPubkeyTagFilter(t *testing.T) {
 	// Create a filter with a Kind, an Author, a Tag, and Since
 	f := filter.New()
@@ -440,14 +440,14 @@ func testKindPubkeyTagFilter(t *testing.T) {
 	// Start index uses Since
 	caStart := new(types.Uint64)
 	caStart.Set(uint64(f.Since.V))
-	expectedStartIdx := indexes.KindPubkeyTagEnc(
+	expectedStartIdx := indexes.TagKindPubkeyEnc(
 		k, p, key, valueHash, caStart, nil,
 	)
 
 	// End index uses math.MaxInt64 since Until is not specified
 	caEnd := new(types.Uint64)
 	caEnd.Set(uint64(math.MaxInt64))
-	expectedEndIdx := indexes.KindPubkeyTagEnc(
+	expectedEndIdx := indexes.TagKindPubkeyEnc(
 		k, p, key, valueHash, caEnd, nil,
 	)
 

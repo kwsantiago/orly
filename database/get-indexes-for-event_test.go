@@ -107,7 +107,7 @@ func testBasicEvent(t *testing.T) {
 	idIndex := indexes.IdEnc(idHash, ser)
 	verifyIndexIncluded(t, idxs, idIndex)
 
-	// 2. IdPubkey index
+	// 2. FullIdPubkey index
 	fullID := new(types.Id)
 	err = fullID.FromId(ev.Id)
 	if chk.E(err) {
@@ -197,7 +197,7 @@ func testEventWithTags(t *testing.T) {
 	}
 
 	// Verify the number of indexes (should be 14 for an event with 2 tags)
-	// 6 basic indexes + 4 indexes per tag (PubkeyTag, Tag, KindTag, KindPubkeyTag)
+	// 6 basic indexes + 4 indexes per tag (TagPubkey, Tag, TagKind, TagKindPubkey)
 	if len(idxs) != 14 {
 		t.Fatalf("Expected 14 indexes, got %d", len(idxs))
 	}
@@ -232,8 +232,8 @@ func testEventWithTags(t *testing.T) {
 	eValueHash := new(types.Ident)
 	eValueHash.FromIdent([]byte("abcdef1234567890"))
 
-	// Verify PubkeyTag index for e tag
-	pubkeyTagIndex := indexes.PubkeyTagEnc(
+	// Verify TagPubkey index for e tag
+	pubkeyTagIndex := indexes.TagPubkeyEnc(
 		pubHash, eKey, eValueHash, createdAt, ser,
 	)
 	verifyIndexIncluded(t, idxs, pubkeyTagIndex)
@@ -244,17 +244,17 @@ func testEventWithTags(t *testing.T) {
 	)
 	verifyIndexIncluded(t, idxs, tagIndex)
 
-	// Verify KindTag index for e tag
+	// Verify TagKind index for e tag
 	kind := new(types.Uint16)
 	kind.Set(uint16(ev.Kind.K))
 
-	kindTagIndex := indexes.KindTagEnc(
+	kindTagIndex := indexes.TagKindEnc(
 		kind, eKey, eValueHash, createdAt, ser,
 	)
 	verifyIndexIncluded(t, idxs, kindTagIndex)
 
-	// Verify KindPubkeyTag index for e tag
-	kindPubkeyTagIndex := indexes.KindPubkeyTagEnc(
+	// Verify TagKindPubkey index for e tag
+	kindPubkeyTagIndex := indexes.TagKindPubkeyEnc(
 		kind, pubHash, eKey, eValueHash, createdAt, ser,
 	)
 	verifyIndexIncluded(t, idxs, kindPubkeyTagIndex)

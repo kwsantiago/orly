@@ -84,17 +84,17 @@ func TestPrefixFunction(t *testing.T) {
 	}{
 		{"Event", Event, EventPrefix},
 		{"Id", Id, IdPrefix},
-		{"IdPubkey", IdPubkey, IdPubkeyPrefix},
+		{"FullIdPubkey", FullIdPubkey, FullIdPubkeyPrefix},
 		{"Pubkey", Pubkey, PubkeyPrefix},
 		{"CreatedAt", CreatedAt, CreatedAtPrefix},
-		{"PubkeyTag", PubkeyTag, PubkeyTagPrefix},
+		{"TagPubkey", TagPubkey, TagPubkeyPrefix},
 		{"Tag", Tag, TagPrefix},
 		{"Kind", Kind, KindPrefix},
 		{"KindPubkey", KindPubkey, KindPubkeyPrefix},
-		{"KindTag", KindTag, KindTagPrefix},
+		{"TagKind", TagKind, TagKindPrefix},
 		{
-			"KindPubkeyTag", KindPubkeyTag,
-			KindPubkeyTagPrefix,
+			"TagKindPubkey", TagKindPubkey,
+			TagKindPubkeyPrefix,
 		},
 		{"Invalid", -1, ""},
 	}
@@ -123,17 +123,17 @@ func TestIdentify(t *testing.T) {
 	}{
 		{"Event", EventPrefix, Event},
 		{"Id", IdPrefix, Id},
-		{"IdPubkey", IdPubkeyPrefix, IdPubkey},
+		{"FullIdPubkey", FullIdPubkeyPrefix, FullIdPubkey},
 		{"Pubkey", PubkeyPrefix, Pubkey},
 		{"CreatedAt", CreatedAtPrefix, CreatedAt},
-		{"PubkeyTag", PubkeyTagPrefix, PubkeyTag},
+		{"TagPubkey", TagPubkeyPrefix, TagPubkey},
 		{"Tag", TagPrefix, Tag},
 		{"Kind", KindPrefix, Kind},
 		{"KindPubkey", KindPubkeyPrefix, KindPubkey},
-		{"KindTag", KindTagPrefix, KindTag},
+		{"TagKind", TagKindPrefix, TagKind},
 		{
-			"KindPubkeyTag", KindPubkeyTagPrefix,
-			KindPubkeyTag,
+			"TagKindPubkey", TagKindPubkeyPrefix,
+			TagKindPubkey,
 		},
 	}
 
@@ -342,7 +342,7 @@ func TestIdFunctions(t *testing.T) {
 	}
 }
 
-// TestIdPubkeyFunctions tests the IdPubkey-related functions
+// TestIdPubkeyFunctions tests the FullIdPubkey-related functions
 func TestIdPubkeyFunctions(t *testing.T) {
 	// Test IdPubkeyVars
 	ser, fid, p, ca := IdPubkeyVars()
@@ -543,12 +543,12 @@ func TestPubkeyFunctions(t *testing.T) {
 	}
 }
 
-// TestPubkeyTagFunctions tests the PubkeyTag-related functions
+// TestPubkeyTagFunctions tests the TagPubkey-related functions
 func TestPubkeyTagFunctions(t *testing.T) {
-	// Test PubkeyTagVars
-	p, k, v, ca, ser := PubkeyTagVars()
+	// Test TagPubkeyVars
+	p, k, v, ca, ser := TagPubkeyVars()
 	if p == nil || k == nil || v == nil || ca == nil || ser == nil {
-		t.Fatalf("PubkeyTagVars should return non-nil values")
+		t.Fatalf("TagPubkeyVars should return non-nil values")
 	}
 
 	// Set values
@@ -569,20 +569,20 @@ func TestPubkeyTagFunctions(t *testing.T) {
 	ca.Set(98765)
 	ser.Set(12345)
 
-	// Test PubkeyTagEnc
-	enc := PubkeyTagEnc(p, k, v, ca, ser)
+	// Test TagPubkeyEnc
+	enc := TagPubkeyEnc(p, k, v, ca, ser)
 	if len(enc.Encs) != 6 {
 		t.Errorf(
-			"PubkeyTagEnc should create T with 6 encoders, got %d",
+			"TagPubkeyEnc should create T with 6 encoders, got %d",
 			len(enc.Encs),
 		)
 	}
 
-	// Test PubkeyTagDec
-	dec := PubkeyTagDec(p, k, v, ca, ser)
+	// Test TagPubkeyDec
+	dec := TagPubkeyDec(p, k, v, ca, ser)
 	if len(dec.Encs) != 6 {
 		t.Errorf(
-			"PubkeyTagDec should create T with 6 encoders, got %d",
+			"TagPubkeyDec should create T with 6 encoders, got %d",
 			len(dec.Encs),
 		)
 	}
@@ -595,8 +595,8 @@ func TestPubkeyTagFunctions(t *testing.T) {
 	}
 
 	// Create new variables for decoding
-	newP, newK, newV, newCa, newSer := PubkeyTagVars()
-	newDec := PubkeyTagDec(newP, newK, newV, newCa, newSer)
+	newP, newK, newV, newCa, newSer := TagPubkeyVars()
+	newDec := TagPubkeyDec(newP, newK, newV, newCa, newSer)
 
 	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
@@ -750,12 +750,12 @@ func TestKindFunctions(t *testing.T) {
 	}
 }
 
-// TestKindTagFunctions tests the KindTag-related functions
+// TestKindTagFunctions tests the TagKind-related functions
 func TestKindTagFunctions(t *testing.T) {
-	// Test KindTagVars
-	ki, k, v, ca, ser := KindTagVars()
+	// Test TagKindVars
+	ki, k, v, ca, ser := TagKindVars()
 	if ki == nil || k == nil || v == nil || ca == nil || ser == nil {
-		t.Fatalf("KindTagVars should return non-nil values")
+		t.Fatalf("TagKindVars should return non-nil values")
 	}
 
 	// Set values
@@ -768,20 +768,20 @@ func TestKindTagFunctions(t *testing.T) {
 	ca.Set(98765)
 	ser.Set(12345)
 
-	// Test KindTagEnc
-	enc := KindTagEnc(ki, k, v, ca, ser)
+	// Test TagKindEnc
+	enc := TagKindEnc(ki, k, v, ca, ser)
 	if len(enc.Encs) != 6 {
 		t.Errorf(
-			"KindTagEnc should create T with 6 encoders, got %d",
+			"TagKindEnc should create T with 6 encoders, got %d",
 			len(enc.Encs),
 		)
 	}
 
-	// Test KindTagDec
-	dec := KindTagDec(ki, k, v, ca, ser)
+	// Test TagKindDec
+	dec := TagKindDec(ki, k, v, ca, ser)
 	if len(dec.Encs) != 6 {
 		t.Errorf(
-			"KindTagDec should create T with 6 encoders, got %d",
+			"TagKindDec should create T with 6 encoders, got %d",
 			len(dec.Encs),
 		)
 	}
@@ -794,8 +794,8 @@ func TestKindTagFunctions(t *testing.T) {
 	}
 
 	// Create new variables for decoding
-	newKi, newK, newV, newCa, newSer := KindTagVars()
-	newDec := KindTagDec(newKi, newK, newV, newCa, newSer)
+	newKi, newK, newV, newCa, newSer := TagKindVars()
+	newDec := TagKindDec(newKi, newK, newV, newCa, newSer)
 
 	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {
@@ -893,12 +893,12 @@ func TestKindPubkeyFunctions(t *testing.T) {
 	}
 }
 
-// TestKindPubkeyTagFunctions tests the KindPubkeyTag-related functions
+// TestKindPubkeyTagFunctions tests the TagKindPubkey-related functions
 func TestKindPubkeyTagFunctions(t *testing.T) {
-	// Test KindPubkeyTagVars
-	ki, p, k, v, ca, ser := KindPubkeyTagVars()
+	// Test TagKindPubkeyVars
+	ki, p, k, v, ca, ser := TagKindPubkeyVars()
 	if ki == nil || p == nil || k == nil || v == nil || ca == nil || ser == nil {
-		t.Fatalf("KindPubkeyTagVars should return non-nil values")
+		t.Fatalf("TagKindPubkeyVars should return non-nil values")
 	}
 
 	// Set values
@@ -920,20 +920,20 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 	ca.Set(98765)
 	ser.Set(12345)
 
-	// Test KindPubkeyTagEnc
-	enc := KindPubkeyTagEnc(ki, p, k, v, ca, ser)
+	// Test TagKindPubkeyEnc
+	enc := TagKindPubkeyEnc(ki, p, k, v, ca, ser)
 	if len(enc.Encs) != 7 {
 		t.Errorf(
-			"KindPubkeyTagEnc should create T with 7 encoders, got %d",
+			"TagKindPubkeyEnc should create T with 7 encoders, got %d",
 			len(enc.Encs),
 		)
 	}
 
-	// Test KindPubkeyTagDec
-	dec := KindPubkeyTagDec(ki, p, k, v, ca, ser)
+	// Test TagKindPubkeyDec
+	dec := TagKindPubkeyDec(ki, p, k, v, ca, ser)
 	if len(dec.Encs) != 7 {
 		t.Errorf(
-			"KindPubkeyTagDec should create T with 7 encoders, got %d",
+			"TagKindPubkeyDec should create T with 7 encoders, got %d",
 			len(dec.Encs),
 		)
 	}
@@ -946,8 +946,8 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 	}
 
 	// Create new variables for decoding
-	newKi, newP, newK, newV, newCa, newSer := KindPubkeyTagVars()
-	newDec := KindPubkeyTagDec(newKi, newP, newK, newV, newCa, newSer)
+	newKi, newP, newK, newV, newCa, newSer := TagKindPubkeyVars()
+	newDec := TagKindPubkeyDec(newKi, newP, newK, newV, newCa, newSer)
 
 	err = newDec.UnmarshalRead(bytes.NewBuffer(buf.Bytes()))
 	if chk.E(err) {

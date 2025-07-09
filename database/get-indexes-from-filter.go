@@ -67,7 +67,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		caEnd.Set(uint64(math.MaxInt64))
 	}
 
-	// KindPubkeyTag kpt
+	// TagKindPubkey kpt
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		log.T.F("kinds authors tags")
 		for _, k := range f.Kinds.ToUint16() {
@@ -93,13 +93,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
 							start, end := new(bytes.Buffer), new(bytes.Buffer)
-							idxS := indexes.KindPubkeyTagEnc(
+							idxS := indexes.TagKindPubkeyEnc(
 								kind, p, key, valueHash, caStart, nil,
 							)
 							if err = idxS.MarshalWrite(start); chk.E(err) {
 								return
 							}
-							idxE := indexes.KindPubkeyTagEnc(
+							idxE := indexes.TagKindPubkeyEnc(
 								kind, p, key, valueHash, caEnd, nil,
 							)
 							if err = idxE.MarshalWrite(end); chk.E(err) {
@@ -119,7 +119,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// KindTag ktc
+	// TagKind ktc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -138,13 +138,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
-						idxS := indexes.KindTagEnc(
+						idxS := indexes.TagKindEnc(
 							kind, key, valueHash, caStart, nil,
 						)
 						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
-						idxE := indexes.KindTagEnc(
+						idxE := indexes.TagKindEnc(
 							kind, key, valueHash, caEnd, nil,
 						)
 						if err = idxE.MarshalWrite(end); chk.E(err) {
@@ -195,7 +195,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// PubkeyTag ptc
+	// TagPubkey ptc
 	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -216,13 +216,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
-						idxS := indexes.PubkeyTagEnc(
+						idxS := indexes.TagPubkeyEnc(
 							p, key, valueHash, caStart, nil,
 						)
 						if err = idxS.MarshalWrite(start); chk.E(err) {
 							return
 						}
-						idxE := indexes.PubkeyTagEnc(
+						idxE := indexes.TagPubkeyEnc(
 							p, key, valueHash, caEnd, nil,
 						)
 						if err = idxE.MarshalWrite(end); chk.E(err) {

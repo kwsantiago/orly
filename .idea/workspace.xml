@@ -20,8 +20,12 @@
   <component name="ChangeListManager">
     <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Handle `#` prefixed tag keys in `GetIndexesFromFilter` and improve limit validation in `HandleReq`.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-for-event_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-for-event_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,56 +73,56 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
-    "Go Build.go build not.realy.lol.executor": "Run",
-    "Go Build.go build orly.dev/event/examples/filter.executor": "Run",
-    "Go Build.go build sample.go.executor": "Run",
-    "Go Test.TestFromCanonical in orly.dev/event.executor": "Run",
-    "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
-    "Go Test.TestGetIndexesForEvent in orly.dev/database.executor": "Run",
-    "Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor": "Run",
-    "Go Test.TestGetIndexesFromFilter in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForAuthorsTags in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForCreatedAt in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForIds in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForKinds in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForKindsAuthors in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForKindsAuthorsTags in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForKindsTags in orly.dev/database.executor": "Run",
-    "Go Test.TestQueryForTags in orly.dev/database.executor": "Run",
-    "Go Test.TestSaveEvents in orly.dev/database.executor": "Run",
-    "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
-    "Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor": "Run",
-    "Go Test.go test not.realy.lol/database/indexes.executor": "Run",
-    "Go Test.go test not.realy.lol/database/indexes/types.executor": "Run",
-    "Go Test.go test orly.dev/database.executor": "Run",
-    "Go Test.go test orly.dev/database/indexes.executor": "Run",
-    "Go Test.go test orly.dev/event.executor": "Run",
-    "Go Test.gobench not.realy.lol/codecbuf.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.GoLinterPluginOnboarding": "true",
-    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
-    "git-widget-placeholder": "main",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/david/src/orly.dev",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.AIAssistantPromptsLibrary"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Build.go build github.com/mleku/realy.lol.executor&quot;: &quot;Run&quot;,
+    &quot;Go Build.go build not.realy.lol.executor&quot;: &quot;Run&quot;,
+    &quot;Go Build.go build orly.dev/event/examples/filter.executor&quot;: &quot;Run&quot;,
+    &quot;Go Build.go build sample.go.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestFromCanonical in orly.dev/event.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestGenerateIndexes in not.realy.lol/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestGetIndexesForEvent in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestGetIndexesFromFilter in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForAuthorsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForCreatedAt in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForIds in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForKinds in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForKindsAuthors in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForKindsAuthorsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForKindsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestQueryForTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestSaveEvents in orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestT in not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test not.realy.lol/database/indexes.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test orly.dev/database.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test orly.dev/database/indexes.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test orly.dev/event.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.gobench not.realy.lol/codecbuf.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/david/src/orly.dev&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AIAssistantPromptsLibrary&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="GoMoveDeclarationDialog.RECENT_KEY">
       <recent name="$PROJECT_DIR$/database" />
