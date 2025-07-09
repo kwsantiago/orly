@@ -82,9 +82,9 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 							return
 						}
 						keyBytes := tag.B(0)[1:]
+						key := new(types.Letter)
+						key.Set(keyBytes[0])
 						for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
-							key := new(types.Letter)
-							key.Set(keyBytes[0])
 							valueHash := new(types.Ident)
 							valueHash.FromIdent(valueBytes)
 							start, end := new(bytes.Buffer), new(bytes.Buffer)
@@ -119,13 +119,12 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-					if err = func() (err error) {
-						kind := new(types.Uint16)
-						kind.Set(k)
-						keyBytes := tag.B(0)
-						valueBytes := tag.B(1)
-						key := new(types.Letter)
-						key.Set(keyBytes[0])
+					kind := new(types.Uint16)
+					kind.Set(k)
+					keyBytes := tag.B(0)
+					key := new(types.Letter)
+					key.Set(keyBytes[0])
+					for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
@@ -146,10 +145,8 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 								start.Bytes(), end.Bytes(),
 							},
 						)
-						return
-					}(); chk.E(err) {
-						return
 					}
+					return
 				}
 			}
 		}
@@ -193,15 +190,14 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-					if err = func() (err error) {
-						p := new(types.PubHash)
-						if err = p.FromPubkey(author); chk.E(err) {
-							return
-						}
-						keyBytes := tag.B(0)
-						valueBytes := tag.B(1)
-						key := new(types.Letter)
-						key.Set(keyBytes[0])
+					p := new(types.PubHash)
+					if err = p.FromPubkey(author); chk.E(err) {
+						return
+					}
+					keyBytes := tag.B(0)
+					key := new(types.Letter)
+					key.Set(keyBytes[0])
+					for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 						valueHash := new(types.Ident)
 						valueHash.FromIdent(valueBytes)
 						start, end := new(bytes.Buffer), new(bytes.Buffer)
@@ -220,10 +216,8 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						idxs = append(
 							idxs, Range{start.Bytes(), end.Bytes()},
 						)
-						return
-					}(); chk.E(err) {
-						return
 					}
+					return
 				}
 			}
 		}
@@ -234,11 +228,10 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.S(0)) == 1 {
-				if err = func() (err error) {
-					keyBytes := tag.B(0)
-					valueBytes := tag.B(1)
-					key := new(types.Letter)
-					key.Set(keyBytes[0])
+				keyBytes := tag.B(0)
+				key := new(types.Letter)
+				key.Set(keyBytes[0])
+				for _, valueBytes := range tag.ToSliceOfBytes()[1:] {
 					valueHash := new(types.Ident)
 					valueHash.FromIdent(valueBytes)
 					start, end := new(bytes.Buffer), new(bytes.Buffer)
@@ -253,10 +246,8 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 					idxs = append(
 						idxs, Range{start.Bytes(), end.Bytes()},
 					)
-					return
-				}(); chk.E(err) {
-					return
 				}
+				return
 			}
 		}
 		return
@@ -265,25 +256,21 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	// Kind kca
 	if f.Kinds != nil && f.Kinds.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		for _, k := range f.Kinds.ToUint16() {
-			if err = func() (err error) {
-				kind := new(types.Uint16)
-				kind.Set(k)
-				start, end := new(bytes.Buffer), new(bytes.Buffer)
-				idxS := indexes.KindEnc(kind, caStart, nil)
-				if err = idxS.MarshalWrite(start); chk.E(err) {
-					return
-				}
-				idxE := indexes.KindEnc(kind, caEnd, nil)
-				if err = idxE.MarshalWrite(end); chk.E(err) {
-					return
-				}
-				idxs = append(
-					idxs, Range{start.Bytes(), end.Bytes()},
-				)
-				return
-			}(); chk.E(err) {
+			kind := new(types.Uint16)
+			kind.Set(k)
+			start, end := new(bytes.Buffer), new(bytes.Buffer)
+			idxS := indexes.KindEnc(kind, caStart, nil)
+			if err = idxS.MarshalWrite(start); chk.E(err) {
 				return
 			}
+			idxE := indexes.KindEnc(kind, caEnd, nil)
+			if err = idxE.MarshalWrite(end); chk.E(err) {
+				return
+			}
+			idxs = append(
+				idxs, Range{start.Bytes(), end.Bytes()},
+			)
+			return
 		}
 		return
 	}
@@ -291,27 +278,23 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 	// Pubkey pca
 	if f.Authors != nil && f.Authors.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
-			if err = func() (err error) {
-				p := new(types.PubHash)
-				if err = p.FromPubkey(author); chk.E(err) {
-					return
-				}
-				start, end := new(bytes.Buffer), new(bytes.Buffer)
-				idxS := indexes.PubkeyEnc(p, caStart, nil)
-				if err = idxS.MarshalWrite(start); chk.E(err) {
-					return
-				}
-				idxE := indexes.PubkeyEnc(p, caEnd, nil)
-				if err = idxE.MarshalWrite(end); chk.E(err) {
-					return
-				}
-				idxs = append(
-					idxs, Range{start.Bytes(), end.Bytes()},
-				)
-				return
-			}(); chk.E(err) {
+			p := new(types.PubHash)
+			if err = p.FromPubkey(author); chk.E(err) {
 				return
 			}
+			start, end := new(bytes.Buffer), new(bytes.Buffer)
+			idxS := indexes.PubkeyEnc(p, caStart, nil)
+			if err = idxS.MarshalWrite(start); chk.E(err) {
+				return
+			}
+			idxE := indexes.PubkeyEnc(p, caEnd, nil)
+			if err = idxE.MarshalWrite(end); chk.E(err) {
+				return
+			}
+			idxs = append(
+				idxs, Range{start.Bytes(), end.Bytes()},
+			)
+			return
 		}
 		return
 	}

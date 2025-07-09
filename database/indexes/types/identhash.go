@@ -10,7 +10,7 @@ const IdentLen = 8
 
 type Ident struct{ val [IdentLen]byte }
 
-func (i *Ident) FromIdent(id []byte) (err error) {
+func (i *Ident) FromIdent(id []byte) {
 	idh := sha256.Sum256(id)
 	copy(i.val[:], idh[:IdentLen])
 	return

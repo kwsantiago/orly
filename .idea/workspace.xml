@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refine `GetSerialsByRange`, optimize `GetIndexesFromFilter`, and update `QueryEvents` with limit checks and enhanced sorting.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Fix off-by-one error in `GetIndexesFromFilter` range logic.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/keys_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/keys_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/identhash.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/identhash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/indexes/types/identhash_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/identhash_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -245,7 +248,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="tests for all codecs, index generation function and tests&#10;&#10;also use codecbuf pool for all the things" />
     <MESSAGE value="refactor GenerateIndexes to use named return values" />
     <MESSAGE value="implement AddEvent and QueryForIds functionality in server and database, refactor event save logic" />
     <MESSAGE value="remove unused letter package, rename and refactor core types, update filters and test logic" />
@@ -270,7 +272,8 @@
     <MESSAGE value="Integrate logging across multiple components (`database`, `socketapi`, `envelopes`) to improve debugging and traceability; implement `HandleReq` and `HandleClose` in `socketapi`." />
     <MESSAGE value="Enhance `HandleReq` in `socketapi`: implement filter completion logic, reverse-sort events by creation time, and log subscription details." />
     <MESSAGE value="Refine `GetSerialsByRange`, optimize `GetIndexesFromFilter`, and update `QueryEvents` with limit checks and enhanced sorting." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refine `GetSerialsByRange`, optimize `GetIndexesFromFilter`, and update `QueryEvents` with limit checks and enhanced sorting." />
+    <MESSAGE value="Fix off-by-one error in `GetIndexesFromFilter` range logic." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix off-by-one error in `GetIndexesFromFilter` range logic." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

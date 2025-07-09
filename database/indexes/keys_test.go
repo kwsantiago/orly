@@ -562,7 +562,7 @@ func TestPubkeyTagFunctions(t *testing.T) {
 		t.Fatalf("FromPubkey failed: %v", err)
 	}
 	k.Set('e')
-	err = v.FromIdent([]byte("test-value"))
+	v.FromIdent([]byte("test-value"))
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -633,7 +633,7 @@ func TestTagFunctions(t *testing.T) {
 
 	// Set values
 	k.Set('e')
-	err := v.FromIdent([]byte("test-value"))
+	v.FromIdent([]byte("test-value"))
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -761,7 +761,7 @@ func TestKindTagFunctions(t *testing.T) {
 	// Set values
 	ki.Set(1234)
 	k.Set('e')
-	err := v.FromIdent([]byte("test-value"))
+	v.FromIdent([]byte("test-value"))
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -913,7 +913,7 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 		t.Fatalf("FromPubkey failed: %v", err)
 	}
 	k.Set('e')
-	err = v.FromIdent([]byte("test-value"))
+	v.FromIdent([]byte("test-value"))
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}

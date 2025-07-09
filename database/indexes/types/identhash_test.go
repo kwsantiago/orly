@@ -19,7 +19,7 @@ func TestFromIdent(t *testing.T) {
 
 	// Test FromIdent
 	i := &Ident{}
-	err := i.FromIdent(testIdent)
+	i.FromIdent(testIdent)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
 	// Create a Ident with a known value
 	i1 := &Ident{}
 	testIdent := []byte("test-identity")
-	err := i1.FromIdent(testIdent)
+	i1.FromIdent(testIdent)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestIdent_UnmarshalReadWithCorruptedData(t *testing.T) {
 	// Create a Ident with a known value
 	i1 := &Ident{}
 	testIdent1 := []byte("test-identity-1")
-	err := i1.FromIdent(testIdent1)
+	i1.FromIdent(testIdent1)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
@@ -79,7 +79,7 @@ func TestIdent_UnmarshalReadWithCorruptedData(t *testing.T) {
 	// Create a second Ident with a different value
 	i2 := &Ident{}
 	testIdent2 := []byte("test-identity-2")
-	err = i2.FromIdent(testIdent2)
+	i2.FromIdent(testIdent2)
 	if chk.E(err) {
 		t.Fatalf("FromIdent failed: %v", err)
 	}
