@@ -18,9 +18,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update index argument ordering and naming for consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Reorder arguments in index-related calls to align with the new conventions and improve readability.&#10;- **database/get-fullidpubkey-by-serial.go**: Rename `IdPubkey` to `FullIdPubkey` and update related functions (`Enc/Dec/Vars`) to reflect the new naming pattern.&#10;- **database/indexes/keys.go**: Adjust encoding/decoding function signatures and constants in line with the reordered argument structure for various indexes (`TagKind`, `TagPubkey`, `TagKindPubkey`).&#10;- **database/get-indexes-for-event.go**: Update references to reordered and renamed index functions; apply changes across the logic for clarity.&#10;- **database/get-indexes-for-event_test.go**: Modify test cases to reflect argument reordering and new function names for consistency.&#10;- **database/get-indexes-from-filter_test.go**: Adjust expected results in tests to align with reordered arguments and validate correctness.&#10;- **database/indexes/keys_test.go**: Revise unit tests to use the updated function signatures and naming conventions for all relevant indexes.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update `QueryEvents` for tag-based intersection and optimize `HandleReq`&#10;&#10;- **database/query-events.go**: Add logic to handle tag-based intersections in `QueryEvents`, ensuring precise filtering of results by intersecting IDs from multiple tags.&#10;- **socketapi/handleReq.go**: Remove redundant logging and refine the `f.Limit` handling to improve performance.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/query-for-serials.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,56 +73,57 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go Build.go build github.com/mleku/realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build not.realy.lol.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build orly.dev/event/examples/filter.executor&quot;: &quot;Run&quot;,
-    &quot;Go Build.go build sample.go.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestFromCanonical in orly.dev/event.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestGenerateIndexes in not.realy.lol/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestGetIndexesForEvent in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestGetIndexesFromFilter in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForAuthorsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForCreatedAt in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForIds in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForKinds in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForKindsAuthors in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForKindsAuthorsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForKindsTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestQueryForTags in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestSaveEvents in orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestT in not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test not.realy.lol/database/indexes.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test not.realy.lol/database/indexes/types.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test orly.dev/database.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test orly.dev/database/indexes.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.go test orly.dev/event.executor&quot;: &quot;Run&quot;,
-    &quot;Go Test.gobench not.realy.lol/codecbuf.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/david/src/orly.dev&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AIAssistantPromptsLibrary&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Build.go build github.com/mleku/realy.lol.executor": "Run",
+    "Go Build.go build not.realy.lol.executor": "Run",
+    "Go Build.go build orly.dev/event/examples/filter.executor": "Run",
+    "Go Build.go build sample.go.executor": "Run",
+    "Go Test.TestFromCanonical in orly.dev/event.executor": "Run",
+    "Go Test.TestGenerateIndexes in not.realy.lol/database.executor": "Run",
+    "Go Test.TestGetIndexesForEvent in orly.dev/database.executor": "Run",
+    "Go Test.TestGetIndexesForEvent/BasicEvent in orly.dev/database.executor": "Run",
+    "Go Test.TestGetIndexesFromFilter in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryEventsIntersection in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForAuthorsTags in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForCreatedAt in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForIds in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForKinds in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForKindsAuthors in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForKindsAuthorsTags in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForKindsTags in orly.dev/database.executor": "Run",
+    "Go Test.TestQueryForTags in orly.dev/database.executor": "Run",
+    "Go Test.TestSaveEvents in orly.dev/database.executor": "Run",
+    "Go Test.TestT in not.realy.lol/database/indexes/types.executor": "Run",
+    "Go Test.TestTMarshalBinary_UnmarshalBinary in orly.dev/event.executor": "Run",
+    "Go Test.go test not.realy.lol/database/indexes.executor": "Run",
+    "Go Test.go test not.realy.lol/database/indexes/types.executor": "Run",
+    "Go Test.go test orly.dev/database.executor": "Run",
+    "Go Test.go test orly.dev/database/indexes.executor": "Run",
+    "Go Test.go test orly.dev/event.executor": "Run",
+    "Go Test.gobench not.realy.lol/codecbuf.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.GoLinterPluginOnboarding": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/david/src/orly.dev",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "junie.project.settings"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="GoMoveDeclarationDialog.RECENT_KEY">
       <recent name="$PROJECT_DIR$/database" />
@@ -137,13 +143,25 @@
       <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.go test orly.dev/database">
+  <component name="RunManager" selected="Go Test.TestQueryEventsIntersection in orly.dev/database">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="orly.dev" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestQueryEventsIntersection in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="orly.dev" />
+      <working_directory value="$PROJECT_DIR$/database" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="orly.dev/database" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestQueryEventsIntersection\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestQueryForAuthorsTags in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -168,18 +186,6 @@
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
       <pattern value="^\QTestQueryForCreatedAt\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestQueryForIds in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="orly.dev" />
-      <working_directory value="$PROJECT_DIR$/database" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="orly.dev/database" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestQueryForIds\E$" />
       <method v="2" />
     </configuration>
     <configuration name="TestSaveEvents in orly.dev/database" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -216,11 +222,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestQueryEventsIntersection in orly.dev/database" />
         <item itemvalue="Go Test.go test orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForAuthorsTags in orly.dev/database" />
         <item itemvalue="Go Test.TestSaveEvents in orly.dev/database" />
         <item itemvalue="Go Test.TestQueryForCreatedAt in orly.dev/database" />
-        <item itemvalue="Go Test.TestQueryForIds in orly.dev/database" />
       </list>
     </recent_temporary>
   </component>
@@ -259,7 +265,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="update project name to &quot;orly.dev&quot; and add initial README for the nostr relay" />
     <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
     <MESSAGE value="complete set of indexes, log data size of data stored vs size of received event" />
     <MESSAGE value="remove all indexes that don't end in a timestamp" />
@@ -284,7 +289,8 @@
     <MESSAGE value="Handle `#` prefixed tag keys in `GetIndexesFromFilter` and improve limit validation in `HandleReq`." />
     <MESSAGE value="Update index naming conventions for clarity and consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Rename various indexes (`KindPubkeyTag` → `TagKindPubkey`, `KindTag` → `TagKind`, `PubkeyTag` → `TagPubkey`) for improved clarity and consistency; update corresponding logic.&#10;- **database/indexes/keys.go**: Modify index keys and constants to reflect new naming convention; adjust encoding/decoding functions correspondingly.&#10;- **database/get-indexes-for-event.go**: Align index references to updated names and handle related encoding changes.&#10;- **database/get-indexes-for-event_test.go**: Update test cases to reflect renamed indexes (`TagPubkey`, `TagKind`, `TagKindPubkey`) and validate correctness.&#10;- **database/get-indexes-from-filter_test.go**: Adjust test logic to verify renamed indexes and ensure proper filter behavior." />
     <MESSAGE value="Update index argument ordering and naming for consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Reorder arguments in index-related calls to align with the new conventions and improve readability.&#10;- **database/get-fullidpubkey-by-serial.go**: Rename `IdPubkey` to `FullIdPubkey` and update related functions (`Enc/Dec/Vars`) to reflect the new naming pattern.&#10;- **database/indexes/keys.go**: Adjust encoding/decoding function signatures and constants in line with the reordered argument structure for various indexes (`TagKind`, `TagPubkey`, `TagKindPubkey`).&#10;- **database/get-indexes-for-event.go**: Update references to reordered and renamed index functions; apply changes across the logic for clarity.&#10;- **database/get-indexes-for-event_test.go**: Modify test cases to reflect argument reordering and new function names for consistency.&#10;- **database/get-indexes-from-filter_test.go**: Adjust expected results in tests to align with reordered arguments and validate correctness.&#10;- **database/indexes/keys_test.go**: Revise unit tests to use the updated function signatures and naming conventions for all relevant indexes." />
-    <option name="LAST_COMMIT_MESSAGE" value="Update index argument ordering and naming for consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Reorder arguments in index-related calls to align with the new conventions and improve readability.&#10;- **database/get-fullidpubkey-by-serial.go**: Rename `IdPubkey` to `FullIdPubkey` and update related functions (`Enc/Dec/Vars`) to reflect the new naming pattern.&#10;- **database/indexes/keys.go**: Adjust encoding/decoding function signatures and constants in line with the reordered argument structure for various indexes (`TagKind`, `TagPubkey`, `TagKindPubkey`).&#10;- **database/get-indexes-for-event.go**: Update references to reordered and renamed index functions; apply changes across the logic for clarity.&#10;- **database/get-indexes-for-event_test.go**: Modify test cases to reflect argument reordering and new function names for consistency.&#10;- **database/get-indexes-from-filter_test.go**: Adjust expected results in tests to align with reordered arguments and validate correctness.&#10;- **database/indexes/keys_test.go**: Revise unit tests to use the updated function signatures and naming conventions for all relevant indexes." />
+    <MESSAGE value="Sort tags in `GetIndexesFromFilter` for consistent iteration order&#10;&#10;- **database/get-indexes-from-filter.go**: Add sorting logic for tags to ensure reverse iteration order; reintroduce `KindPubkey` index handling at the correct position.&#10;- **general logic**: Standardize and improve index type comments for clarity (`tc-`, `kc-`, `pc-`, etc.)." />
+    <option name="LAST_COMMIT_MESSAGE" value="Sort tags in `GetIndexesFromFilter` for consistent iteration order&#10;&#10;- **database/get-indexes-from-filter.go**: Add sorting logic for tags to ensure reverse iteration order; reintroduce `KindPubkey` index handling at the correct position.&#10;- **general logic**: Standardize and improve index type comments for clarity (`tc-`, `kc-`, `pc-`, etc.)." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

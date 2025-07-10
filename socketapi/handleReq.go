@@ -44,7 +44,6 @@ func (a *A) HandleReq(
 			continue
 		}
 		evs = append(evs, e...)
-		log.I.S(f.Limit, len(evs), f.Ids.Len())
 		if (f.Limit != nil && int(*f.Limit) <= len(evs) && *f.Limit > 0) || f.Ids.Len() > 0 {
 			completed[i] = true
 		}

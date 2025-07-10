@@ -1,81 +1,65 @@
 package database
 
 import (
-	"bytes"
 	"orly.dev/chk"
 	"orly.dev/context"
 	"orly.dev/database/indexes/types"
 	"orly.dev/event"
 	"orly.dev/filter"
 	"orly.dev/interfaces/store"
-	"orly.dev/log"
 	"sort"
 )
 
+// QueryEvents retrieves events based on the provided filter.
+// If the filter contains IDs, it fetches events by those IDs directly,
+// overriding other filter criteria. Otherwise, it queries by other filter
+// criteria and fetches matching events. Results are returned in reverse
+// chronological order of their creation timestamps.
 func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
-	var idxs []Range
-	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
-		return
-	}
-	log.T.S(idxs)
-	var idOnly bool
-	var idPkTs []store.IdPkTs
-	for _, idx := range idxs {
-		// Id searches are a special case as they don't require iteration
-		if bytes.Equal(idx.Start, idx.End) {
-			idOnly = true
-			// this is an Id search
+	// if there is Ids in the query, this overrides anything else
+	if f.Ids != nil && f.Ids.Len() > 0 {
+		var idxs []Range
+		if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
+			return
+		}
+		for _, idx := range idxs {
+			// we know there is only Ids in this, so run the ID query and fetch.
 			var ser *types.Uint40
 			if ser, err = d.GetSerialById(idx.Start); chk.E(err) {
 				return
 			}
-			// fetch the events (we return them in the order requested)
+			// fetch the events
 			var ev *event.E
 			if ev, err = d.FetchEventBySerial(ser); chk.E(err) {
 				return
 			}
 			evs = append(evs, ev)
-		} else {
-			var founds types.Uint40s
-			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
-				return
+		}
+		// sort the events by timestamp
+		sort.Slice(
+			evs, func(i, j int) bool {
+				return evs[i].CreatedAt.I64() > evs[j].CreatedAt.I64()
+			},
+		)
+	} else {
+		var idPkTs []store.IdPkTs
+		if idPkTs, err = d.QueryForIds(c, f); chk.E(err) {
+			return
+		}
+		// fetch the events
+		for _, idpk := range idPkTs {
+			var ev *event.E
+			ser := new(types.Uint40)
+			if err = ser.Set(idpk.Ser); chk.E(err) {
+				continue
 			}
-			// fetch the events full id indexes
-			for _, ser := range founds {
-				// scan for the IdPkTs
-				var fidpk *store.IdPkTs
-				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-					return
-				}
-				idPkTs = append(idPkTs, *fidpk)
+			if ev, err = d.FetchEventBySerial(ser); err != nil {
+				continue
 			}
+			// we already know these are in correct order because QueryForIds
+			// already sorts them.
+			evs = append(evs, ev)
 		}
-	}
-	if idOnly {
-		return
-	}
-	// sort results by timestamp in reverse chronological order
-	sort.Slice(
-		idPkTs, func(i, j int) bool {
-			return idPkTs[i].Ts > idPkTs[j].Ts
-		},
-	)
-	// log.I.S(idPkTs)
-	if f.Limit != nil && len(idPkTs) > int(*f.Limit) {
-		idPkTs = idPkTs[:*f.Limit]
-	}
-	// log.I.S(idPkTs)
-	// fetch the events
-	for _, idpk := range idPkTs {
-		var ev *event.E
-		ser := new(types.Uint40)
-		if err = ser.Set(idpk.Ser); chk.E(err) {
-			continue
-		}
-		if ev, err = d.FetchEventBySerial(ser); err != nil {
-			continue
-		}
-		evs = append(evs, ev)
 	}
 	return
 }

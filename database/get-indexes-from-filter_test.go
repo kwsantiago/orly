@@ -19,7 +19,6 @@ import (
 
 // TestGetIndexesFromFilter tests the GetIndexesFromFilter function
 func TestGetIndexesFromFilter(t *testing.T) {
-	// Test cases for each filter type
 	t.Run("Id", testIdFilter)
 	t.Run("Pubkey", testPubkeyFilter)
 	t.Run("CreatedAt", testCreatedAtFilter)
@@ -28,6 +27,7 @@ func TestGetIndexesFromFilter(t *testing.T) {
 	t.Run("Tag", testTagFilter)
 	t.Run("Kind", testKindFilter)
 	t.Run("KindPubkey", testKindPubkeyFilter)
+	t.Run("MultipleKindPubkey", testMultipleKindPubkeyFilter)
 	t.Run("TagKind", testKindTagFilter)
 	t.Run("TagKindPubkey", testKindPubkeyTagFilter)
 }
@@ -397,6 +397,139 @@ func testKindTagFilter(t *testing.T) {
 
 	// Verify the generated index
 	verifyIndex(t, idxs, expectedStartIdx, expectedEndIdx)
+}
+
+// Test Multiple KindPubkey filter
+func testMultipleKindPubkeyFilter(t *testing.T) {
+	// Create a filter with multiple Kinds and multiple Authors
+	f := filter.New()
+	f.Kinds = kinds.New(kind.New(1), kind.New(2))
+
+	// Create two pubkeys
+	pubkey1 := make([]byte, 32)
+	pubkey2 := make([]byte, 32)
+	for i := range pubkey1 {
+		pubkey1[i] = byte(i)
+		pubkey2[i] = byte(i + 100)
+	}
+	f.Authors = f.Authors.Append(pubkey1)
+	f.Authors = f.Authors.Append(pubkey2)
+	f.Since = timestamp.FromUnix(12345)
+
+	// Generate indexes
+	idxs, err := GetIndexesFromFilter(f)
+	if chk.E(err) {
+		t.Fatalf("GetIndexesFromFilter failed: %v", err)
+	}
+
+	// We should have 4 indexes (2 kinds * 2 pubkeys)
+	if len(idxs) != 4 {
+		t.Fatalf("Expected 4 indexes, got %d", len(idxs))
+	}
+
+	// Create the expected indexes
+	k1 := new(types.Uint16)
+	k1.Set(1)
+	k2 := new(types.Uint16)
+	k2.Set(2)
+
+	p1 := new(types.PubHash)
+	err = p1.FromPubkey(pubkey1)
+	if chk.E(err) {
+		t.Fatalf("Failed to create PubHash: %v", err)
+	}
+
+	p2 := new(types.PubHash)
+	err = p2.FromPubkey(pubkey2)
+	if chk.E(err) {
+		t.Fatalf("Failed to create PubHash: %v", err)
+	}
+
+	// Start index uses Since
+	caStart := new(types.Uint64)
+	caStart.Set(uint64(f.Since.V))
+
+	// End index uses math.MaxInt64 since Until is not specified
+	caEnd := new(types.Uint64)
+	caEnd.Set(uint64(math.MaxInt64))
+
+	// Create all expected combinations
+	expectedIdxs := make([][]byte, 8) // 4 combinations * 2 (start/end)
+
+	// Kind 1, Pubkey 1
+	startBuf1 := new(bytes.Buffer)
+	idxS1 := indexes.KindPubkeyEnc(k1, p1, caStart, nil)
+	if err = idxS1.MarshalWrite(startBuf1); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[0] = startBuf1.Bytes()
+
+	endBuf1 := new(bytes.Buffer)
+	idxE1 := indexes.KindPubkeyEnc(k1, p1, caEnd, nil)
+	if err = idxE1.MarshalWrite(endBuf1); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[1] = endBuf1.Bytes()
+
+	// Kind 1, Pubkey 2
+	startBuf2 := new(bytes.Buffer)
+	idxS2 := indexes.KindPubkeyEnc(k1, p2, caStart, nil)
+	if err = idxS2.MarshalWrite(startBuf2); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[2] = startBuf2.Bytes()
+
+	endBuf2 := new(bytes.Buffer)
+	idxE2 := indexes.KindPubkeyEnc(k1, p2, caEnd, nil)
+	if err = idxE2.MarshalWrite(endBuf2); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[3] = endBuf2.Bytes()
+
+	// Kind 2, Pubkey 1
+	startBuf3 := new(bytes.Buffer)
+	idxS3 := indexes.KindPubkeyEnc(k2, p1, caStart, nil)
+	if err = idxS3.MarshalWrite(startBuf3); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[4] = startBuf3.Bytes()
+
+	endBuf3 := new(bytes.Buffer)
+	idxE3 := indexes.KindPubkeyEnc(k2, p1, caEnd, nil)
+	if err = idxE3.MarshalWrite(endBuf3); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[5] = endBuf3.Bytes()
+
+	// Kind 2, Pubkey 2
+	startBuf4 := new(bytes.Buffer)
+	idxS4 := indexes.KindPubkeyEnc(k2, p2, caStart, nil)
+	if err = idxS4.MarshalWrite(startBuf4); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[6] = startBuf4.Bytes()
+
+	endBuf4 := new(bytes.Buffer)
+	idxE4 := indexes.KindPubkeyEnc(k2, p2, caEnd, nil)
+	if err = idxE4.MarshalWrite(endBuf4); chk.E(err) {
+		t.Fatalf("Failed to marshal index: %v", err)
+	}
+	expectedIdxs[7] = endBuf4.Bytes()
+
+	// Verify that all expected combinations are present
+	foundCombinations := 0
+	for _, idx := range idxs {
+		for i := 0; i < len(expectedIdxs); i += 2 {
+			if bytes.Equal(idx.Start, expectedIdxs[i]) && bytes.Equal(idx.End, expectedIdxs[i+1]) {
+				foundCombinations++
+				break
+			}
+		}
+	}
+
+	if foundCombinations != 4 {
+		t.Fatalf("Expected to find 4 combinations, found %d", foundCombinations)
+	}
 }
 
 // Test TagKindPubkey filter

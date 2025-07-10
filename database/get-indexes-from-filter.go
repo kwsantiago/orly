@@ -209,7 +209,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 							idxs, Range{start.Bytes(), end.Bytes()},
 						)
 					}
-					return
 				}
 			}
 		}
@@ -244,7 +243,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						idxs, Range{start.Bytes(), end.Bytes()},
 					)
 				}
-				return
 			}
 		}
 		return
@@ -252,31 +250,27 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 
 	// KindPubkey kpc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
+		log.I.F("kinds authors")
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
-				if err = func() (err error) {
-					kind := new(types.Uint16)
-					kind.Set(k)
-					p := new(types.PubHash)
-					if err = p.FromPubkey(author); chk.E(err) {
-						return
-					}
-					start, end := new(bytes.Buffer), new(bytes.Buffer)
-					idxS := indexes.KindPubkeyEnc(kind, p, caStart, nil)
-					if err = idxS.MarshalWrite(start); chk.E(err) {
-						return
-					}
-					idxE := indexes.KindPubkeyEnc(kind, p, caEnd, nil)
-					if err = idxE.MarshalWrite(end); chk.E(err) {
-						return
-					}
-					idxs = append(
-						idxs, Range{start.Bytes(), end.Bytes()},
-					)
-					return
-				}(); chk.E(err) {
+				kind := new(types.Uint16)
+				kind.Set(k)
+				p := new(types.PubHash)
+				if err = p.FromPubkey(author); chk.E(err) {
 					return
 				}
+				start, end := new(bytes.Buffer), new(bytes.Buffer)
+				idxS := indexes.KindPubkeyEnc(kind, p, caStart, nil)
+				if err = idxS.MarshalWrite(start); chk.E(err) {
+					return
+				}
+				idxE := indexes.KindPubkeyEnc(kind, p, caEnd, nil)
+				if err = idxE.MarshalWrite(end); chk.E(err) {
+					return
+				}
+				idxs = append(
+					idxs, Range{start.Bytes(), end.Bytes()},
+				)
 			}
 		}
 		return
@@ -299,7 +293,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 			idxs = append(
 				idxs, Range{start.Bytes(), end.Bytes()},
 			)
-			return
 		}
 		return
 	}
@@ -323,7 +316,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 			idxs = append(
 				idxs, Range{start.Bytes(), end.Bytes()},
 			)
-			return
 		}
 		return
 	}
