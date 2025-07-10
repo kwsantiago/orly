@@ -8,6 +8,7 @@ import (
 	"orly.dev/database/indexes/types"
 	"orly.dev/filter"
 	"orly.dev/log"
+	"sort"
 )
 
 type Range struct {
@@ -67,7 +68,17 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		caEnd.Set(uint64(math.MaxInt64))
 	}
 
-	// TagKindPubkey kpt
+	if f.Tags != nil && f.Tags.Len() > 1 {
+		// sort the tags so they are in iteration order (reverse)
+		tmp := f.Tags.ToSliceOfTags()
+		sort.Slice(
+			tmp, func(i, j int) bool {
+				return bytes.Compare(tmp[i].B(0), tmp[j].B(0)) > 0
+			},
+		)
+	}
+
+	// TagKindPubkey tkp
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		log.T.F("kinds authors tags")
 		for _, k := range f.Kinds.ToUint16() {
@@ -111,7 +122,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 								},
 							)
 						}
-						return
 					}
 				}
 			}
@@ -119,7 +129,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// TagKind ktc
+	// TagKind tkc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, k := range f.Kinds.ToUint16() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -156,46 +166,13 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 							},
 						)
 					}
-					return
 				}
 			}
 		}
 		return
 	}
 
-	// KindPubkey kpc
-	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
-		for _, k := range f.Kinds.ToUint16() {
-			for _, author := range f.Authors.ToSliceOfBytes() {
-				if err = func() (err error) {
-					kind := new(types.Uint16)
-					kind.Set(k)
-					p := new(types.PubHash)
-					if err = p.FromPubkey(author); chk.E(err) {
-						return
-					}
-					start, end := new(bytes.Buffer), new(bytes.Buffer)
-					idxS := indexes.KindPubkeyEnc(kind, p, caStart, nil)
-					if err = idxS.MarshalWrite(start); chk.E(err) {
-						return
-					}
-					idxE := indexes.KindPubkeyEnc(kind, p, caEnd, nil)
-					if err = idxE.MarshalWrite(end); chk.E(err) {
-						return
-					}
-					idxs = append(
-						idxs, Range{start.Bytes(), end.Bytes()},
-					)
-					return
-				}(); chk.E(err) {
-					return
-				}
-			}
-		}
-		return
-	}
-
-	// TagPubkey ptc
+	// TagPubkey tpc
 	if f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			for _, tag := range f.Tags.ToSliceOfTags() {
@@ -239,7 +216,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Tag  itc
+	// Tag tc-
 	if f.Tags != nil && f.Tags.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Kinds == nil || f.Kinds.Len() == 0) {
 		for _, tag := range f.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
@@ -273,7 +250,39 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Kind kca
+	// KindPubkey kpc
+	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
+		for _, k := range f.Kinds.ToUint16() {
+			for _, author := range f.Authors.ToSliceOfBytes() {
+				if err = func() (err error) {
+					kind := new(types.Uint16)
+					kind.Set(k)
+					p := new(types.PubHash)
+					if err = p.FromPubkey(author); chk.E(err) {
+						return
+					}
+					start, end := new(bytes.Buffer), new(bytes.Buffer)
+					idxS := indexes.KindPubkeyEnc(kind, p, caStart, nil)
+					if err = idxS.MarshalWrite(start); chk.E(err) {
+						return
+					}
+					idxE := indexes.KindPubkeyEnc(kind, p, caEnd, nil)
+					if err = idxE.MarshalWrite(end); chk.E(err) {
+						return
+					}
+					idxs = append(
+						idxs, Range{start.Bytes(), end.Bytes()},
+					)
+					return
+				}(); chk.E(err) {
+					return
+				}
+			}
+		}
+		return
+	}
+
+	// Kind kc-
 	if f.Kinds != nil && f.Kinds.Len() > 0 && (f.Authors == nil || f.Authors.Len() == 0) && (f.Tags == nil || f.Tags.Len() == 0) {
 		for _, k := range f.Kinds.ToUint16() {
 			kind := new(types.Uint16)
@@ -295,7 +304,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// Pubkey pca
+	// Pubkey pc-
 	if f.Authors != nil && f.Authors.Len() > 0 {
 		for _, author := range f.Authors.ToSliceOfBytes() {
 			p := new(types.PubHash)
@@ -319,7 +328,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		return
 	}
 
-	// CreatedAt ica
+	// CreatedAt c--
 	start, end := new(bytes.Buffer), new(bytes.Buffer)
 	idxS := indexes.CreatedAtEnc(caStart, nil)
 	if err = idxS.MarshalWrite(start); chk.E(err) {
