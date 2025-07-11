@@ -26,12 +26,12 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			// we know there is only Ids in this, so run the ID query and fetch.
 			var ser *types.Uint40
 			if ser, err = d.GetSerialById(idx.Start); chk.E(err) {
-				return
+				continue
 			}
 			// fetch the events
 			var ev *event.E
 			if ev, err = d.FetchEventBySerial(ser); chk.E(err) {
-				return
+				continue
 			}
 			evs = append(evs, ev)
 		}

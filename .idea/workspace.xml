@@ -20,12 +20,8 @@
   <component name="ChangeListManager">
     <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update `QueryEvents` for tag-based intersection and optimize `HandleReq`&#10;&#10;- **database/query-events.go**: Add logic to handle tag-based intersections in `QueryEvents`, ensuring precise filtering of results by intersecting IDs from multiple tags.&#10;- **socketapi/handleReq.go**: Remove redundant logging and refine the `f.Limit` handling to improve performance.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-ids.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-ids.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-for-serials.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-for-serials.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/add-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +109,7 @@
     "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
     "SHELLCHECK.PATH": "/home/david/.local/share/JetBrains/GoLand2025.1/Shell Script/shellcheck",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "test1",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "junie.onboarding.icon.badge.shown": "true",
