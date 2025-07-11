@@ -176,6 +176,7 @@ func (a *A) Pinger(
 				return
 			}
 		case <-ctx.Done():
+			log.I.F("context done for %s", remote)
 			return
 		}
 	}

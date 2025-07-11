@@ -76,9 +76,18 @@ func (p *S) Receive(msg typer.T) {
 		}
 		p.Mx.Lock()
 		if subs, ok := p.Map[m.I]; !ok {
+			log.T.F(
+				"adding subscription %s for new subscriber %s\n%s", m.Id,
+				m.I.Remote(),
+				m.Filters.Marshal(nil),
+			)
 			subs = make(map[string]*filters.T)
+			subs[m.Id] = m.Filters
 			p.Map[m.I] = subs
 		} else {
+			log.T.F(
+				"adding subscription %s for subscriber %s", m.Id, m.I.Remote(),
+			)
 			subs[m.Id] = m.Filters
 		}
 		p.Mx.Unlock()
@@ -88,7 +97,7 @@ func (p *S) Receive(msg typer.T) {
 
 func (p *S) Deliver(ev *event.E) {
 	var err error
-	p.Mx.Lock()
+	// p.Mx.Lock()
 	for w, subs := range p.Map {
 		for id, subscriber := range subs {
 			if !subscriber.Match(ev) {
@@ -103,7 +112,7 @@ func (p *S) Deliver(ev *event.E) {
 			}
 		}
 	}
-	p.Mx.Unlock()
+	// p.Mx.Unlock()
 }
 
 // removeSubscriberId removes a specific subscription from a subscriber websocket.

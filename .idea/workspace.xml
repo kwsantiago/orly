@@ -18,10 +18,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update `QueryEvents` for tag-based intersection and optimize `HandleReq`&#10;&#10;- **database/query-events.go**: Add logic to handle tag-based intersections in `QueryEvents`, ensuring precise filtering of results by intersecting IDs from multiple tags.&#10;- **socketapi/handleReq.go**: Remove redundant logging and refine the `f.Limit` handling to improve performance.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor event handling and improve error handling&#10;&#10;- **database/query-events.go**: Replace `return` statements with `continue` to ensure error scenarios do not interrupt the loop and allow processing of subsequent events.&#10;- **server/add-event.go**: Add support for logging ephemeral events and prevent saving them unnecessarily to optimize storage and improve traceability.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/query-events.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/query-events.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/add-event.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/add-event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/publisher.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/socketapi.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/socketapi.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -261,8 +263,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="update more orly stuff, make json codec handle whitespace, fix indexes" />
-    <MESSAGE value="complete set of indexes, log data size of data stored vs size of received event" />
     <MESSAGE value="remove all indexes that don't end in a timestamp" />
     <MESSAGE value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
     <MESSAGE value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
@@ -286,7 +286,9 @@
     <MESSAGE value="Update index naming conventions for clarity and consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Rename various indexes (`KindPubkeyTag` → `TagKindPubkey`, `KindTag` → `TagKind`, `PubkeyTag` → `TagPubkey`) for improved clarity and consistency; update corresponding logic.&#10;- **database/indexes/keys.go**: Modify index keys and constants to reflect new naming convention; adjust encoding/decoding functions correspondingly.&#10;- **database/get-indexes-for-event.go**: Align index references to updated names and handle related encoding changes.&#10;- **database/get-indexes-for-event_test.go**: Update test cases to reflect renamed indexes (`TagPubkey`, `TagKind`, `TagKindPubkey`) and validate correctness.&#10;- **database/get-indexes-from-filter_test.go**: Adjust test logic to verify renamed indexes and ensure proper filter behavior." />
     <MESSAGE value="Update index argument ordering and naming for consistency&#10;&#10;- **database/get-indexes-from-filter.go**: Reorder arguments in index-related calls to align with the new conventions and improve readability.&#10;- **database/get-fullidpubkey-by-serial.go**: Rename `IdPubkey` to `FullIdPubkey` and update related functions (`Enc/Dec/Vars`) to reflect the new naming pattern.&#10;- **database/indexes/keys.go**: Adjust encoding/decoding function signatures and constants in line with the reordered argument structure for various indexes (`TagKind`, `TagPubkey`, `TagKindPubkey`).&#10;- **database/get-indexes-for-event.go**: Update references to reordered and renamed index functions; apply changes across the logic for clarity.&#10;- **database/get-indexes-for-event_test.go**: Modify test cases to reflect argument reordering and new function names for consistency.&#10;- **database/get-indexes-from-filter_test.go**: Adjust expected results in tests to align with reordered arguments and validate correctness.&#10;- **database/indexes/keys_test.go**: Revise unit tests to use the updated function signatures and naming conventions for all relevant indexes." />
     <MESSAGE value="Sort tags in `GetIndexesFromFilter` for consistent iteration order&#10;&#10;- **database/get-indexes-from-filter.go**: Add sorting logic for tags to ensure reverse iteration order; reintroduce `KindPubkey` index handling at the correct position.&#10;- **general logic**: Standardize and improve index type comments for clarity (`tc-`, `kc-`, `pc-`, etc.)." />
-    <option name="LAST_COMMIT_MESSAGE" value="Sort tags in `GetIndexesFromFilter` for consistent iteration order&#10;&#10;- **database/get-indexes-from-filter.go**: Add sorting logic for tags to ensure reverse iteration order; reintroduce `KindPubkey` index handling at the correct position.&#10;- **general logic**: Standardize and improve index type comments for clarity (`tc-`, `kc-`, `pc-`, etc.)." />
+    <MESSAGE value="Update `QueryEvents` for tag-based intersection and optimize `HandleReq`&#10;&#10;- **database/query-events.go**: Add logic to handle tag-based intersections in `QueryEvents`, ensuring precise filtering of results by intersecting IDs from multiple tags.&#10;- **socketapi/handleReq.go**: Remove redundant logging and refine the `f.Limit` handling to improve performance." />
+    <MESSAGE value="Refactor event handling and improve error handling&#10;&#10;- **database/query-events.go**: Replace `return` statements with `continue` to ensure error scenarios do not interrupt the loop and allow processing of subsequent events.&#10;- **server/add-event.go**: Add support for logging ephemeral events and prevent saving them unnecessarily to optimize storage and improve traceability." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor event handling and improve error handling&#10;&#10;- **database/query-events.go**: Replace `return` statements with `continue` to ensure error scenarios do not interrupt the loop and allow processing of subsequent events.&#10;- **server/add-event.go**: Add support for logging ephemeral events and prevent saving them unnecessarily to optimize storage and improve traceability." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

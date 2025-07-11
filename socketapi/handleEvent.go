@@ -15,6 +15,7 @@ import (
 	"orly.dev/ints"
 	"orly.dev/kind"
 	"orly.dev/log"
+	"orly.dev/publish"
 	"orly.dev/tag"
 )
 
@@ -47,7 +48,7 @@ func (a *A) HandleEvent(r []byte, s server.I, remote string) (msg []byte) {
 	ok, reason = s.AddEvent(
 		a.Context(), env.E, a.Listener.Req(), remote,
 	)
-	log.T.F("%s <- event added %v", remote, ok)
+	publish.P.Deliver(env.E)
 	if err = okenvelope.NewFrom(
 		env.Id(), ok, reason,
 	).Write(a.Listener); chk.E(err) {

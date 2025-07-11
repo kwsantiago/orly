@@ -17,7 +17,7 @@ import (
 func (a *A) HandleReq(
 	rem []byte, s server.I, remote string,
 ) (notice []byte) {
-	log.T.F("received request from %s\n%s", remote)
+	log.T.F("received request from %s", remote)
 	var err error
 	sto := s.Storage()
 	if sto == nil {
