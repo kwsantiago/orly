@@ -8,6 +8,8 @@ import (
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
 	"orly.dev/event"
+	"orly.dev/filter"
+	"orly.dev/hex"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -16,6 +18,27 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 	buf := new(bytes.Buffer)
 	// Marshal the event to binary
 	ev.MarshalBinary(buf)
+
+	// Check if the event is replaceable
+	if ev.Kind != nil && ev.Kind.IsReplaceable() {
+		// Create a filter to find previous events of the same kind from the same pubkey
+		f := filter.New()
+		f.Kinds.K = append(f.Kinds.K, ev.Kind)
+		f.Authors = f.Authors.Append(ev.Pubkey)
+
+		// Query for previous events
+		var prevEvents event.S
+		if prevEvents, err = d.QueryEvents(c, f); chk.E(err) {
+			return
+		}
+
+		// If there are previous events, log that we're replacing one
+		if len(prevEvents) > 0 {
+			d.Logger.Infof("Saving new version of replaceable event kind %d from pubkey %s", 
+				ev.Kind.K, hex.Enc(ev.Pubkey))
+		}
+	}
+
 	// Get the next sequence number for the event
 	var serial uint64
 	if serial, err = d.seq.Next(); chk.E(err) {

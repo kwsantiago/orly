@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"orly.dev/chk"
 	"orly.dev/context"
 	"orly.dev/database/indexes/types"
@@ -56,8 +57,19 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			if ev, err = d.FetchEventBySerial(ser); err != nil {
 				continue
 			}
-			// we already know these are in correct order because QueryForIds
-			// already sorts them.
+			if ev.Kind.IsReplaceable() {
+				for _, e := range evs {
+					if bytes.Equal(
+						ev.Pubkey, e.Pubkey,
+					) && ev.Kind.K == e.Kind.K {
+						
+					}
+				}
+				// } else if ev.Kind.IsParameterizedReplaceable(){
+
+			} else {
+
+			}
 			evs = append(evs, ev)
 		}
 	}
