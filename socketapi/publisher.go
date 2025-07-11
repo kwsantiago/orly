@@ -110,6 +110,10 @@ func (p *S) Deliver(ev *event.E) {
 			if err = res.Write(w); chk.E(err) {
 				continue
 			}
+			log.T.F(
+				"sent event to subscriber %s for subscription %s\n%s",
+				w.Remote(), id, ev.Serialize(),
+			)
 		}
 	}
 	// p.Mx.Unlock()

@@ -8,7 +8,6 @@ import (
 	"orly.dev/helpers"
 	"orly.dev/interfaces/server"
 	"orly.dev/log"
-	"orly.dev/publish"
 	"orly.dev/servemux"
 	"orly.dev/units"
 	"orly.dev/ws"
@@ -88,18 +87,6 @@ func (a *A) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		conn.RemoteAddr(), conn.LocalAddr(),
 	)
 	a.Listener = ws.NewListener(conn, r)
-	defer func() {
-		log.T.F("remote %s closed connection", remote)
-		cancel()
-		ticker.Stop()
-		publish.P.Receive(
-			&W{
-				Cancel: true,
-				I:      a.Listener,
-			},
-		)
-		chk.E(a.Listener.Close())
-	}()
 	conn.SetReadLimit(a.MaxMessageSize)
 	chk.E(conn.SetReadDeadline(time.Now().Add(a.PongWait)))
 	conn.SetPongHandler(
