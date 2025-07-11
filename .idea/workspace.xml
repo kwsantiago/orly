@@ -7,7 +7,7 @@
           <value>
             <AIAssistantStoredInstruction>
               <option name="actionId" value="AIAssistant.VCS.GenerateCommitMessage" />
-              <option name="content" value="write a brief first line summarising the changes, and then follow up with a set of hyphen prefixed bullet points listing the detail of each of the changes either grouped by category or grouped by a source file in one sentence" />
+              <option name="content" value="write a brief first line summarising the changes, and then follow up with a set of hyphen prefixed bullet points listing the detail of each of the changes either grouped by category or grouped by a source file in one sentence&#10;&#10;don't make any notes about changes in files in .idea directory, especially not workspace.xml" />
             </AIAssistantStoredInstruction>
           </value>
         </entry>
@@ -18,9 +18,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor socket API event handling and subscription delivery&#10;&#10;- **socketapi/handleEvent.go**: Add `publish` package for event delivery and replace redundant logging with `publish.P.Deliver` for streamlined event handling.&#10;- **socketapi/handleReq.go**: Simplify logging in `HandleReq` by removing unnecessary newline formatting.&#10;- **socketapi/socketapi.go**: Add context logging for improved debugging when context cancels.&#10;- **socketapi/publisher.go**: Add logs for subscription additions; commented out redundant lock handling in `Deliver` for concurrency refinement.">
-      <change beforePath="$PROJECT_DIR$/socketapi/publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/publisher.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketapi/socketapi.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/socketapi.go" afterDir="false" />
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Update socket API to improve connection handling and subscription delivery&#10;&#10;- **socketapi/socketapi.go**: Remove redundant defer logic for connection close and logging; streamline the cleanup process after connection termination.&#10;- **socketapi/publisher.go**: Add detailed subscription event logs to track data sent to subscribers.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleReq.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleReq.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -260,8 +260,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="handle `Until` filter in `GetIndexesFromFilter` and update tests" />
-    <MESSAGE value="migrate `codec` package to `interfaces/codec` and update imports across the project" />
     <MESSAGE value="refactor `GetIndexesFromFilter` and related index encodings to simplify serialization logic; add comprehensive event index tests" />
     <MESSAGE value="change filter indexes to be pairs with created_at ranges" />
     <MESSAGE value="partly implemented query for ids" />
@@ -285,7 +283,9 @@
     <MESSAGE value="Update `QueryEvents` for tag-based intersection and optimize `HandleReq`&#10;&#10;- **database/query-events.go**: Add logic to handle tag-based intersections in `QueryEvents`, ensuring precise filtering of results by intersecting IDs from multiple tags.&#10;- **socketapi/handleReq.go**: Remove redundant logging and refine the `f.Limit` handling to improve performance." />
     <MESSAGE value="Refactor event handling and improve error handling&#10;&#10;- **database/query-events.go**: Replace `return` statements with `continue` to ensure error scenarios do not interrupt the loop and allow processing of subsequent events.&#10;- **server/add-event.go**: Add support for logging ephemeral events and prevent saving them unnecessarily to optimize storage and improve traceability." />
     <MESSAGE value="Refactor socket API event handling and subscription delivery&#10;&#10;- **socketapi/handleEvent.go**: Add `publish` package for event delivery and replace redundant logging with `publish.P.Deliver` for streamlined event handling.&#10;- **socketapi/handleReq.go**: Simplify logging in `HandleReq` by removing unnecessary newline formatting.&#10;- **socketapi/socketapi.go**: Add context logging for improved debugging when context cancels.&#10;- **socketapi/publisher.go**: Add logs for subscription additions; commented out redundant lock handling in `Deliver` for concurrency refinement." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor socket API event handling and subscription delivery&#10;&#10;- **socketapi/handleEvent.go**: Add `publish` package for event delivery and replace redundant logging with `publish.P.Deliver` for streamlined event handling.&#10;- **socketapi/handleReq.go**: Simplify logging in `HandleReq` by removing unnecessary newline formatting.&#10;- **socketapi/socketapi.go**: Add context logging for improved debugging when context cancels.&#10;- **socketapi/publisher.go**: Add logs for subscription additions; commented out redundant lock handling in `Deliver` for concurrency refinement." />
+    <MESSAGE value="Update `socketapi` concurrency and logging improvements&#10;&#10;- **socketapi/socketapi.go**: Clean up unused defer logic for connection handling, removing redundant concurrency and logging code.&#10;- **socketapi/publisher.go**: Add detailed logs for subscription event deliveries to improve traceability during runtime." />
+    <MESSAGE value="Update socket API to improve connection handling and subscription delivery&#10;&#10;- **socketapi/socketapi.go**: Remove redundant defer logic for connection close and logging; streamline the cleanup process after connection termination.&#10;- **socketapi/publisher.go**: Add detailed subscription event logs to track data sent to subscribers." />
+    <option name="LAST_COMMIT_MESSAGE" value="Update socket API to improve connection handling and subscription delivery&#10;&#10;- **socketapi/socketapi.go**: Remove redundant defer logic for connection close and logging; streamline the cleanup process after connection termination.&#10;- **socketapi/publisher.go**: Add detailed subscription event logs to track data sent to subscribers." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">

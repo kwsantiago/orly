@@ -59,10 +59,10 @@ func (a *A) HandleReq(
 		if res, err = eventenvelope.NewResultWith(
 			env.Subscription.String(), ev,
 		); chk.E(err) {
-			return
+			continue
 		}
 		if err = res.Write(a.Listener); chk.E(err) {
-			return
+			continue
 		}
 	}
 	if err = eoseenvelope.NewFrom(env.Subscription).Write(a.Listener); chk.E(err) {
