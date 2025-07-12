@@ -1,27 +1,32 @@
+// Package main is a nostr relay with a simple follow/mute list authentication
+// scheme and the new HTTP REST based protocol. Configuration is via environment
+// variables or an optional .env file.
 package main
 
 import (
 	"fmt"
 	"github.com/pkg/profile"
-	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"orly.dev/chk"
-	"orly.dev/config"
-	"orly.dev/context"
-	"orly.dev/database"
-	"orly.dev/interrupt"
 	"orly.dev/log"
-	"orly.dev/lol"
-	"orly.dev/servemux"
-	"orly.dev/server"
-	"orly.dev/socketapi"
-	"orly.dev/version"
+	realy_lol "orly.dev/version"
 	"os"
-	"strconv"
 	"sync"
+
+	"orly.dev/app"
+	"orly.dev/context"
+	"orly.dev/interrupt"
+	"orly.dev/lol"
+	"orly.dev/ratel"
+	"orly.dev/realy"
+	"orly.dev/realy/config"
+	"orly.dev/realy/options"
+	"orly.dev/units"
 )
 
 func main() {
+	log.I.F("starting realy %s", realy_lol.V)
 	var err error
 	var cfg *config.C
 	if cfg, err = config.New(); chk.T(err) {
@@ -39,39 +44,44 @@ func main() {
 		config.PrintHelp(cfg, os.Stderr)
 		os.Exit(0)
 	}
+	log.I.Ln("log level", cfg.LogLevel)
+	lol.SetLogLevel(cfg.LogLevel)
 	if cfg.Pprof {
 		defer profile.Start(profile.MemProfile).Stop()
 		go func() {
 			chk.E(http.ListenAndServe("127.0.0.1:6060", nil))
 		}()
 	}
-	log.I.F(
-		"starting %s %s; log level: %s", version.Name, version.V,
-		lol.GetLevel(),
-	)
-	wg := &sync.WaitGroup{}
+	var wg sync.WaitGroup
 	c, cancel := context.Cancel(context.Bg())
-	interrupt.AddHandler(func() { cancel() })
-	var sto *database.D
-	if sto, err = database.New(
-		c, cancel, cfg.DataDir, cfg.LogLevel,
-	); chk.E(err) {
-		return
+	storage := ratel.New(
+		ratel.BackendParams{
+			Ctx:            c,
+			WG:             &wg,
+			BlockCacheSize: units.Gb,
+			LogLevel:       lol.GetLogLevel(cfg.DbLogLevel),
+			MaxLimit:       ratel.DefaultMaxLimit,
+		},
+	)
+	r := &app.Relay{C: cfg, Store: storage}
+	go app.MonitorResources(c)
+	var server *realy.Server
+	serverParams := &realy.ServerParams{
+		Ctx:      c,
+		Cancel:   cancel,
+		Rl:       r,
+		DbPath:   cfg.DataDir,
+		MaxLimit: ratel.DefaultMaxLimit,
 	}
-	serveMux := servemux.New()
-	s := &server.S{
-		Ctx:    c,
-		Cancel: cancel,
-		WG:     wg,
-		Addr:   net.JoinHostPort(cfg.Listen, strconv.Itoa(cfg.Port)),
-		Mux:    serveMux,
-		Cfg:    cfg,
-		Store:  sto,
-	}
-	wg.Add(1)
-	interrupt.AddHandler(func() { s.Shutdown() })
-	socketapi.New(s, "/{$}", serveMux, socketapi.DefaultSocketParams())
-	if err = s.Start(); chk.E(err) {
+	var opts []options.O
+	if server, err = realy.NewServer(serverParams, opts...); chk.E(err) {
 		os.Exit(1)
+	}
+	if err != nil {
+		log.F.F("failed to create server: %v", err)
+	}
+	interrupt.AddHandler(func() { server.Shutdown() })
+	if err = server.Start(cfg.Listen, cfg.Port); chk.E(err) {
+		log.F.F("server terminated: %v", err)
 	}
 }

@@ -1,6 +1,6 @@
-// Package config is an implementation of the env.Source interface from
+// Package env is an implementation of the env.Source interface from
 // go-simpler.org
-package config
+package env
 
 import (
 	"orly.dev/chk"

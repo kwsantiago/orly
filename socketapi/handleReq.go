@@ -1,105 +1,107 @@
 package socketapi
 
 import (
-	"fmt"
+	"errors"
 	"orly.dev/chk"
 	"orly.dev/envelopes/closedenvelope"
+	"orly.dev/log"
+
+	"github.com/dgraph-io/badger/v4"
+
+	"orly.dev/context"
 	"orly.dev/envelopes/eoseenvelope"
 	"orly.dev/envelopes/eventenvelope"
 	"orly.dev/envelopes/reqenvelope"
 	"orly.dev/event"
-	"orly.dev/interfaces/server"
-	"orly.dev/log"
-	"orly.dev/publish"
-	"sort"
+	"orly.dev/normalize"
+	"orly.dev/realy/interfaces"
+	"orly.dev/realy/pointers"
 )
 
 func (a *A) HandleReq(
-	rem []byte, s server.I, remote string,
-) (notice []byte) {
-	log.T.F("received request from %s", remote)
+	c context.T, req []byte, srv interfaces.Server,
+) (r []byte) {
+	log.I.F("REQ:\n%s", req)
+	sto := srv.Storage()
 	var err error
-	sto := s.Storage()
-	if sto == nil {
-		panic("no event store has been set to fetch events")
-	}
+	var rem []byte
 	env := reqenvelope.New()
-	if rem, err = env.Unmarshal(rem); chk.E(err) {
-		notice = []byte(err.Error())
-		return
+	if rem, err = env.Unmarshal(req); chk.E(err) {
+		return normalize.Error.F(err.Error())
 	}
-	log.I.S(env)
-	var evs event.S
-	// if the number of events on a filter matches the limit, mark the filter
-	// complete to prevent opening a subscription.
-	completed := make([]bool, len(env.Filters.F))
-	for i, f := range env.Filters.F {
-		var e event.S
-		if e, err = sto.QueryEvents(a.Context(), f); chk.E(err) {
-			// this one failed, maybe try another
-			err = nil
-			if f.Ids.Len() > 0 {
-				completed[i] = true
+	if len(rem) > 0 {
+		log.I.F("extra '%s'", rem)
+	}
+	allowed := env.Filters
+	var events event.S
+	for _, f := range allowed.F {
+		// var i uint
+		if pointers.Present(f.Limit) {
+			if *f.Limit == 0 {
+				continue
+			}
+		}
+		log.D.F(
+			"query from %s %0x,%s", a.RealRemote(), nil,
+			f.Serialize(),
+		)
+		if events, err = sto.QueryEvents(c, f); err != nil {
+			log.E.F("eventstore: %v", err)
+			if errors.Is(err, badger.ErrDBClosed) {
+				return
 			}
 			continue
 		}
-		evs = append(evs, e...)
-		if (f.Limit != nil && int(*f.Limit) <= len(evs) && *f.Limit > 0) || f.Ids.Len() > 0 {
-			completed[i] = true
-		}
-	}
-	sort.Slice(
-		evs, func(i, j int) bool {
-			return evs[i].CreatedAt.I64() > evs[j].CreatedAt.I64()
-		},
-	)
-	for _, ev := range evs {
-		log.I.F("sending event\n%s", ev.Serialize())
-		var res *eventenvelope.Result
-		if res, err = eventenvelope.NewResultWith(
-			env.Subscription.String(), ev,
-		); chk.E(err) {
-			continue
-		}
-		if err = res.Write(a.Listener); chk.E(err) {
-			continue
+		// write out the events to the socket
+		for _, ev := range events {
+			var res *eventenvelope.Result
+			if res, err = eventenvelope.NewResultWith(
+				env.Subscription.T,
+				ev,
+			); chk.E(err) {
+				return
+			}
+			if err = res.Write(a.Listener); chk.E(err) {
+				return
+			}
 		}
 	}
 	if err = eoseenvelope.NewFrom(env.Subscription).Write(a.Listener); chk.E(err) {
 		return
 	}
-	// if all filters are complete, return instead of opening a subscription
-	complete := true
-	for _, c := range completed {
-		if !c {
-			complete = false
+	receiver := make(event.C, 32)
+	cancel := true
+	// if the query was for just Ids we know there cannot be any more results, so cancel the subscription.
+	for _, f := range allowed.F {
+		if f.Ids.Len() < 1 {
+			cancel = false
+			break
+		}
+		// also, if we received the limit amount of events, subscription ded
+		if pointers.Present(f.Limit) {
+			if len(events) < int(*f.Limit) {
+				cancel = false
+			}
+		}
+		if !cancel {
 			break
 		}
 	}
-	if complete {
-		log.I.F("all filters complete, returning")
+	if !cancel {
+		srv.Publisher().Receive(
+			&W{
+				Listener: a.Listener,
+				Id:       env.Subscription.String(),
+				Receiver: receiver,
+				Filters:  env.Filters,
+			},
+		)
+	} else {
 		if err = closedenvelope.NewFrom(
-			env.Subscription, []byte(fmt.Sprintf(
-				"subscription %s complete", env.Subscription.String(),
-			)),
+			env.Subscription, nil,
 		).Write(a.Listener); chk.E(err) {
 			return
 		}
-		return
 	}
-	for _, f := range env.Filters.F {
-		log.I.F(
-			"opening subscription for %s %s", env.Subscription, f.Marshal(nil),
-		)
-	}
-	receiver := make(event.C, 32)
-	publish.P.Receive(
-		&W{
-			I:        a.Listener,
-			Id:       env.Subscription.String(),
-			Receiver: receiver,
-			Filters:  env.Filters,
-		},
-	)
 	return
 }

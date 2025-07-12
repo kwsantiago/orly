@@ -4,12 +4,12 @@ package eventenvelope
 
 import (
 	"io"
-
 	"orly.dev/chk"
-	"orly.dev/envelopes"
 	"orly.dev/errorf"
+
+	"orly.dev/codec"
+	"orly.dev/envelopes"
 	"orly.dev/event"
-	"orly.dev/interfaces/codec"
 	"orly.dev/subscription"
 )
 
@@ -28,8 +28,6 @@ func NewSubmission() *Submission { return &Submission{E: &event.E{}} }
 
 // NewSubmissionWith creates a new eventenvelope.Submission with a provided event.E.
 func NewSubmissionWith(ev *event.E) *Submission { return &Submission{E: ev} }
-
-func (en *Submission) Id() []byte { return en.E.Id }
 
 // Label returns the label of a event eventenvelope.Submission envelope.
 func (en *Submission) Label() string { return L }
@@ -104,8 +102,6 @@ func NewResultWith[V string | []byte](s V, ev *event.E) (
 	}
 	return &Result{subscription.MustNew(s), ev}, nil
 }
-
-func (en *Result) Id() []byte { return en.Event.Id }
 
 // Label returns the label of a event eventenvelope.Result envelope.
 func (en *Result) Label() string { return L }

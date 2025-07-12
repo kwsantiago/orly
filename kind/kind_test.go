@@ -1,11 +1,10 @@
 package kind
 
 import (
+	"orly.dev/chk"
 	"testing"
 
 	"lukechampine.com/frand"
-
-	"orly.dev/chk"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

@@ -1,33 +1,27 @@
-// Package filter is a codec for the nostr filter (queries) and includes:
-//
-//   - tools for matching them to events
-//
-//   - a canonical format scheme to enable compactly
-//
-//   - identifying subscription filters
-//
-//   - a simplified filter that leaves out the IDs and Search fields for
-//     use in the HTTP API.
+// Package filter is a codec for nostr filters (queries) and includes tools for
+// matching them to events, a canonical format scheme to enable compactly
+// identifying subscription filters, and a simplified filter that leavse out the
+// IDs and Search fields for use in the HTTP API.
 package filter
 
 import (
 	"bytes"
 	"encoding/binary"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 	"sort"
 
 	"lukechampine.com/frand"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
 	"orly.dev/ec/schnorr"
 	"orly.dev/ec/secp256k1"
-	"orly.dev/errorf"
 	"orly.dev/event"
 	"orly.dev/hex"
 	"orly.dev/ints"
 	"orly.dev/kind"
 	"orly.dev/kinds"
-	"orly.dev/pointers"
+	"orly.dev/realy/pointers"
+	"orly.dev/sha256"
 	"orly.dev/tag"
 	"orly.dev/tags"
 	"orly.dev/text"
@@ -36,41 +30,36 @@ import (
 
 // F is the primary query form for requesting events from a nostr relay.
 //
-// The ordering of the fields of filters is not specified as in the protocol
-// there is no requirement to generate a hash for fast recognition of identical
-// filters.
-//
-// However, for internal use in a relay, by applying a consistent sort order,
-// this library will produce an identical JSON from the same *set* of fields no
-// matter what order they were provided.
+// The ordering of fields of filters is not specified as in the protocol there
+// is no requirement to generate a hash for fast recognition of identical
+// filters. However, for internal use in a relay, by applying a consistent sort
+// order, this library will produce an identical JSON from the same *set* of
+// fields no matter what order they were provided.
 //
 // This is to facilitate the deduplication of filters so an effective identical
 // match is not performed on an identical filter.
 type F struct {
-	Ids     *tag.T   `json:"ids,omitempty"`
-	Kinds   *kinds.T `json:"kinds,omitempty"`
-	Authors *tag.T   `json:"authors,omitempty"`
-	// Tags are internally stored with the key being prefixed with # and a-zA-Z
-	// as the second character in the first field of a tag.T, but when marshaled
-	// render as an object key that if not present is not rendered.
-	Tags   *tags.T      `json:"-,omitempty"`
-	Since  *timestamp.T `json:"since,omitempty"`
-	Until  *timestamp.T `json:"until,omitempty"`
-	Search []byte       `json:"search,omitempty"`
-	Limit  *uint        `json:"limit,omitempty"`
+	Ids     *tag.T       `json:"ids,omitempty"`
+	Kinds   *kinds.T     `json:"kinds,omitempty"`
+	Authors *tag.T       `json:"authors,omitempty"`
+	Tags    *tags.T      `json:"-,omitempty"`
+	Since   *timestamp.T `json:"since,omitempty"`
+	Until   *timestamp.T `json:"until,omitempty"`
+	Search  []byte       `json:"search,omitempty"`
+	Limit   *uint        `json:"limit,omitempty"`
 }
 
-// New creates a new, reasonably initialized filter that will be ready for most
-// uses without further allocations.
+// New creates a new, reasonably initialized filter that will be ready for most uses without
+// further allocations.
 func New() (f *F) {
 	return &F{
 		Ids:     tag.NewWithCap(10),
 		Kinds:   kinds.NewWithCap(10),
 		Authors: tag.NewWithCap(10),
 		Tags:    tags.New(),
-		Since:   new(timestamp.T),
-		Until:   new(timestamp.T),
-		Search:  nil,
+		// Since:   timestamp.New(),
+		// Until:   timestamp.New(),
+		Search: nil,
 	}
 }
 
@@ -119,8 +108,8 @@ var (
 	Search = []byte("search")
 )
 
-// Marshal a filter into raw JSON bytes, minified. The field ordering and sort
-// of fields is canonicalized so that a hash can identify the same filter.
+// Marshal a filter into raw JSON bytes, minified. The field ordering and sort of fields is
+// canonicalized so that a hash can identify the same filter.
 func (f *F) Marshal(dst []byte) (b []byte) {
 	var err error
 	_ = err
@@ -159,9 +148,8 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 		// } else {
 		// 	first = true
 		// }
-		//
-		// tags are stored as tags with the initial element the "#a" and the
-		// rest the list in each element of the tags list. eg:
+		// tags are stored as tags with the initial element the "#a" and the rest the list in
+		// each element of the tags list. eg:
 		//
 		//     [["#p","<pubkey1>","<pubkey3"],["#t","hashtag","stuff"]]
 		//
@@ -171,14 +159,13 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 				continue
 			}
 			if tg.Len() < 1 || len(tg.Key()) != 2 {
-				// if there are no values, skip; the "key" field must be 2 characters
-				// long,
+				// if there is no values, skip; the "key" field must be 2 characters long,
 				continue
 			}
 			tKey := tg.ToSliceOfBytes()[0]
 			if tKey[0] != '#' &&
 				(tKey[1] < 'a' && tKey[1] > 'z' || tKey[1] < 'A' && tKey[1] > 'Z') {
-				// the first "key" field must begin with '#' and the second be alpha
+				// first "key" field must begin with '#' and second be alpha
 				continue
 			}
 			values := tg.ToSliceOfBytes()[1:]
@@ -267,7 +254,7 @@ const (
 
 // Unmarshal a filter from raw (minified) JSON bytes into the runtime format.
 //
-// todo: this does not tolerate whitespace, but it's bleeding fast.
+// todo: this may tolerate whitespace, not certain currently.
 func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 	r = b[:]
 	var key []byte
@@ -316,7 +303,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 				copy(k, key)
 				switch key[1] {
 				case 'e', 'p':
-					// the tags must all be 64-character hexadecimal
+					// the tags must all be 64 character hexadecimal
 					var ff [][]byte
 					if ff, r, err = text.UnmarshalHexArray(
 						r,
@@ -326,7 +313,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 					}
 					ff = append([][]byte{k}, ff...)
 					f.Tags = f.Tags.AppendTags(tag.New(ff...))
-					// f.Tags.E = append(f.Tags.E, tag.New(ff...))
+					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
 				default:
 					// other types of tags can be anything
 					var ff [][]byte
@@ -335,7 +322,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 					}
 					ff = append([][]byte{k}, ff...)
 					f.Tags = f.Tags.AppendTags(tag.New(ff...))
-					// f.Tags.E = append(f.Tags.E, tag.New(ff...))
+					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
 				}
 				state = betweenKV
 			case IDs[0]:
@@ -431,10 +418,14 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 			}
 			if r[0] == '}' {
 				state = afterClose
+				// log.I.Ln("afterClose")
+				// rem = rem[1:]
 			} else if r[0] == ',' {
 				state = openParen
+				// log.I.Ln("openParen")
 			} else if r[0] == '"' {
 				state = inKey
+				// log.I.Ln("inKey")
 			}
 		}
 		if len(r) == 0 {
@@ -453,35 +444,50 @@ invalid:
 // Matches checks a filter against an event and determines if the event matches the filter.
 func (f *F) Matches(ev *event.E) bool {
 	if ev == nil {
+		// log.F.ToSliceOfBytes("nil event")
 		return false
 	}
 	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.Id) {
+		// log.F.ToSliceOfBytes("no ids in filter match event\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}
 	if f.Kinds.Len() > 0 && !f.Kinds.Contains(ev.Kind) {
+		// log.F.ToSliceOfBytes("no matching kinds in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}
 	if f.Authors.Len() > 0 && !f.Authors.Contains(ev.Pubkey) {
+		// log.F.ToSliceOfBytes("no matching authors in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}
 	if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {
 		return false
 	}
+	// if f.Tags.Len() > 0 {
+	//	for _, v := range f.Tags.ToSliceOfTags() {
+	//		tvs := v.ToSliceOfBytes()
+	//		if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
+	//			return false
+	//		}
+	//	}
+	//	return false
+	// }
 	if f.Since.Int() != 0 && ev.CreatedAt.I64() < f.Since.I64() {
+		// log.F.ToSliceOfBytes("event is older than since\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}
 	if f.Until.Int() != 0 && ev.CreatedAt.I64() > f.Until.I64() {
+		// log.F.ToSliceOfBytes("event is newer than until\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}
 	return true
 }
 
-// Fingerprint returns an 8 byte truncated sha256 hash of the filter in the
-// canonical form created by Marshal.
+// Fingerprint returns an 8 byte truncated sha256 hash of the filter in the canonical form
+// created by Marshal.
 //
-// This hash is generated via the JSON encoded form of the filter, with the
-// Limit field removed. This value should be set to zero after all results from
-// a query of stored events, as per NIP-01.
+// This hash is generated via the JSON encoded form of the filter, with the Limit field removed.
+// This value should be set to zero after all results from a query of stored events, as per
+// NIP-01.
 func (f *F) Fingerprint() (fp uint64, err error) {
 	lim := f.Limit
 	f.Limit = nil
@@ -494,8 +500,8 @@ func (f *F) Fingerprint() (fp uint64, err error) {
 	return
 }
 
-// Sort the fields of a filter so a fingerprint on a filter that has the same
-// set of content produces the same fingerprint.
+// Sort the fields of a filter so a fingerprint on a filter that has the same set of content
+// produces the same fingerprint.
 func (f *F) Sort() {
 	if f.Ids != nil {
 		sort.Sort(f.Ids)
@@ -521,8 +527,7 @@ func arePointerValuesEqual[V comparable](a *V, b *V) bool {
 	return false
 }
 
-// Equal checks a filter against another filter to see if they are the same
-// filter.
+// Equal checks a filter against another filter to see if they are the same filter.
 func (f *F) Equal(b *F) bool {
 	// sort the fields so they come out the same
 	f.Sort()
@@ -545,8 +550,9 @@ func GenFilter() (f *F, err error) {
 	n := frand.Intn(16)
 	for _ = range n {
 		id := make([]byte, sha256.Size)
-		_, _ = frand.Read(id)
+		frand.Read(id)
 		f.Ids = f.Ids.Append(id)
+		// f.Ids.Field = append(f.Ids.Field, id)
 	}
 	n = frand.Intn(16)
 	for _ = range n {
@@ -560,6 +566,7 @@ func GenFilter() (f *F, err error) {
 		}
 		pk := sk.PubKey()
 		f.Authors = f.Authors.Append(schnorr.SerializePubKey(pk))
+		// f.Authors.Field = append(f.Authors.Field, schnorr.SerializePubKey(pk))
 	}
 	a := frand.Intn(16)
 	if a < n {
@@ -575,22 +582,24 @@ func GenFilter() (f *F, err error) {
 			var idb [][]byte
 			for range l {
 				id := make([]byte, sha256.Size)
-				_, _ = frand.Read(id)
+				frand.Read(id)
 				idb = append(idb, id)
 			}
 			idb = append([][]byte{{'#', byte(b)}}, idb...)
 			f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(idb...))
+			// f.Tags.F = append(f.Tags.F, tag.FromBytesSlice(idb...))
 		} else {
 			var idb [][]byte
 			for range l {
 				bb := make([]byte, frand.Intn(31)+1)
-				_, _ = frand.Read(bb)
+				frand.Read(bb)
 				id := make([]byte, 0, len(bb)*2)
 				id = hex.EncAppend(id, bb)
 				idb = append(idb, id)
 			}
 			idb = append([][]byte{{'#', byte(b)}}, idb...)
 			f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(idb...))
+			// f.Tags.F = append(f.Tags.F, tag.FromBytesSlice(idb...))
 		}
 	}
 	tn := int(timestamp.Now().I64())

@@ -4,8 +4,8 @@ package musig2
 
 import (
 	"fmt"
-
 	"orly.dev/chk"
+
 	"orly.dev/ec"
 	"orly.dev/ec/schnorr"
 )
@@ -214,7 +214,7 @@ func NewContext(
 			WithPublicKey(ctx.pubKey),
 			WithNonceSecretKeyAux(signingKey),
 		)
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -266,7 +266,7 @@ func (c *Context) combineSignerKeys() error {
 	c.combinedKey, _, _, err = AggregateKeys(
 		c.opts.keySet, c.shouldSort, keyAggOpts...,
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	return nil
@@ -425,7 +425,7 @@ func (c *Context) NewSession(options ...SessionOption) (*Session, error) {
 			WithNonceSecretKeyAux(c.signingKey),
 			WithNonceCombinedKeyAux(c.combinedKey.FinalKey),
 		)
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -469,7 +469,7 @@ func (s *Session) RegisterPubNonce(nonce [PubNonceSize]byte) (bool, error) {
 	// now.
 	if haveAllNonces {
 		combinedNonce, err := AggregateNonces(s.pubNonces)
-		if chk.E(err) {
+		if err != nil {
 			return false, err
 		}
 		s.combinedNonce = &combinedNonce
@@ -514,7 +514,7 @@ func (s *Session) Sign(
 	// Now that we've generated our signature, we'll make sure to blank out
 	// our signing nonce.
 	s.localNonces = nil
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	s.msg = msg

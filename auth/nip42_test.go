@@ -1,9 +1,9 @@
 package auth
 
 import (
+	"orly.dev/chk"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/p256k"
 )
 

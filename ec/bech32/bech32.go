@@ -8,8 +8,6 @@ package bech32
 import (
 	"bytes"
 	"strings"
-
-	"orly.dev/chk"
 )
 
 // Charset is the set of characters used in the data section of bech32 strings.
@@ -122,10 +120,8 @@ func bech32Polymod(hrp []byte, values, checksum []byte) int {
 // and 126), otherwise the results are undefined.
 //
 // For more details on the checksum calculation, please refer to BIP 173.
-func writeBech32Checksum(
-	hrp []byte, data []byte, bldr *bytes.Buffer,
-	version Version,
-) {
+func writeBech32Checksum(hrp []byte, data []byte, bldr *bytes.Buffer,
+	version Version) {
 
 	bech32Const := int(VersionToConsts[version])
 	polymod := bech32Polymod(hrp, data, nil) ^ bech32Const
@@ -205,7 +201,7 @@ func decodeNoLimit(bech []byte) ([]byte, []byte, Version, error) {
 	// Each character corresponds to the byte with value of the index in
 	// 'charset'.
 	decoded, err := toBytes(data)
-	if chk.E(err) {
+	if err != nil {
 		return nil, nil, VersionUnknown, err
 	}
 	// Verify if the checksum (stored inside decoded[:]) is valid, given the
@@ -319,10 +315,8 @@ func EncodeM(hrp, data []byte) ([]byte, error) {
 
 // ConvertBits converts a byte slice where each byte is encoding fromBits bits,
 // to a byte slice where each byte is encoding toBits bits.
-func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) (
-	[]byte,
-	error,
-) {
+func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) ([]byte,
+	error) {
 
 	if fromBits < 1 || fromBits > 8 || toBits < 1 || toBits > 8 {
 		return nil, ErrInvalidBitGroups{}
@@ -391,7 +385,7 @@ func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) (
 // checksum purposes.
 func EncodeFromBase256(hrp, data []byte) ([]byte, error) {
 	converted, err := ConvertBits(data, 8, 5, true)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	return Encode(hrp, converted)
@@ -402,11 +396,11 @@ func EncodeFromBase256(hrp, data []byte) ([]byte, error) {
 // base256-encoded byte slice and returns it along with the lowercase HRP.
 func DecodeToBase256(bech []byte) ([]byte, []byte, error) {
 	hrp, data, err := Decode(bech)
-	if chk.E(err) {
+	if err != nil {
 		return nil, nil, err
 	}
 	converted, err := ConvertBits(data, 5, 8, false)
-	if chk.E(err) {
+	if err != nil {
 		return nil, nil, err
 	}
 	return hrp, converted, nil

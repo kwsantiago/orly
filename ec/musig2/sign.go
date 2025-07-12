@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-
 	"orly.dev/chk"
+
 	"orly.dev/ec"
 	"orly.dev/ec/chainhash"
 	"orly.dev/ec/schnorr"
@@ -228,13 +228,13 @@ func computeSigningNonce(
 	r1J, err := btcec.ParseJacobian(
 		combinedNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return nil, nil, err
 	}
 	r2J, err := btcec.ParseJacobian(
 		combinedNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return nil, nil, err
 	}
 
@@ -318,7 +318,7 @@ func Sign(
 	combinedKey, parityAcc, _, err := AggregateKeys(
 		pubKeys, opts.sortKeys, keyAggOpts...,
 	)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -328,7 +328,7 @@ func Sign(
 	nonce, nonceBlinder, err := computeSigningNonce(
 		combinedNonce, combinedKey.FinalKey, msg,
 	)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -479,7 +479,7 @@ func verifyPartialSig(
 	combinedKey, parityAcc, _, err := AggregateKeys(
 		keySet, opts.sortKeys, keyAggOpts...,
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 
@@ -499,13 +499,13 @@ func verifyPartialSig(
 	r1J, err := btcec.ParseJacobian(
 		combinedNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	r2J, err := btcec.ParseJacobian(
 		combinedNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 
@@ -521,13 +521,13 @@ func verifyPartialSig(
 	pubNonce1J, err := btcec.ParseJacobian(
 		pubNonce[:btcec.PubKeyBytesLenCompressed],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	pubNonce2J, err := btcec.ParseJacobian(
 		pubNonce[btcec.PubKeyBytesLenCompressed:],
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 
@@ -574,7 +574,7 @@ func verifyPartialSig(
 	e.SetByteSlice(challengeBytes[:])
 
 	signingKey, err := btcec.ParsePubKey(pubKey)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 

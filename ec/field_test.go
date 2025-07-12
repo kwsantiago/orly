@@ -7,9 +7,9 @@ package btcec
 
 import (
 	"math/rand"
+	"orly.dev/chk"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/hex"
 )
 
@@ -1189,7 +1189,7 @@ func TestFieldSquareRoot(t *testing.T) {
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	return b

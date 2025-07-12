@@ -3,9 +3,9 @@ package eventenvelope
 import (
 	"bufio"
 	"bytes"
+	"orly.dev/chk"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/envelopes"
 	"orly.dev/event"
 	"orly.dev/event/examples"
@@ -14,7 +14,6 @@ import (
 
 func TestSubmission(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
-	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var c, rem, out []byte
 	var err error
 	for scanner.Scan() {
@@ -34,7 +33,7 @@ func TestSubmission(t *testing.T) {
 		rem = ea.Marshal(rem)
 		c = append(c, rem...)
 		var l string
-		if l, rem = envelopes.Identify(rem); chk.E(err) {
+		if l, rem, err = envelopes.Identify(rem); chk.E(err) {
 			t.Fatal(err)
 		}
 		if l != L {
@@ -59,7 +58,6 @@ func TestSubmission(t *testing.T) {
 
 func TestResult(t *testing.T) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
-	scanner.Buffer(make([]byte, 0, 1_000_000_000), 1_000_000_000)
 	var c, rem, out []byte
 	var err error
 	for scanner.Scan() {
@@ -83,7 +81,7 @@ func TestResult(t *testing.T) {
 		rem = ea.Marshal(rem)
 		c = append(c, rem...)
 		var l string
-		if l, rem = envelopes.Identify(rem); chk.E(err) {
+		if l, rem, err = envelopes.Identify(rem); chk.E(err) {
 			t.Fatal(err)
 		}
 		if l != L {

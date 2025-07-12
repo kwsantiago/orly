@@ -2,12 +2,11 @@ package ints
 
 import (
 	"math"
+	"orly.dev/chk"
 	"strconv"
 	"testing"
 
 	"lukechampine.com/frand"
-
-	"orly.dev/chk"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

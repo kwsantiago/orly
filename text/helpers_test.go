@@ -2,13 +2,13 @@ package text
 
 import (
 	"bytes"
+	"orly.dev/chk"
 	"testing"
 
 	"lukechampine.com/frand"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 func TestUnmarshalHexArray(t *testing.T) {

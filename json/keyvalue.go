@@ -2,9 +2,9 @@ package json
 
 import (
 	"io"
-
 	"orly.dev/chk"
-	"orly.dev/interfaces/codec"
+
+	"orly.dev/codec"
 )
 
 // An Object is an (not necessarily) ordered list of KeyValue.

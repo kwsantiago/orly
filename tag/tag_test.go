@@ -2,12 +2,11 @@ package tag
 
 import (
 	"bytes"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"testing"
 
 	"lukechampine.com/frand"
-
-	"orly.dev/chk"
-	"orly.dev/log"
 )
 
 func TestMarshalUnmarshal(t *testing.T) {

@@ -7,10 +7,9 @@ package ints
 import (
 	_ "embed"
 	"io"
+	"orly.dev/errorf"
 
 	"golang.org/x/exp/constraints"
-
-	"orly.dev/errorf"
 )
 
 // run this to regenerate (pointlessly) the base 10 array of 4 places per entry
@@ -18,6 +17,8 @@ import (
 
 //go:embed base10k.txt
 var base10k []byte
+
+const base = 10000
 
 // T is an integer with a fast codec to decimal ASCII.
 type T struct {

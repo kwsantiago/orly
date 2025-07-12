@@ -11,11 +11,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 // This example demonstrates use of GenerateSharedSecret to encrypt a message
@@ -24,7 +22,7 @@ import (
 func Example_encryptDecryptMessage() {
 	newAEAD := func(key []byte) (cipher.AEAD, error) {
 		block, err := aes.NewCipher(key)
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 		return cipher.NewGCM(block)
@@ -34,19 +32,19 @@ func Example_encryptDecryptMessage() {
 		"04115c42e757b2efb7671c578530ec191a1359381e6a71127a9d37c486fd30da" +
 			"e57e76dc58f693bd7e7010358ce6b165e483a2921010db67ac11b1b51b651953d2",
 	) // uncompressed pubkey
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	pubKey, err := secp256k1.ParsePubKey(pubKeyBytes)
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	// Derive an ephemeral public/secret keypair for performing ECDHE with
 	// the recipient.
 	ephemeralSecKey, err := secp256k1.GenerateSecretKey()
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -74,7 +72,7 @@ func Example_encryptDecryptMessage() {
 	// first (and only) use of a counter.
 	plaintext := []byte("test message")
 	aead, err := newAEAD(cipherKey[:])
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -90,7 +88,7 @@ func Example_encryptDecryptMessage() {
 	pkBytes, err := hex.Dec(
 		"a11b0a4e1a132305652ee7a8eb7848f6ad5ea381e3ce20a2c086a2e388230811",
 	)
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -101,7 +99,7 @@ func Example_encryptDecryptMessage() {
 	pubKeyLen := binary.LittleEndian.Uint32(ciphertext[:4])
 	senderPubKeyBytes := ciphertext[4 : 4+pubKeyLen]
 	senderPubKey, err := secp256k1.ParsePubKey(senderPubKeyBytes)
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -115,7 +113,7 @@ func Example_encryptDecryptMessage() {
 	)
 	// Open the sealed message.
 	aead, err = newAEAD(recoveredCipherKey[:])
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -124,7 +122,7 @@ func Example_encryptDecryptMessage() {
 		nil, nonce, ciphertext[4+pubKeyLen:],
 		senderPubKeyBytes,
 	)
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}

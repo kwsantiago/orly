@@ -2,10 +2,10 @@ package authenvelope
 
 import (
 	"bytes"
+	"orly.dev/chk"
 	"testing"
 
 	"orly.dev/auth"
-	"orly.dev/chk"
 	"orly.dev/envelopes"
 	"orly.dev/p256k"
 )
@@ -27,7 +27,7 @@ func TestAuth(t *testing.T) {
 		copy(oChal, b1)
 		var rem []byte
 		var l string
-		if l, b1 = envelopes.Identify(b1); chk.E(err) {
+		if l, b1, err = envelopes.Identify(b1); chk.E(err) {
 			t.Fatal(err)
 		}
 		if l != L {
@@ -62,7 +62,7 @@ func TestAuth(t *testing.T) {
 		b3 = resp.Marshal(b3)
 		oResp := make([]byte, len(b3))
 		copy(oResp, b3)
-		if l, b3 = envelopes.Identify(b3); chk.E(err) {
+		if l, b3, err = envelopes.Identify(b3); chk.E(err) {
 			t.Fatal(err)
 		}
 		if l != L {

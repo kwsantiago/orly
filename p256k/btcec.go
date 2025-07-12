@@ -3,7 +3,6 @@
 package p256k
 
 import (
-	"orly.dev/log"
 	"orly.dev/p256k/btcec"
 )
 

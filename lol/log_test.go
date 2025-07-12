@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLogLevels(t *testing.T) {
@@ -15,9 +16,7 @@ func TestLogLevels(t *testing.T) {
 	}
 
 	// Test that LevelNames matches the constants
-	expectedLevelNames := []string{
-		"off", "fatal", "error", "warn", "info", "debug", "trace",
-	}
+	expectedLevelNames := []string{"off", "fatal", "error", "warn", "info", "debug", "trace"}
 	for i, name := range expectedLevelNames {
 		if LevelNames[i] != name {
 			t.Errorf("LevelNames[%d] = %s, want %s", i, LevelNames[i], name)
@@ -41,17 +40,12 @@ func TestGetLogLevel(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(
-			test.level, func(t *testing.T) {
-				result := GetLogLevel(test.level)
-				if result != test.expected {
-					t.Errorf(
-						"GetLogLevel(%q) = %d, want %d", test.level, result,
-						test.expected,
-					)
-				}
-			},
-		)
+		t.Run(test.level, func(t *testing.T) {
+			result := GetLogLevel(test.level)
+			if result != test.expected {
+				t.Errorf("GetLogLevel(%q) = %d, want %d", test.level, result, test.expected)
+			}
+		})
 	}
 }
 
@@ -75,18 +69,13 @@ func TestSetLogLevel(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(
-			test.level, func(t *testing.T) {
-				SetLogLevel(test.level)
-				result := Level.Load()
-				if result != test.expected {
-					t.Errorf(
-						"After SetLogLevel(%q), Level = %d, want %d",
-						test.level, result, test.expected,
-					)
-				}
-			},
-		)
+		t.Run(test.level, func(t *testing.T) {
+			SetLogLevel(test.level)
+			result := Level.Load()
+			if result != test.expected {
+				t.Errorf("After SetLogLevel(%q), Level = %d, want %d", test.level, result, test.expected)
+			}
+		})
 	}
 }
 
@@ -103,18 +92,67 @@ func TestJoinStrings(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		t.Run(
-			fmt.Sprintf("case_%d", i), func(t *testing.T) {
-				result := JoinStrings(test.args...)
-				if result != test.expected {
-					t.Errorf(
-						"JoinStrings(%v) = %q, want %q", test.args, result,
-						test.expected,
-					)
-				}
-			},
-		)
+		t.Run(fmt.Sprintf("case_%d", i), func(t *testing.T) {
+			result := JoinStrings(test.args...)
+			if result != test.expected {
+				t.Errorf("JoinStrings(%v) = %q, want %q", test.args, result, test.expected)
+			}
+		})
 	}
+}
+
+func TestTimeStamper(t *testing.T) {
+	// Test with NoTimeStamp = false
+	NoTimeStamp.Store(false)
+	timestamp := TimeStamper()
+	if timestamp == "" {
+		t.Error("TimeStamper() returned empty string when NoTimeStamp = false")
+	}
+
+	// Check format (should be like "2006-01-02T15:04:05Z07:00.000 ")
+	_, err := time.Parse("2006-01-02T15:04:05Z07:00.000 ", timestamp)
+	if err != nil {
+		t.Errorf("TimeStamper() returned timestamp in unexpected format: %q, error: %v", timestamp, err)
+	}
+
+	// Test with NoTimeStamp = true
+	NoTimeStamp.Store(true)
+	timestamp = TimeStamper()
+	if timestamp != "" {
+		t.Errorf("TimeStamper() returned %q when NoTimeStamp = true, expected empty string", timestamp)
+	}
+
+	// Reset for other tests
+	NoTimeStamp.Store(false)
+}
+
+func TestGetLoc(t *testing.T) {
+	// Test with ShortLoc = false
+	ShortLoc.Store(false)
+	loc := GetLoc(1)
+	if !strings.Contains(loc, "log_test.go") {
+		t.Errorf("GetLoc(1) = %q, expected to contain 'log_test.go'", loc)
+	}
+
+	// Test with ShortLoc = true
+	ShortLoc.Store(true)
+	loc = GetLoc(1)
+	if !strings.Contains(loc, "log_test.go") {
+		t.Errorf("GetLoc(1) = %q, expected to contain 'log_test.go'", loc)
+	}
+
+	// Test edge case where file path doesn't contain prefix
+	originalPrefix := prefix
+	defer func() { prefix = originalPrefix }() // Restore original prefix after test
+
+	prefix = "non-existent-path"
+	loc = GetLoc(1)
+	if !strings.Contains(loc, "log_test.go") {
+		t.Errorf("GetLoc(1) with non-existent prefix = %q, expected to contain 'log_test.go'", loc)
+	}
+
+	// Reset for other tests
+	ShortLoc.Store(false)
 }
 
 func TestGetPrinter(t *testing.T) {
@@ -133,9 +171,7 @@ func TestGetPrinter(t *testing.T) {
 	buf.Reset()
 	printer.Ln("test message")
 	if buf.String() != "" {
-		t.Errorf(
-			"printer.Ln() printed when level is too high: %q", buf.String(),
-		)
+		t.Errorf("printer.Ln() printed when level is too high: %q", buf.String())
 	}
 
 	// Set log level to Debug
@@ -149,9 +185,7 @@ func TestGetPrinter(t *testing.T) {
 		t.Error("printer.Ln() did not print when it should have")
 	}
 	if !strings.Contains(output, "test message") {
-		t.Errorf(
-			"printer.Ln() output %q does not contain 'test message'", output,
-		)
+		t.Errorf("printer.Ln() output %q does not contain 'test message'", output)
 	}
 
 	// Test F method
@@ -159,10 +193,7 @@ func TestGetPrinter(t *testing.T) {
 	printer.F("formatted %s", "message")
 	output = buf.String()
 	if !strings.Contains(output, "formatted message") {
-		t.Errorf(
-			"printer.F() output %q does not contain 'formatted message'",
-			output,
-		)
+		t.Errorf("printer.F() output %q does not contain 'formatted message'", output)
 	}
 
 	// Test S method
@@ -170,9 +201,7 @@ func TestGetPrinter(t *testing.T) {
 	printer.S("spew message")
 	output = buf.String()
 	if !strings.Contains(output, "spew message") {
-		t.Errorf(
-			"printer.S() output %q does not contain 'spew message'", output,
-		)
+		t.Errorf("printer.S() output %q does not contain 'spew message'", output)
 	}
 
 	// Test C method
@@ -180,9 +209,7 @@ func TestGetPrinter(t *testing.T) {
 	printer.C(func() string { return "closure message" })
 	output = buf.String()
 	if !strings.Contains(output, "closure message") {
-		t.Errorf(
-			"printer.C() output %q does not contain 'closure message'", output,
-		)
+		t.Errorf("printer.C() output %q does not contain 'closure message'", output)
 	}
 
 	// Test Chk method with nil error
@@ -203,10 +230,7 @@ func TestGetPrinter(t *testing.T) {
 		t.Error("printer.Chk(error) returned false, expected true")
 	}
 	if !strings.Contains(buf.String(), "test error") {
-		t.Errorf(
-			"printer.Chk(error) output %q does not contain 'test error'",
-			buf.String(),
-		)
+		t.Errorf("printer.Chk(error) output %q does not contain 'test error'", buf.String())
 	}
 
 	// Test Err method
@@ -216,17 +240,11 @@ func TestGetPrinter(t *testing.T) {
 		t.Error("printer.Err() returned nil error")
 	}
 	if err.Error() != "error message" {
-		t.Errorf(
-			"printer.Err() returned error with message %q, expected 'error message'",
-			err.Error(),
-		)
+		t.Errorf("printer.Err() returned error with message %q, expected 'error message'", err.Error())
 	}
 	// Check if the message was logged
 	if !strings.Contains(buf.String(), "error message") {
-		t.Errorf(
-			"printer.Err() output %q does not contain 'error message'",
-			buf.String(),
-		)
+		t.Errorf("printer.Err() output %q does not contain 'error message'", buf.String())
 	}
 }
 
@@ -253,10 +271,7 @@ func TestGetNullPrinter(t *testing.T) {
 		t.Error("GetNullPrinter().Err() returned nil error")
 	}
 	if err.Error() != "test error" {
-		t.Errorf(
-			"GetNullPrinter().Err() returned error with message %q, expected 'test error'",
-			err.Error(),
-		)
+		t.Errorf("GetNullPrinter().Err() returned error with message %q, expected 'test error'", err.Error())
 	}
 }
 
@@ -283,9 +298,6 @@ func TestNew(t *testing.T) {
 	buf.Reset()
 	log.D.Ln("test message")
 	if !strings.Contains(buf.String(), "test message") {
-		t.Errorf(
-			"log.D.Ln() output %q does not contain 'test message'",
-			buf.String(),
-		)
+		t.Errorf("log.D.Ln() output %q does not contain 'test message'", buf.String())
 	}
 }

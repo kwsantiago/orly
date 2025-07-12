@@ -7,13 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"os"
 	"sort"
 
-	"golang.org/x/exp/constraints"
-
-	"orly.dev/chk"
-	"orly.dev/log"
 	"orly.dev/lol"
 	"orly.dev/tag"
 )
@@ -36,7 +34,7 @@ func New(fields ...*tag.T) (t *T) {
 }
 
 // NewWithCap creates a tags.T with space pre-allocated for a number of tag.T elements.
-func NewWithCap[V constraints.Integer](c V) (t *T) {
+func NewWithCap(c int) (t *T) {
 	return &T{element: make([]*tag.T, 0, c)}
 }
 

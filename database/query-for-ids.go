@@ -12,9 +12,9 @@ import (
 )
 
 // QueryForIds retrieves a list of IdPkTs based on the provided filter.
-// It supports filtering by ranges and tags but disallows filtering by IDs.
+// It supports filtering by ranges and tags but disallows filtering by Ids.
 // Results are sorted by timestamp in reverse chronological order.
-// Returns an error if the filter contains IDs or if any operation fails.
+// Returns an error if the filter contains Ids or if any operation fails.
 func (d *D) QueryForIds(c context.T, f *filter.F) (
 	idPkTs []store.IdPkTs, err error,
 ) {

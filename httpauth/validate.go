@@ -4,17 +4,16 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/log"
 	"strings"
 	"time"
 
-	"orly.dev/chk"
-	"orly.dev/errorf"
 	"orly.dev/event"
 	"orly.dev/ints"
 	"orly.dev/kind"
 	"orly.dev/tag"
-
-	"orly.dev/log"
 )
 
 var ErrMissingKey = fmt.Errorf(
@@ -29,7 +28,6 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 	pubkey []byte, err error,
 ) {
 	val := r.Header.Get(HeaderKey)
-	log.I.F(val)
 	if val == "" {
 		err = ErrMissingKey
 		valid = true
@@ -46,7 +44,6 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 	log.I.F("validating auth '%s'", val)
 	switch {
 	case strings.HasPrefix(val, NIP98Prefix):
-		log.T.F(val)
 		split := strings.Split(val, " ")
 		if len(split) == 1 {
 			err = errorf.E(
@@ -56,8 +53,7 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		}
 		if len(split) > 2 {
 			err = errorf.E(
-				"extraneous content after second field space separated: %s",
-				val,
+				"extraneous content after second field space separated: %s", val,
 			)
 			return
 		}
@@ -79,8 +75,7 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		if !ev.Kind.Equal(kind.HTTPAuth) {
 			err = errorf.E(
 				"invalid kind %d %s in nip-98 http auth event, require %d %s",
-				ev.Kind.K, ev.Kind.Name(), kind.HTTPAuth.K,
-				kind.HTTPAuth.Name(),
+				ev.Kind.K, ev.Kind.Name(), kind.HTTPAuth.K, kind.HTTPAuth.Name(),
 			)
 			return
 		}
@@ -180,15 +175,10 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 				return
 			}
 		}
-		log.T.F("%d %s", time.Now().Unix(), ev.Serialize())
 		if valid, err = ev.Verify(); chk.E(err) {
 			return
 		}
-		if valid {
-			log.I.F("event verified %0x", ev.Pubkey)
-		}
 		if !valid {
-			log.T.F("event not verified")
 			return
 		}
 		pubkey = ev.Pubkey

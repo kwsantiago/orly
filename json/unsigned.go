@@ -2,8 +2,8 @@ package json
 
 import (
 	"golang.org/x/exp/constraints"
-
 	"orly.dev/chk"
+
 	"orly.dev/ints"
 )
 

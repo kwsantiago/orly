@@ -33,6 +33,11 @@ type I interface {
 	Syncer
 	LogLeveler
 	EventIdSerialer
+	Initer
+}
+
+type Initer interface {
+	Init(path string) (err error)
 }
 
 type Pather interface {

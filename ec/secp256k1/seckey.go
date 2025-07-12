@@ -8,7 +8,6 @@ package secp256k1
 import (
 	"crypto/rand"
 	"io"
-
 	"orly.dev/chk"
 )
 

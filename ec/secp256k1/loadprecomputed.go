@@ -11,8 +11,6 @@ import (
 	"io"
 	"strings"
 	"sync"
-
-	"orly.dev/chk"
 )
 
 //go:generate go run genprecomps.go
@@ -52,11 +50,11 @@ var s256BytePoints = func() func() *bytePointTable {
 		// multiplication.
 		decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
 		r, err := zlib.NewReader(decoder)
-		if chk.E(err) {
+		if err != nil {
 			panic(err)
 		}
 		serialized, err := io.ReadAll(r)
-		if chk.E(err) {
+		if err != nil {
 			panic(err)
 		}
 		// Deserialize the precomputed byte points and set the memory table to

@@ -13,8 +13,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-
-	"orly.dev/chk"
 )
 
 var (
@@ -47,14 +45,14 @@ var b58 = [256]byte{`)
 
 func write(w io.Writer, b []byte) {
 	_, err := w.Write(b)
-	if chk.E(err) {
+	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func main() {
 	fi, err := os.Create("alphabet.go")
-	if chk.E(err) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer fi.Close()

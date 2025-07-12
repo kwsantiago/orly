@@ -3,15 +3,15 @@ package atag
 import (
 	"bytes"
 	"math"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"testing"
 
 	"lukechampine.com/frand"
 
-	"orly.dev/chk"
 	"orly.dev/ec/schnorr"
 	"orly.dev/hex"
 	"orly.dev/kind"
-	"orly.dev/log"
 )
 
 func TestT_Marshal_Unmarshal(t *testing.T) {

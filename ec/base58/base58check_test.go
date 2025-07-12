@@ -7,7 +7,6 @@ package base58_test
 import (
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/ec/base58"
 )
 
@@ -51,7 +50,7 @@ func TestBase58Check(t *testing.T) {
 		// test decoding
 		res, version, err := base58.CheckDecode(test.out)
 		switch {
-		case chk.E(err):
+		case err != nil:
 			t.Errorf("CheckDecode test #%d failed with err: %v", x, err)
 
 		case version != test.version:

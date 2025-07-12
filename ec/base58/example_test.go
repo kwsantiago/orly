@@ -7,7 +7,6 @@ package base58_test
 import (
 	"fmt"
 
-	"orly.dev/chk"
 	"orly.dev/ec/base58"
 )
 
@@ -43,7 +42,7 @@ func ExampleCheckDecode() {
 	// Decode an example Base58Check encoded data.
 	encoded := "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
 	decoded, version, err := base58.CheckDecode(encoded)
-	if chk.E(err) {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}

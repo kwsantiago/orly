@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
-
-	"orly.dev/chk"
 )
 
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the
@@ -231,24 +229,18 @@ func TestAddJacobian(t *testing.T) {
 		// Ensure the test data is using points that are actually on
 		// the curve (or the point at infinity).
 		if !p1.Z.IsZero() && !isJacobianOnS256Curve(&p1) {
-			t.Errorf(
-				"#%d first point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d first point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !p2.Z.IsZero() && !isJacobianOnS256Curve(&p2) {
-			t.Errorf(
-				"#%d second point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d second point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !want.Z.IsZero() && !isJacobianOnS256Curve(&want) {
-			t.Errorf(
-				"#%d expected point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d expected point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		// Add the two points.
@@ -257,11 +249,8 @@ func TestAddJacobian(t *testing.T) {
 
 		// Ensure result matches expected.
 		if !r.X.Equals(&want.X) || !r.Y.Equals(&want.Y) || !r.Z.Equals(&want.Z) {
-			t.Errorf(
-				"#%d wrong result\ngot: (%v, %v, %v)\n"+
-					"want: (%v, %v, %v)", i, r.X, r.Y, r.Z, want.X, want.Y,
-				want.Z,
-			)
+			t.Errorf("#%d wrong result\ngot: (%v, %v, %v)\n"+
+				"want: (%v, %v, %v)", i, r.X, r.Y, r.Z, want.X, want.Y, want.Z)
 			continue
 		}
 	}
@@ -334,24 +323,18 @@ func TestAddAffine(t *testing.T) {
 		// Ensure the test data is using points that are actually on
 		// the curve (or the point at infinity).
 		if !(x1.Sign() == 0 && y1.Sign() == 0) && !S256().IsOnCurve(x1, y1) {
-			t.Errorf(
-				"#%d first point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d first point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !(x2.Sign() == 0 && y2.Sign() == 0) && !S256().IsOnCurve(x2, y2) {
-			t.Errorf(
-				"#%d second point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d second point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !(x3.Sign() == 0 && y3.Sign() == 0) && !S256().IsOnCurve(x3, y3) {
-			t.Errorf(
-				"#%d expected point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d expected point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		// Add the two points.
@@ -359,10 +342,8 @@ func TestAddAffine(t *testing.T) {
 
 		// Ensure result matches expected.
 		if rx.Cmp(x3) != 00 || ry.Cmp(y3) != 0 {
-			t.Errorf(
-				"#%d wrong result\ngot: (%x, %x)\n"+
-					"want: (%x, %x)", i, rx, ry, x3, y3,
-			)
+			t.Errorf("#%d wrong result\ngot: (%x, %x)\n"+
+				"want: (%x, %x)", i, rx, ry, x3, y3)
 			continue
 		}
 	}
@@ -429,17 +410,13 @@ func TestDoubleJacobian(t *testing.T) {
 		// Ensure the test data is using points that are actually on
 		// the curve (or the point at infinity).
 		if !p1.Z.IsZero() && !isJacobianOnS256Curve(&p1) {
-			t.Errorf(
-				"#%d first point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d first point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !want.Z.IsZero() && !isJacobianOnS256Curve(&want) {
-			t.Errorf(
-				"#%d expected point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d expected point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		// Double the point.
@@ -447,11 +424,9 @@ func TestDoubleJacobian(t *testing.T) {
 		DoubleNonConst(&p1, &result)
 		// Ensure result matches expected.
 		if !isStrictlyEqual(&result, &want) {
-			t.Errorf(
-				"#%d wrong result\ngot: (%v, %v, %v)\n"+
-					"want: (%v, %v, %v)", i, result.X, result.Y, result.Z,
-				want.X, want.Y, want.Z,
-			)
+			t.Errorf("#%d wrong result\ngot: (%v, %v, %v)\n"+
+				"want: (%v, %v, %v)", i, result.X, result.Y, result.Z,
+				want.X, want.Y, want.Z)
 			continue
 		}
 	}
@@ -506,17 +481,13 @@ func TestDoubleAffine(t *testing.T) {
 		// Ensure the test data is using points that are actually on
 		// the curve (or the point at infinity).
 		if !(x1.Sign() == 0 && y1.Sign() == 0) && !S256().IsOnCurve(x1, y1) {
-			t.Errorf(
-				"#%d first point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d first point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		if !(x3.Sign() == 0 && y3.Sign() == 0) && !S256().IsOnCurve(x3, y3) {
-			t.Errorf(
-				"#%d expected point is not on the curve -- "+
-					"invalid test data", i,
-			)
+			t.Errorf("#%d expected point is not on the curve -- "+
+				"invalid test data", i)
 			continue
 		}
 		// Double the point.
@@ -524,10 +495,8 @@ func TestDoubleAffine(t *testing.T) {
 
 		// Ensure result matches expected.
 		if rx.Cmp(x3) != 00 || ry.Cmp(y3) != 0 {
-			t.Errorf(
-				"#%d wrong result\ngot: (%x, %x)\n"+
-					"want: (%x, %x)", i, rx, ry, x3, y3,
-			)
+			t.Errorf("#%d wrong result\ngot: (%x, %x)\n"+
+				"want: (%x, %x)", i, rx, ry, x3, y3)
 			continue
 		}
 	}
@@ -584,10 +553,8 @@ func TestBaseMult(t *testing.T) {
 		}
 		x, y := s256.ScalarBaseMult(k.Bytes())
 		if fmt.Sprintf("%X", x) != e.x || fmt.Sprintf("%X", y) != e.y {
-			t.Errorf(
-				"%d: bad output for k=%s: got (%X, %X), want (%s, %s)", i,
-				e.k, x, y, e.x, e.y,
-			)
+			t.Errorf("%d: bad output for k=%s: got (%X, %X), want (%s, %s)", i,
+				e.k, x, y, e.x, e.y)
 		}
 		if testing.Short() && i > 5 {
 			break
@@ -601,17 +568,15 @@ func TestBaseMultVerify(t *testing.T) {
 		for i := 0; i < 30; i++ {
 			data := make([]byte, bytes)
 			_, err := rand.Read(data)
-			if chk.E(err) {
+			if err != nil {
 				t.Errorf("failed to read random data for %d", i)
 				continue
 			}
 			x, y := s256.ScalarBaseMult(data)
 			xWant, yWant := s256.ScalarMult(s256.Gx, s256.Gy, data)
 			if x.Cmp(xWant) != 0 || y.Cmp(yWant) != 0 {
-				t.Errorf(
-					"%d: bad output for %X: got (%X, %X), want (%X, %X)",
-					i, data, x, y, xWant, yWant,
-				)
+				t.Errorf("%d: bad output for %X: got (%X, %X), want (%X, %X)",
+					i, data, x, y, xWant, yWant)
 			}
 			if testing.Short() && i > 2 {
 				break
@@ -654,10 +619,8 @@ func TestScalarMult(t *testing.T) {
 		yWant, _ := new(big.Int).SetString(test.ry, 16)
 		xGot, yGot := s256.ScalarMult(x, y, k.Bytes())
 		if xGot.Cmp(xWant) != 0 || yGot.Cmp(yWant) != 0 {
-			t.Fatalf(
-				"%d: bad output: got (%X, %X), want (%X, %X)", i, xGot,
-				yGot, xWant, yWant,
-			)
+			t.Fatalf("%d: bad output: got (%X, %X), want (%X, %X)", i, xGot,
+				yGot, xWant, yWant)
 		}
 	}
 }
@@ -675,7 +638,7 @@ func TestScalarMultRand(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		data := make([]byte, 32)
 		_, err := rand.Read(data)
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -683,10 +646,8 @@ func TestScalarMultRand(t *testing.T) {
 		exponent.Mul(exponent, new(big.Int).SetBytes(data))
 		xWant, yWant := s256.ScalarBaseMult(exponent.Bytes())
 		if x.Cmp(xWant) != 0 || y.Cmp(yWant) != 0 {
-			t.Fatalf(
-				"%d: bad output for %X: got (%X, %X), want (%X, %X)", i,
-				data, x, y, xWant, yWant,
-			)
+			t.Fatalf("%d: bad output for %X: got (%X, %X), want (%X, %X)", i,
+				data, x, y, xWant, yWant)
 			break
 		}
 	}
@@ -838,7 +799,7 @@ func TestSplitKRand(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		bytesK := make([]byte, 32)
 		_, err := rand.Read(bytesK)
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -863,7 +824,7 @@ func TestSplitKRand(t *testing.T) {
 
 func testKeyGeneration(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, err := NewSecretKey()
-	if chk.E(err) {
+	if err != nil {
 		t.Errorf("%s: error: %s", tag, err)
 		return
 	}
@@ -887,10 +848,8 @@ func checkNAFEncoding(pos, neg []byte, origValue *big.Int) error {
 		return fmt.Errorf("positive has leading zero -- got %x", pos)
 	}
 	if len(neg) > len(pos) {
-		return fmt.Errorf(
-			"negative has len %d > pos len %d", len(neg),
-			len(pos),
-		)
+		return fmt.Errorf("negative has len %d > pos len %d", len(neg),
+			len(pos))
 	}
 	// Ensure the result doesn't have any adjacent non-zero digits.
 	gotPos := new(big.Int).SetBytes(pos)
@@ -900,10 +859,8 @@ func checkNAFEncoding(pos, neg []byte, origValue *big.Int) error {
 	for bit := 1; bit < posOrNeg.BitLen(); bit++ {
 		thisBit := posOrNeg.Bit(bit)
 		if prevBit == 1 && thisBit == 1 {
-			return fmt.Errorf(
-				"adjacent non-zero digits found at bit pos %d",
-				bit-1,
-			)
+			return fmt.Errorf("adjacent non-zero digits found at bit pos %d",
+				bit-1)
 		}
 		prevBit = thisBit
 	}
@@ -911,10 +868,8 @@ func checkNAFEncoding(pos, neg []byte, origValue *big.Int) error {
 	// NAF representation sum back to the original value.
 	gotValue := new(big.Int).Sub(gotPos, gotNeg)
 	if origValue.Cmp(gotValue) != 0 {
-		return fmt.Errorf(
-			"pos-neg is not original value: got %x, want %x",
-			gotValue, origValue,
-		)
+		return fmt.Errorf("pos-neg is not original value: got %x, want %x",
+			gotValue, origValue)
 	}
 	return nil
 }

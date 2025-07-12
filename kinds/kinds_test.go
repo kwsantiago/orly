@@ -1,11 +1,11 @@
 package kinds
 
 import (
+	"orly.dev/chk"
 	"testing"
 
 	"lukechampine.com/frand"
 
-	"orly.dev/chk"
 	"orly.dev/kind"
 )
 

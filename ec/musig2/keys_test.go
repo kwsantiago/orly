@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"orly.dev/chk"
 
 	"orly.dev/ec"
 	"orly.dev/ec/schnorr"
@@ -93,7 +92,7 @@ func keysFromIndices(
 		inputKeys[i], err = btcec.ParsePubKey(
 			mustParseHex(pubKeys[keyIdx]),
 		)
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -175,7 +174,7 @@ func TestMuSig2KeyAggTestVectors(t *testing.T) {
 				)
 				// In this set of test cases, we should only get this
 				// for the very first vector.
-				if chk.E(err) {
+				if err != nil {
 					switch testCase.Comment {
 					case "Invalid public key":
 						require.ErrorIs(

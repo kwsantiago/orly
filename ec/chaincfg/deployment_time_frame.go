@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"orly.dev/chk"
 	"orly.dev/ec/wire"
 )
 
 var (
 	// ErrNoBlockClock is returned when an operation fails due to lack of
-	// synchronization with the current up-to-date block clock.
+	// synchornization with the current up to date block clock.
 	ErrNoBlockClock = fmt.Errorf("no block clock synchronized")
 )
 
@@ -89,7 +88,7 @@ func (m *MedianTimeDeploymentStarter) HasStarted(blkHeader *wire.BlockHeader) (
 		return true, nil
 	}
 	medianTime, err := m.blockClock.PastMedianTime(blkHeader)
-	if chk.E(err) {
+	if err != nil {
 		return false, err
 	}
 	// We check both after and equal here as after will fail for equivalent
@@ -130,7 +129,7 @@ func (m *MedianTimeDeploymentEnder) HasEnded(blkHeader *wire.BlockHeader) (
 		return false, nil
 	}
 	medianTime, err := m.blockClock.PastMedianTime(blkHeader)
-	if chk.E(err) {
+	if err != nil {
 		return false, err
 	}
 	// We check both after and equal here as after will fail for equivalent

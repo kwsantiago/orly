@@ -7,13 +7,13 @@ package schnorr
 
 import (
 	"errors"
+	"orly.dev/chk"
 	"strings"
 	"testing"
 	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
 
-	"orly.dev/chk"
 	"orly.dev/ec"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
@@ -192,7 +192,7 @@ var bip340TestVectors = []bip340Test{
 // the only way it can fail is if there is an error in the test source code.
 func decodeHex(hexStr string) []byte {
 	b, err := hex.Dec(hexStr)
-	if chk.E(err) {
+	if err != nil {
 		panic(
 			"invalid hex string in test source: err " + err.Error() +
 				", hex: " + hexStr,
@@ -218,7 +218,7 @@ func TestSchnorrSign(t *testing.T) {
 			signOpts = []SignOption{CustomNonce(auxBytes)}
 		}
 		sig, err := Sign(privKey, msg, signOpts...)
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("test #%v: sig generation failed: %v", i+1, err)
 		}
 		if strings.ToUpper(hex.Enc(sig.Serialize())) != test.signature {
@@ -229,10 +229,10 @@ func TestSchnorrSign(t *testing.T) {
 		}
 		pubKeyBytes := decodeHex(test.publicKey)
 		err = schnorrVerify(sig, msg, pubKeyBytes)
-		if chk.E(err) {
+		if err != nil {
 			t.Fail()
 		}
-		verify := !chk.E(err)
+		verify := err == nil
 		if test.verifyResult != verify {
 			t.Fatalf(
 				"test #%v: verification mismatch: "+
@@ -248,7 +248,7 @@ func TestSchnorrVerify(t *testing.T) {
 		pubKeyBytes := decodeHex(test.publicKey)
 		_, err := ParsePubKey(pubKeyBytes)
 		switch {
-		case !test.validPubKey && chk.E(err):
+		case !test.validPubKey && err != nil:
 			if !errors.Is(err, test.expectErr) {
 				t.Fatalf(
 					"test #%v: pubkey validation should "+
@@ -257,22 +257,22 @@ func TestSchnorrVerify(t *testing.T) {
 				)
 			}
 			continue
-		case chk.E(err):
+		case err != nil:
 			t.Fatalf("test #%v: unable to parse pubkey: %v", i, err)
 		}
 		msg := decodeHex(test.message)
 		sig, err := ParseSignature(decodeHex(test.signature))
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("unable to parse sig: %v", err)
 		}
 		err = schnorrVerify(sig, msg, pubKeyBytes)
-		if chk.E(err) && test.verifyResult {
+		if err != nil && test.verifyResult {
 			t.Fatalf(
 				"test #%v: verification shouldn't have failed: %v", i+1,
 				err,
 			)
 		}
-		verify := !chk.E(err)
+		verify := err == nil
 		if test.verifyResult != verify {
 			t.Fatalf(
 				"test #%v: verificaiton mismatch: expected "+
@@ -301,7 +301,7 @@ func TestSchnorrSignNoMutate(t *testing.T) {
 		privKey, _ := btcec.SecKeyFromBytes(privBytesCopy[:])
 		// Generate a signature for secret key with our message.
 		_, err := Sign(privKey, msg[:])
-		if chk.E(err) {
+		if err != nil {
 			t.Logf("unable to gen sig: %v", err)
 			return false
 		}

@@ -4,13 +4,13 @@ package authenvelope
 
 import (
 	"io"
-
 	"orly.dev/chk"
-	envs "orly.dev/envelopes"
 	"orly.dev/errorf"
-	"orly.dev/event"
-	"orly.dev/interfaces/codec"
 	"orly.dev/log"
+
+	"orly.dev/codec"
+	envs "orly.dev/envelopes"
+	"orly.dev/event"
 	"orly.dev/text"
 )
 
@@ -104,8 +104,6 @@ func NewResponse() *Response { return &Response{} }
 
 // NewResponseWith creates a new Response with a provided event.E.
 func NewResponseWith(event *event.E) *Response { return &Response{Event: event} }
-
-func (en *Response) Id() []byte { return en.Event.Id }
 
 // Label returns the label of a auth Response envelope.
 func (en *Response) Label() string { return L }

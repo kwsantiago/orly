@@ -7,7 +7,7 @@ package base58
 import (
 	"errors"
 
-	"github.com/minio/sha256-simd"
+	"orly.dev/sha256"
 )
 
 // ErrChecksum indicates that the checksum of a check-encoded string does not verify against

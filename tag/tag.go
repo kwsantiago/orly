@@ -5,11 +5,9 @@ package tag
 
 import (
 	"bytes"
-
-	"golang.org/x/exp/constraints"
-
 	"orly.dev/errorf"
 	"orly.dev/log"
+
 	"orly.dev/normalize"
 	"orly.dev/text"
 )
@@ -48,13 +46,7 @@ func New[V string | []byte](fields ...V) (t *T) {
 }
 
 // NewWithCap creates a new empty tag.T with a pre-allocated capacity for some number of fields.
-func NewWithCap[V constraints.Integer](c V) *T {
-	return &T{
-		make(
-			[]BS[[]byte], 0, c,
-		),
-	}
-}
+func NewWithCap(c int) *T { return &T{make([]BS[[]byte], 0, c)} }
 
 // S returns a field of a tag.T as a string.
 func (t *T) S(i int) (s string) {
@@ -196,17 +188,6 @@ func (t *T) Key() []byte {
 		return t.field[Key]
 	}
 	return nil
-}
-
-// KeyString returns the first element of the tags as a string.
-func (t *T) KeyString() string {
-	if t == nil {
-		return ""
-	}
-	if t.Len() > Key {
-		return string(t.field[Key])
-	}
-	return ""
 }
 
 // FilterKey returns the first element of a filter tag (the key) with the # removed

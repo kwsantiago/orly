@@ -5,12 +5,12 @@ package countenvelope
 import (
 	"bytes"
 	"io"
-
 	"orly.dev/chk"
-	"orly.dev/envelopes"
 	"orly.dev/errorf"
+
+	"orly.dev/codec"
+	"orly.dev/envelopes"
 	"orly.dev/filters"
-	"orly.dev/interfaces/codec"
 	"orly.dev/ints"
 	"orly.dev/subscription"
 	"orly.dev/text"

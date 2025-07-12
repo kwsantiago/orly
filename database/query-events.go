@@ -12,7 +12,7 @@ import (
 )
 
 // QueryEvents retrieves events based on the provided filter.
-// If the filter contains IDs, it fetches events by those IDs directly,
+// If the filter contains Ids, it fetches events by those Ids directly,
 // overriding other filter criteria. Otherwise, it queries by other filter
 // criteria and fetches matching events. Results are returned in reverse
 // chronological order of their creation timestamps.
@@ -62,7 +62,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					if bytes.Equal(
 						ev.Pubkey, e.Pubkey,
 					) && ev.Kind.K == e.Kind.K {
-						
+
 					}
 				}
 				// } else if ev.Kind.IsParameterizedReplaceable(){

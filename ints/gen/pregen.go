@@ -4,9 +4,8 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"orly.dev/chk"
+	"os"
 )
 
 func main() {

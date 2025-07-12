@@ -4,12 +4,12 @@ package eventid
 
 import (
 	"lukechampine.com/frand"
-
-	"github.com/minio/sha256-simd"
 	"orly.dev/chk"
 	"orly.dev/errorf"
-	"orly.dev/hex"
 	"orly.dev/log"
+
+	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 // T is the SHA256 hash in hexadecimal of the canonical form of an event as

@@ -3,18 +3,18 @@ package bech32encoding
 import (
 	"bytes"
 	"encoding/binary"
+	"orly.dev/chk"
+	"orly.dev/errorf"
+	"orly.dev/log"
 
-	"github.com/minio/sha256-simd"
 	"orly.dev/bech32encoding/pointers"
 	"orly.dev/bech32encoding/tlv"
-	"orly.dev/chk"
 	"orly.dev/ec/bech32"
 	"orly.dev/ec/schnorr"
-	"orly.dev/errorf"
 	"orly.dev/eventid"
 	"orly.dev/hex"
 	"orly.dev/kind"
-	"orly.dev/log"
+	"orly.dev/sha256"
 )
 
 var (
@@ -223,8 +223,6 @@ func EncodeEvent(
 	pubkey := make([]byte, schnorr.PubKeyBytesLen)
 	if _, err = hex.DecBytes(pubkey, author); len(pubkey) == 32 {
 		tlv.WriteEntry(buf, tlv.Author, pubkey)
-	} else if chk.E(err) {
-		return
 	}
 	var bits5 []byte
 	if bits5, err = bech32.ConvertBits(buf.Bytes(), 8, 5, true); chk.D(err) {

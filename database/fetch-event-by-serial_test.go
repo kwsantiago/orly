@@ -81,7 +81,7 @@ func TestFetchEventBySerial(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf("Failed to query for IDs: %v", err)
+		t.Fatalf("Failed to query for Ids: %v", err)
 	}
 
 	// Verify we got exactly one result
@@ -108,24 +108,32 @@ func TestFetchEventBySerial(t *testing.T) {
 
 	// Verify the fetched event has the same ID as the original event
 	if !bytes.Equal(fetchedEvent.Id, testEvent.Id) {
-		t.Fatalf("Fetched event ID doesn't match original event ID. Got %x, expected %x", 
-			fetchedEvent.Id, testEvent.Id)
+		t.Fatalf(
+			"Fetched event ID doesn't match original event ID. Got %x, expected %x",
+			fetchedEvent.Id, testEvent.Id,
+		)
 	}
 
 	// Verify other event properties match
 	if fetchedEvent.Kind.K != testEvent.Kind.K {
-		t.Fatalf("Fetched event kind doesn't match. Got %d, expected %d", 
-			fetchedEvent.Kind.K, testEvent.Kind.K)
+		t.Fatalf(
+			"Fetched event kind doesn't match. Got %d, expected %d",
+			fetchedEvent.Kind.K, testEvent.Kind.K,
+		)
 	}
 
 	if !bytes.Equal(fetchedEvent.Pubkey, testEvent.Pubkey) {
-		t.Fatalf("Fetched event pubkey doesn't match. Got %x, expected %x", 
-			fetchedEvent.Pubkey, testEvent.Pubkey)
+		t.Fatalf(
+			"Fetched event pubkey doesn't match. Got %x, expected %x",
+			fetchedEvent.Pubkey, testEvent.Pubkey,
+		)
 	}
 
 	if fetchedEvent.CreatedAt.V != testEvent.CreatedAt.V {
-		t.Fatalf("Fetched event created_at doesn't match. Got %d, expected %d", 
-			fetchedEvent.CreatedAt.V, testEvent.CreatedAt.V)
+		t.Fatalf(
+			"Fetched event created_at doesn't match. Got %d, expected %d",
+			fetchedEvent.CreatedAt.V, testEvent.CreatedAt.V,
+		)
 	}
 
 	// Test with a non-existent serial
@@ -143,6 +151,9 @@ func TestFetchEventBySerial(t *testing.T) {
 
 	// The fetched event should be nil
 	if fetchedEvent != nil {
-		t.Fatalf("Expected nil event for non-existent serial, but got: %v", fetchedEvent)
+		t.Fatalf(
+			"Expected nil event for non-existent serial, but got: %v",
+			fetchedEvent,
+		)
 	}
 }

@@ -5,11 +5,11 @@ package subscription
 
 import (
 	"crypto/rand"
-
 	"orly.dev/chk"
-	"orly.dev/ec/bech32"
 	"orly.dev/errorf"
 	"orly.dev/log"
+
+	"orly.dev/ec/bech32"
 	"orly.dev/text"
 )
 

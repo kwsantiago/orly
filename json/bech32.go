@@ -2,11 +2,11 @@ package json
 
 import (
 	"bytes"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 
 	"orly.dev/bech32encoding"
-	"orly.dev/chk"
 	"orly.dev/ec/bech32"
-	"orly.dev/errorf"
 	"orly.dev/text"
 )
 

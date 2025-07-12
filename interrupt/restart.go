@@ -3,12 +3,11 @@
 package interrupt
 
 import (
+	"orly.dev/log"
 	"os"
 	"syscall"
 
 	"github.com/kardianos/osext"
-
-	"orly.dev/log"
 )
 
 // Restart uses syscall.Exec to restart the process. MacOS and Windows are not implemented,

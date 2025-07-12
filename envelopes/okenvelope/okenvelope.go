@@ -1,19 +1,18 @@
 // Package okenvelope is a codec for the OK message, which is an acknowledgement
 // for an EVENT eventenvelope.Submission, containing true/false and if false a
-// message with a machine-readable error type as found in the 'messages'
-// package.
+// message with a machine readable error type as found in the messages package.
 package okenvelope
 
 import (
 	"io"
-
-	"github.com/minio/sha256-simd"
 	"orly.dev/chk"
-	"orly.dev/envelopes"
 	"orly.dev/errorf"
-	"orly.dev/eventid"
-	"orly.dev/interfaces/codec"
 	"orly.dev/log"
+
+	"orly.dev/codec"
+	"orly.dev/envelopes"
+	"orly.dev/eventid"
+	"orly.dev/sha256"
 	"orly.dev/text"
 )
 
@@ -57,9 +56,7 @@ func (en *T) ReasonString() string { return string(en.Reason) }
 
 // Write the okenvelope.T to a provided io.Writer.
 func (en *T) Write(w io.Writer) (err error) {
-	msg := en.Marshal(nil)
-	log.T.F("%s", msg)
-	_, err = w.Write(msg)
+	_, err = w.Write(en.Marshal(nil))
 	return
 }
 

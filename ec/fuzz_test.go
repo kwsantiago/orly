@@ -11,7 +11,6 @@ package btcec
 import (
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/hex"
 )
 
@@ -29,7 +28,7 @@ func FuzzParsePubKey(f *testing.F) {
 	}
 	for _, pubKey := range recoveryTestPubKeys {
 		seed, err := hex.Dec(pubKey)
-		if chk.E(err) {
+		if err != nil {
 			f.Fatal(err)
 		}
 		f.Add(seed)
@@ -38,10 +37,10 @@ func FuzzParsePubKey(f *testing.F) {
 	f.Fuzz(
 		func(t *testing.T, input []byte) {
 			key, err := ParsePubKey(input)
-			if key == nil && !chk.E(err) {
+			if key == nil && err == nil {
 				panic("key==nil && err==nil")
 			}
-			if key != nil && chk.E(err) {
+			if key != nil && err != nil {
 				panic("key!=nil yet err!=nil")
 			}
 		},

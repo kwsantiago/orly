@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"sort"
 
-	"orly.dev/chk"
 	"orly.dev/ec"
 	"orly.dev/ec/chainhash"
 	"orly.dev/ec/schnorr"
@@ -400,7 +399,7 @@ func AggregateKeys(
 			finalKeyJ, parityAcc, opts.tweaks[i-1].Tweak, tweakAcc,
 			opts.tweaks[i-1].IsXOnly,
 		)
-		if chk.E(err) {
+		if err != nil {
 			return nil, nil, nil, err
 		}
 	}

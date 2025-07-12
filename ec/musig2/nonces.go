@@ -8,8 +8,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-
 	"orly.dev/chk"
+
 	"orly.dev/ec"
 	"orly.dev/ec/chainhash"
 	"orly.dev/ec/schnorr"
@@ -244,12 +244,12 @@ func genNonceAuxBytes(
 	}
 	// Next, we'll write out: len(pk) || pk
 	err := writeBytesPrefix(&w, pubkey, uint8Writer)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	// Next, we'll write out: len(aggpk) || aggpk.
 	err = writeBytesPrefix(&w, opts.combinedKey, uint8Writer)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	switch {
@@ -269,13 +269,13 @@ func genNonceAuxBytes(
 			return nil, err
 		}
 		err = writeBytesPrefix(&w, opts.msg, uint64Writer)
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 	}
 	// Finally we'll write out the auxiliary input.
 	err = writeBytesPrefix(&w, opts.auxInput, uint32Writer)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	// Next we'll write out the interaction/index number which will
@@ -318,11 +318,11 @@ func GenNonces(options ...NonceGenOption) (*Nonces, error) {
 	// Using our randomness, pubkey and the set of optional params, generate our
 	// two secret nonces: k1 and k2.
 	k1, err := genNonceAuxBytes(randBytes[:], opts.publicKey, 0, opts)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	k2, err := genNonceAuxBytes(randBytes[:], opts.publicKey, 1, opts)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	var k1Mod, k2Mod btcec.ModNScalar
@@ -362,7 +362,7 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) (
 			// decode.
 			var nonceJ btcec.JacobianPoint
 			nonceJ, err := btcec.ParseJacobian(slicer(pubNonceBytes))
-			if chk.E(err) {
+			if err != nil {
 				return btcec.JacobianPoint{}, err
 			}
 			pubNonceJs[i] = &nonceJ
@@ -387,7 +387,7 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) (
 			return n[:btcec.PubKeyBytesLenCompressed]
 		},
 	)
-	if chk.E(err) {
+	if err != nil {
 		return finalNonce, err
 	}
 	combinedNonce2, err := combineNonces(
@@ -395,7 +395,7 @@ func AggregateNonces(pubNonces [][PubNonceSize]byte) (
 			return n[btcec.PubKeyBytesLenCompressed:]
 		},
 	)
-	if chk.E(err) {
+	if err != nil {
 		return finalNonce, err
 	}
 	copy(finalNonce[:], btcec.JacobianToByteSlice(combinedNonce1))

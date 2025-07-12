@@ -9,10 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 const (
@@ -125,11 +123,11 @@ func (hash *Hash) UnmarshalJSON(input []byte) error {
 	}
 	var sh string
 	err := json.Unmarshal(input, &sh)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	newHash, err := NewHashFromStr(sh)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	return hash.SetBytes(newHash[:])
@@ -140,7 +138,7 @@ func (hash *Hash) UnmarshalJSON(input []byte) error {
 func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	err := sh.SetBytes(newHash)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	return &sh, err
@@ -176,7 +174,7 @@ func TaggedHash(tag []byte, msgs ...[]byte) *Hash {
 func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
-	if chk.E(err) {
+	if err != nil {
 		return nil, err
 	}
 	return ret, nil
@@ -205,7 +203,7 @@ func Decode(dst *Hash, src string) error {
 		reversedHash[HashSize-hex.DecLen(len(srcBytes)):],
 		srcBytes,
 	)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	// Reverse copy from the temporary hash to destination.  Because the
@@ -221,7 +219,7 @@ func Decode(dst *Hash, src string) error {
 func decodeLegacy(dst *Hash, src []byte) error {
 	var hashBytes []byte
 	err := json.Unmarshal(src, &hashBytes)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	if len(hashBytes) != HashSize {

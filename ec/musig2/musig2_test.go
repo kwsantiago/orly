@@ -8,11 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-
 	"orly.dev/ec"
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 const (
@@ -21,7 +19,7 @@ const (
 
 func mustParseHex(str string) []byte {
 	b, err := hex.Dec(str)
-	if chk.E(err) {
+	if err != nil {
 		panic(fmt.Errorf("unable to parse hex: %v", err))
 	}
 	return b
@@ -80,7 +78,7 @@ func testMultiPartySign(
 	signSet := make([]*btcec.PublicKey, numSigners)
 	for i := 0; i < numSigners; i++ {
 		privKey, err := btcec.NewSecretKey()
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("unable to gen priv key: %v", err)
 		}
 		pubKey := privKey.PubKey()
@@ -106,17 +104,17 @@ func testMultiPartySign(
 		signCtx, err := NewContext(
 			signerKey, false, ctxOpts...,
 		)
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("unable to generate context: %v", err)
 		}
 		if combinedKey == nil {
 			combinedKey, err = signCtx.CombinedKey()
-			if chk.E(err) {
+			if err != nil {
 				t.Fatalf("combined key not available: %v", err)
 			}
 		}
 		session, err := signCtx.NewSession()
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("unable to generate new session: %v", err)
 		}
 		signers[i] = session
@@ -135,7 +133,7 @@ func testMultiPartySign(
 				}
 				nonce := otherCtx.PublicNonce()
 				haveAll, err := signer.RegisterPubNonce(nonce)
-				if chk.E(err) {
+				if err != nil {
 					t.Fatalf("unable to add public nonce")
 				}
 				if j == len(signers)-1 && !haveAll {
@@ -153,14 +151,14 @@ func testMultiPartySign(
 	for i := range signers {
 		signer := signers[i]
 		partialSig, err := signer.Sign(msg)
-		if chk.E(err) {
+		if err != nil {
 			t.Fatalf("unable to generate partial sig: %v", err)
 		}
 		// We don't need to combine the signature for the very first
 		// signer, as it already has that partial signature.
 		if i != 0 {
 			haveAll, err := combiner.CombineSig(partialSig)
-			if chk.E(err) {
+			if err != nil {
 				t.Fatalf("unable to combine sigs: %v", err)
 			}
 
@@ -248,11 +246,11 @@ func TestMuSigMultiParty(t *testing.T) {
 func TestMuSigEarlyNonce(t *testing.T) {
 	t.Parallel()
 	privKey1, err := btcec.NewSecretKey()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to gen priv key: %v", err)
 	}
 	privKey2, err := btcec.NewSecretKey()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to gen priv key: %v", err)
 	}
 	// If we try to make a context, with just the secret key and sorting
@@ -266,14 +264,14 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	ctx1, err := NewContext(
 		privKey1, true, WithNumSigners(numSigners), WithEarlyNonceGen(),
 	)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to make ctx: %v", err)
 	}
 	pubKey1 := ctx1.PubKey()
 	ctx2, err := NewContext(
 		privKey2, true, WithKnownSigners(signers), WithEarlyNonceGen(),
 	)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to make ctx: %v", err)
 	}
 	pubKey2 := ctx2.PubKey()
@@ -283,16 +281,16 @@ func TestMuSigEarlyNonce(t *testing.T) {
 		t.Fatalf("unepxected error: %v", err)
 	}
 	_, err = ctx2.CombinedKey()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to get combined key: %v", err)
 	}
 	// The early nonces _should_ be available at this point.
 	nonce1, err := ctx1.EarlySessionNonce()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("session nonce not available: %v", err)
 	}
 	nonce2, err := ctx2.EarlySessionNonce()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("session nonce not available: %v", err)
 	}
 	// The number of registered signers should still be 1 for both parties.
@@ -319,7 +317,7 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	}
 	// We'll now register the other signer for party 1.
 	done, err := ctx1.RegisterSigner(&pubKey2)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to register signer: %v", err)
 	}
 	if !done {
@@ -332,11 +330,11 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	}
 	// We should be able to create the session at this point.
 	session1, err := ctx1.NewSession()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to create new session: %v", err)
 	}
 	session2, err := ctx2.NewSession()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to create new session: %v", err)
 	}
 	msg := sha256.Sum256([]byte("let's get taprooty, LN style"))
@@ -349,14 +347,14 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	// Now we can exchange nonces to continue with the rest of the signing
 	// process as normal.
 	done, err = session1.RegisterPubNonce(nonce2.PubNonce)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to register nonce: %v", err)
 	}
 	if !done {
 		t.Fatalf("signer 1 doesn't have all nonces")
 	}
 	done, err = session2.RegisterPubNonce(nonce1.PubNonce)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to register nonce: %v", err)
 	}
 	if !done {
@@ -369,15 +367,15 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	}
 	// Sign the message and combine the two partial sigs into one.
 	_, err = session1.Sign(msg)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to gen sig: %v", err)
 	}
 	sig2, err := session2.Sign(msg)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to gen sig: %v", err)
 	}
 	done, err = session1.CombineSig(sig2)
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unable to combine sig: %v", err)
 	}
 	if !done {
@@ -390,7 +388,7 @@ func TestMuSigEarlyNonce(t *testing.T) {
 	}
 	// Finally, verify that the final signature is valid.
 	combinedKey, err := ctx1.CombinedKey()
-	if chk.E(err) {
+	if err != nil {
 		t.Fatalf("unexpected combined key error: %v", err)
 	}
 	finalSig := session1.FinalSig()

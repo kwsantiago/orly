@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"orly.dev/chk"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/ec/schnorr"
 	"orly.dev/ec/secp256k1"
 )

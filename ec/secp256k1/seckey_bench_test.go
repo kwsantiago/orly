@@ -6,8 +6,6 @@ package secp256k1
 
 import (
 	"testing"
-
-	"orly.dev/chk"
 )
 
 // BenchmarkSecretKeyGenerate benchmarks generating new cryptographically
@@ -17,7 +15,7 @@ func BenchmarkSecretKeyGenerate(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := GenerateSecretKey()
-		if chk.E(err) {
+		if err != nil {
 			b.Fatal(err)
 		}
 	}

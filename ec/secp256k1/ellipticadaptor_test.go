@@ -7,10 +7,9 @@ package secp256k1
 import (
 	"math/big"
 	"math/rand"
+	"orly.dev/chk"
 	"testing"
 	"time"
-
-	"orly.dev/chk"
 )
 
 // randBytes returns a byte slice of the required size created from a random

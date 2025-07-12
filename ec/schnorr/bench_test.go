@@ -9,12 +9,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-
 	"orly.dev/ec"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -23,7 +21,7 @@ import (
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -35,7 +33,7 @@ func hexToBytes(s string) []byte {
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *btcec.ModNScalar {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar btcec.ModNScalar
@@ -51,7 +49,7 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 // called with hard-coded values.
 func hexToFieldVal(s string) *btcec.FieldVal {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var f btcec.FieldVal
@@ -113,7 +111,7 @@ func BenchmarkSigVerify(b *testing.B) {
 	// Double sha256 of by{0x01, 0x02, 0x03, 0x04}
 	msgHash := sha256.Sum256([]byte("benchmark"))
 	sig, err := Sign(privKey, msgHash[:])
-	if chk.E(err) {
+	if err != nil {
 		b.Fatalf("unable to sign: %v", err)
 	}
 	if !sig.Verify(msgHash[:], pubKey) {

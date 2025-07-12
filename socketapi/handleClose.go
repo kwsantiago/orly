@@ -3,12 +3,14 @@ package socketapi
 import (
 	"orly.dev/chk"
 	"orly.dev/envelopes/closeenvelope"
-	"orly.dev/interfaces/server"
 	"orly.dev/log"
-	"orly.dev/publish"
+	"orly.dev/realy/interfaces"
 )
 
-func (a *A) HandleClose(req []byte, srv server.I) (note []byte) {
+func (a *A) HandleClose(
+	req []byte,
+	srv interfaces.Server,
+) (note []byte) {
 	var err error
 	var rem []byte
 	env := closeenvelope.New()
@@ -21,12 +23,13 @@ func (a *A) HandleClose(req []byte, srv server.I) (note []byte) {
 	if env.ID.String() == "" {
 		return []byte("CLOSE has no <id>")
 	}
-	publish.P.Receive(
+	srv.Publisher().Receive(
 		&W{
-			Cancel: true,
-			I:      a.Listener,
-			Id:     env.ID.String(),
+			Cancel:   true,
+			Listener: a.Listener,
+			Id:       env.ID.String(),
 		},
 	)
+	// srv.Publisher().removeSubscriberId(a.Listener, env.ID.String())
 	return
 }

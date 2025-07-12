@@ -625,6 +625,7 @@ func TestPubkeyTagFunctions(t *testing.T) {
 
 // TestTagFunctions tests the Tag-related functions
 func TestTagFunctions(t *testing.T) {
+	var err error
 	// Test TagVars
 	k, v, ca, ser := TagVars()
 	if k == nil || v == nil || ca == nil || ser == nil {
@@ -752,6 +753,7 @@ func TestKindFunctions(t *testing.T) {
 
 // TestKindTagFunctions tests the TagKind-related functions
 func TestKindTagFunctions(t *testing.T) {
+	var err error
 	// Test TagKindVars
 	k, v, ki, ca, ser := TagKindVars()
 	if ki == nil || k == nil || v == nil || ca == nil || ser == nil {

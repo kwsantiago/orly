@@ -3,8 +3,8 @@ package json
 import (
 	"bytes"
 	"fmt"
-
 	"orly.dev/chk"
+
 	"orly.dev/hex"
 )
 

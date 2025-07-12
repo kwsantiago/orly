@@ -2,17 +2,17 @@ package filter
 
 import (
 	"encoding/binary"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 	"sort"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
 	"orly.dev/ec/schnorr"
-	"orly.dev/errorf"
 	"orly.dev/event"
 	"orly.dev/hex"
 	"orly.dev/ints"
 	"orly.dev/kinds"
-	"orly.dev/pointers"
+	"orly.dev/realy/pointers"
+	"orly.dev/sha256"
 	"orly.dev/tag"
 	"orly.dev/tags"
 	"orly.dev/text"
@@ -253,7 +253,7 @@ func (f *S) Unmarshal(b []byte) (r []byte, err error) {
 					}
 					ff = append([][]byte{k}, ff...)
 					f.Tags = f.Tags.AppendTags(tag.New(ff...))
-					// s.Tags.E = append(s.Tags.E, tag.New(ff...))
+					// s.Tags.F = append(s.Tags.F, tag.New(ff...))
 				default:
 					// other types of tags can be anything
 					var ff [][]byte
@@ -262,7 +262,7 @@ func (f *S) Unmarshal(b []byte) (r []byte, err error) {
 					}
 					ff = append([][]byte{k}, ff...)
 					f.Tags = f.Tags.AppendTags(tag.New(ff...))
-					// s.Tags.E = append(s.Tags.E, tag.New(ff...))
+					// s.Tags.F = append(s.Tags.F, tag.New(ff...))
 				}
 				state = betweenKV
 			case Kinds[0]:
@@ -322,15 +322,15 @@ invalid:
 // Matches checks if a filter.S matches an event.
 func (f *S) Matches(ev *event.E) bool {
 	if ev == nil {
-		// log.E.ToSliceOfBytes("nil event")
+		// log.F.ToSliceOfBytes("nil event")
 		return false
 	}
 	if f.Kinds.Len() > 0 && !f.Kinds.Contains(ev.Kind) {
-		// log.E.ToSliceOfBytes("no matching kinds in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), s.ToObject().String())
+		// log.F.ToSliceOfBytes("no matching kinds in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), s.ToObject().String())
 		return false
 	}
 	if f.Authors.Len() > 0 && !f.Authors.Contains(ev.Pubkey) {
-		// log.E.ToSliceOfBytes("no matching authors in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), s.ToObject().String())
+		// log.F.ToSliceOfBytes("no matching authors in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), s.ToObject().String())
 		return false
 	}
 	if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {

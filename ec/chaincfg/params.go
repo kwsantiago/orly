@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"time"
 
-	"orly.dev/chk"
 	"orly.dev/ec/chainhash"
 	"orly.dev/ec/wire"
 )
@@ -480,7 +479,7 @@ var MainNetParams = Params{
 // hard-coded, and therefore known good, hashes.
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
-	if chk.E(err) {
+	if err != nil {
 		// Ordinarily I don't like panics in library code since it
 		// can take applications down without them having a chance to
 		// recover which is extremely annoying, however an exception is

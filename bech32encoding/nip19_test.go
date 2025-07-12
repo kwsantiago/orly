@@ -2,15 +2,15 @@ package bech32encoding
 
 import (
 	"bytes"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"reflect"
 	"testing"
 
 	"orly.dev/bech32encoding/pointers"
-	"orly.dev/chk"
 	"orly.dev/eventid"
 	"orly.dev/hex"
 	"orly.dev/kind"
-	"orly.dev/log"
 )
 
 func TestEncodeNpub(t *testing.T) {

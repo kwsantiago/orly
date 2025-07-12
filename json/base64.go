@@ -3,9 +3,9 @@ package json
 import (
 	"bytes"
 	"encoding/base64"
-
 	"orly.dev/chk"
 	"orly.dev/errorf"
+
 	"orly.dev/text"
 )
 

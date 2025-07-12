@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-
 	"orly.dev/chk"
+
 	"orly.dev/ec/bech32"
 	"orly.dev/ec/chaincfg"
 )

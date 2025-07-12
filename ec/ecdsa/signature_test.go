@@ -12,10 +12,10 @@ import (
 	"bytes"
 	"errors"
 	"math/rand"
+	"orly.dev/chk"
 	"testing"
 	"time"
 
-	"orly.dev/chk"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
 )
@@ -26,7 +26,7 @@ import (
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	return b
@@ -880,7 +880,7 @@ func TestSignatureIsEqual(t *testing.T) {
 // 			// or not the signature was for a compressed public key are the
 // 			// expected values.
 // 			gotPubKey, gotCompressed, err := RecoverCompact(gotSig, hash)
-// 			if chk.E(err) {
+// 			if err != nil {
 // 				t.Errorf("%s: unexpected error when recovering: %v", test.name,
 // 					err)
 // 				continue
@@ -1092,7 +1092,7 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 			gotSig := SignCompact(secKey, hash[:], compressed)
 
 			gotPubKey, gotCompressed, err := RecoverCompact(gotSig, hash[:])
-			if chk.E(err) {
+			if err != nil {
 				t.Fatalf(
 					"unexpected err: %v\nsig: %x\nhash: %x\nsecret key: %x",
 					err, gotSig, hash, secKey.Serialize(),
@@ -1120,7 +1120,7 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 			randBit := rng.Intn(7)
 			badSig[randByte] ^= 1 << randBit
 			badPubKey, _, err := RecoverCompact(badSig, hash[:])
-			if !chk.E(err) && badPubKey.IsEqual(wantPubKey) {
+			if err == nil && badPubKey.IsEqual(wantPubKey) {
 				t.Fatalf(
 					"recovered public key for bad sig: %x\nhash: %x\n"+
 						"secret key: %x", badSig, hash, secKey.Serialize(),
@@ -1135,7 +1135,7 @@ func TestSignAndRecoverCompactRandom(t *testing.T) {
 			randBit = rng.Intn(7)
 			badHash[randByte] ^= 1 << randBit
 			badPubKey, _, err = RecoverCompact(gotSig, badHash[:])
-			if !chk.E(err) && badPubKey.IsEqual(wantPubKey) {
+			if err == nil && badPubKey.IsEqual(wantPubKey) {
 				t.Fatalf(
 					"recovered public key for bad hash: %x\nsig: %x\n"+
 						"secret key: %x", badHash, gotSig, secKey.Serialize(),

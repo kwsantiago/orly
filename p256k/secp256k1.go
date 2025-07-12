@@ -4,14 +4,14 @@ package p256k
 
 import (
 	"crypto/rand"
-	"unsafe"
-
-	"github.com/minio/sha256-simd"
 	"orly.dev/chk"
-	"orly.dev/ec/schnorr"
-	"orly.dev/ec/secp256k1"
 	"orly.dev/errorf"
 	"orly.dev/log"
+	"unsafe"
+
+	"orly.dev/ec/schnorr"
+	"orly.dev/ec/secp256k1"
+	"orly.dev/sha256"
 )
 
 /*

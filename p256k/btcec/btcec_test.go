@@ -1,13 +1,16 @@
 package btcec_test
 
 import (
+	"bufio"
 	"bytes"
 	"testing"
 	"time"
 
-	"orly.dev/chk"
-	"orly.dev/log"
+	"orly.dev/ec/schnorr"
+	"orly.dev/event"
+	"orly.dev/event/examples"
 	"orly.dev/p256k/btcec"
+	"orly.dev/sha256"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -26,17 +29,96 @@ func TestSigner_Generate(t *testing.T) {
 }
 
 func TestBTCECSignerVerify(t *testing.T) {
+	evs := make([]*event.E, 0, 10000)
+	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	buf := make([]byte, 1_000_000)
+	scanner.Buffer(buf, len(buf))
+	var err error
+	signer := &btcec.Signer{}
+	for scanner.Scan() {
+		var valid bool
+		b := scanner.Bytes()
+		ev := event.New()
+		if _, err = ev.Unmarshal(b); chk.E(err) {
+			t.Errorf("failed to marshal\n%s", b)
+		} else {
+			if valid, err = ev.Verify(); chk.E(err) || !valid {
+				t.Errorf("invalid signature\n%s", b)
+				continue
+			}
+		}
+		id := ev.GetIDBytes()
+		if len(id) != sha256.Size {
+			t.Errorf("id should be 32 bytes, got %d", len(id))
+			continue
+		}
+		if err = signer.InitPub(ev.Pubkey); chk.E(err) {
+			t.Errorf("failed to init pub key: %s\n%0x", err, b)
+		}
+		if valid, err = signer.Verify(id, ev.Sig); chk.E(err) {
+			t.Errorf("failed to verify: %s\n%0x", err, b)
+		}
+		if !valid {
+			t.Errorf(
+				"invalid signature for pub %0x %0x %0x", ev.Pubkey, id,
+				ev.Sig,
+			)
+		}
+		evs = append(evs, ev)
+	}
 }
 
 func TestBTCECSignerSign(t *testing.T) {
+	evs := make([]*event.E, 0, 10000)
+	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	buf := make([]byte, 1_000_000)
+	scanner.Buffer(buf, len(buf))
+	var err error
+	signer := &btcec.Signer{}
+	var skb []byte
+	if err = signer.Generate(); chk.E(err) {
+		t.Fatal(err)
+	}
+	skb = signer.Sec()
+	if err = signer.InitSec(skb); chk.E(err) {
+		t.Fatal(err)
+	}
+	verifier := &btcec.Signer{}
+	pkb := signer.Pub()
+	if err = verifier.InitPub(pkb); chk.E(err) {
+		t.Fatal(err)
+	}
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		ev := event.New()
+		if _, err = ev.Unmarshal(b); chk.E(err) {
+			t.Errorf("failed to marshal\n%s", b)
+		}
+		evs = append(evs, ev)
+	}
+	var valid bool
+	sig := make([]byte, schnorr.SignatureSize)
+	for _, ev := range evs {
+		ev.Pubkey = pkb
+		id := ev.GetIDBytes()
+		if sig, err = signer.Sign(id); chk.E(err) {
+			t.Errorf("failed to sign: %s\n%0x", err, id)
+		}
+		if valid, err = verifier.Verify(id, sig); chk.E(err) {
+			t.Errorf("failed to verify: %s\n%0x", err, id)
+		}
+		if !valid {
+			t.Errorf("invalid signature")
+		}
+	}
+	signer.Zero()
 }
 
 func TestBTCECECDH(t *testing.T) {
 	n := time.Now()
 	var err error
 	var counter int
-	const total = 200
-	var count int
+	const total = 100
 	for _ = range total {
 		s1 := new(btcec.Signer)
 		if err = s1.Generate(); chk.E(err) {
@@ -62,16 +144,13 @@ func TestBTCECECDH(t *testing.T) {
 					secret2,
 				)
 			}
-			count++
 		}
 	}
 	a := time.Now()
 	duration := a.Sub(n)
 	log.I.Ln(
-		"errors", counter,
-		"total", count,
-		"time", duration,
-		"time/op", duration/time.Duration(count),
-		"ops/sec", int(time.Second)/int(duration/time.Duration(count)),
+		"errors", counter, "total", total, "time", duration, "time/op",
+		int(duration/total),
+		"ops/sec", int(time.Second)/int(duration/total),
 	)
 }

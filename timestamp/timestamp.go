@@ -4,13 +4,11 @@ package timestamp
 
 import (
 	"encoding/binary"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 	"time"
 	"unsafe"
 
-	"golang.org/x/exp/constraints"
-
-	"orly.dev/chk"
-	"orly.dev/errorf"
 	"orly.dev/ints"
 )
 
@@ -20,10 +18,10 @@ type T struct{ V int64 }
 
 // New creates a new timestamp.T, as zero or optionally from teh first variadic parameter as
 // int64.
-func New[V constraints.Integer](x ...V) (t *T) {
+func New(x ...int64) (t *T) {
 	t = &T{}
 	if len(x) > 0 {
-		t.V = int64(x[0])
+		t.V = x[0]
 	}
 	return
 }

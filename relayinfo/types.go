@@ -3,13 +3,13 @@ package relayinfo
 import (
 	"encoding/json"
 	"errors"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"os"
 	"sort"
 	"sync"
 
-	"orly.dev/chk"
 	"orly.dev/kinds"
-	"orly.dev/log"
 	"orly.dev/number"
 	"orly.dev/timestamp"
 )
@@ -66,7 +66,7 @@ var (
 		"Nostr Marketplace (for resilient marketplaces)", 15,
 	}
 	NIP15                          = NostrMarketplace
-	EventTreatment                 = NIP{"Event Treatment", 16}
+	EventTreatment                 = NIP{"EVent Treatment", 16}
 	NIP16                          = EventTreatment
 	Reposts                        = NIP{"Reposts", 18}
 	NIP18                          = Reposts

@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
 )
@@ -36,7 +35,7 @@ func setHex(hexString string) *FieldVal {
 // called with hard-coded values.
 func hexToFieldVal(s string) *FieldVal {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var f FieldVal
@@ -150,7 +149,7 @@ func BenchmarkScalarMult(b *testing.B) {
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *ModNScalar {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar ModNScalar

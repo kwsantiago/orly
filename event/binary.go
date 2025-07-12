@@ -59,7 +59,7 @@ func (ev *E) UnmarshalBinary(r io.Reader) (err error) {
 	if ca, err = varint.Decode(r); chk.E(err) {
 		return
 	}
-	ev.CreatedAt = timestamp.New(ca)
+	ev.CreatedAt = timestamp.New(int64(ca))
 	var k uint64
 	if k, err = varint.Decode(r); chk.E(err) {
 		return
@@ -69,13 +69,13 @@ func (ev *E) UnmarshalBinary(r io.Reader) (err error) {
 	if nTags, err = varint.Decode(r); chk.E(err) {
 		return
 	}
-	ev.Tags = tags.NewWithCap(nTags)
+	ev.Tags = tags.NewWithCap(int(nTags))
 	for range nTags {
 		var nField uint64
 		if nField, err = varint.Decode(r); chk.E(err) {
 			return
 		}
-		t := tag.NewWithCap(nField)
+		t := tag.NewWithCap(int(nField))
 		for range nField {
 			var lenField uint64
 			if lenField, err = varint.Decode(r); chk.E(err) {

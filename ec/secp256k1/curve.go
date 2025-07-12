@@ -8,7 +8,6 @@ package secp256k1
 import (
 	"math/bits"
 
-	"orly.dev/chk"
 	"orly.dev/hex"
 )
 
@@ -34,7 +33,7 @@ import (
 // called with hard-coded values.
 func hexToFieldVal(s string) *FieldVal {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var f FieldVal
@@ -58,7 +57,7 @@ func hexToModNScalar(s string) *ModNScalar {
 		s = "0" + s
 	}
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar ModNScalar

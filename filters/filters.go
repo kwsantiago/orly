@@ -34,7 +34,7 @@ func (f *T) Len() int { return len(f.F) }
 // New creates a new filters.T out of a variadic list of filter.F.
 func New(ff ...*filter.F) (f *T) { return &T{F: ff} }
 
-// Match checks if a set of filters.T matches on an event.E.
+// Match checks if a set of filters.T matches on an event.F.
 func (f *T) Match(event *event.E) bool {
 	for _, f := range f.F {
 		if f.Matches(event) {

@@ -5,8 +5,6 @@ package tlv
 
 import (
 	"io"
-
-	"orly.dev/chk"
 )
 
 const (
@@ -20,17 +18,17 @@ const (
 func ReadEntry(buf io.Reader) (typ uint8, value []byte) {
 	var err error
 	t := make([]byte, 1)
-	if _, err = buf.Read(t); chk.E(err) {
+	if _, err = buf.Read(t); err != nil {
 		return
 	}
 	typ = t[0]
 	l := make([]byte, 1)
-	if _, err = buf.Read(l); chk.E(err) {
+	if _, err = buf.Read(l); err != nil {
 		return
 	}
 	length := int(l[0])
 	value = make([]byte, length)
-	if _, err = buf.Read(value); chk.E(err) {
+	if _, err = buf.Read(value); err != nil {
 		// nil value signals end of data or error
 		value = nil
 	}

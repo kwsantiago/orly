@@ -8,7 +8,6 @@ package ecdsa
 import (
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
 )
@@ -19,7 +18,7 @@ import (
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *secp256k1.ModNScalar {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var scalar secp256k1.ModNScalar
@@ -35,7 +34,7 @@ func hexToModNScalar(s string) *secp256k1.ModNScalar {
 // called with hard-coded values.
 func hexToFieldVal(s string) *secp256k1.FieldVal {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	var f secp256k1.FieldVal
@@ -153,7 +152,7 @@ func BenchmarkRecoverCompact(b *testing.B) {
 	msgHash := hexToBytes("c301ba9de5d6053caad9f5eb46523f007702add2c62fa39de03146a36b8026b7")
 	// Ensure a valid compact signature is being benchmarked.
 	pubKey, wasCompressed, err := RecoverCompact(compactSig, msgHash)
-	if chk.E(err) {
+	if err != nil {
 		b.Fatalf("unexpected err: %v", err)
 	}
 	if !wasCompressed {

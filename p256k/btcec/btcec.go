@@ -14,6 +14,7 @@ import (
 type Signer struct {
 	SecretKey *secp256k1.SecretKey
 	PublicKey *secp256k1.PublicKey
+	BTCECSec  *ec.SecretKey
 	pkb, skb  []byte
 }
 
@@ -25,22 +26,14 @@ func (s *Signer) Generate() (err error) {
 		return
 	}
 	s.skb = s.SecretKey.Serialize()
+	s.BTCECSec, _ = ec.PrivKeyFromBytes(s.skb)
 	s.PublicKey = s.SecretKey.PubKey()
 	s.pkb = schnorr.SerializePubKey(s.PublicKey)
 	return
 }
 
-// GenerateForECDH creates a new Signer.
-func (s *Signer) GenerateForECDH() (err error) {
-	return s.Generate()
-}
-
-func (s *Signer) InitECDH() {
-	// noop because this isn't needed in this version
-}
-
 // InitSec initialises a Signer using raw secret key bytes.
-func (s *Signer) InitSec(sec []byte, _ ...bool) (err error) {
+func (s *Signer) InitSec(sec []byte) (err error) {
 	if len(sec) != secp256k1.SecKeyBytesLen {
 		err = errorf.E("sec key must be %d bytes", secp256k1.SecKeyBytesLen)
 		return
@@ -48,6 +41,7 @@ func (s *Signer) InitSec(sec []byte, _ ...bool) (err error) {
 	s.SecretKey = secp256k1.SecKeyFromBytes(sec)
 	s.PublicKey = s.SecretKey.PubKey()
 	s.pkb = schnorr.SerializePubKey(s.PublicKey)
+	s.BTCECSec, _ = ec.PrivKeyFromBytes(s.skb)
 	return
 }
 
@@ -112,7 +106,7 @@ func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
 	); chk.E(err) {
 		return
 	}
-	secret = ec.GenerateSharedSecret(s.SecretKey, pub)
+	secret = ec.GenerateSharedSecret(s.BTCECSec, pub)
 	return
 }
 

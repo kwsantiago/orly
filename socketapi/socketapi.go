@@ -1,107 +1,97 @@
 package socketapi
 
 import (
-	"github.com/fasthttp/websocket"
 	"net/http"
 	"orly.dev/chk"
-	"orly.dev/context"
-	"orly.dev/helpers"
-	"orly.dev/interfaces/server"
 	"orly.dev/log"
-	"orly.dev/servemux"
-	"orly.dev/units"
-	"orly.dev/ws"
 	"strings"
 	"time"
+
+	"github.com/fasthttp/websocket"
+
+	"orly.dev/context"
+	"orly.dev/realy/interfaces"
+	"orly.dev/units"
+	"orly.dev/ws"
 )
 
-type SocketParams struct {
-	WriteWait      time.Duration
-	PongWait       time.Duration
-	PingWait       time.Duration
-	MaxMessageSize int64
-}
-
-func DefaultSocketParams() *SocketParams {
-	return &SocketParams{
-		WriteWait:      10 * time.Second,
-		PongWait:       60 * time.Second,
-		PingWait:       30 * time.Second,
-		MaxMessageSize: 1 * units.Mb,
-	}
-}
+const (
+	DefaultWriteWait      = 10 * time.Second
+	DefaultPongWait       = 60 * time.Second
+	DefaultPingWait       = DefaultPongWait / 2
+	DefaultMaxMessageSize = 1 * units.Mb
+)
 
 type A struct {
 	Ctx context.T
-	server.I
-	// Web is an optional web server that appears on `/` with no Upgrade for
-	// websockets or Accept for application/nostr+json present.
-	Web http.Handler
-	*SocketParams
-	Listener *ws.Listener
+	*ws.Listener
+	interfaces.Server
+	// ClientsMu *sync.Mutex
+	// Clients   map[*websocket.Conn]struct{}
 }
 
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize: 1024, WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
+func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 
-func New(s server.I, path string, sm *servemux.S, socketParams *SocketParams) {
-	a := &A{I: s, SocketParams: socketParams}
-	sm.Handle(path, a)
-	return
-}
-
-// ServeHTTP handles incoming HTTP requests and processes them accordingly. It
-// serves the relayinfo for specific headers or delegates to a web handler. It
-// processes WebSocket upgrade requests when applicable.
-func (a *A) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	remote := helpers.GetRemoteFromReq(r)
-	if r.Header.Get("Upgrade") != "websocket" &&
-		r.Header.Get("Accept") == "application/nostr+json" {
-		log.T.F("serving relayinfo %s", remote)
-		a.I.HandleRelayInfo(w, r)
-		return
-	}
-	if r.Header.Get("Upgrade") != "websocket" {
-		if a.Web == nil {
-			a.I.HandleRelayInfo(w, r)
-		} else {
-			a.Web.ServeHTTP(w, r)
-		}
-		return
-	}
 	var err error
-	ticker := time.NewTicker(a.PingWait)
+
+	ticker := time.NewTicker(DefaultPingWait)
 	var cancel context.F
-	a.Ctx, cancel = context.Cancel(a.I.Context())
+	a.Ctx, cancel = context.Cancel(s.Context())
 	var conn *websocket.Conn
-	if conn, err = Upgrader.Upgrade(w, r, nil); err != nil {
-		log.E.F("%s failed to upgrade websocket: %v", remote, err)
+	conn, err = Upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.E.F("failed to upgrade websocket: %v", err)
 		return
 	}
-	log.T.F(
-		"upgraded to websocket %s (remote %s local %s)", remote,
-		conn.RemoteAddr(), conn.LocalAddr(),
-	)
-	a.Listener = ws.NewListener(conn, r)
-	conn.SetReadLimit(a.MaxMessageSize)
-	chk.E(conn.SetReadDeadline(time.Now().Add(a.PongWait)))
+	// a.ClientsMu.Lock()
+	// a.Clients[conn] = struct{}{}
+	// a.ClientsMu.Unlock()
+	a.Listener = GetListener(conn, r)
+
+	defer func() {
+		cancel()
+		ticker.Stop()
+		// a.ClientsMu.Lock()
+		// if _, ok := a.Clients[a.Listener.Conn]; ok {
+		a.Publisher().Receive(
+			&W{
+				Cancel:   true,
+				Listener: a.Listener,
+			},
+		)
+		// 	delete(a.Clients, a.Listener.Conn)
+		chk.E(a.Listener.Conn.Close())
+		// a.Publisher().removeSubscriber(a.Listener)
+		// }
+		// a.ClientsMu.Unlock()
+	}()
+	conn.SetReadLimit(DefaultMaxMessageSize)
+	chk.E(conn.SetReadDeadline(time.Now().Add(DefaultPongWait)))
 	conn.SetPongHandler(
 		func(string) error {
-			chk.E(conn.SetReadDeadline(time.Now().Add(a.PongWait)))
+			chk.E(conn.SetReadDeadline(time.Now().Add(DefaultPongWait)))
 			return nil
 		},
 	)
-	go a.Pinger(a.Ctx, ticker, cancel, remote)
+	// if a.Server.AuthRequired() {
+	//	a.Listener.RequestAuth()
+	// }
+	// if a.Listener.AuthRequested() && len(a.Listener.Authed()) == 0 {
+	//	log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+	//	if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).Write(a.Listener); chk.E(err) {
+	//		return
+	//	}
+	//	// return
+	// }
+	go a.Pinger(a.Ctx, ticker, cancel, a.Server)
 	var message []byte
 	var typ int
 	for {
 		select {
 		case <-a.Ctx.Done():
-			log.I.F("%s closing connection", remote)
+			a.Listener.Close()
+			return
+		case <-s.Context().Done():
 			a.Listener.Close()
 			return
 		default:
@@ -128,43 +118,12 @@ func (a *A) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if typ == websocket.PingMessage {
-			log.T.F("pinging %s", remote)
-			if _, err = a.Listener.Write(nil); chk.E(err) {
+			if err = a.Listener.WriteMessage(
+				websocket.PongMessage, nil,
+			); chk.E(err) {
 			}
 			continue
 		}
-		go a.HandleMessage(message, remote)
-	}
-
-}
-
-func (a *A) Pinger(
-	ctx context.T, ticker *time.Ticker, cancel context.F, remote string,
-) {
-	log.T.F("running pinger for %s", remote)
-	defer func() {
-		cancel()
-		ticker.Stop()
-		_ = a.Listener.Conn.Close()
-		log.T.F("stopped pinger for %s", remote)
-	}()
-	var err error
-	for {
-		select {
-		case <-ticker.C:
-			err = a.Listener.Conn.WriteControl(
-				websocket.PingMessage, nil,
-				time.Now().Add(a.PingWait),
-			)
-			if err != nil {
-				log.E.F(
-					"%s error writing ping: %v; closing websocket", remote, err,
-				)
-				return
-			}
-		case <-ctx.Done():
-			log.I.F("context done for %s", remote)
-			return
-		}
+		go a.HandleMessage(message)
 	}
 }

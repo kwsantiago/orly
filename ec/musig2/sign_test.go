@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"orly.dev/chk"
 
 	"orly.dev/ec"
 	"orly.dev/ec/secp256k1"
@@ -125,7 +124,7 @@ func TestMusig2SignVerify(t *testing.T) {
 				pubKeys, err := keysFromIndices(
 					t, testCase.Indices, testCases.PubKeys,
 				)
-				if chk.E(err) {
+				if err != nil {
 					require.ErrorIs(t, err, secp256k1.ErrPubKeyNotOnCurve)
 					return
 				}
@@ -182,7 +181,7 @@ func TestMusig2SignVerify(t *testing.T) {
 				err = partialSig.Decode(
 					bytes.NewReader(mustParseHex(testCase.Sig)),
 				)
-				if chk.E(err) && strings.Contains(
+				if err != nil && strings.Contains(
 					testCase.Comment, "group size",
 				) {
 					require.ErrorIs(t, err, ErrPartialSigInvalid)

@@ -9,10 +9,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-
 	"orly.dev/hex"
+	"orly.dev/sha256"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -21,7 +19,7 @@ import (
 // hard-coded values.
 func hexToBytes(s string) []byte {
 	b, err := hex.Dec(s)
-	if chk.E(err) {
+	if err != nil {
 		panic("invalid hex in source file: " + s)
 	}
 	return b

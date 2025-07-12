@@ -4,8 +4,8 @@ package schnorr
 
 import (
 	"fmt"
-
 	"orly.dev/chk"
+
 	"orly.dev/ec"
 	"orly.dev/ec/chainhash"
 	"orly.dev/ec/secp256k1"
@@ -143,7 +143,7 @@ func schnorrVerify(sig *Signature, hash []byte, pubKeyBytes []byte) error {
 	//
 	// Fail if P is not a point on the curve
 	pubKey, err := ParsePubKey(pubKeyBytes)
-	if chk.E(err) {
+	if err != nil {
 		return err
 	}
 	if !pubKey.IsOnCurve() {
@@ -482,7 +482,7 @@ func Sign(
 		}
 		sig, err := schnorrSign(&privKeyScalar, &kPrime, pub, hash, opts)
 		kPrime.Zero()
-		if chk.E(err) {
+		if err != nil {
 			return nil, err
 		}
 		return sig, nil
@@ -503,7 +503,7 @@ func Sign(
 		// Steps 10-15.
 		sig, err := schnorrSign(&privKeyScalar, k, pub, hash, opts)
 		k.Zero()
-		if chk.E(err) {
+		if err != nil {
 			// Try again with a new nonce.
 			continue
 		}

@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"orly.dev/chk"
 
 	"orly.dev/hex"
 )
@@ -61,7 +60,7 @@ func TestMusig2NonceGenTestVectors(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("test_case=%v", i), func(t *testing.T) {
 				nonce, err := GenNonces(withCustomOptions(customOpts))
-				if chk.E(err) {
+				if err != nil {
 					t.Fatalf("err gen nonce aux bytes %v", err)
 				}
 				expectedBytes, _ := hex.Dec(testCase.Expected)
@@ -143,7 +142,7 @@ func TestMusig2AggregateNoncesTestVectors(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("invalid_case=%v", i), func(t *testing.T) {
 				_, err := AggregateNonces(testNonces)
-				require.True(t, chk.E(err))
+				require.True(t, err != nil)
 				require.Equal(t, testCase.ExpectedErr, err.Error())
 			},
 		)

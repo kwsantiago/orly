@@ -4,8 +4,8 @@ package atag
 
 import (
 	"bytes"
-
 	"orly.dev/chk"
+
 	"orly.dev/hex"
 	"orly.dev/ints"
 	"orly.dev/kind"

@@ -5,7 +5,7 @@
 
 package chainhash
 
-import "github.com/minio/sha256-simd"
+import "orly.dev/sha256"
 
 // HashB calculates hash(b) and returns the resulting bytes.
 func HashB(b []byte) []byte {

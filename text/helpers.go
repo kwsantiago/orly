@@ -3,11 +3,11 @@ package text
 import (
 	"bytes"
 	"io"
+	"orly.dev/chk"
+	"orly.dev/errorf"
 
 	"github.com/templexxx/xhex"
 
-	"orly.dev/chk"
-	"orly.dev/errorf"
 	"orly.dev/hex"
 )
 

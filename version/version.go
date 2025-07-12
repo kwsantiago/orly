@@ -1,12 +1,12 @@
 package version
 
-import _ "embed"
+import (
+	_ "embed"
+)
 
 //go:embed version
 var V string
 
-var Name = "orly"
+var Description = "relay powered by the orly framework"
 
-var Description = "fast, simple nostr relay"
-
-var URL = "https://orly.dev"
+var URL = "https://orly"

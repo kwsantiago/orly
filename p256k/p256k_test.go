@@ -3,13 +3,15 @@
 package p256k_test
 
 import (
+	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"testing"
 	"time"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-	"orly.dev/log"
+	"orly.dev/ec/schnorr"
+	"orly.dev/event"
+	"orly.dev/event/examples"
 	"orly.dev/p256k"
 	realy "orly.dev/signer"
 )
@@ -30,43 +32,94 @@ func TestSigner_Generate(t *testing.T) {
 }
 
 func TestSignerVerify(t *testing.T) {
-	// Initialize a new signer
+	// evs := make([]*event.E, 0, 10000)
+	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	buf := make([]byte, 1_000_000)
+	scanner.Buffer(buf, len(buf))
+	var err error
 	signer := &p256k.Signer{}
-	err := signer.Generate()
-	if chk.E(err) {
-		t.Fatalf("Failed to generate signer key pair: %v", err)
+	for scanner.Scan() {
+		var valid bool
+		b := scanner.Bytes()
+		bc := make([]byte, 0, len(b))
+		bc = append(bc, b...)
+		ev := event.New()
+		if _, err = ev.Unmarshal(b); chk.E(err) {
+			t.Errorf("failed to marshal\n%s", b)
+		} else {
+			if valid, err = ev.Verify(); chk.T(err) || !valid {
+				t.Errorf("invalid signature\n%s", bc)
+				continue
+			}
+		}
+		id := ev.GetIDBytes()
+		if len(id) != sha256.Size {
+			t.Errorf("id should be 32 bytes, got %d", len(id))
+			continue
+		}
+		if err = signer.InitPub(ev.Pubkey); chk.T(err) {
+			t.Errorf("failed to init pub key: %s\n%0x", err, ev.Pubkey)
+			continue
+		}
+		if valid, err = signer.Verify(id, ev.Sig); chk.E(err) {
+			t.Errorf("failed to verify: %s\n%0x", err, ev.Id)
+			continue
+		}
+		if !valid {
+			t.Errorf(
+				"invalid signature for\npub %0x\neid %0x\nsig %0x\n%s",
+				ev.Pubkey, id, ev.Sig, bc,
+			)
+			continue
+		}
+		// fmt.Printf("%s\n", bc)
+		// evs = append(evs, ev)
 	}
+}
 
-	// Sample message to sign
-	message := sha256.Sum256([]byte("Hello, world!"))
-	// Sign the message
-	signature, err := signer.Sign(message[:])
-	if chk.E(err) {
-		t.Fatalf("Failed to sign message: %v", err)
+func TestSignerSign(t *testing.T) {
+	evs := make([]*event.E, 0, 10000)
+	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+	buf := make([]byte, 1_000_000)
+	scanner.Buffer(buf, len(buf))
+	var err error
+	signer := &p256k.Signer{}
+	var skb, pkb []byte
+	if skb, pkb, _, _, err = p256k.Generate(); chk.E(err) {
+		t.Fatal(err)
 	}
-
-	// Verify the signature
-	valid, err := signer.Verify(message[:], signature)
-	if chk.E(err) {
-		t.Fatalf("Error verifying signature: %v", err)
+	log.I.S(skb, pkb)
+	if err = signer.InitSec(skb); chk.E(err) {
+		t.Fatal(err)
 	}
-
-	// Check if the signature is valid
-	if !valid {
-		t.Error("Valid signature was rejected")
+	verifier := &p256k.Signer{}
+	if err = verifier.InitPub(pkb); chk.E(err) {
+		t.Fatal(err)
 	}
-
-	// Modify the message and verify again
-	tamperedMessage := sha256.Sum256([]byte("Hello, tampered world!"))
-	valid, err = signer.Verify(tamperedMessage[:], signature)
-	if !chk.E(err) {
-		t.Fatalf("Error verifying tampered message: %v", err)
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		ev := event.New()
+		if _, err = ev.Unmarshal(b); chk.E(err) {
+			t.Errorf("failed to marshal\n%s", b)
+		}
+		evs = append(evs, ev)
 	}
-
-	// Expect the verification to fail
-	if valid {
-		t.Error("Invalid signature was accepted")
+	var valid bool
+	sig := make([]byte, schnorr.SignatureSize)
+	for _, ev := range evs {
+		ev.Pubkey = pkb
+		id := ev.GetIDBytes()
+		if sig, err = signer.Sign(id); chk.E(err) {
+			t.Errorf("failed to sign: %s\n%0x", err, id)
+		}
+		if valid, err = verifier.Verify(id, sig); chk.E(err) {
+			t.Errorf("failed to verify: %s\n%0x", err, id)
+		}
+		if !valid {
+			t.Errorf("invalid signature")
+		}
 	}
+	signer.Zero()
 }
 
 func TestECDH(t *testing.T) {
@@ -74,14 +127,14 @@ func TestECDH(t *testing.T) {
 	var err error
 	var s1, s2 realy.I
 	var counter int
-	const total = 50
+	const total = 100
 	for _ = range total {
 		s1, s2 = &p256k.Signer{}, &p256k.Signer{}
-		if err = s1.GenerateForECDH(); chk.E(err) {
+		if err = s1.Generate(); chk.E(err) {
 			t.Fatal(err)
 		}
 		for _ = range total {
-			if err = s2.GenerateForECDH(); chk.E(err) {
+			if err = s2.Generate(); chk.E(err) {
 				t.Fatal(err)
 			}
 			var secret1, secret2 []byte

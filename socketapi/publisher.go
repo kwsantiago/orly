@@ -1,18 +1,16 @@
 package socketapi
 
 import (
-	"orly.dev/interfaces/listener"
-	"orly.dev/interfaces/typer"
+	"orly.dev/chk"
 	"orly.dev/log"
 	"regexp"
 	"sync"
 
-	"orly.dev/chk"
 	"orly.dev/envelopes/eventenvelope"
 	"orly.dev/event"
 	"orly.dev/filters"
-	"orly.dev/interfaces/publisher"
-	"orly.dev/publish"
+	"orly.dev/realy/publish/publisher"
+	"orly.dev/ws"
 )
 
 const Type = "socketapi"
@@ -22,14 +20,14 @@ var (
 )
 
 // Map is a map of filters associated with a collection of ws.Listener connections.
-type Map map[listener.I]map[string]*filters.T
+type Map map[*ws.Listener]map[string]*filters.T
 
 type W struct {
-	listener.I
+	*ws.Listener
 	// If Cancel is true, this is a close command.
 	Cancel bool
-	// Id is the subscription Id. If Cancel is true, cancel the named
-	// subscription, otherwise, cancel the publisher for the socket.
+	// Id is the subscription Id. If Cancel is true, cancel the named subscription, otherwise,
+	// cancel the publisher for the socket.
 	Id       string
 	Receiver event.C
 	Filters  *filters.T
@@ -38,7 +36,7 @@ type W struct {
 func (w *W) Type() string { return Type }
 
 type Close struct {
-	listener.I
+	*ws.Listener
 	Id string
 }
 
@@ -51,58 +49,77 @@ type S struct {
 
 var _ publisher.I = &S{}
 
-func init() {
-	publish.P.Register(NewPublisher())
-}
-
-func NewPublisher() *S { return &S{Map: make(Map)} }
+func New() *S { return &S{Map: make(Map)} }
 
 func (p *S) Type() string { return Type }
 
-func (p *S) Receive(msg typer.T) {
+func (p *S) Receive(msg publisher.Message) {
 	if m, ok := msg.(*W); ok {
 		if m.Cancel {
 			if m.Id == "" {
-				log.T.F("removing subscriber %s", m.I.Remote())
-				p.removeSubscriber(m.I)
+				p.removeSubscriber(m.Listener)
+				log.T.F("removed listener %s", m.Listener.RealRemote())
 			} else {
+				p.removeSubscriberId(m.Listener, m.Id)
 				log.T.F(
-					"removing subscription %s of %s",
-					m.Id, m.I.Remote(),
+					"removed subscription %s for %s", m.Id,
+					m.Listener.RealRemote(),
 				)
-				p.removeSubscriberId(m.I, m.Id)
 			}
 			return
 		}
 		p.Mx.Lock()
-		if subs, ok := p.Map[m.I]; !ok {
-			log.T.F(
-				"adding subscription %s for new subscriber %s\n%s", m.Id,
-				m.I.Remote(),
-				m.Filters.Marshal(nil),
-			)
+		if subs, ok := p.Map[m.Listener]; !ok {
 			subs = make(map[string]*filters.T)
 			subs[m.Id] = m.Filters
-			p.Map[m.I] = subs
-		} else {
+			// log.I.S(p.Map)
+			p.Map[m.Listener] = subs
 			log.T.F(
-				"adding subscription %s for subscriber %s", m.Id, m.I.Remote(),
+				"created new subscription for %s, %s", m.Listener.RealRemote(),
+				m.Filters.Marshal(nil),
 			)
+			// log.I.S(m.Listener, p.Map)
+		} else {
 			subs[m.Id] = m.Filters
+			log.T.F(
+				"added subscription %s for %s", m.Id, m.Listener.RealRemote(),
+			)
 		}
 		p.Mx.Unlock()
-
 	}
 }
 
 func (p *S) Deliver(ev *event.E) {
+	log.T.F("delivering event %0x to subscribers", ev.Id)
 	var err error
-	// p.Mx.Lock()
+	p.Mx.Lock()
 	for w, subs := range p.Map {
+		log.I.F("%v %s", subs, w.RealRemote())
 		for id, subscriber := range subs {
+			log.T.F(
+				"subscriber %s\n%s", w.RealRemote(), subscriber.Marshal(nil),
+			)
+			// if !publicReadable {
+			//	if authRequired && !w.IsAuthed() {
+			//		continue
+			//	}
+			// }
 			if !subscriber.Match(ev) {
 				continue
 			}
+			// if ev.Kind.IsPrivileged() {
+			//	ab := w.AuthedBytes()
+			//	var containsPubkey bool
+			//	if ev.Tags != nil {
+			//		containsPubkey = ev.Tags.ContainsAny([]byte{'p'}, tag.New(ab))
+			//	}
+			//	if !bytes.Equal(ev.Pubkey, ab) || containsPubkey {
+			//		if ab == nil {
+			//			continue
+			//		}
+			//		continue
+			//	}
+			// }
 			var res *eventenvelope.Result
 			if res, err = eventenvelope.NewResultWith(id, ev); chk.E(err) {
 				continue
@@ -110,17 +127,14 @@ func (p *S) Deliver(ev *event.E) {
 			if err = res.Write(w); chk.E(err) {
 				continue
 			}
-			log.T.F(
-				"sent event to subscriber %s for subscription %s\n%s",
-				w.Remote(), id, ev.Serialize(),
-			)
+			log.T.F("dispatched event %0x to subscription %s", ev.Id, id)
 		}
 	}
-	// p.Mx.Unlock()
+	p.Mx.Unlock()
 }
 
 // removeSubscriberId removes a specific subscription from a subscriber websocket.
-func (p *S) removeSubscriberId(ws listener.I, id string) {
+func (p *S) removeSubscriberId(ws *ws.Listener, id string) {
 	p.Mx.Lock()
 	var subs map[string]*filters.T
 	var ok bool
@@ -135,7 +149,7 @@ func (p *S) removeSubscriberId(ws listener.I, id string) {
 }
 
 // removeSubscriber removes a websocket from the S collection.
-func (p *S) removeSubscriber(ws listener.I) {
+func (p *S) removeSubscriber(ws *ws.Listener) {
 	p.Mx.Lock()
 	clear(p.Map[ws])
 	delete(p.Map, ws)

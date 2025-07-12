@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"orly.dev/chk"
 	"orly.dev/ec/base58"
 )
 
@@ -99,7 +98,7 @@ func TestBase58(t *testing.T) {
 	// Decode tests
 	for x, test := range hexTests {
 		b, err := hex.DecodeString(test.in)
-		if chk.E(err) {
+		if err != nil {
 			t.Errorf("hex.DecodeString failed failed #%d: got: %s", x, test.in)
 			continue
 		}

@@ -2,14 +2,14 @@ package bech32encoding
 
 import (
 	"bytes"
-
 	"orly.dev/chk"
+	"orly.dev/log"
+
 	btcec "orly.dev/ec"
 	"orly.dev/ec/bech32"
 	"orly.dev/ec/schnorr"
 	"orly.dev/ec/secp256k1"
 	"orly.dev/hex"
-	"orly.dev/log"
 )
 
 const (

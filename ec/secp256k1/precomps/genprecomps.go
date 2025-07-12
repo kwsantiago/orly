@@ -11,11 +11,11 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"os"
 
-	"orly.dev/chk"
 	"orly.dev/ec/secp256k1"
-	"orly.dev/log"
 )
 
 // curveParams houses the secp256k1 curve parameters for convenient access.
@@ -192,7 +192,7 @@ func endomorphismVectors(lambda *big.Int) (a1, b1, a2, b2 *big.Int) {
 }
 
 // deriveEndomorphismParams calculates and returns parameters needed to make use
-// of the secp256k1 endomorphism. TODO: this is unused
+// of the secp256k1 endomorphism.
 func deriveEndomorphismParams() [2]endomorphismParams {
 	// roots returns the solutions of the characteristic polynomial of the
 	// secp256k1 endomorphism.
@@ -321,12 +321,12 @@ func main() {
 	}
 	serialized := serializedBytePoints()
 	embedded, err := os.Create("secp256k1/rawbytepoints.bin")
-	if chk.E(err) {
+	if err != nil {
 		log.F.Ln(err)
 		os.Exit(1)
 	}
 	n, err := embedded.Write(serialized)
-	if chk.E(err) {
+	if err != nil {
 		panic(err)
 	}
 	if n != len(serialized) {

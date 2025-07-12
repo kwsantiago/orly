@@ -1,12 +1,12 @@
 package text
 
 import (
+	"orly.dev/chk"
 	"testing"
 
 	"lukechampine.com/frand"
 
-	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
+	"orly.dev/sha256"
 )
 
 func TestUnescapeByteString(t *testing.T) {

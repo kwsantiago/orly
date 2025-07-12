@@ -34,8 +34,10 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 
 		// If there are previous events, log that we're replacing one
 		if len(prevEvents) > 0 {
-			d.Logger.Infof("Saving new version of replaceable event kind %d from pubkey %s", 
-				ev.Kind.K, hex.Enc(ev.Pubkey))
+			d.Logger.Infof(
+				"Saving new version of replaceable event kind %d from pubkey %s",
+				ev.Kind.K, hex.Enc(ev.Pubkey),
+			)
 		}
 	}
 
@@ -89,6 +91,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 			return
 		},
 	)
-	// log.T.F("total data written: %d bytes keys %d bytes values", kc, vc)
+	// log.F.F("total data written: %d bytes keys %d bytes values", kc, vc)
 	return
 }

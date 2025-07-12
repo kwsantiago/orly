@@ -5,12 +5,13 @@ package interrupt
 
 import (
 	"fmt"
+	"orly.dev/log"
 	"os"
 	"os/signal"
 	"runtime"
 
-	"go.uber.org/atomic"
-	"orly.dev/log"
+	"orly.dev/atomic"
+	"orly.dev/qu"
 )
 
 // HandlerWithSource is an interrupt handling closure and the source location that it was sent
@@ -32,7 +33,7 @@ var (
 	signals = []os.Signal{os.Interrupt}
 
 	// ShutdownRequestChan is a channel that can receive shutdown requests
-	ShutdownRequestChan = make(chan struct{})
+	ShutdownRequestChan = qu.T()
 
 	// addHandlerChan is used to add an interrupt handler to the list of handlers to be invoked
 	// on SIGINT (Ctrl+C) signals.
@@ -40,7 +41,7 @@ var (
 
 	// HandlersDone is closed after all interrupt handlers run the first time an interrupt is
 	// signaled.
-	HandlersDone = make(chan struct{})
+	HandlersDone = make(qu.C)
 
 	interruptCallbacks       []func()
 	interruptCallbackSources []string
@@ -60,7 +61,7 @@ func Listener() {
 			interruptCallbacks[idx]()
 		}
 		log.D.Ln("interrupt handlers finished")
-		close(HandlersDone)
+		HandlersDone.Q()
 		if RestartRequested {
 			Restart()
 		}
@@ -74,7 +75,7 @@ out:
 			invokeCallbacks()
 			break out
 
-		case <-ShutdownRequestChan:
+		case <-ShutdownRequestChan.Wait():
 			log.W.Ln("received shutdown request - shutting down...")
 			requested.Store(true)
 			invokeCallbacks()
@@ -87,7 +88,7 @@ out:
 				handler.Source,
 			)
 
-		case <-HandlersDone:
+		case <-HandlersDone.Wait():
 			break out
 		}
 	}
@@ -118,7 +119,7 @@ func Request() {
 		return
 	}
 	requested.Store(true)
-	close(ShutdownRequestChan)
+	ShutdownRequestChan.Q()
 	var ok bool
 	select {
 	case _, ok = <-ShutdownRequestChan:

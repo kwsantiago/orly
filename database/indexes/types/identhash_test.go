@@ -10,6 +10,7 @@ import (
 )
 
 func TestFromIdent(t *testing.T) {
+	var err error
 	// Create a test identity
 	testIdent := []byte("test-identity")
 
@@ -34,6 +35,7 @@ func TestFromIdent(t *testing.T) {
 }
 
 func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
+	var err error
 	// Create a Ident with a known value
 	i1 := &Ident{}
 	testIdent := []byte("test-identity")
@@ -68,6 +70,7 @@ func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
 }
 
 func TestIdent_UnmarshalReadWithCorruptedData(t *testing.T) {
+	var err error
 	// Create a Ident with a known value
 	i1 := &Ident{}
 	testIdent1 := []byte("test-identity-1")

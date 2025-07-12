@@ -4,11 +4,11 @@
 package kind
 
 import (
+	"orly.dev/chk"
 	"sync"
 
 	"golang.org/x/exp/constraints"
 
-	"orly.dev/chk"
 	"orly.dev/ints"
 )
 

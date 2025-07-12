@@ -6,7 +6,6 @@ package btcec
 import (
 	"fmt"
 
-	"orly.dev/chk"
 	"orly.dev/ec/secp256k1"
 )
 
@@ -84,7 +83,7 @@ func ParseJacobian(point []byte) (JacobianPoint, error) {
 		return infinityPoint, nil
 	}
 	noncePk, err := secp256k1.ParsePubKey(point)
-	if chk.E(err) {
+	if err != nil {
 		return JacobianPoint{}, err
 	}
 	noncePk.AsJacobian(&result)

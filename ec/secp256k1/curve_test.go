@@ -10,10 +10,9 @@ import (
 	"math/big"
 	"math/bits"
 	"math/rand"
+	"orly.dev/chk"
 	"testing"
 	"time"
-
-	"orly.dev/chk"
 )
 
 var (

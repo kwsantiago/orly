@@ -4,13 +4,13 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/url"
+	"orly.dev/chk"
+	"orly.dev/log"
 	"strings"
 	"time"
 
-	"orly.dev/chk"
 	"orly.dev/event"
 	"orly.dev/kind"
-	"orly.dev/log"
 	"orly.dev/tag"
 	"orly.dev/tags"
 	"orly.dev/timestamp"
@@ -26,7 +26,7 @@ func GenerateChallenge() (b []byte) {
 }
 
 // CreateUnsigned creates an event which should be sent via an "AUTH" command.
-// If the authentication succeeds, the user will be authenticated as pubkey.
+// If the authentication succeeds, the user will be authenticated as a pubkey.
 func CreateUnsigned(pubkey, challenge []byte, relayURL string) (ev *event.E) {
 	return &event.E{
 		Pubkey:    pubkey,
@@ -41,13 +41,19 @@ func CreateUnsigned(pubkey, challenge []byte, relayURL string) (ev *event.E) {
 
 // helper function for ValidateAuthEvent.
 func parseURL(input string) (*url.URL, error) {
-	return url.Parse(strings.ToLower(strings.TrimSuffix(input, "/")))
+	return url.Parse(
+		strings.ToLower(
+			strings.TrimSuffix(input, "/"),
+		),
+	)
 }
 
 var (
-	// ChallengeTag is the tag for the challenge in a NIP-42 auth event (prevents relay attacks).
+	// ChallengeTag is the tag for the challenge in a NIP-42 auth event
+	// (prevents relay attacks).
 	ChallengeTag = []byte("challenge")
-	// RelayTag is is the relay tag for a NIP-42 auth event (prevents cross-server attacks).
+	// RelayTag is the relay tag for a NIP-42 auth event (prevents cross-server
+	// attacks).
 	RelayTag = []byte("relay")
 )
 

@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"orly.dev/chk"
 	"reflect"
 	"testing"
 	"time"
 
-	"orly.dev/chk"
 	"orly.dev/hex"
 )
 
