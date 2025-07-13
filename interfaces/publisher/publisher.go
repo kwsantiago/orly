@@ -1,7 +1,7 @@
 package publisher
 
 import (
-	"orly.dev/event"
+	"orly.dev/encoders/event"
 	"orly.dev/interfaces/typer"
 )
 

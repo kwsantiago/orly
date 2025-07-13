@@ -3,8 +3,7 @@ package types
 import (
 	"errors"
 	"io"
-
-	"orly.dev/chk"
+	"orly.dev/utils/chk"
 )
 
 // MaxUint24 is the maximum value of a 24-bit unsigned integer: 2^24 - 1.

@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"sync"
 
-	"orly.dev/context"
-	"orly.dev/event"
-	"orly.dev/filter"
-	"orly.dev/filters"
+	"orly.dev/app/config"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/filters"
 	"orly.dev/interfaces/store"
-	"orly.dev/realy/config"
+	"orly.dev/utils/context"
 )
 
 type List map[string]struct{}

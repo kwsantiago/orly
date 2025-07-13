@@ -2,11 +2,11 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
 )
 
 func TestFromIdent(t *testing.T) {

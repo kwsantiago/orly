@@ -1,0 +1,51 @@
+package openapi
+
+import (
+	"net/http"
+	"orly.dev/app/realy/helpers"
+	"time"
+
+	"github.com/danielgtaylor/huma/v2"
+
+	"orly.dev/utils/context"
+)
+
+type ShutdownInput struct {
+	Auth string `header:"Authorization" doc:"nostr nip-98 (and expiring variant)" required:"true"`
+}
+
+type ShutdownOutput struct{}
+
+func (x *Operations) RegisterShutdown(api huma.API) {
+	name := "Shutdown"
+	description := "Shutdown relay"
+	path := "/shutdown"
+	scopes := []string{"admin"}
+	method := http.MethodGet
+	huma.Register(
+		api, huma.Operation{
+			OperationID:   name,
+			Summary:       name,
+			Path:          path,
+			Method:        method,
+			Tags:          []string{"admin"},
+			Description:   helpers.GenerateDescription(description, scopes),
+			Security:      []map[string][]string{{"auth": scopes}},
+			DefaultStatus: 204,
+		}, func(ctx context.T, input *ShutdownInput) (
+			wgh *ShutdownOutput, err error,
+		) {
+			// r := ctx.Value("http-request").(*http.Request)
+			// authed, _ := x.AdminAuth(r)
+			// if !authed {
+			//	err = huma.Error401Unauthorized("authorization required")
+			//	return
+			// }
+			go func() {
+				time.Sleep(time.Second)
+				x.Shutdown()
+			}()
+			return
+		},
+	)
+}

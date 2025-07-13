@@ -8,19 +8,19 @@ import (
 	"github.com/pkg/profile"
 	"net/http"
 	_ "net/http/pprof"
-	"orly.dev/chk"
-	"orly.dev/log"
+	"orly.dev/app/realy"
+	"orly.dev/app/realy/options"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/interrupt"
+	"orly.dev/utils/log"
 	realy_lol "orly.dev/version"
 	"os"
 
 	"orly.dev/app"
-	"orly.dev/context"
+	"orly.dev/app/config"
 	"orly.dev/database"
-	"orly.dev/interrupt"
-	"orly.dev/lol"
-	"orly.dev/realy"
-	"orly.dev/realy/config"
-	"orly.dev/realy/options"
+	"orly.dev/utils/context"
+	"orly.dev/utils/lol"
 )
 
 func main() {

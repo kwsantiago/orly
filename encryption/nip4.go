@@ -5,14 +5,14 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
-	"orly.dev/chk"
-	"orly.dev/errorf"
+	"orly.dev/crypto/p256k"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/errorf"
 	"strings"
 
 	"lukechampine.com/frand"
 
-	"orly.dev/hex"
-	"orly.dev/p256k"
+	"orly.dev/encoders/hex"
 )
 
 // ComputeSharedSecret returns a shared secret key used to encrypt messages. The private and public keys should be hex

@@ -3,13 +3,13 @@ package database
 import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
-	"orly.dev/chk"
-	"orly.dev/context"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
-	"orly.dev/event"
-	"orly.dev/filter"
-	"orly.dev/hex"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/hex"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.

@@ -3,12 +3,12 @@ package types
 import (
 	"bytes"
 	"encoding/base64"
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-	"orly.dev/hex"
+	"orly.dev/encoders/hex"
 )
 
 func TestFromIdHash(t *testing.T) {

@@ -3,11 +3,11 @@ package database
 import (
 	"bytes"
 	"math"
-	"orly.dev/chk"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
-	"orly.dev/filter"
-	"orly.dev/log"
+	"orly.dev/encoders/filter"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/log"
 	"sort"
 )
 

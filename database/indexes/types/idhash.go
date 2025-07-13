@@ -3,12 +3,12 @@ package types
 import (
 	"encoding/base64"
 	"io"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/errorf"
 
 	"github.com/minio/sha256-simd"
 
-	"orly.dev/chk"
-	"orly.dev/errorf"
-	"orly.dev/hex"
+	"orly.dev/encoders/hex"
 )
 
 const IdHashLen = 8

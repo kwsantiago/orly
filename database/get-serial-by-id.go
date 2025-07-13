@@ -3,9 +3,9 @@ package database
 import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
-	"orly.dev/chk"
 	"orly.dev/database/indexes/types"
-	"orly.dev/log"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/log"
 )
 
 func (d *D) GetSerialById(idx []byte) (ser *types.Uint40, err error) {

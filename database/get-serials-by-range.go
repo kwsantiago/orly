@@ -3,8 +3,8 @@ package database
 import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
-	"orly.dev/chk"
 	"orly.dev/database/indexes/types"
+	"orly.dev/utils/chk"
 )
 
 func (d *D) GetSerialsByRange(idx Range) (

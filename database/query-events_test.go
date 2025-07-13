@@ -4,17 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"orly.dev/chk"
-	"orly.dev/context"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/hex"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/kinds"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/tags"
+	"orly.dev/encoders/timestamp"
 	"orly.dev/event/examples"
-	"orly.dev/filter"
-	"orly.dev/hex"
-	"orly.dev/kind"
-	"orly.dev/kinds"
-	"orly.dev/tag"
-	"orly.dev/tags"
-	"orly.dev/timestamp"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 	"os"
 	"testing"
 )
@@ -94,7 +94,10 @@ func TestQueryEvents(t *testing.T) {
 
 	// Verify it's the correct event
 	if !bytes.Equal(evs[0].Id, testEvent.Id) {
-		t.Fatalf("Event ID doesn't match. Got %x, expected %x", evs[0].Id, testEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match. Got %x, expected %x", evs[0].Id,
+			testEvent.Id,
+		)
 	}
 
 	// Test querying by kind
@@ -118,7 +121,10 @@ func TestQueryEvents(t *testing.T) {
 	// Verify all events have the correct kind
 	for i, ev := range evs {
 		if ev.Kind.K != testKind.K {
-			t.Fatalf("Event %d has incorrect kind. Got %d, expected %d", i, ev.Kind.K, testKind.K)
+			t.Fatalf(
+				"Event %d has incorrect kind. Got %d, expected %d", i,
+				ev.Kind.K, testKind.K,
+			)
 		}
 	}
 
@@ -142,8 +148,10 @@ func TestQueryEvents(t *testing.T) {
 	// Verify all events have the correct author
 	for i, ev := range evs {
 		if !bytes.Equal(ev.Pubkey, events[1].Pubkey) {
-			t.Fatalf("Event %d has incorrect author. Got %x, expected %x", 
-				i, ev.Pubkey, events[1].Pubkey)
+			t.Fatalf(
+				"Event %d has incorrect author. Got %x, expected %x",
+				i, ev.Pubkey, events[1].Pubkey,
+			)
 		}
 	}
 
@@ -164,7 +172,7 @@ func TestQueryEvents(t *testing.T) {
 
 	// Create a newer version of the replaceable event
 	newerEvent := event.New()
-	newerEvent.Kind = kind.ProfileMetadata // Same kind
+	newerEvent.Kind = kind.ProfileMetadata      // Same kind
 	newerEvent.Pubkey = replaceableEvent.Pubkey // Same pubkey
 	newerEvent.CreatedAt = new(timestamp.T)
 	newerEvent.CreatedAt.V = timestamp.Now().V - 3600 // 1 hour ago (newer than the original)
@@ -188,13 +196,18 @@ func TestQueryEvents(t *testing.T) {
 
 	// Verify we got exactly one event
 	if len(evs) != 1 {
-		t.Fatalf("Expected 1 event when querying for replaced event by ID, got %d", len(evs))
+		t.Fatalf(
+			"Expected 1 event when querying for replaced event by ID, got %d",
+			len(evs),
+		)
 	}
 
 	// Verify it's the original event
 	if !bytes.Equal(evs[0].Id, replaceableEvent.Id) {
-		t.Fatalf("Event ID doesn't match when querying for replaced event. Got %x, expected %x", 
-			evs[0].Id, replaceableEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match when querying for replaced event. Got %x, expected %x",
+			evs[0].Id, replaceableEvent.Id,
+		)
 	}
 
 	// Query for all events of this kind and pubkey
@@ -203,7 +216,7 @@ func TestQueryEvents(t *testing.T) {
 
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
-			Kinds: kindFilter,
+			Kinds:   kindFilter,
 			Authors: authorFilter,
 		},
 	)
@@ -213,19 +226,24 @@ func TestQueryEvents(t *testing.T) {
 
 	// Verify we got only one event (the latest one)
 	if len(evs) != 1 {
-		t.Fatalf("Expected 1 event when querying for replaceable events, got %d", len(evs))
+		t.Fatalf(
+			"Expected 1 event when querying for replaceable events, got %d",
+			len(evs),
+		)
 	}
 
 	// Verify it's the newer event
 	if !bytes.Equal(evs[0].Id, newerEvent.Id) {
-		t.Fatalf("Event ID doesn't match when querying for replaceable events. Got %x, expected %x", 
-			evs[0].Id, newerEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match when querying for replaceable events. Got %x, expected %x",
+			evs[0].Id, newerEvent.Id,
+		)
 	}
 
 	// Test deletion events
 	// Create a deletion event that references the replaceable event
 	deletionEvent := event.New()
-	deletionEvent.Kind = kind.Deletion // Kind 5 is deletion
+	deletionEvent.Kind = kind.Deletion             // Kind 5 is deletion
 	deletionEvent.Pubkey = replaceableEvent.Pubkey // Same pubkey as the event being deleted
 	deletionEvent.CreatedAt = new(timestamp.T)
 	deletionEvent.CreatedAt.V = timestamp.Now().V // Current time
@@ -245,23 +263,30 @@ func TestQueryEvents(t *testing.T) {
 	// Query for all events of this kind and pubkey again
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
-			Kinds: kindFilter,
+			Kinds:   kindFilter,
 			Authors: authorFilter,
 		},
 	)
 	if err != nil {
-		t.Fatalf("Failed to query for replaceable events after deletion: %v", err)
+		t.Fatalf(
+			"Failed to query for replaceable events after deletion: %v", err,
+		)
 	}
 
 	// Verify we still get the newer event (deletion should only affect the original event)
 	if len(evs) != 1 {
-		t.Fatalf("Expected 1 event when querying for replaceable events after deletion, got %d", len(evs))
+		t.Fatalf(
+			"Expected 1 event when querying for replaceable events after deletion, got %d",
+			len(evs),
+		)
 	}
 
 	// Verify it's still the newer event
 	if !bytes.Equal(evs[0].Id, newerEvent.Id) {
-		t.Fatalf("Event ID doesn't match after deletion. Got %x, expected %x", 
-			evs[0].Id, newerEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match after deletion. Got %x, expected %x",
+			evs[0].Id, newerEvent.Id,
+		)
 	}
 
 	// Query for the original event by ID
@@ -276,18 +301,23 @@ func TestQueryEvents(t *testing.T) {
 
 	// Verify we still get the original event when querying by ID
 	if len(evs) != 1 {
-		t.Fatalf("Expected 1 event when querying for deleted event by ID, got %d", len(evs))
+		t.Fatalf(
+			"Expected 1 event when querying for deleted event by ID, got %d",
+			len(evs),
+		)
 	}
 
 	// Verify it's the original event
 	if !bytes.Equal(evs[0].Id, replaceableEvent.Id) {
-		t.Fatalf("Event ID doesn't match when querying for deleted event by ID. Got %x, expected %x", 
-			evs[0].Id, replaceableEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match when querying for deleted event by ID. Got %x, expected %x",
+			evs[0].Id, replaceableEvent.Id,
+		)
 	}
 
 	// Create a parameterized replaceable event
 	paramEvent := event.New()
-	paramEvent.Kind = kind.New(30000) // Kind 30000+ is parameterized replaceable
+	paramEvent.Kind = kind.New(30000)    // Kind 30000+ is parameterized replaceable
 	paramEvent.Pubkey = events[0].Pubkey // Use the same pubkey as an existing event
 	paramEvent.CreatedAt = new(timestamp.T)
 	paramEvent.CreatedAt.V = timestamp.Now().V - 7200 // 2 hours ago
@@ -306,7 +336,7 @@ func TestQueryEvents(t *testing.T) {
 
 	// Create a deletion event that references the parameterized replaceable event using an a-tag
 	paramDeletionEvent := event.New()
-	paramDeletionEvent.Kind = kind.Deletion // Kind 5 is deletion
+	paramDeletionEvent.Kind = kind.Deletion       // Kind 5 is deletion
 	paramDeletionEvent.Pubkey = paramEvent.Pubkey // Same pubkey as the event being deleted
 	paramDeletionEvent.CreatedAt = new(timestamp.T)
 	paramDeletionEvent.CreatedAt.V = timestamp.Now().V // Current time
@@ -315,10 +345,12 @@ func TestQueryEvents(t *testing.T) {
 
 	// Add an a-tag referencing the parameterized replaceable event
 	// Format: kind:pubkey:d-tag
-	aTagValue := fmt.Sprintf("%d:%s:%s", 
-		paramEvent.Kind.K, 
-		hex.Enc(paramEvent.Pubkey), 
-		"test-d-tag")
+	aTagValue := fmt.Sprintf(
+		"%d:%s:%s",
+		paramEvent.Kind.K,
+		hex.Enc(paramEvent.Pubkey),
+		"test-d-tag",
+	)
 
 	paramDeletionEvent.Tags = paramDeletionEvent.Tags.AppendTags(
 		tag.New([]byte{'a'}, []byte(aTagValue)),
@@ -335,17 +367,23 @@ func TestQueryEvents(t *testing.T) {
 
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
-			Kinds: paramKindFilter,
+			Kinds:   paramKindFilter,
 			Authors: paramAuthorFilter,
 		},
 	)
 	if err != nil {
-		t.Fatalf("Failed to query for parameterized replaceable events after deletion: %v", err)
+		t.Fatalf(
+			"Failed to query for parameterized replaceable events after deletion: %v",
+			err,
+		)
 	}
 
 	// Verify we get no events (since the only one was deleted)
 	if len(evs) != 0 {
-		t.Fatalf("Expected 0 events when querying for deleted parameterized replaceable events, got %d", len(evs))
+		t.Fatalf(
+			"Expected 0 events when querying for deleted parameterized replaceable events, got %d",
+			len(evs),
+		)
 	}
 
 	// Query for the parameterized event by ID
@@ -355,18 +393,25 @@ func TestQueryEvents(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf("Failed to query for deleted parameterized event by ID: %v", err)
+		t.Fatalf(
+			"Failed to query for deleted parameterized event by ID: %v", err,
+		)
 	}
 
 	// Verify we still get the event when querying by ID
 	if len(evs) != 1 {
-		t.Fatalf("Expected 1 event when querying for deleted parameterized event by ID, got %d", len(evs))
+		t.Fatalf(
+			"Expected 1 event when querying for deleted parameterized event by ID, got %d",
+			len(evs),
+		)
 	}
 
 	// Verify it's the correct event
 	if !bytes.Equal(evs[0].Id, paramEvent.Id) {
-		t.Fatalf("Event ID doesn't match when querying for deleted parameterized event by ID. Got %x, expected %x", 
-			evs[0].Id, paramEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match when querying for deleted parameterized event by ID. Got %x, expected %x",
+			evs[0].Id, paramEvent.Id,
+		)
 	}
 
 	// Test querying by time range
@@ -399,8 +444,10 @@ func TestQueryEvents(t *testing.T) {
 	// Verify all events are within the time range
 	for i, ev := range evs {
 		if ev.CreatedAt.V < sinceTime.V || ev.CreatedAt.V > untilTime.V {
-			t.Fatalf("Event %d is outside the time range. Got %d, expected between %d and %d", 
-				i, ev.CreatedAt.V, sinceTime.V, untilTime.V)
+			t.Fatalf(
+				"Event %d is outside the time range. Got %d, expected between %d and %d",
+				i, ev.CreatedAt.V, sinceTime.V, untilTime.V,
+			)
 		}
 	}
 
@@ -453,8 +500,8 @@ func TestQueryEvents(t *testing.T) {
 			var hasTag bool
 			for _, tag := range ev.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-					if bytes.Equal(tag.B(0), testTag.B(0)) && 
-					   bytes.Equal(tag.B(1), testTag.B(1)) {
+					if bytes.Equal(tag.B(0), testTag.B(0)) &&
+						bytes.Equal(tag.B(1), testTag.B(1)) {
 						hasTag = true
 						break
 					}

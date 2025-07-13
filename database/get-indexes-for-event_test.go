@@ -2,18 +2,18 @@ package database
 
 import (
 	"bytes"
+	"orly.dev/utils/chk"
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
-	"orly.dev/event"
-	"orly.dev/kind"
-	"orly.dev/tag"
-	"orly.dev/tags"
-	"orly.dev/timestamp"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/tags"
+	"orly.dev/encoders/timestamp"
 )
 
 func TestGetIndexesForEvent(t *testing.T) {

@@ -3,13 +3,13 @@ package database
 import (
 	"bufio"
 	"bytes"
-	"orly.dev/chk"
-	"orly.dev/context"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/timestamp"
 	"orly.dev/event/examples"
-	"orly.dev/filter"
 	"orly.dev/interfaces/store"
-	"orly.dev/timestamp"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 	"os"
 	"testing"
 )
@@ -116,8 +116,10 @@ func TestQueryForCreatedAt(t *testing.T) {
 
 		// Verify the timestamp is within the range
 		if result.Ts < sinceTime.V || result.Ts > untilTime.V {
-			t.Fatalf("result %d with ID %x has timestamp %d outside the range [%d, %d]", 
-				i, result.Id, result.Ts, sinceTime.V, untilTime.V)
+			t.Fatalf(
+				"result %d with ID %x has timestamp %d outside the range [%d, %d]",
+				i, result.Id, result.Ts, sinceTime.V, untilTime.V,
+			)
 		}
 	}
 
@@ -152,8 +154,10 @@ func TestQueryForCreatedAt(t *testing.T) {
 
 		// Verify the timestamp is after the Since timestamp
 		if result.Ts < sinceTime.V {
-			t.Fatalf("result %d with ID %x has timestamp %d before the Since timestamp %d", 
-				i, result.Id, result.Ts, sinceTime.V)
+			t.Fatalf(
+				"result %d with ID %x has timestamp %d before the Since timestamp %d",
+				i, result.Id, result.Ts, sinceTime.V,
+			)
 		}
 	}
 
@@ -188,8 +192,10 @@ func TestQueryForCreatedAt(t *testing.T) {
 
 		// Verify the timestamp is before the Until timestamp
 		if result.Ts > untilTime.V {
-			t.Fatalf("result %d with ID %x has timestamp %d after the Until timestamp %d", 
-				i, result.Id, result.Ts, untilTime.V)
+			t.Fatalf(
+				"result %d with ID %x has timestamp %d after the Until timestamp %d",
+				i, result.Id, result.Ts, untilTime.V,
+			)
 		}
 	}
 }

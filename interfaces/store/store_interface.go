@@ -9,13 +9,13 @@ package store
 import (
 	"io"
 
-	"orly.dev/config"
-	"orly.dev/context"
-	"orly.dev/event"
-	"orly.dev/eventid"
-	"orly.dev/eventidserial"
-	"orly.dev/filter"
-	"orly.dev/tag"
+	"orly.dev/app/config"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/eventid"
+	"orly.dev/encoders/eventidserial"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/tag"
+	"orly.dev/utils/context"
 )
 
 // I am a type for a persistence layer for nostr events handled by a relay.

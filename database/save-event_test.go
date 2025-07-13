@@ -3,10 +3,10 @@ package database
 import (
 	"bufio"
 	"bytes"
-	"orly.dev/chk"
-	"orly.dev/context"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
 	"orly.dev/event/examples"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 	"os"
 	"testing"
 	"time"

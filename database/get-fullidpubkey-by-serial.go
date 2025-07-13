@@ -3,11 +3,11 @@ package database
 import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
-	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
+	"orly.dev/encoders/codecbuf"
 	"orly.dev/interfaces/store"
+	"orly.dev/utils/chk"
 )
 
 func (d *D) GetFullIdPubkeyBySerial(ser *types.Uint40) (

@@ -1,11 +1,10 @@
 package types
 
 import (
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"reflect"
 	"testing"
-
-	"orly.dev/chk"
 )
 
 func TestUint24(t *testing.T) {

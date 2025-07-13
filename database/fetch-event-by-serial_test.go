@@ -3,13 +3,13 @@ package database
 import (
 	"bufio"
 	"bytes"
-	"orly.dev/chk"
-	"orly.dev/context"
 	"orly.dev/database/indexes/types"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/tag"
 	"orly.dev/event/examples"
-	"orly.dev/filter"
-	"orly.dev/tag"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 	"os"
 	"testing"
 )

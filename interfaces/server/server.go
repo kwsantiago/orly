@@ -2,9 +2,9 @@ package server
 
 import (
 	"net/http"
-	"orly.dev/context"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
 	"orly.dev/interfaces/store"
+	"orly.dev/utils/context"
 )
 
 type I interface {

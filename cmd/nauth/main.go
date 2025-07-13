@@ -3,16 +3,16 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"orly.dev/chk"
-	"orly.dev/errorf"
-	"orly.dev/log"
+	"orly.dev/crypto/p256k"
+	"orly.dev/encoders/bech32encoding"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/errorf"
+	"orly.dev/utils/log"
 	"os"
 	"time"
 
-	"orly.dev/bech32encoding"
-	"orly.dev/httpauth"
-	"orly.dev/p256k"
-	"orly.dev/signer"
+	"orly.dev/interfaces/signer"
+	"orly.dev/protocol/httpauth"
 )
 
 const secEnv = "NOSTR_SECRET_KEY"

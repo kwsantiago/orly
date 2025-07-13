@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"orly.dev/chk"
-	"orly.dev/log"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -33,7 +33,7 @@ import (
 	"orly.dev/cmd/lerproxy/reverse"
 	"orly.dev/cmd/lerproxy/tcpkeepalive"
 	"orly.dev/cmd/lerproxy/util"
-	"orly.dev/context"
+	"orly.dev/utils/context"
 )
 
 type runArgs struct {

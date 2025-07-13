@@ -3,12 +3,12 @@ package types
 import (
 	"bytes"
 	"math"
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"reflect"
 	"testing"
 
 	"lukechampine.com/frand"
-	"orly.dev/chk"
 )
 
 func TestUint32(t *testing.T) {

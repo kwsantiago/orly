@@ -1,13 +1,13 @@
 package database
 
 import (
-	"orly.dev/chk"
-	"orly.dev/context"
 	"orly.dev/database/indexes/types"
-	"orly.dev/errorf"
-	"orly.dev/filter"
+	"orly.dev/encoders/filter"
 	"orly.dev/interfaces/store"
-	"orly.dev/log"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
+	"orly.dev/utils/errorf"
+	"orly.dev/utils/log"
 	"sort"
 )
 

@@ -2,12 +2,12 @@ package database
 
 import (
 	"fmt"
+	"orly.dev/utils/log"
 	"runtime"
 	"strings"
 
 	"go.uber.org/atomic"
-	"orly.dev/log"
-	"orly.dev/lol"
+	"orly.dev/utils/lol"
 )
 
 // NewLogger creates a new badger logger.

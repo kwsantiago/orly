@@ -3,8 +3,7 @@ package types
 import (
 	"errors"
 	"io"
-
-	"orly.dev/chk"
+	"orly.dev/utils/chk"
 )
 
 // MaxUint40 is the maximum value of a 40-bit unsigned integer: 2^40 - 1.

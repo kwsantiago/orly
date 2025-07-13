@@ -3,11 +3,11 @@ package database
 import (
 	"bytes"
 	"github.com/dgraph-io/badger/v4"
-	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
-	"orly.dev/event"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/encoders/event"
+	"orly.dev/utils/chk"
 )
 
 func (d *D) FetchEventBySerial(ser *types.Uint40) (ev *event.E, err error) {

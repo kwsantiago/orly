@@ -4,15 +4,15 @@ import (
 	"crypto/rand"
 	"fmt"
 	"hash"
-	"orly.dev/chk"
+	"orly.dev/crypto/keys"
+	"orly.dev/crypto/sha256"
+	"orly.dev/utils/chk"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"orly.dev/hex"
-	"orly.dev/keys"
-	"orly.dev/sha256"
+	"orly.dev/encoders/hex"
 )
 
 func assertCryptPriv(

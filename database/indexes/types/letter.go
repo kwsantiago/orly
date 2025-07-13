@@ -2,7 +2,7 @@ package types
 
 import (
 	"io"
-	"orly.dev/chk"
+	"orly.dev/utils/chk"
 )
 
 const LetterLen = 1

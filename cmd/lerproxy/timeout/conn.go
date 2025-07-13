@@ -4,7 +4,7 @@ package timeout
 
 import (
 	"net"
-	"orly.dev/chk"
+	"orly.dev/utils/chk"
 	"time"
 )
 

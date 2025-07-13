@@ -3,9 +3,8 @@ package types_test
 import (
 	"bytes"
 	"orly.dev/database/indexes/types"
+	"orly.dev/utils/chk"
 	"testing"
-
-	"orly.dev/chk"
 )
 
 func TestT(t *testing.T) {

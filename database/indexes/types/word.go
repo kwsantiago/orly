@@ -2,9 +2,8 @@ package types
 
 import (
 	"io"
-	"orly.dev/codecbuf"
-
-	"orly.dev/chk"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 )
 
 var zero = []byte{0x00}

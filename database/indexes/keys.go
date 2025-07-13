@@ -3,9 +3,9 @@ package indexes
 import (
 	"io"
 	t "orly.dev/database/indexes/types"
+	"orly.dev/utils/chk"
 	"reflect"
 
-	"orly.dev/chk"
 	"orly.dev/interfaces/codec"
 )
 

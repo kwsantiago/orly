@@ -2,10 +2,9 @@ package types
 
 import (
 	"io"
+	"orly.dev/utils/errorf"
 
 	"github.com/minio/sha256-simd"
-
-	"orly.dev/errorf"
 )
 
 const IdLen = sha256.Size

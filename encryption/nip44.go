@@ -8,13 +8,12 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
-	"orly.dev/chk"
-	"orly.dev/errorf"
+	"orly.dev/crypto/sha256"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/errorf"
 
 	"golang.org/x/crypto/chacha20"
 	"golang.org/x/crypto/hkdf"
-
-	"orly.dev/sha256"
 )
 
 const (

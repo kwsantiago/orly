@@ -6,8 +6,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"orly.dev/chk"
-	"orly.dev/log"
+	"orly.dev/crypto/ec/bech32"
+	"orly.dev/crypto/ec/schnorr"
+	secp256k2 "orly.dev/crypto/ec/secp256k1"
+	"orly.dev/encoders/bech32encoding"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/interrupt"
+	"orly.dev/utils/log"
 	"os"
 	"runtime"
 	"strings"
@@ -16,13 +21,8 @@ import (
 
 	"github.com/alexflint/go-arg"
 
-	"orly.dev/atomic"
-	"orly.dev/bech32encoding"
-	"orly.dev/ec/bech32"
-	"orly.dev/ec/schnorr"
-	"orly.dev/ec/secp256k1"
-	"orly.dev/interrupt"
-	"orly.dev/qu"
+	"orly.dev/utils/atomic"
+	"orly.dev/utils/qu"
 )
 
 var prefix = append(bech32encoding.PubHRP, '1')
@@ -34,9 +34,9 @@ const (
 )
 
 type Result struct {
-	sec  *secp256k1.SecretKey
+	sec  *secp256k2.SecretKey
 	npub []byte
-	pub  *secp256k1.PublicKey
+	pub  *secp256k2.PublicKey
 }
 
 var args struct {
@@ -219,11 +219,11 @@ out:
 // GenKeyPair creates a fresh new key pair using the entropy source used by
 // crypto/rand (ie, /dev/random on posix systems).
 func GenKeyPair() (
-	sec *secp256k1.SecretKey,
-	pub *secp256k1.PublicKey, err error,
+	sec *secp256k2.SecretKey,
+	pub *secp256k2.PublicKey, err error,
 ) {
 
-	sec, err = secp256k1.GenerateSecretKey()
+	sec, err = secp256k2.GenerateSecretKey()
 	if err != nil {
 		err = fmt.Errorf("error generating key: %s", err)
 		return

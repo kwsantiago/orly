@@ -2,12 +2,12 @@ package types
 
 import (
 	"io"
+	"orly.dev/crypto/ec/schnorr"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/errorf"
 
 	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-	"orly.dev/ec/schnorr"
-	"orly.dev/errorf"
-	"orly.dev/hex"
+	"orly.dev/encoders/hex"
 )
 
 const PubHashLen = 8

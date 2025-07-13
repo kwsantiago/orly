@@ -3,9 +3,9 @@ package indexes
 import (
 	"bytes"
 	"io"
-	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes/types"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"testing"
 )
 

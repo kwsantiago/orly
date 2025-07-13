@@ -3,18 +3,18 @@ package database
 import (
 	"bytes"
 	"math"
+	"orly.dev/utils/chk"
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"orly.dev/chk"
-	"orly.dev/codecbuf"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
-	"orly.dev/filter"
-	"orly.dev/kind"
-	"orly.dev/kinds"
-	"orly.dev/tag"
-	"orly.dev/timestamp"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/kinds"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/timestamp"
 )
 
 // TestGetIndexesFromFilter tests the GetIndexesFromFilter function
@@ -520,7 +520,9 @@ func testMultipleKindPubkeyFilter(t *testing.T) {
 	foundCombinations := 0
 	for _, idx := range idxs {
 		for i := 0; i < len(expectedIdxs); i += 2 {
-			if bytes.Equal(idx.Start, expectedIdxs[i]) && bytes.Equal(idx.End, expectedIdxs[i+1]) {
+			if bytes.Equal(idx.Start, expectedIdxs[i]) && bytes.Equal(
+				idx.End, expectedIdxs[i+1],
+			) {
 				foundCombinations++
 				break
 			}

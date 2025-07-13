@@ -3,16 +3,16 @@ package database
 import (
 	"bufio"
 	"bytes"
-	"orly.dev/chk"
-	"orly.dev/context"
 	"orly.dev/database/indexes/types"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
+	"orly.dev/encoders/filter"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/kinds"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/timestamp"
 	"orly.dev/event/examples"
-	"orly.dev/filter"
-	"orly.dev/kind"
-	"orly.dev/kinds"
-	"orly.dev/tag"
-	"orly.dev/timestamp"
+	"orly.dev/utils/chk"
+	"orly.dev/utils/context"
 	"os"
 	"testing"
 )
@@ -67,7 +67,9 @@ func TestQueryForSerials(t *testing.T) {
 		// Get the serial for this event
 		serial, err := db.GetSerialById(ev.Id)
 		if err != nil {
-			t.Fatalf("Failed to get serial for event #%d: %v", eventCount+1, err)
+			t.Fatalf(
+				"Failed to get serial for event #%d: %v", eventCount+1, err,
+			)
 		}
 
 		if serial != nil {
@@ -109,8 +111,10 @@ func TestQueryForSerials(t *testing.T) {
 	}
 
 	if !bytes.Equal(ev.Id, testEvent.Id) {
-		t.Fatalf("Event ID doesn't match. Got %x, expected %x", 
-			ev.Id, testEvent.Id)
+		t.Fatalf(
+			"Event ID doesn't match. Got %x, expected %x",
+			ev.Id, testEvent.Id,
+		)
 	}
 
 	// Test querying by kind
@@ -140,8 +144,10 @@ func TestQueryForSerials(t *testing.T) {
 		}
 
 		if ev.Kind.K != testKind.K {
-			t.Fatalf("Event %d has incorrect kind. Got %d, expected %d", 
-				i, ev.Kind.K, testKind.K)
+			t.Fatalf(
+				"Event %d has incorrect kind. Got %d, expected %d",
+				i, ev.Kind.K, testKind.K,
+			)
 		}
 	}
 
@@ -171,8 +177,10 @@ func TestQueryForSerials(t *testing.T) {
 		}
 
 		if !bytes.Equal(ev.Pubkey, events[1].Pubkey) {
-			t.Fatalf("Event %d has incorrect author. Got %x, expected %x", 
-				i, ev.Pubkey, events[1].Pubkey)
+			t.Fatalf(
+				"Event %d has incorrect author. Got %x, expected %x",
+				i, ev.Pubkey, events[1].Pubkey,
+			)
 		}
 	}
 
@@ -212,8 +220,10 @@ func TestQueryForSerials(t *testing.T) {
 		}
 
 		if ev.CreatedAt.V < sinceTime.V || ev.CreatedAt.V > untilTime.V {
-			t.Fatalf("Event %d is outside the time range. Got %d, expected between %d and %d", 
-				i, ev.CreatedAt.V, sinceTime.V, untilTime.V)
+			t.Fatalf(
+				"Event %d is outside the time range. Got %d, expected between %d and %d",
+				i, ev.CreatedAt.V, sinceTime.V, untilTime.V,
+			)
 		}
 	}
 }

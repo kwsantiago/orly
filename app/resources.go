@@ -1,12 +1,12 @@
 package app
 
 import (
-	"orly.dev/log"
+	"orly.dev/utils/log"
 	"os"
 	"runtime"
 	"time"
 
-	"orly.dev/context"
+	"orly.dev/utils/context"
 )
 
 func MonitorResources(c context.T) {

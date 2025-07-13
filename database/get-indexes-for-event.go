@@ -2,10 +2,10 @@ package database
 
 import (
 	"bytes"
-	"orly.dev/chk"
 	"orly.dev/database/indexes"
 	. "orly.dev/database/indexes/types"
-	"orly.dev/event"
+	"orly.dev/encoders/event"
+	"orly.dev/utils/chk"
 )
 
 // appendIndexBytes marshals an index to a byte slice and appends it to the idxs slice

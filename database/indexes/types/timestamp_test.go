@@ -2,11 +2,10 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"testing"
 	"time"
-
-	"orly.dev/chk"
 )
 
 func TestTimestamp_FromInt(t *testing.T) {

@@ -2,10 +2,9 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/codecbuf"
+	"orly.dev/encoders/codecbuf"
+	"orly.dev/utils/chk"
 	"testing"
-
-	"orly.dev/chk"
 )
 
 func TestLetter_New(t *testing.T) {
