@@ -68,6 +68,41 @@ func (a *A) HandleEvent(
 			var res []*event.E
 			if t.Len() >= 2 {
 				switch {
+				case bytes.Equal(t.Key(), []byte("e")):
+					// Process 'e' tag (event reference)
+					eventID := t.Value()
+
+					// Create a filter to find the referenced event
+					f := filter.New()
+					f.Ids = f.Ids.Append(eventID)
+
+					// Query for the referenced event
+					referencedEvents, err := sto.QueryEvents(c, f)
+					if err != nil {
+						if err = okenvelope.NewFrom(
+							env.Id, false,
+							normalize.Error.F("failed to query for referenced event"),
+						).Write(a.Listener); chk.E(err) {
+							return
+						}
+						return
+					}
+
+					// If we found the referenced event, check if the author matches
+					if len(referencedEvents) > 0 {
+						referencedEvent := referencedEvents[0]
+
+						// Check if the author of the deletion event matches the author of the referenced event
+						if !bytes.Equal(referencedEvent.Pubkey, env.Pubkey) {
+							if err = okenvelope.NewFrom(
+								env.Id, false,
+								normalize.Blocked.F("blocked: cannot delete events from other authors"),
+							).Write(a.Listener); chk.E(err) {
+								return
+							}
+							return
+						}
+					}
 				case bytes.Equal(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
 					if len(split) != 3 {
@@ -201,6 +236,27 @@ func (a *A) HandleEvent(
 				}
 			}
 			res = nil
+		}
+		// Check if this event has been deleted before
+		if env.E.Kind.K != kind.Deletion.K {
+			// Create a filter to check for deletion events that reference this
+			// event ID
+			f := filter.New()
+			f.Kinds.K = []*kind.T{kind.Deletion}
+			f.Tags.AppendTags(tag.New([]byte{'e'}, env.Id))
+
+			// Query for deletion events
+			deletionEvents, err := sto.QueryEvents(c, f)
+			if err == nil && len(deletionEvents) > 0 {
+				// Found deletion events for this ID, don't save it
+				if err = okenvelope.NewFrom(
+					env.Id, false,
+					normalize.Blocked.F("event was deleted, not storing it again"),
+				).Write(a.Listener); chk.E(err) {
+					return
+				}
+				return
+			}
 		}
 		if err = okenvelope.NewFrom(
 			env.Id, true,

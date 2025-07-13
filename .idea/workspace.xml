@@ -20,9 +20,7 @@
   <component name="ChangeListManager">
     <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor tag and ID handling with `tag.FromBytesSlice`&#10;&#10;- **filter/filter.go**: Replace multiple instances of `tag.New` with `tag.FromBytesSlice` for improved tag and ID handling consistency and readability.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/get-indexes-from-filter.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/get-indexes-from-filter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/fullid.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/fullid.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/indexes/types/idhash.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/indexes/types/idhash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
