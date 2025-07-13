@@ -30,6 +30,5 @@ func (a *A) HandleClose(
 			Id:       env.ID.String(),
 		},
 	)
-	// srv.Publisher().removeSubscriberId(a.Listener, env.ID.String())
 	return
 }

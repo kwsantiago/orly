@@ -18,8 +18,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Refactor tag and ID handling with `tag.FromBytesSlice`&#10;&#10;- **filter/filter.go**: Replace multiple instances of `tag.New` with `tag.FromBytesSlice` for improved tag and ID handling consistency and readability.">
+    <list default="true" id="848aca24-a3ec-4e50-a3d5-7b132d168000" name="Changes" comment="Enhance deletion event handling in `socketapi/handleEvent.go`&#10;&#10;- **socketapi/handleEvent.go**:  &#10;  - Add logic to process `'e'` tags by verifying event references, ensuring deletion events only target events from the same author.&#10;  - Introduce checks to prevent storing previously deleted events by querying for deletion events linked to the given ID.&#10;  - Improve error handling and provide appropriate feedback messages when events are blocked or errors occur during queries.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/socketapi/handleClose.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleClose.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/socketapi/handleEvent.go" beforeDir="false" afterPath="$PROJECT_DIR$/socketapi/handleEvent.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -261,7 +262,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="partly implemented query for ids" />
     <MESSAGE value="log event processing duration and throughput in save-event test" />
     <MESSAGE value="added comprehensive tests for QueryForIds" />
     <MESSAGE value="Ensure data directory creation in `database.go` using `os.MkdirAll` and `apputil.EnsureDir`." />
@@ -286,7 +286,8 @@
     <MESSAGE value="Update socket API to improve connection handling and subscription delivery&#10;&#10;- **socketapi/socketapi.go**: Remove redundant defer logic for connection close and logging; streamline the cleanup process after connection termination.&#10;- **socketapi/publisher.go**: Add detailed subscription event logs to track data sent to subscribers." />
     <MESSAGE value="Update error handling in `socketapi/handleReq.go`&#10;&#10;- **socketapi/handleReq.go**: Replace `return` statements with `continue` in error conditions to ensure subsequent events are processed without interruption." />
     <MESSAGE value="Refactor tag and ID handling with `tag.FromBytesSlice`&#10;&#10;- **filter/filter.go**: Replace multiple instances of `tag.New` with `tag.FromBytesSlice` for improved tag and ID handling consistency and readability." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor tag and ID handling with `tag.FromBytesSlice`&#10;&#10;- **filter/filter.go**: Replace multiple instances of `tag.New` with `tag.FromBytesSlice` for improved tag and ID handling consistency and readability." />
+    <MESSAGE value="Enhance deletion event handling in `socketapi/handleEvent.go`&#10;&#10;- **socketapi/handleEvent.go**:  &#10;  - Add logic to process `'e'` tags by verifying event references, ensuring deletion events only target events from the same author.&#10;  - Introduce checks to prevent storing previously deleted events by querying for deletion events linked to the given ID.&#10;  - Improve error handling and provide appropriate feedback messages when events are blocked or errors occur during queries." />
+    <option name="LAST_COMMIT_MESSAGE" value="Enhance deletion event handling in `socketapi/handleEvent.go`&#10;&#10;- **socketapi/handleEvent.go**:  &#10;  - Add logic to process `'e'` tags by verifying event references, ensuring deletion events only target events from the same author.&#10;  - Introduce checks to prevent storing previously deleted events by querying for deletion events linked to the given ID.&#10;  - Improve error handling and provide appropriate feedback messages when events are blocked or errors occur during queries." />
     <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
   <component name="VgoProject">
