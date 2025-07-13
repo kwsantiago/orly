@@ -16,7 +16,10 @@ type Id struct {
 
 func (fi *Id) FromId(id []byte) (err error) {
 	if len(id) != IdLen {
-		err = errorf.E("invalid Id length, got %d require %d", len(id), IdLen)
+		err = errorf.E(
+			"fullid.FromId: invalid Id length, got %d require %d", len(id),
+			IdLen,
+		)
 		return
 	}
 	copy(fi.val[:], id)
