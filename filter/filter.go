@@ -312,7 +312,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 						return
 					}
 					ff = append([][]byte{k}, ff...)
-					f.Tags = f.Tags.AppendTags(tag.New(ff...))
+					f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
 					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
 				default:
 					// other types of tags can be anything
@@ -321,7 +321,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 						return
 					}
 					ff = append([][]byte{k}, ff...)
-					f.Tags = f.Tags.AppendTags(tag.New(ff...))
+					f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
 					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
 				}
 				state = betweenKV
@@ -335,7 +335,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 				); chk.E(err) {
 					return
 				}
-				f.Ids = tag.New(ff...)
+				f.Ids = tag.FromBytesSlice(ff...)
 				state = betweenKV
 			case Kinds[0]:
 				if len(key) < len(Kinds) {
@@ -356,7 +356,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 				); chk.E(err) {
 					return
 				}
-				f.Authors = tag.New(ff...)
+				f.Authors = tag.FromBytesSlice(ff...)
 				state = betweenKV
 			case Until[0]:
 				if len(key) < len(Until) {
