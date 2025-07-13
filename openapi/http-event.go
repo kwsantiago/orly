@@ -217,12 +217,8 @@ func (x *Operations) RegisterEvent(api huma.API) {
 						// if advancedDeleter != nil {
 						//	advancedDeleter.BeforeDelete(ctx, t.Value(), ev.Pubkey)
 						// }
-						if err = sto.DeleteEvent(
-							ctx, target.EventId(),
-						); chk.T(err) {
-							err = huma.Error500InternalServerError(err.Error())
-							return
-						}
+						// Instead of deleting the event, we'll just add the deletion event
+						// The query logic will filter out deleted events
 						// if advancedDeleter != nil {
 						//	advancedDeleter.AfterDelete(t.Value(), ev.Pubkey)
 						// }

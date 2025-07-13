@@ -12,17 +12,15 @@ import (
 	"orly.dev/log"
 	realy_lol "orly.dev/version"
 	"os"
-	"sync"
 
 	"orly.dev/app"
 	"orly.dev/context"
+	"orly.dev/database"
 	"orly.dev/interrupt"
 	"orly.dev/lol"
-	"orly.dev/ratel"
 	"orly.dev/realy"
 	"orly.dev/realy/config"
 	"orly.dev/realy/options"
-	"orly.dev/units"
 )
 
 func main() {
@@ -52,17 +50,11 @@ func main() {
 			chk.E(http.ListenAndServe("127.0.0.1:6060", nil))
 		}()
 	}
-	var wg sync.WaitGroup
 	c, cancel := context.Cancel(context.Bg())
-	storage := ratel.New(
-		ratel.BackendParams{
-			Ctx:            c,
-			WG:             &wg,
-			BlockCacheSize: units.Gb,
-			LogLevel:       lol.GetLogLevel(cfg.DbLogLevel),
-			MaxLimit:       ratel.DefaultMaxLimit,
-		},
-	)
+	storage, err := database.New(c, cancel, cfg.DataDir, cfg.DbLogLevel)
+	if chk.E(err) {
+		os.Exit(1)
+	}
 	r := &app.Relay{C: cfg, Store: storage}
 	go app.MonitorResources(c)
 	var server *realy.Server
@@ -71,7 +63,7 @@ func main() {
 		Cancel:   cancel,
 		Rl:       r,
 		DbPath:   cfg.DataDir,
-		MaxLimit: ratel.DefaultMaxLimit,
+		MaxLimit: 512, // Default max limit for events
 	}
 	var opts []options.O
 	if server, err = realy.NewServer(serverParams, opts...); chk.E(err) {

@@ -14,7 +14,6 @@ import (
 	"orly.dev/log"
 	"orly.dev/normalize"
 	"orly.dev/realy/interfaces"
-	"orly.dev/sha256"
 	"orly.dev/tag"
 )
 
@@ -30,11 +29,7 @@ func (a *A) HandleEvent(
 	if sto == nil {
 		panic("no event store has been set to store event")
 	}
-	// var auther relay.Authenticator
-	// if auther, ok = srv.Relay().(relay.Authenticator); ok {
-	// }
 	rl := srv.Relay()
-	// advancedDeleter, _ := sto.(relay.AdvancedDeleter)
 	env := eventenvelope.NewSubmission()
 	if rem, err = env.Unmarshal(req); chk.E(err) {
 		return
@@ -42,46 +37,6 @@ func (a *A) HandleEvent(
 	if len(rem) > 0 {
 		log.I.F("extra '%s'", rem)
 	}
-	// accept, notice, after := rl.AcceptEvent(c, env.F, a.Req(),
-	//	a.RealRemote(), nil,
-	//	//a.AuthedBytes(),
-	// )
-	// if !accept {
-	//	if strings.Contains(notice, "mute") {
-	//		if err = okenvelope.NewFrom(env.Id, false,
-	//			normalize.Blocked.F(notice)).Write(a.Listener); chk.F(err) {
-	//		}
-	//	} else {
-	//		//if auther != nil && auther.AuthRequired() {
-	//		//	if !a.AuthRequested() {
-	//		//		a.RequestAuth()
-	//		//		log.I.F("requesting auth from client %s", a.RealRemote())
-	//		//		if err = authenvelope.NewChallengeWith(a.Challenge()).Write(a.Listener); chk.F(err) {
-	//		//			return
-	//		//		}
-	//		//		if err = okenvelope.NewFrom(env.Id, false,
-	//		//			normalize.AuthRequired.F("auth required for storing events")).Write(a.Listener); chk.F(err) {
-	//		//		}
-	//		//		return
-	//		//	} else {
-	//		//		log.I.F("requesting auth again from client %s", a.RealRemote())
-	//		//		if err = authenvelope.NewChallengeWith(a.Challenge()).Write(a.Listener); chk.F(err) {
-	//		//			return
-	//		//		}
-	//		//		if err = okenvelope.NewFrom(env.Id, false,
-	//		//			normalize.AuthRequired.F("auth required for storing events")).Write(a.Listener); chk.F(err) {
-	//		//		}
-	//		//		return
-	//		//	}
-	//		//} else {
-	//		//	log.W.F("didn't find authentication method")
-	//		//}
-	//	}
-	//	if err = okenvelope.NewFrom(env.Id, false,
-	//		normalize.Invalid.F(notice)).Write(a.Listener); chk.F(err) {
-	//	}
-	//	return
-	// }
 	if !bytes.Equal(env.GetIDBytes(), env.Id) {
 		if err = okenvelope.NewFrom(
 			env.Id, false,
@@ -113,45 +68,20 @@ func (a *A) HandleEvent(
 			var res []*event.E
 			if t.Len() >= 2 {
 				switch {
-				case bytes.Equal(t.Key(), []byte("e")):
-					evId := make([]byte, sha256.Size)
-					if _, err = hex.DecBytes(evId, t.Value()); chk.E(err) {
-						continue
-					}
-					res, err = sto.QueryEvents(c, &filter.F{Ids: tag.New(evId)})
-					if err != nil {
-						if err = okenvelope.NewFrom(
-							env.Id, false,
-							normalize.Error.F("failed to query for target event"),
-						).Write(a.Listener); chk.E(err) {
-							return
-						}
-						return
-					}
-					for i := range res {
-						if res[i].Kind.Equal(kind.Deletion) {
-							if err = okenvelope.NewFrom(
-								env.Id, false,
-								normalize.Blocked.F("not processing or storing delete event containing delete event references"),
-							).Write(a.Listener); chk.E(err) {
-								return
-							}
-							return
-						}
-						if !bytes.Equal(res[i].Pubkey, env.E.Pubkey) {
-							if err = okenvelope.NewFrom(
-								env.Id, false,
-								normalize.Blocked.F("cannot delete other users' events (delete by e tag)"),
-							).Write(a.Listener); chk.E(err) {
-								return
-							}
-							return
-						}
-					}
 				case bytes.Equal(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
 					if len(split) != 3 {
 						continue
+					}
+					// Check if the deletion event is trying to delete itself
+					if bytes.Equal(split[2], env.Id) {
+						if err = okenvelope.NewFrom(
+							env.Id, false,
+							normalize.Blocked.F("deletion event cannot reference its own ID"),
+						).Write(a.Listener); chk.E(err) {
+							return
+						}
+						return
 					}
 					var pk []byte
 					if pk, err = hex.DecAppend(nil, split[1]); chk.E(err) {
@@ -210,10 +140,6 @@ func (a *A) HandleEvent(
 					}
 					f := filter.New()
 					f.Kinds.K = []*kind.T{kk}
-					// aut := make(by, 0, len(pk)/2)
-					// if aut, err = hex.DecAppend(aut, pk); chk.E(err) {
-					// 	return
-					// }
 					f.Authors.Append(pk)
 					f.Tags.AppendTags(tag.New([]byte{'#', 'd'}, split[2]))
 					res, err = sto.QueryEvents(c, f)
@@ -266,21 +192,13 @@ func (a *A) HandleEvent(
 					}
 					return
 				}
-				// if advancedDeleter != nil {
-				//	advancedDeleter.BeforeDelete(c, t.Value(), env.Pubkey)
-				// }
-				if err = sto.DeleteEvent(c, target.EventId()); chk.T(err) {
-					if err = okenvelope.NewFrom(
-						env.Id, false,
-						normalize.Error.F(err.Error()),
-					).Write(a.Listener); chk.E(err) {
-						return
-					}
+				// Instead of deleting the event, we'll just add the deletion
+				// event The query logic will filter out deleted events
+				if err = okenvelope.NewFrom(
+					env.Id, true,
+				).Write(a.Listener); chk.E(err) {
 					return
 				}
-				// if advancedDeleter != nil {
-				//	advancedDeleter.AfterDelete(t.Value(), env.Pubkey)
-				// }
 			}
 			res = nil
 		}
@@ -293,7 +211,7 @@ func (a *A) HandleEvent(
 	var reason []byte
 	ok, reason = srv.AddEvent(
 		c, rl, env.E, a.Req(), a.RealRemote(), nil,
-	) // a.AuthedBytes(),
+	)
 
 	log.I.F("event added %v, %s", ok, reason)
 	if err = okenvelope.NewFrom(
@@ -301,8 +219,5 @@ func (a *A) HandleEvent(
 	).Write(a.Listener); chk.E(err) {
 		return
 	}
-	// if after != nil {
-	//	after()
-	// }
 	return
 }

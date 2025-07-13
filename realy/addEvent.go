@@ -3,7 +3,6 @@ package realy
 import (
 	"errors"
 	"net/http"
-	"orly.dev/log"
 	"strings"
 
 	"orly.dev/context"
@@ -56,9 +55,6 @@ func (s *Server) addEvent(
 				return false, normalize.Error.F("failed to save (%s)", errmsg)
 			}
 		}
-		log.I.F(
-			"event id %0x stored ephemeral: %s", ev.Id, ev.Kind.IsEphemeral(),
-		)
 		// if advancedSaver != nil {
 		//	advancedSaver.AfterSave(ev)
 		// }
@@ -70,6 +66,5 @@ func (s *Server) addEvent(
 	// notify subscribers
 	s.listeners.Deliver(ev)
 	accepted = true
-	log.I.S(ev)
 	return
 }
