@@ -75,7 +75,8 @@ func TestFetchEventBySerial(t *testing.T) {
 	testEvent := events[3] // Using the same event as in other tests
 
 	// Use QueryForIds to get the IdPkTs for this event
-	idPkTs, err := db.QueryForIds(
+	var sers types.Uint40s
+	sers, err = db.QueryForSerials(
 		ctx, &filter.F{
 			Ids: tag.New(testEvent.Id),
 		},
@@ -85,18 +86,12 @@ func TestFetchEventBySerial(t *testing.T) {
 	}
 
 	// Verify we got exactly one result
-	if len(idPkTs) != 1 {
-		t.Fatalf("Expected 1 IdPkTs, got %d", len(idPkTs))
-	}
-
-	// Create a serial from the IdPkTs
-	testSerial := new(types.Uint40)
-	if err = testSerial.Set(uint64(idPkTs[0].Ser)); err != nil {
-		t.Fatalf("Failed to create serial: %v", err)
+	if len(sers) != 1 {
+		t.Fatalf("Expected 1 IdPkTs, got %d", len(sers))
 	}
 
 	// Fetch the event by serial
-	fetchedEvent, err := db.FetchEventBySerial(testSerial)
+	fetchedEvent, err := db.FetchEventBySerial(sers[0])
 	if err != nil {
 		t.Fatalf("Failed to fetch event by serial: %v", err)
 	}
