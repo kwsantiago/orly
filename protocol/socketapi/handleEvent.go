@@ -3,6 +3,7 @@ package socketapi
 import (
 	"bytes"
 	"orly.dev/app/realy/interfaces"
+	"orly.dev/crypto/sha256"
 	"orly.dev/encoders/envelopes/eventenvelope"
 	"orly.dev/encoders/envelopes/okenvelope"
 	"orly.dev/encoders/event"
@@ -78,11 +79,14 @@ func (a *A) HandleEvent(
 				switch {
 				case bytes.Equal(t.Key(), []byte("e")):
 					// Process 'e' tag (event reference)
-					eventID := t.Value()
+					eventId := make([]byte, sha256.Size)
+					if _, err = hex.DecBytes(eventId, t.Value()); chk.E(err) {
+						return
+					}
 
 					// Create a filter to find the referenced event
 					f := filter.New()
-					f.Ids = f.Ids.Append(eventID)
+					f.Ids = f.Ids.Append(eventId)
 
 					// Query for the referenced event
 					var referencedEvents []*event.E
@@ -116,8 +120,7 @@ func (a *A) HandleEvent(
 
 						// Create eventid.T from the event ID bytes
 						var eid *eventid.T
-						eid, err = eventid.NewFromBytes(eventID)
-						if chk.E(err) {
+						if eid, err = eventid.NewFromBytes(eventId); chk.E(err) {
 							if err = a.sendResponse(
 								env.Id, false,
 								normalize.Error.F("failed to create event ID"),
@@ -139,7 +142,7 @@ func (a *A) HandleEvent(
 							return
 						}
 
-						log.I.F("successfully deleted event %x", eventID)
+						log.I.F("successfully deleted event %x", eventId)
 					}
 				case bytes.Equal(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
@@ -200,7 +203,6 @@ func (a *A) HandleEvent(
 						return
 					}
 					if !bytes.Equal(pk, env.E.Pubkey) {
-						log.I.S(pk, env.E.Pubkey, env.E)
 						if err = a.sendResponse(
 							env.Id, false,
 							normalize.Blocked.F("cannot delete other users' events (delete by a tag)"),
@@ -287,7 +289,9 @@ func (a *A) HandleEvent(
 					return
 				}
 
-				log.I.F("successfully deleted event %x", target.EventId().Bytes())
+				log.I.F(
+					"successfully deleted event %x", target.EventId().Bytes(),
+				)
 			}
 			res = nil
 		}
@@ -323,7 +327,7 @@ func (a *A) HandleEvent(
 		c, rl, env.E, a.Req(), a.RealRemote(), nil,
 	)
 
-	log.I.F("event added %v, %s", ok, reason)
+	log.I.F("event %0x added %v, %s", env.E.Id, ok, reason)
 	if err = a.sendResponse(env.Id, ok, reason); chk.E(err) {
 		return
 	}

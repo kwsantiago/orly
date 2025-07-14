@@ -41,10 +41,6 @@ func (a *A) HandleReq(
 				continue
 			}
 		}
-		log.D.F(
-			"query from %s %0x,%s", a.RealRemote(), nil,
-			f.Serialize(),
-		)
 		if events, err = sto.QueryEvents(c, f); chk.E(err) {
 			log.E.F("eventstore: %v", err)
 			if errors.Is(err, badger.ErrDBClosed) {

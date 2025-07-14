@@ -17,6 +17,9 @@ import (
 	"orly.dev/utils/context"
 )
 
+// Publish processes and saves an event based on its type and rules.
+// It handles replaceable, ephemeral, and parameterized replaceable events.
+// Duplicate or conflicting events are managed before saving the new one.
 func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 	sto := s.relay.Storage()
 	if evt.Kind.IsEphemeral() {
@@ -71,8 +74,9 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 						)
 						// replaceable events we don't tombstone when replacing,
 						// so if deleted, old versions can be restored
-						if err = sto.DeleteEvent(c, ev.EventId()); // true,
-						chk.E(err) {
+						if err = sto.DeleteEvent(
+							c, ev.EventId(), true,
+						); chk.E(err) {
 							return
 						}
 					}()
@@ -122,8 +126,8 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 				if del {
 					defer func() {
 						if err != nil {
-							// something went wrong saving the replacement, so we won't delete
-							// the event.
+							// something went wrong saving the replacement, so
+							// we won't delete the event.
 							return
 						}
 						log.T.C(
@@ -136,8 +140,9 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 						)
 						// replaceable events we don't tombstone when replacing,
 						// so if deleted, old versions can be restored
-						if err = sto.DeleteEvent(c, ev.EventId()); // true,
-						chk.E(err) {
+						if err = sto.DeleteEvent(
+							c, ev.EventId(), true,
+						); chk.E(err) {
 							return
 						}
 					}()

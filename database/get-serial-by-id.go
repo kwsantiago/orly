@@ -5,11 +5,9 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/database/indexes/types"
 	"orly.dev/utils/chk"
-	"orly.dev/utils/log"
 )
 
 func (d *D) GetSerialById(idx []byte) (ser *types.Uint40, err error) {
-	log.T.S(idx)
 	if err = d.View(
 		func(txn *badger.Txn) (err error) {
 			it := txn.NewIterator(badger.DefaultIteratorOptions)
