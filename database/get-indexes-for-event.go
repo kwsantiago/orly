@@ -30,7 +30,7 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	idxs [][]byte, err error,
 ) {
 	defer func() {
-		if err != nil {
+		if chk.E(err) {
 			idxs = nil
 		}
 	}()

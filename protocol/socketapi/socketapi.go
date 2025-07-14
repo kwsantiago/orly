@@ -39,7 +39,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 	a.Ctx, cancel = context.Cancel(s.Context())
 	var conn *websocket.Conn
 	conn, err = Upgrader.Upgrade(w, r, nil)
-	if err != nil {
+	if chk.E(err) {
 		log.E.F("failed to upgrade websocket: %v", err)
 		return
 	}
@@ -97,7 +97,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 		default:
 		}
 		typ, message, err = conn.ReadMessage()
-		if err != nil {
+		if chk.E(err) {
 			if strings.Contains(
 				err.Error(), "use of closed network connection",
 			) {

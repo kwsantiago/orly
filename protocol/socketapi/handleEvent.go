@@ -6,6 +6,7 @@ import (
 	"orly.dev/encoders/envelopes/eventenvelope"
 	"orly.dev/encoders/envelopes/okenvelope"
 	"orly.dev/encoders/event"
+	"orly.dev/encoders/eventid"
 	"orly.dev/encoders/filter"
 	"orly.dev/encoders/hex"
 	"orly.dev/encoders/ints"
@@ -84,8 +85,9 @@ func (a *A) HandleEvent(
 					f.Ids = f.Ids.Append(eventID)
 
 					// Query for the referenced event
-					referencedEvents, err := sto.QueryEvents(c, f)
-					if err != nil {
+					var referencedEvents []*event.E
+					referencedEvents, err = sto.QueryEvents(c, f)
+					if chk.E(err) {
 						if err = a.sendResponse(
 							env.Id, false,
 							normalize.Error.F("failed to query for referenced event"),
@@ -95,11 +97,13 @@ func (a *A) HandleEvent(
 						return
 					}
 
-					// If we found the referenced event, check if the author matches
+					// If we found the referenced event, check if the author
+					// matches
 					if len(referencedEvents) > 0 {
 						referencedEvent := referencedEvents[0]
 
-						// Check if the author of the deletion event matches the author of the referenced event
+						// Check if the author of the deletion event matches the
+						// author of the referenced event
 						if !bytes.Equal(referencedEvent.Pubkey, env.Pubkey) {
 							if err = a.sendResponse(
 								env.Id, false,
@@ -109,6 +113,33 @@ func (a *A) HandleEvent(
 							}
 							return
 						}
+
+						// Create eventid.T from the event ID bytes
+						var eid *eventid.T
+						eid, err = eventid.NewFromBytes(eventID)
+						if chk.E(err) {
+							if err = a.sendResponse(
+								env.Id, false,
+								normalize.Error.F("failed to create event ID"),
+							); chk.E(err) {
+								return
+							}
+							return
+						}
+
+						// Use DeleteEvent to actually delete the referenced
+						// event
+						if err = sto.DeleteEvent(c, eid); chk.E(err) {
+							if err = a.sendResponse(
+								env.Id, false,
+								normalize.Error.F("failed to delete referenced event"),
+							); chk.E(err) {
+								return
+							}
+							return
+						}
+
+						log.I.F("successfully deleted event %x", eventID)
 					}
 				case bytes.Equal(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
@@ -183,7 +214,7 @@ func (a *A) HandleEvent(
 					f.Authors.Append(pk)
 					f.Tags.AppendTags(tag.New([]byte{'#', 'd'}, split[2]))
 					res, err = sto.QueryEvents(c, f)
-					if err != nil {
+					if chk.E(err) {
 						if err = a.sendResponse(
 							env.Id, false,
 							normalize.Error.F("failed to query for target event"),
@@ -230,13 +261,39 @@ func (a *A) HandleEvent(
 					}
 					return
 				}
-				// Instead of deleting the event, we'll just add the deletion
-				// event The query logic will filter out deleted events
-				if err = a.sendResponse(env.Id, true); chk.E(err) {
+
+				// Create eventid.T from the target event ID bytes
+				var eid *eventid.T
+				eid, err = eventid.NewFromBytes(target.EventId().Bytes())
+				if chk.E(err) {
+					if err = a.sendResponse(
+						env.Id, false,
+						normalize.Error.F("failed to create event ID"),
+					); chk.E(err) {
+						return
+					}
 					return
 				}
+
+				// Use DeleteEvent to actually delete the target event
+				// with noTombstone=true to not save tombstones
+				if err = sto.DeleteEvent(c, eid, true); chk.E(err) {
+					if err = a.sendResponse(
+						env.Id, false,
+						normalize.Error.F("failed to delete target event"),
+					); chk.E(err) {
+						return
+					}
+					return
+				}
+
+				log.I.F("successfully deleted event %x", target.EventId().Bytes())
 			}
 			res = nil
+		}
+		// Send success response after processing all deletions
+		if err = a.sendResponse(env.Id, true); chk.E(err) {
+			return
 		}
 		// Check if this event has been deleted before
 		if env.E.Kind.K != kind.Deletion.K {
@@ -247,7 +304,8 @@ func (a *A) HandleEvent(
 			f.Tags.AppendTags(tag.New([]byte{'e'}, env.Id))
 
 			// Query for deletion events
-			deletionEvents, err := sto.QueryEvents(c, f)
+			var deletionEvents []*event.E
+			deletionEvents, err = sto.QueryEvents(c, f)
 			if err == nil && len(deletionEvents) > 0 {
 				// Found deletion events for this ID, don't save it
 				if err = a.sendResponse(
@@ -258,9 +316,6 @@ func (a *A) HandleEvent(
 				}
 				return
 			}
-		}
-		if err = a.sendResponse(env.Id, true); chk.E(err) {
-			return
 		}
 	}
 	var reason []byte

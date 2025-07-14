@@ -7,7 +7,6 @@ import (
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
 	"orly.dev/utils/errorf"
-	"orly.dev/utils/log"
 	"sort"
 )
 
@@ -27,7 +26,6 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
 		return
 	}
-	log.T.S(idxs)
 	var idOnly bool
 	var tagIdPkTs []store.IdPkTs
 	for _, idx := range idxs {

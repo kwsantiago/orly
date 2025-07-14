@@ -86,7 +86,6 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 		f := filter.New()
 		f.Authors = tag.New(evt.Pubkey)
 		f.Kinds = kinds.New(evt.Kind)
-		log.I.S(evt)
 		log.I.F(
 			"filter for parameterized replaceable %v %s",
 			f.Tags.ToStringsSlice(),

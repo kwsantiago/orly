@@ -142,7 +142,7 @@ func schnorrVerify(sig *Signature, hash []byte, pubKeyBytes []byte) error {
 	//
 	// Fail if P is not a point on the curve
 	pubKey, err := ParsePubKey(pubKeyBytes)
-	if err != nil {
+	if chk.E(err) {
 		return err
 	}
 	if !pubKey.IsOnCurve() {

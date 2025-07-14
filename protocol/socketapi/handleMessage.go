@@ -44,7 +44,7 @@ func (a *A) HandleMessage(msg []byte) {
 	}
 	if len(notice) > 0 {
 		log.D.F("notice->%s %s", a.RealRemote(), notice)
-		if err = noticeenvelope.NewFrom(notice).Write(a.Listener); err != nil {
+		if err = noticeenvelope.NewFrom(notice).Write(a.Listener); chk.E(err) {
 			return
 		}
 	}
