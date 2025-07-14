@@ -92,9 +92,13 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 		f := filter.New()
 		f.Authors = tag.New(evt.Pubkey)
 		f.Kinds = kinds.New(evt.Kind)
-		f.Tags = tags.New(
-			tag.New("#d"), tag.New(evt.Tags.GetFirst(tag.New("d")).Value()),
-		)
+		// Create a tag with key 'd' and value from the event's d-tag
+		dTag := evt.Tags.GetFirst(tag.New("d"))
+		if dTag != nil && dTag.Len() > 1 {
+			f.Tags = tags.New(
+				tag.New([]byte{'d'}, dTag.Value()),
+			)
+		}
 		log.I.F(
 			"filter for parameterized replaceable %v %s",
 			f.Tags.ToStringsSlice(),

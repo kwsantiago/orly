@@ -271,9 +271,15 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 				// Check if we already have an event with this 'd' tag value
 				existing, exists := paramReplaceableEvents[key][dValue]
-				if !exists || ev.CreatedAt.I64() > existing.CreatedAt.I64() {
+				// Only keep the newer event, regardless of processing order
+				if !exists {
+					// No existing event, add this one
+					paramReplaceableEvents[key][dValue] = ev
+				} else if ev.CreatedAt.I64() > existing.CreatedAt.I64() {
+					// This event is newer than the existing one, replace it
 					paramReplaceableEvents[key][dValue] = ev
 				}
+				// If this event is older than the existing one, ignore it
 			} else {
 				// Regular events
 				regularEvents = append(regularEvents, ev)
