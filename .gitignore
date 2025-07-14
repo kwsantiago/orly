@@ -23,6 +23,9 @@ node_modules/**
 .idea
 .idea/
 .idea/**
+/.idea/
+/.idea/**
+/.idea
 # and others
 /go.work.sum
 /secp256k1/
