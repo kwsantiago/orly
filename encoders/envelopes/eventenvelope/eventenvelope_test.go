@@ -8,8 +8,8 @@ import (
 
 	"orly.dev/encoders/envelopes"
 	"orly.dev/encoders/event"
+	"orly.dev/encoders/event/examples"
 	"orly.dev/encoders/subscription"
-	"orly.dev/event/examples"
 )
 
 func TestSubmission(t *testing.T) {

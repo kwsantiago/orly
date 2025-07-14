@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"orly.dev/encoders/event"
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 )
 
 func TestSigner_Generate(t *testing.T) {

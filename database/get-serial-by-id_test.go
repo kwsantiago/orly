@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"orly.dev/encoders/event"
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
 	"os"

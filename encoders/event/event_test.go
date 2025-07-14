@@ -8,7 +8,7 @@ import (
 	"orly.dev/utils/chk"
 	"testing"
 
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 )
 
 func TestTMarshal_Unmarshal(t *testing.T) {

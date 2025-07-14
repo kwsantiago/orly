@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 )
 
 func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {

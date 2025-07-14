@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"orly.dev/encoders/event"
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 )
 
 func TestVerify(t *testing.T) {

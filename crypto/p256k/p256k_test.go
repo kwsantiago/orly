@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"orly.dev/encoders/event"
-	"orly.dev/event/examples"
+	"orly.dev/encoders/event/examples"
 	realy "orly.dev/interfaces/signer"
 )
 

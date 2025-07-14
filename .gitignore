@@ -92,3 +92,5 @@ node_modules/**
 /gui/gui/index.html
 database/testrealy
 /.idea/workspace.xml
+/.idea/dictionaries/project.xml
+/.idea/shelf/Add_tombstone_handling__enhance_event_ID_logic__update_imports.xml
