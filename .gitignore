@@ -20,6 +20,9 @@ node_modules/**
 **/node_modules/
 **/node_modules/**
 /test*
+.idea
+.idea/
+.idea/**
 # and others
 /go.work.sum
 /secp256k1/
