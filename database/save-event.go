@@ -11,6 +11,7 @@ import (
 	"orly.dev/encoders/hex"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
+	"orly.dev/utils/log"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -20,9 +21,10 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 	// Marshal the event to binary
 	ev.MarshalBinary(buf)
 
-	// Check for tombstone existence - if event was deleted, don't save it again
+	// Check for tombstone existence - if the event was deleted, don't save it
+	// again
 	if ev.Id != nil {
-		// Create tombstone prefix key to check for existence
+		// Create a tombstone prefix key to check for existence
 		fid, _ := indexes.TombstoneVars()
 		if err = fid.FromId(ev.Id); chk.E(err) {
 			return
@@ -131,6 +133,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 			return
 		},
 	)
-	// log.F.F("total data written: %d bytes keys %d bytes values", kc, vc)
+	log.T.F("total data written: %d bytes keys %d bytes values", kc, vc)
 	return
 }
