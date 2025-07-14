@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"errors"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
@@ -19,9 +20,48 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 	// Marshal the event to binary
 	ev.MarshalBinary(buf)
 
+	// Check for tombstone existence - if event was deleted, don't save it again
+	if ev.Id != nil {
+		// Create tombstone prefix key to check for existence
+		fid, _ := indexes.TombstoneVars()
+		if err = fid.FromId(ev.Id); chk.E(err) {
+			return
+		}
+
+		// Create prefix key (prefix + event ID, without timestamp)
+		prefixBuf := new(bytes.Buffer)
+		if err = indexes.TombstoneEnc(
+			fid, nil,
+		).MarshalWrite(prefixBuf); chk.E(err) {
+			return
+		}
+		tombstonePrefix := prefixBuf.Bytes()
+		// Check if any tombstone exists with this prefix
+		err = d.View(
+			func(txn *badger.Txn) error {
+				opts := badger.DefaultIteratorOptions
+				opts.PrefetchValues = false // We only need to check existence
+				it := txn.NewIterator(opts)
+				defer it.Close()
+
+				it.Seek(tombstonePrefix)
+				if it.ValidForPrefix(tombstonePrefix) {
+					// Tombstone exists, event was deleted
+					return errors.New("blocked: not saving deleted event again")
+				}
+				// No tombstone found, proceed with saving
+				return nil
+			},
+		)
+		if chk.E(err) {
+			return
+		}
+	}
+
 	// Check if the event is replaceable
 	if ev.Kind != nil && ev.Kind.IsReplaceable() {
-		// Create a filter to find previous events of the same kind from the same pubkey
+		// Create a filter to find previous events of the same kind from the
+		// same pubkey
 		f := filter.New()
 		f.Kinds.K = append(f.Kinds.K, ev.Kind)
 		f.Authors = f.Authors.Append(ev.Pubkey)

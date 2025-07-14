@@ -81,6 +81,8 @@ func Prefix(prf int) (i I) {
 		return IdPrefix
 	case FullIdPubkey:
 		return FullIdPubkeyPrefix
+	case Tombstone:
+		return TombstonePrefix
 
 	case CreatedAt:
 		return CreatedAtPrefix
@@ -119,6 +121,8 @@ func Identify(r io.Reader) (i int, err error) {
 		i = Id
 	case FullIdPubkeyPrefix:
 		i = FullIdPubkey
+	case TombstonePrefix:
+		i = Tombstone
 
 	case CreatedAtPrefix:
 		i = CreatedAt
@@ -236,7 +240,7 @@ func TombstoneVars() (
 }
 func TombstoneEnc(fid *t.Id, ts *t.Uint64) (enc *T) {
 	return New(
-		NewPrefix(FullIdPubkey), fid, ts,
+		NewPrefix(Tombstone), fid, ts,
 	)
 }
 func TombstoneDec(fid *t.Id, ts *t.Uint64) (enc *T) {

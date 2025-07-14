@@ -63,7 +63,8 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 		// Regular events that are not replaceable
 		var regularEvents event.S
 
-		// Map to track deletion events by kind and pubkey (for replaceable events)
+		// Map to track deletion events by kind and pubkey (for replaceable
+		// events)
 		deletionsByKindPubkey := make(map[string]bool)
 		// Map to track deletion events by kind, pubkey, and d-tag (for
 		// parameterized replaceable events)
@@ -88,11 +89,12 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					if eTag.Len() < 2 {
 						continue
 					}
-					// We don't need to do anything with direct event ID references
-					// as we'll filter those out in the second pass
+					// We don't need to do anything with direct event ID
+					// references as we'll filter those out in the second pass
 				}
 
-				// Check for 'a' tags that reference parameterized replaceable events
+				// Check for 'a' tags that reference parameterized replaceable
+				// events
 				aTags := ev.Tags.GetAll(tag.New([]byte{'a'}))
 				for _, aTag := range aTags.ToSliceOfTags() {
 					if aTag.Len() < 2 {
