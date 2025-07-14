@@ -58,6 +58,7 @@ const (
 	EventPrefix        = I("evt")
 	IdPrefix           = I("eid")
 	FullIdPubkeyPrefix = I("fpc") // full id, pubkey, created at
+	TombstonePrefix    = I("tmb")
 
 	CreatedAtPrefix  = I("c--") // created at
 	KindPrefix       = I("kc-") // kind, created at
@@ -220,6 +221,26 @@ func FullIdPubkeyDec(
 	ser *t.Uint40, fid *t.Id, p *t.PubHash, ca *t.Uint64,
 ) (enc *T) {
 	return New(NewPrefix(), ser, fid, p, ca)
+}
+
+// Tombstone is a marker indicating that an event with the Id is deleted and
+// should not be saved again, and the timestamp of when the deletion occurred.
+//
+//	3 prefix|32 Id|8 timestamp
+var Tombstone = next()
+
+func TombstoneVars() (
+	fid *t.Id, ts *t.Uint64,
+) {
+	return new(t.Id), new(t.Uint64)
+}
+func TombstoneEnc(fid *t.Id, ts *t.Uint64) (enc *T) {
+	return New(
+		NewPrefix(FullIdPubkey), fid, ts,
+	)
+}
+func TombstoneDec(fid *t.Id, ts *t.Uint64) (enc *T) {
+	return New(NewPrefix(), fid, ts)
 }
 
 // CreatedAt is an index that allows search for the timestamp on the event.
