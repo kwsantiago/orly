@@ -91,3 +91,4 @@ node_modules/**
 /gui/gui/main.wasm
 /gui/gui/index.html
 database/testrealy
+/.idea/workspace.xml

@@ -1,12 +1,12 @@
-= realy.lol
+= orly.lol
 :toc:
 :note-caption: note 👉
 
-image:https://img.shields.io/badge/godoc-documentation-blue.svg[Documentation,link=https://pkg.go.dev/realy.lol]
-image:https://img.shields.io/badge/donate-geyser_crowdfunding_project_page-orange.svg[Support this project,link=https://geyser.fund/project/realy]
+image:https://img.shields.io/badge/godoc-documentation-blue.svg[Documentation,link=https://pkg.go.dev/orly.lol]
+image:https://img.shields.io/badge/donate-geyser_crowdfunding_project_page-orange.svg[Support this project,link=https://geyser.fund/project/orly]
 zap me: ⚡️mleku@getalby.com
 
-image:./realy.png[realy.png]
+image:./orly.png[orly.png]
 
 nostr relay built from a heavily modified fork of https://github.com/nbd-wtf/go-nostr[nbd-wtf/go-nostr]
 and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum performance, simplicity and memory efficiency.
@@ -57,18 +57,17 @@ In order to disable the use of this, you must set the environment variable `CGO_
 
 ----
 export CGO_ENABLED=0
-cd cmd/realy
 go build .
 ----
 
-This will build the binary and place it in cmd/realy and then you can move it where you like.
+This will build the binary and place it in the root of the repository and then you can move it where you like.
 
 === Static build
 
 To produce a static binary, whether you use the CGO secp256k1 or disable CGO as above:
 
 ----
-go build --ldflags '-extldflags "-static"' -o ~/bin/realy ./cmd/realy/.
+go build --ldflags '-extldflags "-static"' -o ~/bin/orly .
 ----
 
 will place it into your `~/bin/` directory, and it will work on any system of the same architecture with the same glibc major version (has been 2 for a long time).
@@ -82,7 +81,7 @@ The default will run the relay with default settings, which will not be what you
 To see the current active configuration:
 
 ----
-realy env
+orly env
 ----
 
 === Create Persistent Configuration
@@ -90,35 +89,33 @@ realy env
 This output can be directed to the profile location to make the settings editable without manually setting them on the commandline:
 
 ----
-realy env > $HOME/.config/realy/.env
+orly env > $HOME/.config/orly/.env
 ----
 
 You can now edit this file to alter the configuration.
 
-Regarding the configuration system, this is an element of many servers that is absurdly complex, and for which reason Realy does not use a complicated scheme, a simple library that allows automatic configuration of a series of options, added a simple info print:
+Regarding the configuration system, this is an element of many servers that is absurdly complex, and for which reason orly does not use a complicated scheme, a simple library that allows automatic configuration of a series of options, added a simple info print:
 
 ----
-realy help
+orly help
 ----
 
 will show you the instructions, and the one simple extension of being able to use a standard formated .env file to configure all the options for an instance.
 
 === Database Storage Location
 
-The database is stored in `$HOME/.local/share/realy` and if need be you can stop `realy` delete everything in this directory and restart to "nuke" the database. Note that this is now available through the link:#_simplified_nostr[Simplified Nostr] HTTP OpenAPI endpoint on `/nuke`
+The database is stored in `$HOME/.local/share/orly` and if need be you can stop `orly` delete everything in this directory and restart to "nuke" the database. Note that this is now available through the link:#_simplified_nostr[Simplified Nostr] HTTP OpenAPI endpoint on `/nuke`
 
 == API support
 
 === Standard Nostr NIPs
 
-`realy` already accepts all the standard NIPs mainly nip-01 and many other types are recognised such an NIP-42 auth messages and it uses and parses relay lists, and all that other stuff.
-It has maybe the most faithful implementation of NIP-42 but most clients don't correctly implement it, or at all.
-Which is sad, but what can you do with stupid people?
+`orly` already accepts all the standard NIPs mainly nip-01 and many other types are recognised such an NIP-42 auth messages and it uses and parses relay lists, and all that other stuff.
 
 [#_simplified_nostr]
 === Simplified Nostr
 
-Rather than write a text that will likely fall out of date very quickly, simply run `realy` and visit its listener address (eg link:http://localhost:3334/api[http://localhost:3334/api]) to see the full documentation.
+Rather than write a text that will likely fall out of date very quickly, simply run `orly` and visit its listener address (eg link:http://localhost:3334/api[http://localhost:3334/api]) to see the full documentation.
 
 By default this presents you with a Scalar Docs page that lets you browse the available API methods and shows examples in many forms including cURL and most languages how to call and what data needs to go in headers, body, and parameters and what results will come back.
 
