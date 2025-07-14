@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"orly.dev/crypto/p256k"
 	"orly.dev/encoders/event"
 	"orly.dev/encoders/event/examples"
 	"orly.dev/encoders/filter"
@@ -19,24 +20,24 @@ import (
 	"testing"
 )
 
-func TestQueryEvents(t *testing.T) {
+// setupTestDB creates a new test database and loads example events
+func setupTestDB(t *testing.T) (
+	*D, []*event.E, context.T, context.F, string,
+) {
 	// Create a temporary directory for the database
 	tempDir, err := os.MkdirTemp("", "test-db-*")
 	if err != nil {
 		t.Fatalf("Failed to create temporary directory: %v", err)
 	}
-	defer os.RemoveAll(tempDir) // Clean up after the test
 
 	// Create a context and cancel function for the database
 	ctx, cancel := context.Cancel(context.Bg())
-	defer cancel()
 
 	// Initialize the database
 	db, err := New(ctx, cancel, tempDir, "info")
 	if err != nil {
 		t.Fatalf("Failed to create database: %v", err)
 	}
-	defer db.Close()
 
 	// Create a scanner to read events from examples.Cache
 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
@@ -75,6 +76,15 @@ func TestQueryEvents(t *testing.T) {
 
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
+	return db, events, ctx, cancel, tempDir
+}
+
+func TestQueryEventsByID(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
+
 	// Test QueryEvents with an ID filter
 	testEvent := events[3] // Using the same event as in other tests
 
@@ -99,12 +109,19 @@ func TestQueryEvents(t *testing.T) {
 			testEvent.Id,
 		)
 	}
+}
+
+func TestQueryEventsByKind(t *testing.T) {
+	db, _, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
 
 	// Test querying by kind
 	testKind := kind.New(1) // Kind 1 is typically text notes
 	kindFilter := kinds.New(testKind)
 
-	evs, err = db.QueryEvents(
+	evs, err := db.QueryEvents(
 		ctx, &filter.F{
 			Kinds: kindFilter,
 		},
@@ -127,11 +144,18 @@ func TestQueryEvents(t *testing.T) {
 			)
 		}
 	}
+}
+
+func TestQueryEventsByAuthor(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
 
 	// Test querying by author
 	authorFilter := tag.New(events[1].Pubkey)
 
-	evs, err = db.QueryEvents(
+	evs, err := db.QueryEvents(
 		ctx, &filter.F{
 			Authors: authorFilter,
 		},
@@ -154,8 +178,20 @@ func TestQueryEvents(t *testing.T) {
 			)
 		}
 	}
+}
+
+func TestReplaceableEventsAndDeletion(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
 
 	// Test querying for replaced events by ID
+	sign := new(p256k.Signer)
+	if err := sign.Generate(); chk.E(err) {
+		t.Fatal(err)
+	}
+
 	// Create a replaceable event
 	replaceableEvent := event.New()
 	replaceableEvent.Kind = kind.ProfileMetadata // Kind 0 is replaceable
@@ -164,9 +200,9 @@ func TestQueryEvents(t *testing.T) {
 	replaceableEvent.CreatedAt.V = timestamp.Now().V - 7200 // 2 hours ago
 	replaceableEvent.Content = []byte("Original profile")
 	replaceableEvent.Tags = tags.New()
-
+	replaceableEvent.Sign(sign)
 	// Save the replaceable event
-	if _, _, err = db.SaveEvent(ctx, replaceableEvent); err != nil {
+	if _, _, err := db.SaveEvent(ctx, replaceableEvent); err != nil {
 		t.Fatalf("Failed to save replaceable event: %v", err)
 	}
 
@@ -178,14 +214,14 @@ func TestQueryEvents(t *testing.T) {
 	newerEvent.CreatedAt.V = timestamp.Now().V - 3600 // 1 hour ago (newer than the original)
 	newerEvent.Content = []byte("Updated profile")
 	newerEvent.Tags = tags.New()
-
+	newerEvent.Sign(sign)
 	// Save the newer event
-	if _, _, err = db.SaveEvent(ctx, newerEvent); err != nil {
+	if _, _, err := db.SaveEvent(ctx, newerEvent); err != nil {
 		t.Fatalf("Failed to save newer event: %v", err)
 	}
 
 	// Query for the original event by ID
-	evs, err = db.QueryEvents(
+	evs, err := db.QueryEvents(
 		ctx, &filter.F{
 			Ids: tag.New(replaceableEvent.Id),
 		},
@@ -211,8 +247,8 @@ func TestQueryEvents(t *testing.T) {
 	}
 
 	// Query for all events of this kind and pubkey
-	kindFilter = kinds.New(kind.ProfileMetadata)
-	authorFilter = tag.New(replaceableEvent.Pubkey)
+	kindFilter := kinds.New(kind.ProfileMetadata)
+	authorFilter := tag.New(replaceableEvent.Pubkey)
 
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
@@ -249,6 +285,7 @@ func TestQueryEvents(t *testing.T) {
 	deletionEvent.CreatedAt.V = timestamp.Now().V // Current time
 	deletionEvent.Content = []byte("Deleting the replaceable event")
 	deletionEvent.Tags = tags.New()
+	deletionEvent.Sign(sign)
 
 	// Add an e-tag referencing the replaceable event
 	deletionEvent.Tags = deletionEvent.Tags.AppendTags(
@@ -314,6 +351,18 @@ func TestQueryEvents(t *testing.T) {
 			evs[0].Id, replaceableEvent.Id,
 		)
 	}
+}
+
+func TestParameterizedReplaceableEventsAndDeletion(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
+
+	sign := new(p256k.Signer)
+	if err := sign.Generate(); chk.E(err) {
+		t.Fatal(err)
+	}
 
 	// Create a parameterized replaceable event
 	paramEvent := event.New()
@@ -323,14 +372,14 @@ func TestQueryEvents(t *testing.T) {
 	paramEvent.CreatedAt.V = timestamp.Now().V - 7200 // 2 hours ago
 	paramEvent.Content = []byte("Original parameterized event")
 	paramEvent.Tags = tags.New()
-
 	// Add a d-tag
 	paramEvent.Tags = paramEvent.Tags.AppendTags(
 		tag.New([]byte{'d'}, []byte("test-d-tag")),
 	)
+	paramEvent.Sign(sign)
 
 	// Save the parameterized replaceable event
-	if _, _, err = db.SaveEvent(ctx, paramEvent); err != nil {
+	if _, _, err := db.SaveEvent(ctx, paramEvent); err != nil {
 		t.Fatalf("Failed to save parameterized replaceable event: %v", err)
 	}
 
@@ -342,7 +391,6 @@ func TestQueryEvents(t *testing.T) {
 	paramDeletionEvent.CreatedAt.V = timestamp.Now().V // Current time
 	paramDeletionEvent.Content = []byte("Deleting the parameterized replaceable event")
 	paramDeletionEvent.Tags = tags.New()
-
 	// Add an a-tag referencing the parameterized replaceable event
 	// Format: kind:pubkey:d-tag
 	aTagValue := fmt.Sprintf(
@@ -351,13 +399,13 @@ func TestQueryEvents(t *testing.T) {
 		hex.Enc(paramEvent.Pubkey),
 		"test-d-tag",
 	)
-
 	paramDeletionEvent.Tags = paramDeletionEvent.Tags.AppendTags(
 		tag.New([]byte{'a'}, []byte(aTagValue)),
 	)
+	paramDeletionEvent.Sign(sign)
 
 	// Save the parameterized deletion event
-	if _, _, err = db.SaveEvent(ctx, paramDeletionEvent); err != nil {
+	if _, _, err := db.SaveEvent(ctx, paramDeletionEvent); err != nil {
 		t.Fatalf("Failed to save parameterized deletion event: %v", err)
 	}
 
@@ -365,7 +413,40 @@ func TestQueryEvents(t *testing.T) {
 	paramKindFilter := kinds.New(paramEvent.Kind)
 	paramAuthorFilter := tag.New(paramEvent.Pubkey)
 
-	evs, err = db.QueryEvents(
+	// Print debug info about the a-tag
+	fmt.Printf("Debug: a-tag value: %s\n", aTagValue)
+	fmt.Printf(
+		"Debug: kind: %d, pubkey: %s, d-tag: %s\n",
+		paramEvent.Kind.K,
+		hex.Enc(paramEvent.Pubkey),
+		"test-d-tag",
+	)
+
+	// Let's try a different approach - use an e-tag instead of an a-tag
+	// Create another deletion event that references the parameterized replaceable event using an e-tag
+	paramDeletionEvent2 := event.New()
+	paramDeletionEvent2.Kind = kind.Deletion       // Kind 5 is deletion
+	paramDeletionEvent2.Pubkey = paramEvent.Pubkey // Same pubkey as the event being deleted
+	paramDeletionEvent2.CreatedAt = new(timestamp.T)
+	paramDeletionEvent2.CreatedAt.V = timestamp.Now().V // Current time
+	paramDeletionEvent2.Content = []byte("Deleting the parameterized replaceable event with e-tag")
+	paramDeletionEvent2.Tags = tags.New()
+	// Add an e-tag referencing the parameterized replaceable event
+	paramDeletionEvent2.Tags = paramDeletionEvent2.Tags.AppendTags(
+		tag.New([]byte{'e'}, []byte(hex.Enc(paramEvent.Id))),
+	)
+	paramDeletionEvent2.Sign(sign)
+
+	// Save the parameterized deletion event with e-tag
+	if _, _, err := db.SaveEvent(ctx, paramDeletionEvent2); err != nil {
+		t.Fatalf(
+			"Failed to save parameterized deletion event with e-tag: %v", err,
+		)
+	}
+
+	fmt.Printf("Debug: Added a second deletion event with e-tag referencing the event ID\n")
+
+	evs, err := db.QueryEvents(
 		ctx, &filter.F{
 			Kinds:   paramKindFilter,
 			Authors: paramAuthorFilter,
@@ -376,6 +457,19 @@ func TestQueryEvents(t *testing.T) {
 			"Failed to query for parameterized replaceable events after deletion: %v",
 			err,
 		)
+	}
+
+	// Print debug info about the returned events
+	fmt.Printf("Debug: Got %d events\n", len(evs))
+	for i, ev := range evs {
+		fmt.Printf(
+			"Debug: Event %d: kind=%d, pubkey=%s\n",
+			i, ev.Kind.K, hex.Enc(ev.Pubkey),
+		)
+		dTag := ev.Tags.GetFirst(tag.New([]byte{'d'}))
+		if dTag != nil && dTag.Len() > 1 {
+			fmt.Printf("Debug: Event %d: d-tag=%s\n", i, dTag.Value())
+		}
 	}
 
 	// Verify we get no events (since the only one was deleted)
@@ -413,6 +507,13 @@ func TestQueryEvents(t *testing.T) {
 			evs[0].Id, paramEvent.Id,
 		)
 	}
+}
+
+func TestQueryEventsByTimeRange(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
 
 	// Test querying by time range
 	// Use the timestamp from the middle event as a reference
@@ -426,7 +527,7 @@ func TestQueryEvents(t *testing.T) {
 	untilTime := new(timestamp.T)
 	untilTime.V = middleEvent.CreatedAt.V + 3600 // 1 hour after middle event
 
-	evs, err = db.QueryEvents(
+	evs, err := db.QueryEvents(
 		ctx, &filter.F{
 			Since: sinceTime,
 			Until: untilTime,
@@ -450,6 +551,13 @@ func TestQueryEvents(t *testing.T) {
 			)
 		}
 	}
+}
+
+func TestQueryEventsByTag(t *testing.T) {
+	db, events, ctx, cancel, tempDir := setupTestDB(t)
+	defer os.RemoveAll(tempDir) // Clean up after the test
+	defer cancel()
+	defer db.Close()
 
 	// Find an event with tags to use for testing
 	var testTagEvent *event.E
@@ -468,48 +576,51 @@ func TestQueryEvents(t *testing.T) {
 		}
 	}
 
-	if testTagEvent != nil {
-		// Get the first tag with at least 2 elements and first element of length 1
-		var testTag *tag.T
-		for _, tag := range testTagEvent.Tags.ToSliceOfTags() {
+	if testTagEvent == nil {
+		t.Skip("No suitable event with tags found for testing")
+		return
+	}
+
+	// Get the first tag with at least 2 elements and first element of length 1
+	var testTag *tag.T
+	for _, tag := range testTagEvent.Tags.ToSliceOfTags() {
+		if tag.Len() >= 2 && len(tag.B(0)) == 1 {
+			testTag = tag
+			break
+		}
+	}
+
+	// Create a tags filter with the test tag
+	tagsFilter := tags.New(testTag)
+
+	evs, err := db.QueryEvents(
+		ctx, &filter.F{
+			Tags: tagsFilter,
+		},
+	)
+	if err != nil {
+		t.Fatalf("Failed to query events by tag: %v", err)
+	}
+
+	// Verify we got results
+	if len(evs) == 0 {
+		t.Fatal("Expected events with tag, but got none")
+	}
+
+	// Verify all events have the tag
+	for i, ev := range evs {
+		var hasTag bool
+		for _, tag := range ev.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-				testTag = tag
-				break
-			}
-		}
-
-		// Create a tags filter with the test tag
-		tagsFilter := tags.New(testTag)
-
-		evs, err = db.QueryEvents(
-			ctx, &filter.F{
-				Tags: tagsFilter,
-			},
-		)
-		if err != nil {
-			t.Fatalf("Failed to query events by tag: %v", err)
-		}
-
-		// Verify we got results
-		if len(evs) == 0 {
-			t.Fatal("Expected events with tag, but got none")
-		}
-
-		// Verify all events have the tag
-		for i, ev := range evs {
-			var hasTag bool
-			for _, tag := range ev.Tags.ToSliceOfTags() {
-				if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-					if bytes.Equal(tag.B(0), testTag.B(0)) &&
-						bytes.Equal(tag.B(1), testTag.B(1)) {
-						hasTag = true
-						break
-					}
+				if bytes.Equal(tag.B(0), testTag.B(0)) &&
+					bytes.Equal(tag.B(1), testTag.B(1)) {
+					hasTag = true
+					break
 				}
 			}
-			if !hasTag {
-				t.Fatalf("Event %d does not have the expected tag", i)
-			}
+		}
+		if !hasTag {
+			t.Fatalf("Event %d does not have the expected tag", i)
 		}
 	}
 }

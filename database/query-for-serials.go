@@ -17,13 +17,9 @@ func (d *D) QueryForSerials(c context.T, f *filter.F) (
 	var founds types.Uint40s
 	var idPkTs []store.IdPkTs
 	if f.Ids != nil && f.Ids.Len() > 0 {
-		var idxs []Range
-		if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
-			return
-		}
-		for _, idx := range idxs {
+		for _, id := range f.Ids.ToSliceOfBytes() {
 			var ser *types.Uint40
-			if ser, err = d.GetSerialById(idx.Start); chk.E(err) {
+			if ser, err = d.GetSerialById(id); chk.E(err) {
 				return
 			}
 			founds = append(founds, ser)

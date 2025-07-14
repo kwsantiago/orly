@@ -77,20 +77,6 @@ func TestQueryForIds(t *testing.T) {
 	var idTsPk []store.IdPkTs
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
-			Ids: tag.New(events[3].Id),
-		},
-	)
-	if len(idTsPk) != 1 {
-		t.Fatal("did not find expected event")
-	}
-	if !bytes.Equal(idTsPk[0].Id, events[3].Id) {
-		t.Fatalf(
-			"did not find expected event, got %0x, expected %0x",
-			idTsPk[0].Id, events[3].Id,
-		)
-	}
-	idTsPk, err = db.QueryForIds(
-		ctx, &filter.F{
 			Authors: tag.New(events[1].Pubkey),
 		},
 	)

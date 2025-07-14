@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"orly.dev/encoders/tags"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/errorf"
 	"orly.dev/utils/log"
@@ -47,6 +48,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
+					log.I.S(ev, evt)
 					return errorf.W(string(normalize.Invalid.F("not replacing newer replaceable event")))
 				}
 				// not deleting these events because some clients are retarded
@@ -90,6 +92,9 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 		f := filter.New()
 		f.Authors = tag.New(evt.Pubkey)
 		f.Kinds = kinds.New(evt.Kind)
+		f.Tags = tags.New(
+			tag.New("#d"), tag.New(evt.Tags.GetFirst(tag.New("d")).Value()),
+		)
 		log.I.F(
 			"filter for parameterized replaceable %v %s",
 			f.Tags.ToStringsSlice(),
@@ -98,6 +103,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 		if evs, err = sto.QueryEvents(c, f); err != nil {
 			return errorf.E("failed to query before replacing: %w", err)
 		}
+		log.I.S(evs)
 		if len(evs) > 0 {
 			for _, ev := range evs {
 				del := true
@@ -106,7 +112,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
-					return errorf.D(string(normalize.Blocked.F("not replacing newer parameterized replaceable event")))
+					return errorf.D(string(normalize.Error.F("not replacing newer parameterized replaceable event")))
 				}
 				// not deleting these events because some clients are retarded
 				// and the query will pull the new one, but a backup can recover
@@ -153,7 +159,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 	if _, _, err = sto.SaveEvent(c, evt); chk.E(err) && !errors.Is(
 		err, store.ErrDupEvent,
 	) {
-		return errorf.E("failed to save: %w", err)
+		return
 	}
 	return
 }

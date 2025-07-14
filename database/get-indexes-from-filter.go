@@ -131,7 +131,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 
 	// TagKindPubkey tkp
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 && f.Tags != nil && f.Tags.Len() > 0 {
-		log.T.F("kinds authors tags")
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
 				for _, tag := range f.Tags.ToSliceOfTags() {
@@ -300,7 +299,6 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 
 	// KindPubkey kpc
 	if f.Kinds != nil && f.Kinds.Len() > 0 && f.Authors != nil && f.Authors.Len() > 0 {
-		log.I.F("kinds authors")
 		for _, k := range f.Kinds.ToUint16() {
 			for _, author := range f.Authors.ToSliceOfBytes() {
 				kind := new(types.Uint16)

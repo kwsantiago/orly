@@ -8,10 +8,8 @@ import (
 	"orly.dev/database/indexes/types"
 	"orly.dev/encoders/event"
 	"orly.dev/encoders/filter"
-	"orly.dev/encoders/hex"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
-	"orly.dev/utils/log"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -49,7 +47,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 				it.Seek(tombstonePrefix)
 				if it.ValidForPrefix(tombstonePrefix) {
 					// Tombstone exists, event was deleted
-					return errors.New("blocked: not saving deleted event again")
+					return errors.New("error: not saving deleted event again")
 				}
 				// No tombstone found, proceed with saving
 				return nil
@@ -68,19 +66,19 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		f.Kinds.K = append(f.Kinds.K, ev.Kind)
 		f.Authors = f.Authors.Append(ev.Pubkey)
 
-		// Query for previous events
-		var prevEvents event.S
-		if prevEvents, err = d.QueryEvents(c, f); chk.E(err) {
-			return
-		}
+		// // Query for previous events
+		// var prevEvents event.S
+		// if prevEvents, err = d.QueryEvents(c, f); chk.E(err) {
+		// 	return
+		// }
 
-		// If there are previous events, log that we're replacing one
-		if len(prevEvents) > 0 {
-			d.Logger.Infof(
-				"Saving new version of replaceable event kind %d from pubkey %s",
-				ev.Kind.K, hex.Enc(ev.Pubkey),
-			)
-		}
+		// // If there are previous events, log that we're replacing one
+		// if len(prevEvents) > 0 {
+		// 	log.T.F(
+		// 		"Saving new version of replaceable event kind %d from pubkey %s",
+		// 		ev.Kind.K, hex.Enc(ev.Pubkey),
+		// 	)
+		// }
 	}
 
 	// Get the next sequence number for the event
@@ -133,6 +131,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 			return
 		},
 	)
-	log.T.F("total data written: %d bytes keys %d bytes values", kc, vc)
+	// log.T.F("total data written: %d bytes keys %d bytes values", kc, vc)
 	return
 }

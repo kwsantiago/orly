@@ -7,7 +7,6 @@ import (
 	"orly.dev/encoders/event"
 	"orly.dev/encoders/filter"
 	"orly.dev/encoders/hex"
-	"orly.dev/encoders/ints"
 	"orly.dev/encoders/kind"
 	"orly.dev/encoders/tag"
 	"orly.dev/interfaces/store"
@@ -25,14 +24,10 @@ import (
 func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 	// if there is Ids in the query, this overrides anything else
 	if f.Ids != nil && f.Ids.Len() > 0 {
-		var idxs []Range
-		if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
-			return
-		}
-		for _, idx := range idxs {
+		for _, idx := range f.Ids.ToSliceOfBytes() {
 			// we know there is only Ids in this, so run the ID query and fetch.
 			var ser *types.Uint40
-			if ser, err = d.GetSerialById(idx.Start); chk.E(err) {
+			if ser, err = d.GetSerialById(idx); chk.E(err) {
 				continue
 			}
 			// fetch the events
@@ -108,11 +103,12 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					}
 
 					// Parse the kind
-					kin := ints.New(uint16(0))
-					if _, err = kin.Unmarshal(split[0]); err != nil {
+					kindStr := string(split[0])
+					kindInt, err := strconv.Atoi(kindStr)
+					if err != nil {
 						continue
 					}
-					kk := kind.New(kin.Uint16())
+					kk := kind.New(uint16(kindInt))
 
 					// Only process parameterized replaceable events
 					if !kk.IsParameterizedReplaceable() {
@@ -176,6 +172,27 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					if targetEv.Kind.IsReplaceable() {
 						key := string(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
 						deletionsByKindPubkey[key] = true
+					} else if targetEv.Kind.IsParameterizedReplaceable() {
+						// For parameterized replaceable events, we need to consider the 'd' tag
+						key := string(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
+
+						// Get the 'd' tag value
+						dTag := targetEv.Tags.GetFirst(tag.New([]byte{'d'}))
+						var dValue string
+						if dTag != nil && dTag.Len() > 1 {
+							dValue = string(dTag.Value())
+						} else {
+							// If no 'd' tag, use empty string
+							dValue = ""
+						}
+
+						// Initialize the inner map if it doesn't exist
+						if _, exists := deletionsByKindPubkeyDTag[key]; !exists {
+							deletionsByKindPubkeyDTag[key] = make(map[string]bool)
+						}
+
+						// Mark this d-tag as deleted
+						deletionsByKindPubkeyDTag[key][dValue] = true
 					}
 				}
 			}
@@ -238,7 +255,10 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					dValue = ""
 				}
 
+				// Check if this event has been deleted via an a-tag
 				if deletionMap, exists := deletionsByKindPubkeyDTag[key]; exists {
+					// If the d-tag value is in the deletion map and this event is not
+					// specifically requested by ID, skip it
 					if deletionMap[dValue] && !isIdInFilter {
 						continue
 					}

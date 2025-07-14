@@ -11,12 +11,15 @@ import (
 
 // mainNetGenesisHash is the hash of the first block in the block chain for the
 // main network (genesis block).
-var mainNetGenesisHash = Hash([HashSize]byte{// Make go vet happy.
-	0x6f, 0xe2, 0x8c, 0x0a, 0xb6, 0xf1, 0xb3, 0x72,
-	0xc1, 0xa6, 0xa2, 0x46, 0xae, 0x63, 0xf7, 0x4f,
-	0x93, 0x1e, 0x83, 0x65, 0xe1, 0x5a, 0x08, 0x9c,
-	0x68, 0xd6, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00,
-})
+var mainNetGenesisHash = Hash(
+	[HashSize]byte{
+		// Make go vet happy.
+		0x6f, 0xe2, 0x8c, 0x0a, 0xb6, 0xf1, 0xb3, 0x72,
+		0xc1, 0xa6, 0xa2, 0x46, 0xae, 0x63, 0xf7, 0x4f,
+		0x93, 0x1e, 0x83, 0x65, 0xe1, 0x5a, 0x08, 0x9c,
+		0x68, 0xd6, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00,
+	},
+)
 
 // TestHash tests the Hash API.
 func TestHash(t *testing.T) {
@@ -39,19 +42,24 @@ func TestHash(t *testing.T) {
 	}
 	// Ensure proper size.
 	if len(hash) != HashSize {
-		t.Errorf("NewHash: hash length mismatch - got: %v, want: %v",
-			len(hash), HashSize
+		t.Errorf(
+			"NewHash: hash length mismatch - got: %v, want: %v",
+			len(hash), HashSize,
 		)
 	}
 	// Ensure contents match.
 	if !bytes.Equal(hash[:], buf) {
-		t.Errorf("NewHash: hash contents mismatch - got: %v, want: %v",
-			hash[:], buf)
+		t.Errorf(
+			"NewHash: hash contents mismatch - got: %v, want: %v",
+			hash[:], buf,
+		)
 	}
 	// Ensure contents of hash of block 234440 don't match 234439.
 	if hash.IsEqual(blockHash) {
-		t.Errorf("IsEqual: hash contents should not match - got: %v, want: %v",
-			hash, blockHash)
+		t.Errorf(
+			"IsEqual: hash contents should not match - got: %v, want: %v",
+			hash, blockHash,
+		)
 	}
 	// Set hash from byte slice and ensure contents match.
 	err = hash.SetBytes(blockHash.CloneBytes())
@@ -59,8 +67,10 @@ func TestHash(t *testing.T) {
 		t.Errorf("SetBytes: %v", err)
 	}
 	if !hash.IsEqual(blockHash) {
-		t.Errorf("IsEqual: hash contents mismatch - got: %v, want: %v",
-			hash, blockHash)
+		t.Errorf(
+			"IsEqual: hash contents mismatch - got: %v, want: %v",
+			hash, blockHash,
+		)
 	}
 	// Ensure nil hashes are handled properly.
 	if !(*Hash)(nil).IsEqual(nil) {
@@ -86,16 +96,21 @@ func TestHash(t *testing.T) {
 func TestHashString(t *testing.T) {
 	// Block 100000 hash.
 	wantStr := "000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506"
-	hash := Hash([HashSize]byte{// Make go vet happy.
-		0x06, 0xe5, 0x33, 0xfd, 0x1a, 0xda, 0x86, 0x39,
-		0x1f, 0x3f, 0x6c, 0x34, 0x32, 0x04, 0xb0, 0xd2,
-		0x78, 0xd4, 0xaa, 0xec, 0x1c, 0x0b, 0x20, 0xaa,
-		0x27, 0xba, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
-	})
+	hash := Hash(
+		[HashSize]byte{
+			// Make go vet happy.
+			0x06, 0xe5, 0x33, 0xfd, 0x1a, 0xda, 0x86, 0x39,
+			0x1f, 0x3f, 0x6c, 0x34, 0x32, 0x04, 0xb0, 0xd2,
+			0x78, 0xd4, 0xaa, 0xec, 0x1c, 0x0b, 0x20, 0xaa,
+			0x27, 0xba, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
+		},
+	)
 	hashStr := hash.String()
 	if hashStr != wantStr {
-		t.Errorf("String: wrong hash string - got %v, want %v",
-			hashStr, wantStr)
+		t.Errorf(
+			"String: wrong hash string - got %v, want %v",
+			hashStr, wantStr,
+		)
 	}
 }
 

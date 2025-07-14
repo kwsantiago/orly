@@ -40,19 +40,19 @@ func (s *Server) addEvent(
 		// }
 		if saveErr := s.Publish(c, ev); saveErr != nil {
 			if errors.Is(saveErr, store.ErrDupEvent) {
-				return false, normalize.Error.F(saveErr.Error())
+				return false, []byte(saveErr.Error())
 			}
 			errmsg := saveErr.Error()
 			if socketapi.NIP20prefixmatcher.MatchString(errmsg) {
 				if strings.Contains(errmsg, "tombstone") {
-					return false, normalize.Blocked.F("event was deleted, not storing it again")
+					return false, normalize.Error.F("event was deleted, not storing it again")
 				}
 				if strings.HasPrefix(errmsg, string(normalize.Blocked)) {
 					return false, []byte(errmsg)
 				}
-				return false, normalize.Error.F(errmsg)
+				return false, []byte(errmsg)
 			} else {
-				return false, normalize.Error.F("failed to save (%s)", errmsg)
+				return false, []byte(errmsg)
 			}
 		}
 		// if advancedSaver != nil {
