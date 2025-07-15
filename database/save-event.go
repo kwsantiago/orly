@@ -2,14 +2,22 @@ package database
 
 import (
 	"bytes"
-	"errors"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/database/indexes"
 	"orly.dev/database/indexes/types"
 	"orly.dev/encoders/event"
 	"orly.dev/encoders/filter"
+	"orly.dev/encoders/hex"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/kinds"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/tag/atag"
+	"orly.dev/encoders/tags"
+	"orly.dev/interfaces/store"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
+	"orly.dev/utils/errorf"
+	"sort"
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
@@ -19,68 +27,90 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 	// Marshal the event to binary
 	ev.MarshalBinary(buf)
 
-	// Check for tombstone existence - if the event was deleted, don't save it
-	// again
-	if ev.Id != nil {
-		// Create a tombstone prefix key to check for existence
-		fid, _ := indexes.TombstoneVars()
-		if err = fid.FromId(ev.Id); chk.E(err) {
-			return
+	// check if an existing delete event references this event submission
+	if ev.Kind.IsParameterizedReplaceable() {
+		var idxs []Range
+		// construct a tag
+		t := ev.Tags.GetFirst(tag.New("d"))
+		a := atag.T{
+			Kind:   ev.Kind,
+			PubKey: ev.Pubkey,
+			DTag:   t.Value(),
 		}
-
-		// Create prefix key (prefix + event ID, without timestamp)
-		prefixBuf := new(bytes.Buffer)
-		if err = indexes.TombstoneEnc(
-			fid, nil,
-		).MarshalWrite(prefixBuf); chk.E(err) {
-			return
-		}
-		tombstonePrefix := prefixBuf.Bytes()
-		// Check if any tombstone exists with this prefix
-		err = d.View(
-			func(txn *badger.Txn) error {
-				opts := badger.DefaultIteratorOptions
-				opts.PrefetchValues = false // We only need to check existence
-				it := txn.NewIterator(opts)
-				defer it.Close()
-
-				it.Seek(tombstonePrefix)
-				if it.ValidForPrefix(tombstonePrefix) {
-					// Tombstone exists, event was deleted
-					return errors.New("error: not saving deleted event again")
-				}
-				// No tombstone found, proceed with saving
-				return nil
+		at := a.Marshal(nil)
+		if idxs, err = GetIndexesFromFilter(
+			&filter.F{
+				Authors: tag.New(hex.Enc(ev.Pubkey)),
+				Kinds:   kinds.New(kind.Deletion),
+				Tags:    tags.New(tag.New([]byte("#a"), at)),
 			},
-		)
-		if chk.E(err) {
+		); chk.E(err) {
+			return
+		}
+		var sers types.Uint40s
+		for _, idx := range idxs {
+			var s types.Uint40s
+			if s, err = d.GetSerialsByRange(idx); chk.E(err) {
+				return
+			}
+			sers = append(sers, s...)
+		}
+		if len(sers) > 0 {
+			// there can be multiple of these because the author/kind/tag is a
+			// stable value but refers to any event from the author, of the
+			// kind, with the identifier. so we need to fetch the full ID index
+			// to get the timestamp and ensure that the event post-dates it.
+			// otherwise it should be rejected.
+			var idPkTss []*store.IdPkTs
+			for _, ser := range sers {
+				var fidpk *store.IdPkTs
+				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
+					return
+				}
+				idPkTss = append(idPkTss, fidpk)
+			}
+			// sort by timestamp, so the first is the newest
+			sort.Slice(
+				idPkTss, func(i, j int) bool {
+					return idPkTss[i].Ts > idPkTss[j].Ts
+				},
+			)
+			if ev.CreatedAt.I64() < idPkTss[0].Ts {
+				err = errorf.E(
+					"blocked: %0x was deleted by address %s because it is older than the delete: event: %d delete: %d",
+					ev.Id, at, ev.CreatedAt.I64(), idPkTss[0].Ts,
+				)
+				return
+			}
+			return
+		}
+	} else {
+		var idxs []Range
+		if idxs, err = GetIndexesFromFilter(
+			&filter.F{
+				Authors: tag.New(hex.Enc(ev.Pubkey)),
+				Kinds:   kinds.New(kind.Deletion),
+				Tags:    tags.New(tag.New("#e", hex.Enc(ev.Id))),
+			},
+		); chk.E(err) {
+			return
+		}
+		var sers types.Uint40s
+		for _, idx := range idxs {
+			var s types.Uint40s
+			if s, err = d.GetSerialsByRange(idx); chk.E(err) {
+				return
+			}
+			sers = append(sers, s...)
+		}
+		if len(sers) > 0 {
+			// really there can only be one of these; the chances of an idhash
+			// collision are basically zero in practice, at least, one in a
+			// billion or more anyway, more than a human is going to create.
+			err = errorf.E("blocked: %0x was deleted by event Id", ev.Id)
 			return
 		}
 	}
-
-	// Check if the event is replaceable
-	if ev.Kind != nil && ev.Kind.IsReplaceable() {
-		// Create a filter to find previous events of the same kind from the
-		// same pubkey
-		f := filter.New()
-		f.Kinds.K = append(f.Kinds.K, ev.Kind)
-		f.Authors = f.Authors.Append(ev.Pubkey)
-
-		// // Query for previous events
-		// var prevEvents event.S
-		// if prevEvents, err = d.QueryEvents(c, f); chk.E(err) {
-		// 	return
-		// }
-
-		// // If there are previous events, log that we're replacing one
-		// if len(prevEvents) > 0 {
-		// 	log.T.F(
-		// 		"Saving new version of replaceable event kind %d from pubkey %s",
-		// 		ev.Kind.K, hex.Enc(ev.Pubkey),
-		// 	)
-		// }
-	}
-
 	// Get the next sequence number for the event
 	var serial uint64
 	if serial, err = d.seq.Next(); chk.E(err) {

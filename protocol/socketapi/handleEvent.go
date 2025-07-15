@@ -278,8 +278,7 @@ func (a *A) HandleEvent(
 				}
 
 				// Use DeleteEvent to actually delete the target event
-				// with noTombstone=true to not save tombstones
-				if err = sto.DeleteEvent(c, eid, true); chk.E(err) {
+				if err = sto.DeleteEvent(c, eid); chk.E(err) {
 					if err = a.sendResponse(
 						env.Id, false,
 						normalize.Error.F("failed to delete target event"),

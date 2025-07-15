@@ -3,8 +3,14 @@ package database
 import (
 	"bufio"
 	"bytes"
+	"orly.dev/crypto/p256k"
 	"orly.dev/encoders/event"
 	"orly.dev/encoders/event/examples"
+	"orly.dev/encoders/hex"
+	"orly.dev/encoders/kind"
+	"orly.dev/encoders/tag"
+	"orly.dev/encoders/tags"
+	"orly.dev/encoders/timestamp"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/context"
 	"os"
@@ -80,4 +86,74 @@ func TestSaveEvents(t *testing.T) {
 		dur/time.Duration(eventCount),
 		float64(time.Second)/float64(dur/time.Duration(eventCount)),
 	)
+}
+
+// TestDeletionEventWithETagRejection tests that a deletion event with an "e" tag is rejected.
+func TestDeletionEventWithETagRejection(t *testing.T) {
+	// Create a temporary directory for the database
+	tempDir, err := os.MkdirTemp("", "test-db-*")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir) // Clean up after the test
+
+	// Create a context and cancel function for the database
+	ctx, cancel := context.Cancel(context.Bg())
+	defer cancel()
+
+	// Initialize the database
+	db, err := New(ctx, cancel, tempDir, "info")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer db.Close()
+
+	// Create a signer
+	sign := new(p256k.Signer)
+	if err := sign.Generate(); chk.E(err) {
+		t.Fatal(err)
+	}
+
+	// Create a regular event
+	regularEvent := event.New()
+	regularEvent.Kind = kind.TextNote // Kind 1 is a text note
+	regularEvent.Pubkey = sign.Pub()
+	regularEvent.CreatedAt = new(timestamp.T)
+	regularEvent.CreatedAt.V = timestamp.Now().V - 3600 // 1 hour ago
+	regularEvent.Content = []byte("Regular event")
+	regularEvent.Tags = tags.New()
+	regularEvent.Sign(sign)
+
+	// Save the regular event
+	if _, _, err := db.SaveEvent(ctx, regularEvent); err != nil {
+		t.Fatalf("Failed to save regular event: %v", err)
+	}
+
+	// Create a deletion event with an "e" tag referencing the regular event
+	deletionEvent := event.New()
+	deletionEvent.Kind = kind.Deletion // Kind 5 is deletion
+	deletionEvent.Pubkey = sign.Pub()
+	deletionEvent.CreatedAt = new(timestamp.T)
+	deletionEvent.CreatedAt.V = timestamp.Now().V // Current time
+	deletionEvent.Content = []byte("Deleting the regular event")
+	deletionEvent.Tags = tags.New()
+
+	// Add an e-tag referencing the regular event
+	deletionEvent.Tags = deletionEvent.Tags.AppendTags(
+		tag.New([]byte{'e'}, []byte(hex.Enc(regularEvent.Id))),
+	)
+
+	deletionEvent.Sign(sign)
+
+	// Try to save the deletion event, it should be rejected
+	_, _, err = db.SaveEvent(ctx, deletionEvent)
+	if err == nil {
+		t.Fatal("Expected deletion event with e-tag to be rejected, but it was accepted")
+	}
+
+	// Verify the error message
+	expectedError := "deletion events referencing other events with 'e' tag are not allowed"
+	if err.Error() != expectedError {
+		t.Fatalf("Expected error message '%s', got '%s'", expectedError, err.Error())
+	}
 }

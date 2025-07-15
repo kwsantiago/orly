@@ -77,7 +77,7 @@ type GetIdsWriter interface {
 
 type Deleter interface {
 	// DeleteEvent is used to handle deletion events, as per NIP-09.
-	DeleteEvent(c context.T, ev *eventid.T, noTombstone ...bool) (err error)
+	DeleteEvent(c context.T, ev *eventid.T) (err error)
 }
 
 type Saver interface {

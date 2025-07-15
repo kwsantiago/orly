@@ -76,9 +76,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 						)
 						// replaceable events we don't tombstone when replacing,
 						// so if deleted, old versions can be restored
-						if err = sto.DeleteEvent(
-							c, ev.EventId(), true,
-						); chk.E(err) {
+						if err = sto.DeleteEvent(c, ev.EventId()); chk.E(err) {
 							return
 						}
 					}()
@@ -107,7 +105,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 		if evs, err = sto.QueryEvents(c, f); err != nil {
 			return errorf.E("failed to query before replacing: %w", err)
 		}
-		log.I.S(evs)
+		// log.I.S(evs)
 		if len(evs) > 0 {
 			for _, ev := range evs {
 				del := true
@@ -150,9 +148,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 						)
 						// replaceable events we don't tombstone when replacing,
 						// so if deleted, old versions can be restored
-						if err = sto.DeleteEvent(
-							c, ev.EventId(), true,
-						); chk.E(err) {
+						if err = sto.DeleteEvent(c, ev.EventId()); chk.E(err) {
 							return
 						}
 					}()
