@@ -16,7 +16,7 @@ type I interface {
 	// Init is called at the very beginning by [S.Start], allowing a realy
 	// to initialize its internal resources.
 	Init() error
-	// Storage returns the realy storage implementation.
+	// Storage returns the relay storage implementation.
 	Storage() store.I
 }
 

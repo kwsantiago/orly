@@ -59,11 +59,12 @@ func main() {
 	go app.MonitorResources(c)
 	var server *realy.Server
 	serverParams := &realy.ServerParams{
-		Ctx:      c,
-		Cancel:   cancel,
-		Rl:       r,
-		DbPath:   cfg.DataDir,
-		MaxLimit: 512, // Default max limit for events
+		Ctx:          c,
+		Cancel:       cancel,
+		Rl:           r,
+		DbPath:       cfg.DataDir,
+		MaxLimit:     512, // Default max limit for events
+		AuthRequired: cfg.AuthRequired,
 	}
 	var opts []options.O
 	if server, err = realy.NewServer(serverParams, opts...); chk.E(err) {

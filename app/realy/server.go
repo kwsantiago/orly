@@ -26,27 +26,28 @@ import (
 )
 
 type Server struct {
-	Ctx        context.T
-	Cancel     context.F
-	options    *options.T
-	relay      relay.I
-	clientsMu  sync.Mutex
-	clients    map[*websocket.Conn]struct{}
-	Addr       string
-	mux        *servemux.S
-	httpServer *http.Server
-	listeners  *publish.S
+	Ctx          context.T
+	Cancel       context.F
+	options      *options.T
+	relay        relay.I
+	clientsMu    sync.Mutex
+	clients      map[*websocket.Conn]struct{}
+	Addr         string
+	mux          *servemux.S
+	httpServer   *http.Server
+	listeners    *publish.S
+	authRequired bool
 }
 
 type ServerParams struct {
-	Ctx            context.T
-	Cancel         context.F
-	Rl             relay.I
-	DbPath         string
-	MaxLimit       int
-	Admins         []signer.I
-	Owners         [][]byte
-	PublicReadable bool
+	Ctx          context.T
+	Cancel       context.F
+	Rl           relay.I
+	DbPath       string
+	MaxLimit     int
+	Admins       []signer.I
+	Owners       [][]byte
+	AuthRequired bool
 }
 
 func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
@@ -70,6 +71,7 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 		listeners: publish.New(
 			socketapi.New(),
 		),
+		authRequired: sp.AuthRequired,
 	}
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {
@@ -98,7 +100,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start up the relay.
-func (s *Server) Start(host string, port int, started ...chan bool) (err error) {
+func (s *Server) Start(
+	host string, port int, started ...chan bool,
+) (err error) {
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	log.I.F("starting relay listener at %s", addr)
 	ln, err := net.Listen("tcp", addr)

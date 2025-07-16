@@ -153,7 +153,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			}
 		}
 	}
-	if _, _, err = sto.SaveEvent(c, evt); chk.E(err) && !errors.Is(
+	if _, _, err = sto.SaveEvent(c, evt); err != nil && !errors.Is(
 		err, store.ErrDupEvent,
 	) {
 		return

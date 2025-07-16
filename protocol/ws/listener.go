@@ -15,21 +15,26 @@ import (
 
 // Listener is a websocket implementation for a relay listener.
 type Listener struct {
-	mutex        sync.Mutex
-	Conn         *websocket.Conn
-	Request      *http.Request
-	remote       atomic.String
-	authedPubkey atomic.Bytes
-	isAuthed     atomic.Bool
-	challenge    atomic.Bytes
+	mutex         sync.Mutex
+	Conn          *websocket.Conn
+	Request       *http.Request
+	remote        atomic.String
+	authedPubkey  atomic.Bytes
+	authRequested atomic.Bool
+	isAuthed      atomic.Bool
+	challenge     atomic.Bytes
 }
 
 // NewListener creates a new Listener for listening for inbound connections for
 // a relay.
-func NewListener(conn *websocket.Conn, req *http.Request) (ws *Listener) {
+func NewListener(
+	conn *websocket.Conn, req *http.Request, authRequired bool,
+) (ws *Listener) {
 	ws = &Listener{Conn: conn, Request: req}
 	ws.setRemoteFromReq(req)
-	ws.SetChallenge(auth.GenerateChallenge())
+	if authRequired {
+		ws.SetChallenge(auth.GenerateChallenge())
+	}
 	return
 }
 
@@ -99,4 +104,15 @@ func (ws *Listener) SetAuthedPubkey(b []byte) {
 func (ws *Listener) Challenge() []byte { return ws.challenge.Load() }
 func (ws *Listener) SetChallenge(b []byte) {
 	ws.challenge.Store(b)
+}
+
+// AuthRequested returns whether the Listener has asked for auth from the
+// client.
+func (ws *Listener) AuthRequested() (read bool) {
+	return ws.authRequested.Load()
+}
+
+// RequestAuth stores when auth has been required from a client.
+func (ws *Listener) RequestAuth() {
+	ws.authRequested.Store(true)
 }

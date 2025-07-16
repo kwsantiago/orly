@@ -24,4 +24,6 @@ type S interface {
 	Relay() relay.I
 	Shutdown()
 	Storage() store.I
+	AuthRequired() bool
+	ServiceURL(req *http.Request) (s string)
 }

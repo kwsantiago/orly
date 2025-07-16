@@ -3,6 +3,7 @@ package socketapi
 import (
 	"net/http"
 	"orly.dev/app/realy/helpers"
+	"orly.dev/encoders/envelopes/authenvelope"
 	"orly.dev/interfaces/server"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
@@ -64,7 +65,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 		log.E.F("failed to upgrade websocket: %v", err)
 		return
 	}
-	a.Listener = GetListener(conn, r)
+	a.Listener = ws.NewListener(conn, r, a.S.AuthRequired())
 	defer func() {
 		cancel()
 		ticker.Stop()
@@ -84,6 +85,14 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 			return nil
 		},
 	)
+	if a.S.AuthRequired() {
+		log.T.F("requesting auth from client from %s", a.Listener.RealRemote())
+		a.Listener.RequestAuth()
+		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
+			Write(a.Listener); chk.E(err) {
+			return
+		}
+	}
 	go a.Pinger(a.Ctx, ticker, cancel, a.S)
 	var message []byte
 	var typ int

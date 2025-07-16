@@ -27,16 +27,17 @@ import (
 // present, or if a .env file is found in ~/.config/orly/ that is read instead
 // and overrides anything else.
 type C struct {
-	AppName    string `env:"ORLY_APP_NAME" default:"orly"`
-	Config     string `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
-	State      string `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces"`
-	DataDir    string `env:"ORLY_DATA_DIR" usage:"storage location for the ratel event store"`
-	Listen     string `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
-	DNS        string `env:"ORLY_DNS" usage:"external DNS name that points at the relay"`
-	Port       int    `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
-	LogLevel   string `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	DbLogLevel string `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	Pprof      bool   `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
+	AppName      string `env:"ORLY_APP_NAME" default:"orly"`
+	Config       string `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
+	State        string `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces"`
+	DataDir      string `env:"ORLY_DATA_DIR" usage:"storage location for the event store"`
+	Listen       string `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
+	DNS          string `env:"ORLY_DNS" usage:"external DNS name that points at the relay"`
+	Port         int    `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
+	LogLevel     string `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	DbLogLevel   string `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	Pprof        bool   `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
+	AuthRequired bool   `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
 }
 
 // New creates a new config.C.

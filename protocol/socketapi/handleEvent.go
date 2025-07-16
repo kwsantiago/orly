@@ -76,9 +76,9 @@ func (a *A) HandleEvent(
 	if len(rem) > 0 {
 		log.I.F("extra '%s'", rem)
 	}
-	if !bytes.Equal(env.GetIDBytes(), env.Id) {
+	if !bytes.Equal(env.GetIDBytes(), env.E.Id) {
 		if err = a.sendResponse(
-			env.Id, false,
+			env.E.Id, false,
 			normalize.Invalid.F("event id is computed incorrectly"),
 		); chk.E(err) {
 			return
@@ -87,13 +87,13 @@ func (a *A) HandleEvent(
 	}
 	if ok, err = env.Verify(); chk.T(err) {
 		if err = a.sendResponse(
-			env.Id, false, normalize.Error.F("failed to verify signature"),
+			env.E.Id, false, normalize.Error.F("failed to verify signature"),
 		); chk.E(err) {
 			return
 		}
 	} else if !ok {
 		if err = a.sendResponse(
-			env.Id, false, normalize.Error.F("signature is invalid"),
+			env.E.Id, false, normalize.Error.F("signature is invalid"),
 		); chk.E(err) {
 			return
 		}
@@ -121,7 +121,7 @@ func (a *A) HandleEvent(
 					referencedEvents, err = sto.QueryEvents(c, f)
 					if chk.E(err) {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Error.F("failed to query for referenced event"),
 						); chk.E(err) {
 							return
@@ -138,7 +138,7 @@ func (a *A) HandleEvent(
 						// author of the referenced event
 						if !bytes.Equal(referencedEvent.Pubkey, env.Pubkey) {
 							if err = a.sendResponse(
-								env.Id, false,
+								env.E.Id, false,
 								normalize.Blocked.F("blocked: cannot delete events from other authors"),
 							); chk.E(err) {
 								return
@@ -150,7 +150,7 @@ func (a *A) HandleEvent(
 						var eid *eventid.T
 						if eid, err = eventid.NewFromBytes(eventId); chk.E(err) {
 							if err = a.sendResponse(
-								env.Id, false,
+								env.E.Id, false,
 								normalize.Error.F("failed to create event ID"),
 							); chk.E(err) {
 								return
@@ -162,7 +162,7 @@ func (a *A) HandleEvent(
 						// event
 						if err = sto.DeleteEvent(c, eid); chk.E(err) {
 							if err = a.sendResponse(
-								env.Id, false,
+								env.E.Id, false,
 								normalize.Error.F("failed to delete referenced event"),
 							); chk.E(err) {
 								return
@@ -178,9 +178,9 @@ func (a *A) HandleEvent(
 						continue
 					}
 					// Check if the deletion event is trying to delete itself
-					if bytes.Equal(split[2], env.Id) {
+					if bytes.Equal(split[2], env.E.Id) {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Blocked.F("deletion event cannot reference its own ID"),
 						); chk.E(err) {
 							return
@@ -190,7 +190,7 @@ func (a *A) HandleEvent(
 					var pk []byte
 					if pk, err = hex.DecAppend(nil, split[1]); chk.E(err) {
 						if err = a.sendResponse(
-							env.Id, false, normalize.Invalid.F(
+							env.E.Id, false, normalize.Invalid.F(
 								"delete event a tag pubkey value invalid: %s",
 								t.Value(),
 							),
@@ -202,7 +202,7 @@ func (a *A) HandleEvent(
 					kin := ints.New(uint16(0))
 					if _, err = kin.Unmarshal(split[0]); chk.E(err) {
 						if err = a.sendResponse(
-							env.Id, false, normalize.Invalid.F(
+							env.E.Id, false, normalize.Invalid.F(
 								"delete event a tag kind value invalid: %s",
 								t.Value(),
 							),
@@ -214,7 +214,7 @@ func (a *A) HandleEvent(
 					kk := kind.New(kin.Uint16())
 					if kk.Equal(kind.Deletion) {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Blocked.F("delete event kind may not be deleted"),
 						); chk.E(err) {
 							return
@@ -223,7 +223,7 @@ func (a *A) HandleEvent(
 					}
 					if !kk.IsParameterizedReplaceable() {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Error.F("delete tags with a tags containing non-parameterized-replaceable events cannot be processed"),
 						); chk.E(err) {
 							return
@@ -232,7 +232,7 @@ func (a *A) HandleEvent(
 					}
 					if !bytes.Equal(pk, env.E.Pubkey) {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Blocked.F("cannot delete other users' events (delete by a tag)"),
 						); chk.E(err) {
 							return
@@ -246,7 +246,7 @@ func (a *A) HandleEvent(
 					res, err = sto.QueryEvents(c, f)
 					if chk.E(err) {
 						if err = a.sendResponse(
-							env.Id, false,
+							env.E.Id, false,
 							normalize.Error.F("failed to query for target event"),
 						); chk.E(err) {
 							return
@@ -268,8 +268,8 @@ func (a *A) HandleEvent(
 			for _, target := range res {
 				if target.Kind.K == kind.Deletion.K {
 					if err = a.sendResponse(
-						env.Id, false, normalize.Error.F(
-							"cannot delete delete event %s", env.Id,
+						env.E.Id, false, normalize.Error.F(
+							"cannot delete delete event %s", env.E.Id,
 						),
 					); chk.E(err) {
 						return
@@ -284,7 +284,7 @@ func (a *A) HandleEvent(
 				}
 				if !bytes.Equal(target.Pubkey, env.Pubkey) {
 					if err = a.sendResponse(
-						env.Id, false,
+						env.E.Id, false,
 						normalize.Error.F("only author can delete event"),
 					); chk.E(err) {
 						return
@@ -297,7 +297,7 @@ func (a *A) HandleEvent(
 				eid, err = eventid.NewFromBytes(target.EventId().Bytes())
 				if chk.E(err) {
 					if err = a.sendResponse(
-						env.Id, false,
+						env.E.Id, false,
 						normalize.Error.F("failed to create event ID"),
 					); chk.E(err) {
 						return
@@ -308,7 +308,7 @@ func (a *A) HandleEvent(
 				// Use DeleteEvent to actually delete the target event
 				if err = sto.DeleteEvent(c, eid); chk.E(err) {
 					if err = a.sendResponse(
-						env.Id, false,
+						env.E.Id, false,
 						normalize.Error.F("failed to delete target event"),
 					); chk.E(err) {
 						return
@@ -323,7 +323,7 @@ func (a *A) HandleEvent(
 			res = nil
 		}
 		// Send a success response after processing all deletions
-		if err = a.sendResponse(env.Id, true); chk.E(err) {
+		if err = a.sendResponse(env.E.Id, true); chk.E(err) {
 			return
 		}
 		// Check if this event has been deleted before
@@ -332,7 +332,7 @@ func (a *A) HandleEvent(
 			// event ID
 			f := filter.New()
 			f.Kinds.K = []*kind.T{kind.Deletion}
-			f.Tags.AppendTags(tag.New([]byte{'e'}, env.Id))
+			f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.Id))
 
 			// Query for deletion events
 			var deletionEvents []*event.E
@@ -340,7 +340,7 @@ func (a *A) HandleEvent(
 			if err == nil && len(deletionEvents) > 0 {
 				// Found deletion events for this ID, don't save it
 				if err = a.sendResponse(
-					env.Id, false,
+					env.E.Id, false,
 					normalize.Blocked.F("event was deleted, not storing it again"),
 				); chk.E(err) {
 					return
@@ -354,7 +354,7 @@ func (a *A) HandleEvent(
 		c, rl, env.E, a.Req(), a.RealRemote(), nil,
 	)
 	log.I.F("event %0x added %v, %s", env.E.Id, ok, reason)
-	if err = a.sendResponse(env.Id, ok, reason); chk.E(err) {
+	if err = a.sendResponse(env.E.Id, ok, reason); chk.E(err) {
 		return
 	}
 	return
