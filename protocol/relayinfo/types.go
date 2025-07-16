@@ -325,7 +325,7 @@ func (ri *T) HasNIP(n int) (ok bool) {
 // Save the relayinfo.T to a given file as JSON.
 func (ri *T) Save(filename string) (err error) {
 	if ri == nil {
-		err = errors.New("cannot save nil realy info document")
+		err = errors.New("cannot save nil relay info document")
 		log.E.Ln(err)
 		return
 	}

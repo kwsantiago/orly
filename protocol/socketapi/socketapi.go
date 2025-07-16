@@ -31,7 +31,7 @@ const (
 type A struct {
 	Ctx context.T
 	*ws.Listener
-	server.S
+	server.I
 }
 
 // Serve handles an incoming WebSocket request by upgrading the HTTP request,
@@ -54,7 +54,7 @@ type A struct {
 // alive, and processes incoming messages. It ensures proper cleanup of
 // resources on connection termination or cancellation, adhering to the given
 // context's lifecycle.
-func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
+func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 	var err error
 	ticker := time.NewTicker(DefaultPingWait)
 	var cancel context.F
@@ -65,7 +65,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 		log.E.F("failed to upgrade websocket: %v", err)
 		return
 	}
-	a.Listener = ws.NewListener(conn, r, a.S.AuthRequired())
+	a.Listener = ws.NewListener(conn, r, a.I.AuthRequired())
 	defer func() {
 		cancel()
 		ticker.Stop()
@@ -85,7 +85,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 			return nil
 		},
 	)
-	if a.S.AuthRequired() {
+	if a.I.AuthRequired() {
 		log.T.F("requesting auth from client from %s", a.Listener.RealRemote())
 		a.Listener.RequestAuth()
 		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
@@ -93,7 +93,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 			return
 		}
 	}
-	go a.Pinger(a.Ctx, ticker, cancel, a.S)
+	go a.Pinger(a.Ctx, ticker, cancel, a.I)
 	var message []byte
 	var typ int
 	for {

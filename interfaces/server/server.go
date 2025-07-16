@@ -9,7 +9,7 @@ import (
 	"orly.dev/utils/context"
 )
 
-type S interface {
+type I interface {
 	AddEvent(
 		c context.T, rl relay.I, ev *event.E, hr *http.Request,
 		origin string, authedPubkey []byte,
@@ -25,5 +25,6 @@ type S interface {
 	Shutdown()
 	Storage() store.I
 	AuthRequired() bool
+	PublicReadable() bool
 	ServiceURL(req *http.Request) (s string)
 }

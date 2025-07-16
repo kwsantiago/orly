@@ -26,28 +26,30 @@ import (
 )
 
 type Server struct {
-	Ctx          context.T
-	Cancel       context.F
-	options      *options.T
-	relay        relay.I
-	clientsMu    sync.Mutex
-	clients      map[*websocket.Conn]struct{}
-	Addr         string
-	mux          *servemux.S
-	httpServer   *http.Server
-	listeners    *publish.S
-	authRequired bool
+	Ctx            context.T
+	Cancel         context.F
+	options        *options.T
+	relay          relay.I
+	clientsMu      sync.Mutex
+	clients        map[*websocket.Conn]struct{}
+	Addr           string
+	mux            *servemux.S
+	httpServer     *http.Server
+	listeners      *publish.S
+	authRequired   bool
+	publicReadable bool
 }
 
 type ServerParams struct {
-	Ctx          context.T
-	Cancel       context.F
-	Rl           relay.I
-	DbPath       string
-	MaxLimit     int
-	Admins       []signer.I
-	Owners       [][]byte
-	AuthRequired bool
+	Ctx            context.T
+	Cancel         context.F
+	Rl             relay.I
+	DbPath         string
+	MaxLimit       int
+	Admins         []signer.I
+	Owners         [][]byte
+	AuthRequired   bool
+	PublicReadable bool
 }
 
 func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
@@ -71,7 +73,8 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 		listeners: publish.New(
 			socketapi.New(),
 		),
-		authRequired: sp.AuthRequired,
+		authRequired:   sp.AuthRequired,
+		publicReadable: sp.PublicReadable,
 	}
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {

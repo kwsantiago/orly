@@ -10,8 +10,8 @@ import (
 	"orly.dev/utils/log"
 )
 
-func (a *A) HandleAuth(b []byte, srv server.S) (msg []byte) {
-	if a.S.AuthRequired() {
+func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
+	if a.I.AuthRequired() {
 		log.I.F("AUTH:\n%s", b)
 		var err error
 		var rem []byte

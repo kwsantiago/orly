@@ -13,7 +13,7 @@ import (
 	"orly.dev/utils/chk"
 	"orly.dev/utils/interrupt"
 	"orly.dev/utils/log"
-	realy_lol "orly.dev/version"
+	"orly.dev/version"
 	"os"
 
 	"orly.dev/app"
@@ -24,7 +24,6 @@ import (
 )
 
 func main() {
-	log.I.F("starting realy %s", realy_lol.V)
 	var err error
 	var cfg *config.C
 	if cfg, err = config.New(); chk.T(err) {
@@ -34,6 +33,7 @@ func main() {
 		config.PrintHelp(cfg, os.Stderr)
 		os.Exit(0)
 	}
+	log.I.F("starting %s %s", cfg.AppName, version.V)
 	if config.GetEnv() {
 		config.PrintEnv(cfg, os.Stdout)
 		os.Exit(0)
@@ -59,12 +59,13 @@ func main() {
 	go app.MonitorResources(c)
 	var server *realy.Server
 	serverParams := &realy.ServerParams{
-		Ctx:          c,
-		Cancel:       cancel,
-		Rl:           r,
-		DbPath:       cfg.DataDir,
-		MaxLimit:     512, // Default max limit for events
-		AuthRequired: cfg.AuthRequired,
+		Ctx:            c,
+		Cancel:         cancel,
+		Rl:             r,
+		DbPath:         cfg.DataDir,
+		MaxLimit:       512, // Default max limit for events
+		AuthRequired:   cfg.AuthRequired,
+		PublicReadable: cfg.PublicReadable,
 	}
 	var opts []options.O
 	if server, err = realy.NewServer(serverParams, opts...); chk.E(err) {

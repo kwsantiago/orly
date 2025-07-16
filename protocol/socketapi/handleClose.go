@@ -30,7 +30,7 @@ import (
 // returned instead. Logs any remaining unprocessed data for diagnostics.
 func (a *A) HandleClose(
 	req []byte,
-	srv server.S,
+	srv server.I,
 ) (note []byte) {
 	var err error
 	var rem []byte

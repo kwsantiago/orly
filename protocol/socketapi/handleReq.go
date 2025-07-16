@@ -45,7 +45,7 @@ import (
 // If the subscription should be canceled due to completed query results, it
 // generates and sends a closure envelope.
 func (a *A) HandleReq(
-	c context.T, req []byte, srv server.S,
+	c context.T, req []byte, srv server.I,
 ) (r []byte) {
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()

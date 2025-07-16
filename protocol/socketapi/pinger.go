@@ -34,7 +34,7 @@ import (
 // dictated by the ticker. If the ping write fails or the context is canceled,
 // it stops the ticker, invokes the cancel function, and closes the connection.
 func (a *A) Pinger(
-	ctx context.T, ticker *time.Ticker, cancel context.F, s server.S,
+	ctx context.T, ticker *time.Ticker, cancel context.F, s server.I,
 ) {
 	defer func() {
 		cancel()

@@ -38,16 +38,16 @@ func (a *A) HandleMessage(msg []byte) {
 	// rl := a.Relay()
 	switch t {
 	case eventenvelope.L:
-		notice = a.HandleEvent(a.Context(), rem, a.S)
+		notice = a.HandleEvent(a.Context(), rem, a.I)
 	case reqenvelope.L:
 		notice = a.HandleReq(
 			a.Context(), rem,
-			a.S,
+			a.I,
 		)
 	case closeenvelope.L:
-		notice = a.HandleClose(rem, a.S)
+		notice = a.HandleClose(rem, a.I)
 	case authenvelope.L:
-		notice = a.HandleAuth(rem, a.S)
+		notice = a.HandleAuth(rem, a.I)
 	default:
 		notice = []byte(fmt.Sprintf("unknown envelope type %s\n%s", t, rem))
 	}

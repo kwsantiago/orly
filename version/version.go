@@ -9,4 +9,4 @@ var V string
 
 var Description = "relay powered by the orly framework"
 
-var URL = "https://orly"
+var URL = "https://orly.dev"

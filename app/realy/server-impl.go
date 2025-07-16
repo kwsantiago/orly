@@ -28,6 +28,7 @@ func (s *Server) Publisher() *publish.S { return s.listeners }
 
 func (s *Server) Context() context.T { return s.Ctx }
 
-func (s *Server) AuthRequired() bool { return s.authRequired }
+func (s *Server) AuthRequired() bool   { return s.authRequired }
+func (s *Server) PublicReadable() bool { return s.publicReadable }
 
-var _ server.S = &Server{}
+var _ server.I = &Server{}

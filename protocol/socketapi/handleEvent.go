@@ -57,7 +57,7 @@ func (a *A) sendResponse(eventID []byte, ok bool, reason ...[]byte) error {
 // deleting events while responding to the client based on the evaluation
 // results. Returns immediately if any verification or operation fails.
 func (a *A) HandleEvent(
-	c context.T, req []byte, srv server.S,
+	c context.T, req []byte, srv server.I,
 ) (msg []byte) {
 
 	log.T.F("handleEvent %s %s", a.RealRemote(), req)
