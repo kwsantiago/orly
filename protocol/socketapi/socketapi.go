@@ -2,7 +2,7 @@ package socketapi
 
 import (
 	"net/http"
-	"orly.dev/app/realy/helpers"
+	"orly.dev/app/relay/helpers"
 	"orly.dev/encoders/envelopes/authenvelope"
 	"orly.dev/interfaces/server"
 	"orly.dev/utils/chk"

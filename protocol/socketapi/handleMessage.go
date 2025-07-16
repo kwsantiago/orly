@@ -35,7 +35,6 @@ func (a *A) HandleMessage(msg []byte) {
 	if t, rem, err = envelopes.Identify(msg); chk.E(err) {
 		notice = []byte(err.Error())
 	}
-	// rl := a.Relay()
 	switch t {
 	case eventenvelope.L:
 		notice = a.HandleEvent(a.Context(), rem, a.I)

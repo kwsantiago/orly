@@ -9,7 +9,7 @@ import (
 
 	"github.com/fasthttp/websocket"
 
-	"orly.dev/app/realy/helpers"
+	"orly.dev/app/relay/helpers"
 	"orly.dev/utils/atomic"
 )
 

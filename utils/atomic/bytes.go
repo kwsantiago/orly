@@ -42,6 +42,9 @@ func NewBytes(val []byte) *Bytes {
 
 // Load atomically loads the wrapped []byte.
 func (x *Bytes) Load() (b []byte) {
+	if x.v.Load() == nil {
+		return
+	}
 	vb := x.v.Load().([]byte)
 	b = make([]byte, len(vb))
 	copy(b, vb)

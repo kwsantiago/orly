@@ -1,4 +1,4 @@
-package realy
+package relay
 
 import (
 	_ "embed"
@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"orly.dev/app/realy/helpers"
-	"orly.dev/app/realy/options"
-	"orly.dev/app/realy/publish"
+	"orly.dev/app/relay/helpers"
+	"orly.dev/app/relay/options"
+	"orly.dev/app/relay/publish"
 	"orly.dev/interfaces/relay"
 	"orly.dev/protocol/servemux"
 	"orly.dev/utils/chk"

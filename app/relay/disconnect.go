@@ -1,4 +1,4 @@
-package realy
+package relay
 
 import (
 	"orly.dev/utils/log"

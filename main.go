@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/profile"
 	"net/http"
 	_ "net/http/pprof"
-	"orly.dev/app/realy"
-	"orly.dev/app/realy/options"
+	"orly.dev/app/relay"
+	"orly.dev/app/relay/options"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/interrupt"
 	"orly.dev/utils/log"
@@ -57,8 +57,8 @@ func main() {
 	}
 	r := &app.Relay{C: cfg, Store: storage}
 	go app.MonitorResources(c)
-	var server *realy.Server
-	serverParams := &realy.ServerParams{
+	var server *relay.Server
+	serverParams := &relay.ServerParams{
 		Ctx:            c,
 		Cancel:         cancel,
 		Rl:             r,
@@ -68,7 +68,7 @@ func main() {
 		PublicReadable: cfg.PublicReadable,
 	}
 	var opts []options.O
-	if server, err = realy.NewServer(serverParams, opts...); chk.E(err) {
+	if server, err = relay.NewServer(serverParams, opts...); chk.E(err) {
 		os.Exit(1)
 	}
 	if err != nil {

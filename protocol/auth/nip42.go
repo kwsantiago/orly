@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"net/url"
 	"orly.dev/utils/chk"
-	"orly.dev/utils/log"
+	"orly.dev/utils/errorf"
 	"strings"
 	"time"
 
@@ -64,67 +64,58 @@ func Validate(evt *event.E, challenge []byte, relayURL string) (
 	ok bool, err error,
 ) {
 	if evt.Kind.K != kind.ClientAuthentication.K {
-		err = log.E.Err(
+		err = errorf.E(
 			"event incorrect kind for auth: %d %s",
 			evt.Kind.K, kind.GetString(evt.Kind),
 		)
-		log.D.Ln(err)
 		return
 	}
 	if evt.Tags.GetFirst(tag.New(ChallengeTag, challenge)) == nil {
-		err = log.E.Err("challenge tag missing from auth response")
-		log.D.Ln(err)
+		err = errorf.E("challenge tag missing from auth response")
 		return
 	}
 	var expected, found *url.URL
 	if expected, err = parseURL(relayURL); chk.D(err) {
-		log.D.Ln(err)
 		return
 	}
 	r := evt.Tags.
 		GetFirst(tag.New(RelayTag, nil)).Value()
 	if len(r) == 0 {
-		err = log.E.Err("relay tag missing from auth response")
-		log.D.Ln(err)
+		err = errorf.E("relay tag missing from auth response")
 		return
 	}
 	if found, err = parseURL(string(r)); chk.D(err) {
-		err = log.E.Err("error parsing relay url: %s", err)
-		log.D.Ln(err)
+		err = errorf.E("error parsing relay url: %s", err)
 		return
 	}
 	if expected.Scheme != found.Scheme {
-		err = log.E.Err(
+		err = errorf.E(
 			"HTTP Scheme incorrect: expected '%s' got '%s",
 			expected.Scheme, found.Scheme,
 		)
-		log.D.Ln(err)
 		return
 	}
 	if expected.Host != found.Host {
-		err = log.E.Err(
+		err = errorf.E(
 			"HTTP Host incorrect: expected '%s' got '%s",
 			expected.Host, found.Host,
 		)
-		log.D.Ln(err)
 		return
 	}
 	if expected.Path != found.Path {
-		err = log.E.Err(
+		err = errorf.E(
 			"HTTP Path incorrect: expected '%s' got '%s",
 			expected.Path, found.Path,
 		)
-		log.D.Ln(err)
 		return
 	}
 
 	now := time.Now()
 	if evt.CreatedAt.Time().After(now.Add(10*time.Minute)) ||
 		evt.CreatedAt.Time().Before(now.Add(-10*time.Minute)) {
-		err = log.E.Err(
+		err = errorf.E(
 			"auth event more than 10 minutes before or after current time",
 		)
-		log.D.Ln(err)
 		return
 	}
 	// save for last, as it is the most expensive operation

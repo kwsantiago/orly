@@ -26,7 +26,7 @@ func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 		if valid, err = auth.Validate(
 			env.Event, a.Listener.Challenge(),
 			srv.ServiceURL(a.Listener.Request),
-		); chk.E(err) {
+		); err != nil {
 			e := err.Error()
 			if err = Ok.Error(a, env, e); chk.E(err) {
 				return []byte(e)

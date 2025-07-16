@@ -1,4 +1,4 @@
-package realy
+package relay
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 	"orly.dev/utils/context"
 )
 
-func (s *Server) addEvent(
+func (s *Server) AddEvent(
 	c context.T, rl relay.I, ev *event.E,
 	hr *http.Request, origin string,
 	authedPubkey []byte,
