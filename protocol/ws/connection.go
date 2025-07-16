@@ -37,7 +37,7 @@ type Connection struct {
 func NewConnection(
 	c context.T, url string, requestHeader http.Header,
 	tlsConfig *tls.Config,
-) (*Connection, error) {
+) (connection *Connection, errResult error) {
 	dialer := ws.Dialer{
 		Header: ws.HandshakeHeaderHTTP(requestHeader),
 		Extensions: []httphead.Option{
@@ -112,7 +112,7 @@ func NewConnection(
 }
 
 // WriteMessage dispatches a message through the Connection.
-func (cn *Connection) WriteMessage(c context.T, data []byte) error {
+func (cn *Connection) WriteMessage(c context.T, data []byte) (err error) {
 	select {
 	case <-c.Done():
 		return errors.New("context canceled")
@@ -141,7 +141,7 @@ func (cn *Connection) WriteMessage(c context.T, data []byte) error {
 }
 
 // ReadMessage picks up the next incoming message on a Connection.
-func (cn *Connection) ReadMessage(c context.T, buf io.Writer) error {
+func (cn *Connection) ReadMessage(c context.T, buf io.Writer) (err error) {
 	for {
 		select {
 		case <-c.Done():
@@ -179,6 +179,6 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) error {
 }
 
 // Close the Connection.
-func (cn *Connection) Close() error {
+func (cn *Connection) Close() (err error) {
 	return cn.conn.Close()
 }

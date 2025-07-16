@@ -34,7 +34,7 @@ type W struct {
 	Filters  *filters.T
 }
 
-func (w *W) Type() string { return Type }
+func (w *W) Type() (typeName string) { return Type }
 
 type Close struct {
 	*ws.Listener
@@ -50,9 +50,9 @@ type S struct {
 
 var _ publisher.I = &S{}
 
-func New() *S { return &S{Map: make(Map)} }
+func New() (publisher *S) { return &S{Map: make(Map)} }
 
-func (p *S) Type() string { return Type }
+func (p *S) Type() (typeName string) { return Type }
 
 func (p *S) Receive(msg publisher.Message) {
 	if m, ok := msg.(*W); ok {

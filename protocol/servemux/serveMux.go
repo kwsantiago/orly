@@ -6,7 +6,7 @@ type S struct {
 	*http.ServeMux
 }
 
-func NewServeMux() *S {
+func NewServeMux() (mux *S) {
 	return &S{http.NewServeMux()}
 }
 

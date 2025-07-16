@@ -16,7 +16,7 @@ type Range struct {
 }
 
 // isHexString checks if the byte slice contains only hex characters
-func isHexString(data []byte) bool {
+func isHexString(data []byte) (isHex bool) {
 	if len(data)%2 != 0 {
 		return false
 	}

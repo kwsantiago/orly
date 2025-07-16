@@ -245,7 +245,7 @@ func discardingHandler(conn *websocket.Conn) {
 	io.ReadAll(conn) // discard all input
 }
 
-func newWebsocketServer(handler func(*websocket.Conn)) *httptest.Server {
+func newWebsocketServer(handler func(*websocket.Conn)) (server *httptest.Server) {
 	return httptest.NewServer(
 		&websocket.Server{
 			Handshake: anyOriginHandshake,
@@ -257,11 +257,11 @@ func newWebsocketServer(handler func(*websocket.Conn)) *httptest.Server {
 // anyOriginHandshake is an alternative to default in golang.org/x/net/websocket
 // which checks for origin. nostr client sends no origin and it makes no difference
 // for the tests here anyway.
-var anyOriginHandshake = func(conf *websocket.Config, r *http.Request) error {
+var anyOriginHandshake = func(conf *websocket.Config, r *http.Request) (err error) {
 	return nil
 }
 
-func mustRelayConnect(url string) *Client {
+func mustRelayConnect(url string) (client *Client) {
 	rl, err := RelayConnect(context.Background(), url)
 	if err != nil {
 		panic(err.Error())

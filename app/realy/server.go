@@ -98,7 +98,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start up the relay.
-func (s *Server) Start(host string, port int, started ...chan bool) error {
+func (s *Server) Start(host string, port int, started ...chan bool) (err error) {
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	log.I.F("starting relay listener at %s", addr)
 	ln, err := net.Listen("tcp", addr)
@@ -135,6 +135,6 @@ func (s *Server) Shutdown() {
 
 // Router returns the servemux that handles paths on the HTTP server of the
 // relay.
-func (s *Server) Router() *http.ServeMux {
+func (s *Server) Router() (router *http.ServeMux) {
 	return s.mux.ServeMux
 }
