@@ -125,7 +125,7 @@ func (pool *Pool) EnsureRelay(url string) (*Client, error) {
 		return relay, nil
 	} else {
 		var err error
-		// we use this ctx here so when the pool dies everything dies
+		// we use this ctx here, so when the pool dies everything dies
 		ctx, cancel := context.Timeout(pool.Context, time.Second*15)
 		defer cancel()
 
@@ -219,7 +219,7 @@ func (pool *Pool) subMany(
 					case evt, more := <-sub.Events:
 						if !more {
 							// this means the connection was closed for weird
-							// reasons, like the server shut down so we will
+							// reasons, like the server shutdown, so we will
 							// update the filters here to include only events
 							// seem from now on and try to reconnect until we
 							// succeed
@@ -283,7 +283,7 @@ func (pool *Pool) subMany(
 				// we will go back to the beginning of the loop and try to
 				// connect again and again until the context is canceled
 				time.Sleep(interval)
-				interval = interval * 17 / 10 // the next time we try we will wait longer
+				interval = interval * 17 / 10 // the next time we try, we will wait longer
 			}
 		}(url)
 	}
@@ -355,7 +355,7 @@ func (pool *Pool) subManyEose(
 						reason,
 						"auth-required:",
 					) && pool.authHandler != nil && !hasAuthed {
-						// client is requesting auth. if we can we will perform
+						// client is requesting auth. if we can, we will perform
 						// auth and try again
 						err = client.Auth(ctx, pool.authHandler())
 						if err == nil {
@@ -437,7 +437,8 @@ func (pool *Pool) BatchedSubMany(
 	return pool.batchedSubMany(c, dfs, pool.subMany)
 }
 
-// BatchedSubManyEose is like BatchedSubMany, but ends upon receiving EOSE from all relays.
+// BatchedSubManyEose is like BatchedSubMany, but ends upon receiving EOSE from
+// all relays.
 func (pool *Pool) BatchedSubManyEose(
 	c context.T, dfs []DirectedFilters,
 ) chan IncomingEvent {

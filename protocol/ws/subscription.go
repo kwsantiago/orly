@@ -138,12 +138,12 @@ func (sub *Subscription) dispatchClosed(reason string) {
 	}
 }
 
-// Unsub closes the subscription, sending "CLOSE" to realy as in NIP-01. Unsub()
+// Unsub closes the subscription, sending "CLOSE" to relay as in NIP-01. Unsub()
 // also closes the channel sub.Events and makes a new one.
 func (sub *Subscription) Unsub() {
 	// cancel the context (if it's not canceled already)
 	sub.cancel()
-	// mark the subscription as closed and send a CLOSE to the realy (naïve
+	// mark the subscription as closed and send a CLOSE to the relay (naïve
 	// sync.Once implementation)
 	if sub.live.CompareAndSwap(true, false) {
 		sub.Close()
@@ -171,7 +171,7 @@ func (sub *Subscription) Sub(_ context.T, ff *filters.T) {
 	sub.Fire()
 }
 
-// Fire sends the "REQ" command to the realy.
+// Fire sends the "REQ" command to the relay.
 func (sub *Subscription) Fire() (err error) {
 	id := sub.GetID()
 

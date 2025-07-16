@@ -18,8 +18,9 @@ type Envelope interface {
 	Label() string
 	// Write outputs the envelope to an io.Writer
 	Write(w io.Writer) (err error)
-	// JSON is a somewhat simplified version of the json.Marshaler/json.Unmarshaler
-	// that has no error for the Marshal side of the operation.
+	// JSON is a somewhat simplified version of the
+	// json.Marshaler/json.Unmarshaler that has no error for the Marshal side of
+	// the operation.
 	JSON
 }
 
@@ -35,12 +36,12 @@ type JSON interface {
 }
 
 // Binary is a similarly simplified form of the stdlib binary Marshal/Unmarshal
-// interfaces. Same as JSON it does not have an error for the MarshalBinary.
+// server. Same as JSON it does not have an error for the MarshalBinary.
 type Binary interface {
-	// MarshalBinary converts the data of the type into binary form, appending it to
-	// the provided slice.
+	// MarshalBinary converts the data of the type into binary form, appending
+	// it to the provided slice.
 	MarshalBinary(dst []byte) (b []byte)
-	// UnmarshalBinary decodes a binary form of a type back into the runtime form,
-	// and returns whatever remains after the type has been decoded out.
+	// UnmarshalBinary decodes a binary form of a type back into the runtime
+	// form, and returns whatever remains after the type has been decoded out.
 	UnmarshalBinary(b []byte) (r []byte, err error)
 }

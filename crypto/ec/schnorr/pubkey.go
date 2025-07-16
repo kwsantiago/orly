@@ -32,8 +32,8 @@ func ParsePubKey(pubKeyStr []byte) (*btcec.PublicKey, error) {
 		)
 		return nil, err
 	}
-	// We'll manually prepend the compressed byte so we can re-use the
-	// existing pubkey parsing routine of the main btcec package.
+	// We'll manually prepend the compressed byte so we can re-use the existing
+	// pubkey parsing routine of the main btcec package.
 	var keyCompressed [btcec.PubKeyBytesLenCompressed]byte
 	keyCompressed[0] = secp256k1.PubKeyFormatCompressedEven
 	copy(keyCompressed[1:], pubKeyStr)
@@ -41,7 +41,7 @@ func ParsePubKey(pubKeyStr []byte) (*btcec.PublicKey, error) {
 }
 
 // SerializePubKey serializes a public key as specified by BIP 340. Public keys
-// in this format are 32 bytes in length, and are assumed to have an even y
+// in this format are 32 bytes in length and are assumed to have an even y
 // coordinate.
 func SerializePubKey(pub *btcec.PublicKey) []byte {
 	pBytes := pub.SerializeCompressed()

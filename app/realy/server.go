@@ -10,19 +10,17 @@ import (
 	"orly.dev/app/realy/options"
 	"orly.dev/app/realy/publish"
 	"orly.dev/interfaces/relay"
+	"orly.dev/protocol/servemux"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
-	realy_lol "orly.dev/version"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/danielgtaylor/huma/v2"
 	"github.com/fasthttp/websocket"
 	"github.com/rs/cors"
 
 	"orly.dev/interfaces/signer"
-	"orly.dev/protocol/openapi"
 	"orly.dev/protocol/socketapi"
 	"orly.dev/utils/context"
 )
@@ -35,17 +33,9 @@ type Server struct {
 	clientsMu  sync.Mutex
 	clients    map[*websocket.Conn]struct{}
 	Addr       string
-	mux        *openapi.ServeMux
+	mux        *servemux.S
 	httpServer *http.Server
-	// authRequired   bool
-	// publicReadable bool
-	// maxLimit       int
-	// admins         []signer.I
-	// owners         [][]byte
-	listeners *publish.S
-	huma.API
-	// ConfigurationMx sync.Mutex
-	// configuration   *store.Configuration
+	listeners  *publish.S
 }
 
 type ServerParams struct {
@@ -69,22 +59,18 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 			return nil, fmt.Errorf("storage init: %w", err)
 		}
 	}
-	serveMux := openapi.NewServeMux()
+	serveMux := servemux.NewServeMux()
 	s = &Server{
-		Ctx:       sp.Ctx,
-		Cancel:    sp.Cancel,
-		relay:     sp.Rl,
-		clients:   make(map[*websocket.Conn]struct{}),
-		mux:       serveMux,
-		options:   op,
-		listeners: publish.New(socketapi.New(), openapi.New()),
-		API: openapi.NewHuma(
-			serveMux, sp.Rl.Name(), realy_lol.V,
-			realy_lol.Description,
+		Ctx:     sp.Ctx,
+		Cancel:  sp.Cancel,
+		relay:   sp.Rl,
+		clients: make(map[*websocket.Conn]struct{}),
+		mux:     serveMux,
+		options: op,
+		listeners: publish.New(
+			socketapi.New(),
 		),
 	}
-	// register the http API operations
-	huma.AutoRegister(s.API, openapi.NewOperations(s))
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {
 			s.Shutdown()

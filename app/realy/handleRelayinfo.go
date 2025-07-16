@@ -21,16 +21,16 @@ func (s *Server) handleRelayInfo(w http.ResponseWriter, r *http.Request) {
 	} else {
 		supportedNIPs := relayinfo.GetList(
 			relayinfo.BasicProtocol,
-			relayinfo.EncryptedDirectMessage,
+			// relayinfo.EncryptedDirectMessage,
 			relayinfo.EventDeletion,
 			relayinfo.RelayInformationDocument,
 			relayinfo.GenericTagQueries,
-			relayinfo.NostrMarketplace,
+			// relayinfo.NostrMarketplace,
 			relayinfo.EventTreatment,
-			relayinfo.CommandResults,
+			// relayinfo.CommandResults,
 			relayinfo.ParameterizedReplaceableEvents,
-			relayinfo.ExpirationTimestamp,
-			relayinfo.ProtectedEvents,
+			// relayinfo.ExpirationTimestamp,
+			// relayinfo.ProtectedEvents,
 			relayinfo.RelayListMetadata,
 		)
 		sort.Sort(supportedNIPs)

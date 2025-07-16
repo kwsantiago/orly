@@ -49,7 +49,6 @@ func NewConnection(
 	if err != nil {
 		return nil, errorf.E("failed to dial: %w", err)
 	}
-
 	enableCompression := false
 	state := ws.StateClientSide
 	for _, extension := range hs.Extensions {
@@ -59,7 +58,6 @@ func NewConnection(
 			break
 		}
 	}
-
 	// reader
 	var flateReader *wsflate.Reader
 	var msgStateR wsflate.MessageState
@@ -72,7 +70,6 @@ func NewConnection(
 			},
 		)
 	}
-
 	controlHandler := wsutil.ControlFrameHandler(conn, ws.StateClientSide)
 	reader := &wsutil.Reader{
 		Source:         conn,
@@ -83,7 +80,6 @@ func NewConnection(
 			&msgStateR,
 		},
 	}
-
 	// writer
 	var flateWriter *wsflate.Writer
 	var msgStateW wsflate.MessageState
@@ -100,10 +96,8 @@ func NewConnection(
 			},
 		)
 	}
-
 	writer := wsutil.NewWriter(conn, state, ws.OpText)
 	writer.SetExtensions(&msgStateW)
-
 	return &Connection{
 		conn:              conn,
 		enableCompression: enableCompression,
@@ -124,7 +118,6 @@ func (cn *Connection) WriteMessage(c context.T, data []byte) error {
 		return errors.New("context canceled")
 	default:
 	}
-
 	if cn.msgStateW.IsCompressed() && cn.enableCompression {
 		cn.flateWriter.Reset(cn.writer)
 		if _, err := io.Copy(
@@ -141,11 +134,9 @@ func (cn *Connection) WriteMessage(c context.T, data []byte) error {
 			return errorf.E("failed to write message: %w", err)
 		}
 	}
-
 	if err := cn.writer.Flush(); chk.T(err) {
 		return errorf.E("failed to flush writer: %w", err)
 	}
-
 	return nil
 }
 
@@ -157,13 +148,11 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) error {
 			return errors.New("context canceled")
 		default:
 		}
-
 		h, err := cn.reader.NextFrame()
 		if err != nil {
 			cn.conn.Close()
 			return errorf.E("failed to advance frame: %w", err)
 		}
-
 		if h.OpCode.IsControl() {
 			if err := cn.controlHandler(h, cn.reader); chk.T(err) {
 				return errorf.E("failed to handle control frame: %w", err)
@@ -172,12 +161,10 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) error {
 			h.OpCode == ws.OpText {
 			break
 		}
-
 		if err := cn.reader.Discard(); chk.T(err) {
 			return errorf.E("failed to discard: %w", err)
 		}
 	}
-
 	if cn.msgStateR.IsCompressed() && cn.enableCompression {
 		cn.flateReader.Reset(cn.reader)
 		if _, err := io.Copy(buf, cn.flateReader); chk.T(err) {
@@ -188,7 +175,6 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) error {
 			return errorf.E("failed to read message: %w", err)
 		}
 	}
-
 	return nil
 }
 

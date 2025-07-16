@@ -1,7 +1,7 @@
 package socketapi
 
 import (
-	"orly.dev/app/realy/interfaces"
+	"orly.dev/interfaces/server"
 	"orly.dev/utils/log"
 	"time"
 
@@ -10,8 +10,31 @@ import (
 	"orly.dev/utils/context"
 )
 
+// Pinger sends periodic WebSocket ping messages to ensure the connection is
+// alive and responsive. It terminates the connection if pings fail or the
+// context is canceled.
+//
+// Parameters:
+//
+//   - ctx: A context object used to monitor cancellation signals and
+//     manage termination of the method execution.
+//
+//   - ticker: A time.Ticker object that triggers periodic pings based on
+//     its configured interval.
+//
+//   - cancel: A context.CancelFunc called to gracefully terminate operations
+//     associated with the WebSocket connection.
+//
+//   - s: An interface representing the server context, allowing interactions
+//     related to the connection.
+//
+// Expected behavior:
+//
+// The method writes ping messages to the WebSocket connection at intervals
+// dictated by the ticker. If the ping write fails or the context is canceled,
+// it stops the ticker, invokes the cancel function, and closes the connection.
 func (a *A) Pinger(
-	ctx context.T, ticker *time.Ticker, cancel context.F, s interfaces.Server,
+	ctx context.T, ticker *time.Ticker, cancel context.F, s server.S,
 ) {
 	defer func() {
 		cancel()

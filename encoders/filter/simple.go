@@ -2,11 +2,11 @@ package filter
 
 import (
 	"encoding/binary"
-	"orly.dev/app/realy/pointers"
 	"orly.dev/crypto/ec/schnorr"
 	"orly.dev/crypto/sha256"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/errorf"
+	"orly.dev/utils/pointers"
 	"sort"
 
 	"orly.dev/encoders/event"

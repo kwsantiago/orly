@@ -2,12 +2,12 @@ package socketapi
 
 import (
 	"errors"
-	"orly.dev/app/realy/interfaces"
-	"orly.dev/app/realy/pointers"
 	"orly.dev/encoders/envelopes/closedenvelope"
+	"orly.dev/interfaces/server"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
 	"orly.dev/utils/normalize"
+	"orly.dev/utils/pointers"
 
 	"github.com/dgraph-io/badger/v4"
 
@@ -18,8 +18,34 @@ import (
 	"orly.dev/utils/context"
 )
 
+// HandleReq processes a raw request, parses its envelope, validates filters,
+// and interacts with the server storage and subscription mechanisms to query
+// events or manage subscriptions.
+//
+// Parameters:
+//
+//   - c: A context object used for managing deadlines, cancellation signals,
+//     and other request-scoped values.
+//
+//   - req: A byte slice representing the raw request data to be processed.
+//
+//   - srv: An interface representing the server, providing access to storage
+//     and subscription management.
+//
+// Return values:
+//
+//   - r: A byte slice containing the response or error message generated
+//     during processing.
+//
+// Expected behavior:
+//
+// The method parses and validates the incoming request envelope, querying
+// events from the server storage based on filters provided. It sends results
+// through the associated subscription or writes error messages to the listener.
+// If the subscription should be canceled due to completed query results, it
+// generates and sends a closure envelope.
 func (a *A) HandleReq(
-	c context.T, req []byte, srv interfaces.Server,
+	c context.T, req []byte, srv server.S,
 ) (r []byte) {
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()
@@ -67,13 +93,14 @@ func (a *A) HandleReq(
 	}
 	receiver := make(event.C, 32)
 	cancel := true
-	// if the query was for just Ids we know there cannot be any more results, so cancel the subscription.
+	// if the query was for just Ids, we know there cannot be any more results,
+	// so cancel the subscription.
 	for _, f := range allowed.F {
 		if f.Ids.Len() < 1 {
 			cancel = false
 			break
 		}
-		// also, if we received the limit amount of events, subscription ded
+		// also, if we received the limit number of events, subscription ded
 		if pointers.Present(f.Limit) {
 			if len(events) < int(*f.Limit) {
 				cancel = false

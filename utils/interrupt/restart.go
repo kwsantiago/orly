@@ -10,8 +10,8 @@ import (
 	"github.com/kardianos/osext"
 )
 
-// Restart uses syscall.Exec to restart the process. MacOS and Windows are not implemented,
-// currently.
+// Restart uses syscall.Exec to restart the process. macOS and Windows are not
+// implemented, currently.
 func Restart() {
 	log.D.Ln("restarting")
 	file, e := osext.Executable()

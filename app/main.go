@@ -1,4 +1,4 @@
-// Package app implements the realy nostr relay with a simple follow/mute list authentication scheme and the new HTTP REST based protocol.
+// Package app implements the orly nostr relay.
 package app
 
 import (
@@ -74,7 +74,6 @@ func (r *Relay) AcceptReq(
 	c context.T, hr *http.Request, id []byte,
 	ff *filters.T, authedPubkey []byte,
 ) (allowed *filters.T, ok bool, modified bool) {
-
 	allowed = ff
 	ok = true
 	return

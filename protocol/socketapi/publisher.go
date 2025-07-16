@@ -1,7 +1,7 @@
 package socketapi
 
 import (
-	"orly.dev/app/realy/publish/publisher"
+	"orly.dev/interfaces/publisher"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
 	"regexp"
@@ -19,15 +19,16 @@ var (
 	NIP20prefixmatcher = regexp.MustCompile(`^\w+: `)
 )
 
-// Map is a map of filters associated with a collection of ws.Listener connections.
+// Map is a map of filters associated with a collection of ws.Listener
+// connections.
 type Map map[*ws.Listener]map[string]*filters.T
 
 type W struct {
 	*ws.Listener
 	// If Cancel is true, this is a close command.
 	Cancel bool
-	// Id is the subscription Id. If Cancel is true, cancel the named subscription, otherwise,
-	// cancel the publisher for the socket.
+	// Id is the subscription Id. If Cancel is true, cancel the named
+	// subscription, otherwise, cancel the publisher for the socket.
 	Id       string
 	Receiver event.C
 	Filters  *filters.T
@@ -72,13 +73,11 @@ func (p *S) Receive(msg publisher.Message) {
 		if subs, ok := p.Map[m.Listener]; !ok {
 			subs = make(map[string]*filters.T)
 			subs[m.Id] = m.Filters
-			// log.I.S(p.Map)
 			p.Map[m.Listener] = subs
 			log.T.F(
 				"created new subscription for %s, %s", m.Listener.RealRemote(),
 				m.Filters.Marshal(nil),
 			)
-			// log.I.S(m.Listener, p.Map)
 		} else {
 			subs[m.Id] = m.Filters
 			log.T.F(
@@ -99,27 +98,9 @@ func (p *S) Deliver(ev *event.E) {
 			log.T.F(
 				"subscriber %s\n%s", w.RealRemote(), subscriber.Marshal(nil),
 			)
-			// if !publicReadable {
-			//	if authRequired && !w.IsAuthed() {
-			//		continue
-			//	}
-			// }
 			if !subscriber.Match(ev) {
 				continue
 			}
-			// if ev.Kind.IsPrivileged() {
-			//	ab := w.AuthedBytes()
-			//	var containsPubkey bool
-			//	if ev.Tags != nil {
-			//		containsPubkey = ev.Tags.ContainsAny([]byte{'p'}, tag.New(ab))
-			//	}
-			//	if !bytes.Equal(ev.Pubkey, ab) || containsPubkey {
-			//		if ab == nil {
-			//			continue
-			//		}
-			//		continue
-			//	}
-			// }
 			var res *eventenvelope.Result
 			if res, err = eventenvelope.NewResultWith(id, ev); chk.E(err) {
 				continue
@@ -133,7 +114,8 @@ func (p *S) Deliver(ev *event.E) {
 	p.Mx.Unlock()
 }
 
-// removeSubscriberId removes a specific subscription from a subscriber websocket.
+// removeSubscriberId removes a specific subscription from a subscriber
+// websocket.
 func (p *S) removeSubscriberId(ws *ws.Listener, id string) {
 	p.Mx.Lock()
 	var subs map[string]*filters.T

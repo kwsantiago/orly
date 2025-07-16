@@ -1,7 +1,7 @@
-// Package lol (log of location) is a simple logging library that prints a high precision unix
-// timestamp and the source location of a log print to make tracing errors simpler. Includes a
-// set of logging levels and the ability to filter out higher log levels for a more quiet
-// output.
+// Package lol (log of location) is a simple logging library that prints a high
+// precision unix timestamp and the source location of a log print to make
+// tracing errors simpler. Includes a set of logging levels and the ability to
+// filter out higher log levels for a more quiet output.
 package lol
 
 import (
@@ -38,10 +38,10 @@ var LevelNames = []string{
 }
 
 type (
-	// LevelPrinter defines a set of terminal printing primitives that output with extra data,
-	// time, log logLevelList, and code location
+	// LevelPrinter defines a set of terminal printing primitives that output
+	// with extra data, time, log logLevelList, and code location
 
-	// Ln prints lists of interfaces with spaces in between
+	// Ln prints lists of server with spaces in between
 	Ln func(a ...interface{})
 	// F prints like fmt.Println surrounded []byte log details
 	F func(format string, a ...interface{})
@@ -203,8 +203,9 @@ func getTracer() (fn func(funcName string, variables ...any)) {
 		for _, v := range variables {
 			vars += spew.Sdump(v)
 		}
-		fmt.Fprintf(Writer, "%s %s %s\n%s",
-			//TimeStamper(),
+		fmt.Fprintf(
+			Writer, "%s %s %s\n%s",
+			// TimeStamper(),
 			LevelSpecs[Trace].Colorizer(LevelSpecs[Trace].Name),
 			funcName,
 			loc,
@@ -228,7 +229,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -240,7 +242,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -252,7 +255,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -264,7 +268,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 			if Level.Load() < l {
 				return
 			}
-			fmt.Fprintf(writer,
+			fmt.Fprintf(
+				writer,
 				"%s%s %s %s\n",
 				msgCol(TimeStamper()),
 				LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -277,7 +282,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 				return e != nil
 			}
 			if e != nil {
-				fmt.Fprintf(writer,
+				fmt.Fprintf(
+					writer,
 					"%s%s %s %s\n",
 					msgCol(TimeStamper()),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -290,7 +296,8 @@ func GetPrinter(l int32, writer io.Writer, skip int) LevelPrinter {
 		},
 		Err: func(format string, a ...interface{}) error {
 			if Level.Load() >= l {
-				fmt.Fprintf(writer,
+				fmt.Fprintf(
+					writer,
 					"%s%s %s %s\n",
 					msgCol(TimeStamper()),
 					LevelSpecs[l].Colorizer(LevelSpecs[l].Name),
@@ -311,7 +318,11 @@ func GetNullPrinter() LevelPrinter {
 		S:   func(a ...interface{}) {},
 		C:   func(closure func() string) {},
 		Chk: func(e error) bool { return e != nil },
-		Err: func(format string, a ...interface{}) error { return fmt.Errorf(format, a...) },
+		Err: func(
+			format string, a ...interface{},
+		) error {
+			return fmt.Errorf(format, a...)
+		},
 	}
 }
 
@@ -352,7 +363,17 @@ func TimeStamper() (s string) {
 	if NoTimeStamp.Load() {
 		return
 	}
-	return time.Now().Format("2006-01-02T15:04:05Z07:00.000 ")
+	ts := time.Now().Format("150405.000000")
+	ds := time.Now().Format("2006-01-02")
+	s += color.New(color.FgBlue).Sprint(ds[0:4])
+	s += color.New(color.FgHiBlue).Sprint(ds[5:7])
+	s += color.New(color.FgBlue).Sprint(ds[8:])
+	s += color.New(color.FgHiBlue).Sprint(ts[0:2])
+	s += color.New(color.FgBlue).Sprint(ts[2:4])
+	s += color.New(color.FgHiBlue).Sprint(ts[4:6])
+	s += color.New(color.FgBlue).Sprint(ts[7:])
+	s += " "
+	return
 }
 
 // var wd, _ = os.Getwd()

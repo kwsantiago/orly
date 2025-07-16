@@ -35,12 +35,12 @@ func URL[V string | []byte](v V) (b []byte) {
 	}
 	u = bytes.TrimSpace(u)
 	u = bytes.ToLower(u)
-	// if address has a port number, we can probably assume it is insecure
+	// if the address has a port number, we can probably assume it is insecure
 	// websocket as most public or production relays have a domain name and a
-	// well known port 80 or 443 and thus no port number.
+	// well-known port 80 or 443 and thus no port number.
 	//
 	// if a protocol prefix is present, we assume it is already complete.
-	// Converting http/s to websocket equivalent will be done later anyway.
+	// Converting http/s to websocket-equivalent will be done later anyway.
 	if bytes.Contains(u, []byte(":")) &&
 		!(hp(u, HTTP) || hp(u, HTTPS) || hp(u, WS) || hp(u, WSS)) {
 
@@ -55,7 +55,7 @@ func URL[V string | []byte](v V) (b []byte) {
 		_, err := p.Unmarshal(split[1])
 		if chk.E(err) {
 			log.D.F("Error normalizing URL '%s': %s", u, err)
-			// again, without an error we must return nil
+			// again, without an error, we must return nil
 			return
 		}
 		if p.Uint64() > 65535 {
@@ -74,8 +74,8 @@ func URL[V string | []byte](v V) (b []byte) {
 		}
 	}
 
-	// if prefix isn't specified as http/s or websocket, assume secure websocket
-	// and add wss prefix (this is the most common).
+	// if the prefix isn't specified as http/s or websocket, assume secure
+	// websocket and add wss prefix (this is the most common).
 	if !(hp(u, HTTP) || hp(u, HTTPS) || hp(u, WS) || hp(u, WSS)) {
 		u = append(WSS, u...)
 	}

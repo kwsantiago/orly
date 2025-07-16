@@ -1,4 +1,4 @@
-// Package relay contains a collection of interfaces for enabling the building
+// Package relay contains a collection of server for enabling the building
 // of modular nostr relay implementations.
 package relay
 
@@ -11,9 +11,9 @@ import (
 // I is the main interface for implementing a nostr relay.
 type I interface {
 	// Name is used as the "name" field in NIP-11 and as a prefix in default
-	// Server logging. For other NIP-11 fields, see [Informationer].
+	// S logging. For other NIP-11 fields, see [Informationer].
 	Name() string
-	// Init is called at the very beginning by [Server.Start], allowing a realy
+	// Init is called at the very beginning by [S.Start], allowing a realy
 	// to initialize its internal resources.
 	Init() error
 	// Storage returns the realy storage implementation.
@@ -28,12 +28,12 @@ type Informationer interface {
 }
 
 // ShutdownAware is called during the server shutdown.
-// See [Server.Shutdown] for details.
+// See [S.Shutdown] for details.
 type ShutdownAware interface {
 	OnShutdown(context.T)
 }
 
-// Logger is what [Server] uses to log messages.
+// Logger is what [S] uses to log messages.
 type Logger interface {
 	Infof(format string, v ...any)
 	Warningf(format string, v ...any)

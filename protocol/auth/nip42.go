@@ -57,8 +57,9 @@ var (
 	RelayTag = []byte("relay")
 )
 
-// Validate checks whether event is a valid NIP-42 event for given challenge and
-// relayURL. The result of the validation is encoded in the ok bool.
+// Validate checks whether an event is a valid NIP-42 event for a given
+// challenge and relayURL. The result of the validation is encoded in the ok
+// bool.
 func Validate(evt *event.E, challenge []byte, relayURL string) (
 	ok bool, err error,
 ) {
@@ -76,7 +77,6 @@ func Validate(evt *event.E, challenge []byte, relayURL string) (
 		log.D.Ln(err)
 		return
 	}
-	// log.I.Ln(relayURL)
 	var expected, found *url.URL
 	if expected, err = parseURL(relayURL); chk.D(err) {
 		log.D.Ln(err)

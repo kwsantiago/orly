@@ -84,7 +84,7 @@ func TestNestedSubscriptions(t *testing.T) {
 	for {
 		select {
 		case event := <-sub.Events:
-			// now fetch author of this
+			// now fetch the author of this
 			var lim uint = 1
 			sub, err := rl.Subscribe(
 				context.Bg(),
@@ -103,7 +103,8 @@ func TestNestedSubscriptions(t *testing.T) {
 			for {
 				select {
 				case <-sub.Events:
-					// do another subscription here in "sync" mode, just so we're sure things are not blocking
+					// do another subscription here in "sync" mode, just so
+					// we're sure things are not blocking
 					rl.QuerySync(context.Bg(), &filter.F{Limit: &lim})
 
 					n.Add(1)

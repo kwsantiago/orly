@@ -4,8 +4,8 @@
 package publish
 
 import (
-	"orly.dev/app/realy/publish/publisher"
 	"orly.dev/encoders/event"
+	"orly.dev/interfaces/publisher"
 )
 
 // S is the control structure for the subscription management scheme.

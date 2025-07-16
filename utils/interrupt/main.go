@@ -14,8 +14,8 @@ import (
 	"orly.dev/utils/qu"
 )
 
-// HandlerWithSource is an interrupt handling closure and the source location that it was sent
-// from.
+// HandlerWithSource is an interrupt handling closure and the source location
+// that it was sent from.
 type HandlerWithSource struct {
 	Source string
 	Fn     func()
@@ -35,20 +35,20 @@ var (
 	// ShutdownRequestChan is a channel that can receive shutdown requests
 	ShutdownRequestChan = qu.T()
 
-	// addHandlerChan is used to add an interrupt handler to the list of handlers to be invoked
-	// on SIGINT (Ctrl+C) signals.
+	// addHandlerChan is used to add an interrupt handler to the list of
+	// handlers to be invoked on SIGINT (Ctrl+C) signals.
 	addHandlerChan = make(chan HandlerWithSource)
 
-	// HandlersDone is closed after all interrupt handlers run the first time an interrupt is
-	// signaled.
+	// HandlersDone is closed after all interrupt handlers run the first time an
+	// interrupt is signaled.
 	HandlersDone = make(qu.C)
 
 	interruptCallbacks       []func()
 	interruptCallbackSources []string
 )
 
-// Listener listens for interrupt signals, registers interrupt callbacks, and responds to custom
-// shutdown signals as required
+// Listener listens for interrupt signals, registers interrupt callbacks, and
+// responds to custom shutdown signals as required
 func Listener() {
 	invokeCallbacks := func() {
 		// run handlers in LIFO order.
@@ -96,8 +96,8 @@ out:
 
 // AddHandler adds a handler to call when a SIGINT (Ctrl+C) is received.
 func AddHandler(handler func()) {
-	// Create the channel and start the main interrupt handler which invokes all other callbacks
-	// and exits if not already done.
+	// Create the channel and start the main interrupt handler which invokes all
+	// other callbacks and exits if not already done.
 	_, loc, line, _ := runtime.Caller(1)
 	msg := fmt.Sprintf("%s:%d", loc, line)
 	if ch == nil {
@@ -130,8 +130,8 @@ func Request() {
 	}
 }
 
-// GoroutineDump returns a string with the current goroutine dump in order to show what's going
-// on in case of timeout.
+// GoroutineDump returns a string with the current goroutine dump in order to
+// show what's going on in case of timeout.
 func GoroutineDump() string {
 	buf := make([]byte, 1<<18)
 	n := runtime.Stack(buf, true)

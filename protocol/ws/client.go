@@ -36,21 +36,35 @@ import (
 var subscriptionIDCounter atomic.Int32
 
 type Client struct {
-	closeMutex                    sync.Mutex
-	URL                           string
-	RequestHeader                 http.Header // e.g. for origin header
-	Connection                    *Connection
-	Subscriptions                 *xsync.MapOf[string, *Subscription]
-	ConnectionError               error
-	connectionContext             context.T // will be canceled when the connection closes
-	connectionContextCancel       context.F
-	challenge                     []byte      // NIP-42 challenge, we only keep the last
-	notices                       chan []byte // NIP-01 NOTICEs
-	okCallbacks                   *xsync.MapOf[string, func(bool, string)]
-	writeQueue                    chan writeRequest
+	closeMutex sync.Mutex
+
+	URL string
+
+	RequestHeader http.Header // e.g. for origin header
+
+	Connection *Connection
+
+	Subscriptions *xsync.MapOf[string, *Subscription]
+
+	ConnectionError error
+
+	connectionContext context.T // will be canceled when the connection closes
+
+	connectionContextCancel context.F
+
+	challenge []byte // NIP-42 challenge, we only keep the last
+
+	notices chan []byte // NIP-01 NOTICEs
+
+	okCallbacks *xsync.MapOf[string, func(bool, string)]
+
+	writeQueue chan writeRequest
+
 	subscriptionChannelCloseQueue chan *Subscription
-	signatureChecker              func(*event.E) bool
-	AssumeValid                   bool // this will skip verifying signatures for events received from this relay
+
+	signatureChecker func(*event.E) bool
+
+	AssumeValid bool // this will skip verifying signatures for events received from this relay
 }
 
 type writeRequest struct {
@@ -58,7 +72,8 @@ type writeRequest struct {
 	answer chan error
 }
 
-// NewRelay returns a new relay. The relay connection will be closed when the context is canceled.
+// NewRelay returns a new relay. The relay connection will be closed when the
+// context is canceled.
 func NewRelay(c context.T, url string, opts ...RelayOption) *Client {
 	ctx, cancel := context.Cancel(c)
 	r := &Client{
@@ -81,8 +96,9 @@ func NewRelay(c context.T, url string, opts ...RelayOption) *Client {
 	return r
 }
 
-// RelayConnect returns a relay object connected to url. Once successfully connected, cancelling
-// ctx has no effect. To close the connection, call r.Close().
+// RelayConnect returns a relay object connected to url. Once successfully
+// connected, cancelling ctx has no effect. To close the connection, call
+// r.Close().
 func RelayConnect(ctx context.T, url string, opts ...RelayOption) (
 	*Client, error,
 ) {
@@ -101,8 +117,8 @@ var (
 	_ RelayOption = (WithSignatureChecker)(nil)
 )
 
-// WithNoticeHandler just takes notices and is expected to do something with them. when not
-// given, defaults to logging the notices.
+// WithNoticeHandler just takes notices and is expected to do something with
+// them. when not given, defaults to logging the notices.
 type WithNoticeHandler func(notice []byte)
 
 func (nh WithNoticeHandler) ApplyRelayOption(r *Client) {
@@ -114,8 +130,8 @@ func (nh WithNoticeHandler) ApplyRelayOption(r *Client) {
 	}()
 }
 
-// WithSignatureChecker must be a function that checks the signature of an event and returns
-// true or false.
+// WithSignatureChecker must be a function that checks the signature of an event
+// and returns true or false.
 type WithSignatureChecker func(*event.E) bool
 
 func (sc WithSignatureChecker) ApplyRelayOption(r *Client) {
@@ -133,16 +149,18 @@ func (r *Client) Context() context.T { return r.connectionContext }
 // IsConnected returns true if the connection to this relay seems to be active.
 func (r *Client) IsConnected() bool { return r.connectionContext.Err() == nil }
 
-// Connect tries to establish a websocket connection to r.URL. If the context expires before the
-// connection is complete, an error is returned. Once successfully connected, context expiration
-// has no effect: call r.Close to close the connection.
+// Connect tries to establish a websocket connection to r.URL. If the context
+// expires before the connection is complete, an error is returned. Once
+// successfully connected, context expiration has no effect: call r.Close to
+// close the connection.
 //
-// The underlying relay connection will use a background context. If you want to pass a custom
-// context to the underlying relay connection, use NewRelay() and then Client.Connect().
+// The underlying relay connection will use a background context. If you want to
+// pass a custom context to the underlying relay connection, use NewRelay() and
+// then Client.Connect().
 func (r *Client) Connect(c context.T) error { return r.ConnectWithTLS(c, nil) }
 
-// ConnectWithTLS tries to establish a secured websocket connection to r.URL using customized
-// tls.Config (CA's, etc).
+// ConnectWithTLS tries to establish a secured websocket connection to r.URL
+// using customized tls.Config (CA's, etc.).
 func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 	if r.connectionContext == nil || r.Subscriptions == nil {
 		return errorf.E("relay must be initialized with a call to NewRelay()")
@@ -265,7 +283,8 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 					)
 					continue
 				} else {
-					// check if the event matches the desired filter, ignore otherwise
+					// check if the event matches the desired filter, ignore
+					// otherwise
 					if !sub.Filters.Match(env.Event) {
 						log.D.F(
 							"{%s} filter does not match: %v ~ %v\n", r.URL,
@@ -273,7 +292,8 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 						)
 						continue
 					}
-					// check signature, ignore invalid, except from trusted (AssumeValid) relays
+					// check signature, ignore invalid, except from trusted
+					// (AssumeValid) relays
 					if !r.AssumeValid {
 						if ok = r.signatureChecker(env.Event); !ok {
 							log.E.F(
@@ -283,7 +303,8 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 							continue
 						}
 					}
-					// dispatch this to the internal .events channel of the subscription
+					// dispatch this to the internal .events channel of the
+					// subscription
 					sub.dispatchEvent(env.Event)
 				}
 			case eoseenvelope.L:
@@ -340,14 +361,16 @@ func (r *Client) Write(msg []byte) <-chan error {
 	return ch
 }
 
-// Publish sends an "EVENT" command to the relay r as in NIP-01 and waits for an OK response.
+// Publish sends an "EVENT" command to the relay r as in NIP-01 and waits for an
+// OK response.
 func (r *Client) Publish(c context.T, ev *event.E) error {
 	return r.publish(
 		c, ev,
 	)
 }
 
-// Auth sends an "AUTH" command client->relay as in NIP-42 and waits for an OK response.
+// Auth sends an "AUTH" command client->relay as in NIP-42 and waits for an OK
+// response.
 func (r *Client) Auth(c context.T, sign signer.I) error {
 	authEvent := auth.CreateUnsigned(sign.Pub(), r.challenge, r.URL)
 	if err := authEvent.Sign(sign); chk.T(err) {
@@ -367,7 +390,8 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 		)
 		defer cancel()
 	} else {
-		// otherwise make the context cancellable so we can stop everything upon receiving an "OK"
+		// otherwise make the context cancellable so we can stop everything upon
+		// receiving an "OK"
 		ctx, cancel = context.Cancel(ctx)
 		defer cancel()
 	}
@@ -402,7 +426,8 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 	for {
 		select {
 		case <-ctx.Done():
-			// this will be called when we get an OK or when the context has been canceled
+			// this will be called when we get an OK or when the context has
+			// been canceled
 			if gotOk {
 				return err
 			}
@@ -414,12 +439,13 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 	}
 }
 
-// Subscribe sends a "REQ" command to the relay r as in NIP-01.
-// Events are returned through the channel sub.Events.
-// The subscription is closed when context ctx is cancelled ("CLOSE" in NIP-01).
+// Subscribe sends a "REQ" command to the relay r as in NIP-01. Events are
+// returned through the channel sub.Events. The subscription is closed when
+// context ctx is cancelled ("CLOSE" in NIP-01).
 //
-// Remember to cancel subscriptions, either by calling `.Unsub()` on them or ensuring their `context.Context` will be canceled at some point.
-// Failure to do that will result in a huge number of halted goroutines being created.
+// Remember to cancel subscriptions, either by calling `.Unsub()` on them or
+// ensuring their `context.Context` will be canceled at some point. Failure to
+// do that will result in a huge number of halted goroutines being created.
 func (r *Client) Subscribe(
 	c context.T, ff *filters.T,
 	opts ...SubscriptionOption,
@@ -438,8 +464,9 @@ func (r *Client) Subscribe(
 
 // PrepareSubscription creates a subscription, but doesn't fire it.
 //
-// Remember to cancel subscriptions, either by calling `.Unsub()` on them or ensuring their `context.Context` will be canceled at some point.
-// Failure to do that will result in a huge number of halted goroutines being created.
+// Remember to cancel subscriptions, either by calling `.Unsub()` on them or
+// ensuring their `context.Context` will be canceled at some point. Failure to
+// do that will result in a huge number of halted goroutines being created.
 func (r *Client) PrepareSubscription(
 	c context.T, ff *filters.T,
 	opts ...SubscriptionOption,
@@ -469,8 +496,8 @@ func (r *Client) PrepareSubscription(
 	return sub
 }
 
-// QuerySync is only used in tests. The realy query method is synchronous now anyway (it ensures
-// sort order is respected).
+// QuerySync is only used in tests. The realy query method is synchronous now
+// anyway (it ensures sort order is respected).
 func (r *Client) QuerySync(
 	ctx context.T, f *filter.F,
 	opts ...SubscriptionOption,

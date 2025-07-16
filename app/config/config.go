@@ -23,9 +23,9 @@ import (
 	"orly.dev/utils/apputil"
 )
 
-// C is the configuration for realy relay. These are read from the environment
-// if present, or if a .env file is found in ~/.config/realy/ that is read
-// instead and overrides anything else.
+// C is the configuration for the relay. These are read from the environment if
+// present, or if a .env file is found in ~/.config/orly/ that is read instead
+// and overrides anything else.
 type C struct {
 	AppName    string `env:"ORLY_APP_NAME" default:"orly"`
 	Config     string `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
@@ -103,7 +103,7 @@ func (kv KVSlice) Less(i, j int) bool { return kv[i].Key < kv[j].Key }
 func (kv KVSlice) Swap(i, j int)      { kv[i], kv[j] = kv[j], kv[i] }
 
 // Compose merges two KVSlice together, replacing the values of earlier keys
-// with same named KV items later in the slice (enabling compositing two
+// with the same named KV items later in the slice (enabling compositing two
 // together as a .env, as well as them being composed as structs.
 func (kv KVSlice) Compose(kv2 KVSlice) (out KVSlice) {
 	// duplicate the initial KVSlice
@@ -128,7 +128,7 @@ out:
 // standard formatted environment variable key/value pair list, one per line.
 // Note you must dereference a pointer type to use this. This allows the
 // composition of the config in this file with an extended form with a
-// customized variant of realy to produce correct environment variables both
+// customized variant of the relay to produce correct environment variables both
 // read and write.
 func EnvKV(cfg any) (m KVSlice) {
 	t := reflect.TypeOf(cfg)

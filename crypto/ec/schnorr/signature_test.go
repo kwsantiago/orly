@@ -187,8 +187,8 @@ var bip340TestVectors = []bip340Test{
 	},
 }
 
-// decodeHex decodes the passed hex string and returns the resulting bytes.  It
-// panics if an error occurs.  This is only used in the tests as a helper since
+// decodeHex decodes the passed hex string and returns the resulting bytes. It
+// panics if an error occurs. This is only used in the tests as a helper since
 // the only way it can fail is if there is an error in the test source code.
 func decodeHex(hexStr string) []byte {
 	b, err := hex.Dec(hexStr)
@@ -208,7 +208,7 @@ func TestSchnorrSign(t *testing.T) {
 			continue
 		}
 		d := decodeHex(test.secretKey)
-		privKey, _ := btcec.btcec.SecKeyFromBytes(d)
+		privKey, _ := btcec.SecKeyFromBytes(d)
 		var auxBytes [32]byte
 		aux := decodeHex(test.auxRand)
 		copy(auxBytes[:], aux)

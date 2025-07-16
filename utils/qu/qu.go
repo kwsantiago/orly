@@ -14,7 +14,7 @@ import (
 	"orly.dev/utils/lol"
 )
 
-// C is your basic empty struct signalling channel
+// C is your basic empty struct signal channel
 type C chan struct{}
 
 var (
@@ -42,8 +42,8 @@ func lc(cl func() string) {
 	}
 }
 
-// T creates an unbuffered chan struct{} for trigger and quit signalling (momentary and breaker
-// switches)
+// T creates an unbuffered chan struct{} for trigger and quit signalling
+// (momentary and breaker switches)
 func T() C {
 	mx.Lock()
 	defer mx.Unlock()
@@ -56,9 +56,10 @@ func T() C {
 	return o
 }
 
-// Ts creates a buffered chan struct{} which is specifically intended for signalling without
-// blocking, generally one is the size of buffer to be used, though there might be conceivable
-// cases where the channel should accept more signals without blocking the caller
+// Ts creates a buffered chan struct{} which is specifically intended for
+// signalling without blocking, generally one is the size of buffer to be used,
+// though there might be conceivable cases where the channel should accept more
+// signals without blocking the caller
 func Ts(n int) C {
 	mx.Lock()
 	defer mx.Unlock()
@@ -197,7 +198,8 @@ func PrintChanState() {
 	mx.Unlock()
 }
 
-// GetOpenUnbufferedChanCount returns the number of qu channels that are still open
+// GetOpenUnbufferedChanCount returns the number of qu channels that are still
+// open
 func GetOpenUnbufferedChanCount() (o int) {
 	mx.Lock()
 	var c int
@@ -219,7 +221,8 @@ func GetOpenUnbufferedChanCount() (o int) {
 	return
 }
 
-// GetOpenBufferedChanCount returns the number of qu channels that are still open
+// GetOpenBufferedChanCount returns the number of qu channels that are still
+// open
 func GetOpenBufferedChanCount() (o int) {
 	mx.Lock()
 	var c int

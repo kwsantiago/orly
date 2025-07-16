@@ -45,7 +45,7 @@ func TestPublish(t *testing.T) {
 		t.Fatalf("textNote.Sign: %v", err)
 	}
 	// fake relay server
-	var mu sync.Mutex // guards published to satisfy go test -race
+	var mu sync.Mutex // guards published to satisfy `go test -race`
 	var published bool
 	ws := newWebsocketServer(
 		func(conn *websocket.Conn) {
@@ -65,10 +65,9 @@ func TestPublish(t *testing.T) {
 			if raw[1], err = env.Unmarshal(raw[1]); chk.E(err) {
 				t.Fatal(err)
 			}
-			// event := parseEventMessage(t, raw)
-			if !bytes.Equal(env.T.Serialize(), textNote.Serialize()) {
+			if !bytes.Equal(env.E.Serialize(), textNote.Serialize()) {
 				t.Errorf(
-					"received event:\n%s\nwant:\n%s", env.T.Serialize(),
+					"received event:\n%s\nwant:\n%s", env.E.Serialize(),
 					textNote.Serialize(),
 				)
 			}

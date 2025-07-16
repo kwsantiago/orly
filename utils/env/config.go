@@ -9,12 +9,12 @@ import (
 )
 
 // Env is a key/value map used to represent environment variables. This is
-// implemented for go-simpler.org library.
+// implemented for the go-simpler.org library.
 type Env map[string]string
 
 // GetEnv reads a file expected to represent a collection of KEY=value in
-// standard shell environment variable format - ie, key usually in all upper
-// case no spaces and words separated by underscore, value can have any
+// standard shell environment variable format - i.e., key usually in all upper
+// case no spaces and words separated by underscore; value can have any
 // separator, but usually comma, for an array of values.
 func GetEnv(path string) (env Env, err error) {
 	var s []byte

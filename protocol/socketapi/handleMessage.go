@@ -13,6 +13,20 @@ import (
 	"orly.dev/encoders/envelopes/reqenvelope"
 )
 
+// HandleMessage processes an incoming message, identifies its type, and
+// delegates handling to the appropriate method based on the message's envelope
+// type.
+//
+// Parameters:
+//
+//   - msg: A byte slice representing the raw message to be processed.
+//
+// Expected behavior:
+//
+// The method identifies the message type by examining its envelope label and
+// passes the message payload to the corresponding handler function. If the type
+// is unrecognized, it logs an error and generates an appropriate notice
+// message. Handles errors in message identification or writing responses.
 func (a *A) HandleMessage(msg []byte) {
 	var notice []byte
 	var err error
@@ -24,23 +38,18 @@ func (a *A) HandleMessage(msg []byte) {
 	// rl := a.Relay()
 	switch t {
 	case eventenvelope.L:
-		notice = a.HandleEvent(a.Context(), rem, a.Server)
+		notice = a.HandleEvent(a.Context(), rem, a.S)
 	case reqenvelope.L:
 		notice = a.HandleReq(
 			a.Context(), rem,
-			// a.Options().SkipEventFunc,
-			a.Server,
+			a.S,
 		)
 	case closeenvelope.L:
-		notice = a.HandleClose(rem, a.Server)
+		notice = a.HandleClose(rem, a.S)
 	case authenvelope.L:
-		notice = a.HandleAuth(rem, a.Server)
+		notice = a.HandleAuth(rem, a.S)
 	default:
-		// if wsh, ok := rl.(relay.WebSocketHandler); ok {
-		//	wsh.HandleUnknownType(a.Listener, t, rem)
-		// } else {
 		notice = []byte(fmt.Sprintf("unknown envelope type %s\n%s", t, rem))
-		// }
 	}
 	if len(notice) > 0 {
 		log.D.F("notice->%s %s", a.RealRemote(), notice)

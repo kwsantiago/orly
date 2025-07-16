@@ -2,10 +2,10 @@ package realy
 
 import (
 	"net/http"
-	"orly.dev/app/realy/interfaces"
 	"orly.dev/app/realy/publish"
 	"orly.dev/encoders/event"
 	"orly.dev/interfaces/relay"
+	"orly.dev/interfaces/server"
 	"orly.dev/interfaces/store"
 	"orly.dev/utils/context"
 )
@@ -28,4 +28,4 @@ func (s *Server) Publisher() *publish.S { return s.listeners }
 
 func (s *Server) Context() context.T { return s.Ctx }
 
-var _ interfaces.Server = &Server{}
+var _ server.S = &Server{}

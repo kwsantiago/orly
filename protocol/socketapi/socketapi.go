@@ -2,7 +2,8 @@ package socketapi
 
 import (
 	"net/http"
-	"orly.dev/app/realy/interfaces"
+	"orly.dev/app/realy/helpers"
+	"orly.dev/interfaces/server"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
 	"strings"
@@ -22,18 +23,38 @@ const (
 	DefaultMaxMessageSize = 1 * units.Mb
 )
 
+// A is a composite type that integrates a context, a websocket Listener, and a
+// server interface to manage WebSocket-based server communication. It is
+// designed to handle message processing, authentication, and event dispatching
+// in its operations.
 type A struct {
 	Ctx context.T
 	*ws.Listener
-	interfaces.Server
-	// ClientsMu *sync.Mutex
-	// Clients   map[*websocket.Conn]struct{}
+	server.S
 }
 
-func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
-
+// Serve handles an incoming WebSocket request by upgrading the HTTP request,
+// managing the WebSocket connection, and delegating received messages for
+// processing.
+//
+// Parameters:
+//
+//   - w: The HTTP response writer used to manage the connection upgrade.
+//
+//   - r: The HTTP request object that is being upgraded to a WebSocket
+//     connection.
+//
+//   - s: The server context object that manages request lifecycle and state.
+//
+// Expected behavior:
+//
+// The method upgrades the HTTP connection to a WebSocket connection, sets up
+// read and write limits, handles pings and pongs for keeping the connection
+// alive, and processes incoming messages. It ensures proper cleanup of
+// resources on connection termination or cancellation, adhering to the given
+// context's lifecycle.
+func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.S) {
 	var err error
-
 	ticker := time.NewTicker(DefaultPingWait)
 	var cancel context.F
 	a.Ctx, cancel = context.Cancel(s.Context())
@@ -43,27 +64,17 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 		log.E.F("failed to upgrade websocket: %v", err)
 		return
 	}
-	// a.ClientsMu.Lock()
-	// a.Clients[conn] = struct{}{}
-	// a.ClientsMu.Unlock()
 	a.Listener = GetListener(conn, r)
-
 	defer func() {
 		cancel()
 		ticker.Stop()
-		// a.ClientsMu.Lock()
-		// if _, ok := a.Clients[a.Listener.Conn]; ok {
 		a.Publisher().Receive(
 			&W{
 				Cancel:   true,
 				Listener: a.Listener,
 			},
 		)
-		// 	delete(a.Clients, a.Listener.Conn)
 		chk.E(a.Listener.Conn.Close())
-		// a.Publisher().removeSubscriber(a.Listener)
-		// }
-		// a.ClientsMu.Unlock()
 	}()
 	conn.SetReadLimit(DefaultMaxMessageSize)
 	chk.E(conn.SetReadDeadline(time.Now().Add(DefaultPongWait)))
@@ -73,17 +84,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 			return nil
 		},
 	)
-	// if a.Server.AuthRequired() {
-	//	a.Listener.RequestAuth()
-	// }
-	// if a.Listener.AuthRequested() && len(a.Listener.Authed()) == 0 {
-	//	log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
-	//	if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).Write(a.Listener); chk.E(err) {
-	//		return
-	//	}
-	//	// return
-	// }
-	go a.Pinger(a.Ctx, ticker, cancel, a.Server)
+	go a.Pinger(a.Ctx, ticker, cancel, a.S)
 	var message []byte
 	var typ int
 	for {
@@ -96,8 +97,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 			return
 		default:
 		}
-		typ, message, err = conn.ReadMessage()
-		if chk.E(err) {
+		if typ, message, err = conn.ReadMessage(); err != nil {
 			if strings.Contains(
 				err.Error(), "use of closed network connection",
 			) {
@@ -112,7 +112,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s interfaces.Server) {
 			) {
 				log.W.F(
 					"unexpected close error from %s: %v",
-					a.Listener.Request.Header.Get("X-Forwarded-For"), err,
+					helpers.GetRemoteFromReq(r), err,
 				)
 			}
 			return

@@ -22,22 +22,8 @@ func (s *Server) addEvent(
 	if ev == nil {
 		return false, normalize.Invalid.F("empty event")
 	}
-	// sto := rl.Storage()
-	// advancedSaver, _ := sto.(relay.AdvancedSaver)
-	// don't allow storing event with protected marker as per nip-70 with auth enabled.
-	// if (s.authRequired || !s.publicReadable) && ev.Tags.ContainsProtectedMarker() {
-	//	if len(authedPubkey) == 0 || !bytes.Equal(ev.Pubkey, authedPubkey) {
-	//		return false,
-	//			[]byte(fmt.Sprintf("event with relay marker tag '-' (nip-70 protected event) "+
-	//				"may only be published by matching npub: %0x is not %0x",
-	//				authedPubkey, ev.Pubkey))
-	//	}
-	// }
 	if ev.Kind.IsEphemeral() {
 	} else {
-		// if advancedSaver != nil {
-		//	advancedSaver.BeforeSave(c, ev)
-		// }
 		if saveErr := s.Publish(c, ev); saveErr != nil {
 			if errors.Is(saveErr, store.ErrDupEvent) {
 				return false, []byte(saveErr.Error())
@@ -55,14 +41,7 @@ func (s *Server) addEvent(
 				return false, []byte(errmsg)
 			}
 		}
-		// if advancedSaver != nil {
-		//	advancedSaver.AfterSave(ev)
-		// }
 	}
-	// var authRequired bool
-	// if ar, ok := rl.(relay.Authenticator); ok {
-	//	authRequired = ar.AuthRequired()
-	// }
 	// notify subscribers
 	s.listeners.Deliver(ev)
 	accepted = true

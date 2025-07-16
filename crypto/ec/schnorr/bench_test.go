@@ -16,7 +16,7 @@ import (
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
-// is an error.  This is only provided for the hard-coded constants so errors in
+// is an error. This is only provided for the hard-coded constants, so errors in
 // the source code can be detected. It will only (and must only) be called with
 // hard-coded values.
 func hexToBytes(s string) []byte {
@@ -28,8 +28,10 @@ func hexToBytes(s string) []byte {
 }
 
 // hexToModNScalar converts the passed hex string into a ModNScalar and will
-// panic if there is an error.  This is only provided for the hard-coded
-// constants so errors in the source code can be detected. It will only (and
+// panic if there is an error. This is only provided for the hard-coded
+//
+//	constants, so errors in the source code can be detected. It will only (and
+//
 // must only) be called with hard-coded values.
 func hexToModNScalar(s string) *btcec.ModNScalar {
 	b, err := hex.Dec(s)
@@ -44,10 +46,10 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 }
 
 // hexToFieldVal converts the passed hex string into a FieldVal and will panic
-// if there is an error.  This is only provided for the hard-coded constants so
+// if there is an error. This is only provided for the hard-coded constants, so
 // errors in the source code can be detected. It will only (and must only) be
 // called with hard-coded values.
-func hexToFieldVal(s string) *btcec.btcec {
+func hexToFieldVal(s string) *btcec.FieldVal {
 	b, err := hex.Dec(s)
 	if err != nil {
 		panic("invalid hex in source file: " + s)
@@ -60,8 +62,8 @@ func hexToFieldVal(s string) *btcec.btcec {
 }
 
 // fromHex converts the passed hex string into a big integer pointer and will
-// panic is there is an error.  This is only provided for the hard-coded
-// constants so errors in the source code can bet detected. It will only (and
+// panic if there is an error. This is only provided for the hard-coded
+// constants, so errors in the source code can be detected. It will only (and
 // must only) be called for initialization purposes.
 func fromHex(s string) *big.Int {
 	if s == "" {

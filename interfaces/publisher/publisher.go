@@ -2,13 +2,16 @@ package publisher
 
 import (
 	"orly.dev/encoders/event"
-	"orly.dev/interfaces/typer"
 )
 
+type Message interface {
+	Type() string
+}
+
 type I interface {
-	typer.T
+	Message
 	Deliver(ev *event.E)
-	Receive(msg typer.T)
+	Receive(msg Message)
 }
 
 type Publishers []I

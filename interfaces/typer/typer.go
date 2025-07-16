@@ -1,5 +1,5 @@
-// Package typer is an interface for interfaces to use to identify their type simply for
-// aggregating multiple self-registered interfaces such that the top level can recognise the
+// Package typer is an interface for server to use to identify their type simply for
+// aggregating multiple self-registered server such that the top level can recognise the
 // type of a message and match it to the type of handler.
 package typer
 

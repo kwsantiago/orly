@@ -48,7 +48,6 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
-					log.I.S(ev, evt)
 					return errorf.W(string(normalize.Invalid.F("not replacing newer replaceable event")))
 				}
 				// not deleting these events because some clients are retarded
@@ -74,8 +73,6 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 								)
 							},
 						)
-						// replaceable events we don't tombstone when replacing,
-						// so if deleted, old versions can be restored
 						if err = sto.DeleteEvent(c, ev.EventId()); chk.E(err) {
 							return
 						}

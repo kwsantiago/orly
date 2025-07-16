@@ -23,7 +23,8 @@ type NIP struct {
 // N returns the number of a nostr "improvement" possibility.
 func (n NIP) N() int { return n.Number }
 
-// GetList converts a NIP into a number.List of simple numbers, sorted in ascending order.
+// GetList converts a NIP into a number.List of simple numbers, sorted in
+// ascending order.
 func GetList(items ...NIP) (n number.List) {
 	for _, item := range items {
 		n = append(n, item.N())
@@ -32,7 +33,8 @@ func GetList(items ...NIP) (n number.List) {
 	return
 }
 
-// this is the list of all nips and their titles for use in supported_nips field
+// this is the list of all nips and their titles for use in the supported_nips
+// field
 var (
 	BasicProtocol              = NIP{"Basic protocol flow description", 1}
 	NIP1                       = BasicProtocol
@@ -175,20 +177,20 @@ var NIPMap = map[int]NIP{
 
 // Limits are rules about what is acceptable for events and filters on a relay.
 type Limits struct {
-	// MaxMessageLength is the maximum number of bytes for incoming JSON
-	// that the relay will attempt to decode and act upon. When you send large
+	// MaxMessageLength is the maximum number of bytes for incoming JSON that
+	// the relay will attempt to decode and act upon. When you send large
 	// subscriptions, you will be limited by this value. It also effectively
 	// limits the maximum size of any event. Value is calculated from [ to ] and
-	// is after UTF-8 serialization (so some unicode characters will cost 2-3
+	// is after UTF-8 serialization (so some Unicode characters will cost 2-3
 	// bytes). It is equal to the maximum size of the WebSocket message frame.
 	MaxMessageLength int `json:"max_message_length,omitempty"`
-	// MaxSubscriptions is total number of subscriptions that may be active on a
-	// single websocket connection to this relay. It's possible that
+	// MaxSubscriptions is the total number of subscriptions that may be active
+	// on a single websocket connection to this relay. It's possible that
 	// authenticated clients with a (paid) relationship to the relay may have
 	// higher limits.
 	MaxSubscriptions int `json:"max_subscriptions,omitempty"`
-	// MaxFilter is maximum number of filter values in each subscription. Must
-	// be one or higher.
+	// MaxFilter is the maximum number of filter values in each subscription.
+	// Must be one or higher.
 	MaxFilters int `json:"max_filters,omitempty"`
 	// MaxLimit is the relay server will clamp each filter's limit value to this
 	// number. This means the client won't be able to get more than this number
@@ -210,17 +212,17 @@ type Limits struct {
 	// MinPowDifficulty new events will require at least this difficulty of PoW,
 	// based on NIP-13, or they will be rejected by this server.
 	MinPowDifficulty int `json:"min_pow_difficulty,omitempty"`
-	// AuthRequired means the realy requires NIP-42 authentication to happen
+	// AuthRequired means the relay requires NIP-42 authentication to happen
 	// before a new connection may perform any other action. Even if set to
 	// False, authentication may be required for specific actions.
 	AuthRequired bool `json:"auth_required"`
-	// PaymentRequired this realy requires payment before a new connection may
+	// PaymentRequired this relay requires payment before a new connection may
 	// perform any action.
 	PaymentRequired bool `json:"payment_required"`
-	// RestrictedWrites this realy requires some kind of condition to be
-	// fulfilled in order to accept events (not necessarily, but including
+	// RestrictedWrites means this relay requires some kind of condition to be
+	// fulfilled to accept events (not necessarily, but including
 	// payment_required and min_pow_difficulty). This should only be set to true
-	// when users are expected to know the realy policy before trying to write
+	// when users are expected to know the relay policy before trying to write
 	// to it -- like belonging to a special pubkey-based whitelist or writing
 	// only events of a specific niche kind or content. Normal anti-spam
 	// heuristics, for example, do not qualify.q
@@ -241,13 +243,14 @@ type Sub struct {
 	Period int `json:"period"`
 }
 
-// Pub is a limitation for what you can store on the relay as a kinds.T and the cost (for???).
+// Pub is a limitation for what you can store on the relay as a kinds.T and the
+// cost (for???).
 type Pub struct {
 	Kinds kinds.T `json:"kinds"`
 	Payment
 }
 
-// T is the realy information document.
+// T is the relay information document.
 type T struct {
 	Name           string      `json:"name"`
 	Description    string      `json:"description,omitempty"`
@@ -268,7 +271,7 @@ type T struct {
 	sync.Mutex
 }
 
-// NewInfo populates the nips map and if an Info structure is provided it is
+// NewInfo populates the nips map, and if an Info structure is provided, it is
 // used and its nips map is populated if it isn't already.
 func NewInfo(inf *T) (info *T) {
 	if inf != nil {

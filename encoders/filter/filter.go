@@ -7,12 +7,12 @@ package filter
 import (
 	"bytes"
 	"encoding/binary"
-	"orly.dev/app/realy/pointers"
 	"orly.dev/crypto/ec/schnorr"
 	"orly.dev/crypto/ec/secp256k1"
 	"orly.dev/crypto/sha256"
 	"orly.dev/utils/chk"
 	"orly.dev/utils/errorf"
+	"orly.dev/utils/pointers"
 	"sort"
 
 	"lukechampine.com/frand"

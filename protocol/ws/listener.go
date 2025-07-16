@@ -8,6 +8,7 @@ import (
 
 	"github.com/fasthttp/websocket"
 
+	"orly.dev/app/realy/helpers"
 	"orly.dev/utils/atomic"
 )
 
@@ -16,45 +17,23 @@ type Listener struct {
 	mutex   sync.Mutex
 	Conn    *websocket.Conn
 	Request *http.Request
-	// challenge     atomic.String
-	remote atomic.String
-	// authed        atomic.String
-	// authRequested atomic.Bool
+	remote  atomic.String
 }
 
 // NewListener creates a new Listener for listening for inbound connections for
 // a relay.
-func NewListener(
-	conn *websocket.Conn,
-	req *http.Request,
-	challenge []byte,
-) (ws *Listener) {
+func NewListener(conn *websocket.Conn, req *http.Request) (ws *Listener) {
 	ws = &Listener{Conn: conn, Request: req}
-	// ws.challenge.Store(string(challenge))
-	// ws.authRequested.Store(false)
 	ws.setRemoteFromReq(req)
 	return
 }
 
 func (ws *Listener) setRemoteFromReq(r *http.Request) {
-	var rr string
-	// reverse proxy should populate this field so we see the remote not the
-	// proxy
-	rem := r.Header.Get("X-Forwarded-For")
-	if rem == "" {
-		rr = r.RemoteAddr
-	} else {
-		splitted := strings.Split(rem, " ")
-		if len(splitted) == 1 {
-			rr = splitted[0]
-		}
-		if len(splitted) == 2 {
-			rr = splitted[1]
-		}
-		// in case upstream doesn't set this, or we are directly listening
-		// instead of via reverse proxy or just if the header field is missing,
-		// put the connection remote address into the websocket state data.
-	}
+	// Use the helper function to get the remote address
+	rr := helpers.GetRemoteFromReq(r)
+
+	// If the helper function couldn't determine the remote address, fall back
+	// to the connection's remote address
 	if rr == "" {
 		// if that fails, fall back to the remote (probably the proxy, unless
 		// the relay is actually directly listening)

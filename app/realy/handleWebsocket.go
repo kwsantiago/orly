@@ -7,6 +7,6 @@ import (
 )
 
 func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
-	a := &socketapi.A{Server: s}
+	a := &socketapi.A{S: s}
 	a.Serve(w, r, s)
 }
