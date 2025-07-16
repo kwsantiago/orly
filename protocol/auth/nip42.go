@@ -16,12 +16,12 @@ import (
 	"orly.dev/encoders/timestamp"
 )
 
-// GenerateChallenge creates a reasonable, 96-byte base64 challenge string
+// GenerateChallenge creates a reasonable, 16-byte base64 challenge string
 func GenerateChallenge() (b []byte) {
 	bb := make([]byte, 12)
 	b = make([]byte, 16)
 	_, _ = rand.Read(bb)
-	base64.StdEncoding.Encode(b, bb)
+	base64.URLEncoding.Encode(b, bb)
 	return
 }
 
@@ -63,7 +63,6 @@ var (
 func Validate(evt *event.E, challenge []byte, relayURL string) (
 	ok bool, err error,
 ) {
-	// log.T.ToSliceOfBytes("relayURL '%s'", relayURL)
 	if evt.Kind.K != kind.ClientAuthentication.K {
 		err = log.E.Err(
 			"event incorrect kind for auth: %d %s",

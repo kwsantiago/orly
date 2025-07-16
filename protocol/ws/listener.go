@@ -3,6 +3,7 @@ package ws
 
 import (
 	"net/http"
+	"orly.dev/protocol/auth"
 	"strings"
 	"sync"
 
@@ -14,10 +15,13 @@ import (
 
 // Listener is a websocket implementation for a relay listener.
 type Listener struct {
-	mutex   sync.Mutex
-	Conn    *websocket.Conn
-	Request *http.Request
-	remote  atomic.String
+	mutex        sync.Mutex
+	Conn         *websocket.Conn
+	Request      *http.Request
+	remote       atomic.String
+	authedPubkey atomic.Bytes
+	isAuthed     atomic.Bool
+	challenge    atomic.Bytes
 }
 
 // NewListener creates a new Listener for listening for inbound connections for
@@ -25,6 +29,7 @@ type Listener struct {
 func NewListener(conn *websocket.Conn, req *http.Request) (ws *Listener) {
 	ws = &Listener{Conn: conn, Request: req}
 	ws.setRemoteFromReq(req)
+	ws.SetChallenge(auth.GenerateChallenge())
 	return
 }
 
@@ -82,3 +87,16 @@ func (ws *Listener) Req() *http.Request { return ws.Request }
 
 // Close the Listener connection from the Listener side.
 func (ws *Listener) Close() (err error) { return ws.Conn.Close() }
+
+func (ws *Listener) IsAuthed() bool       { return ws.isAuthed.Load() }
+func (ws *Listener) SetAuthed(b bool)     { ws.isAuthed.Store(b) }
+func (ws *Listener) AuthedPubkey() []byte { return ws.authedPubkey.Load() }
+func (ws *Listener) SetAuthedPubkey(b []byte) {
+	ws.isAuthed.Store(true)
+	ws.authedPubkey.Store(b)
+}
+
+func (ws *Listener) Challenge() []byte { return ws.challenge.Load() }
+func (ws *Listener) SetChallenge(b []byte) {
+	ws.challenge.Store(b)
+}
