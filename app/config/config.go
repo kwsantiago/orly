@@ -38,7 +38,7 @@ type C struct {
 	Pprof          bool     `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
 	AuthRequired   bool     `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
 	PublicReadable bool     `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to the whether or not authed"`
-	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)"`
+	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/"`
 	Owners         []string `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 }
 
@@ -71,6 +71,7 @@ func New() (cfg *C, err error) {
 		lol.SetLogLevel(cfg.LogLevel)
 		log.I.F("loaded configuration from %s", envPath)
 	}
+	log.I.S(cfg)
 	return
 }
 

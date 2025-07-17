@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"orly.dev/app/config"
 	"orly.dev/app/relay/helpers"
 	"orly.dev/app/relay/options"
 	"orly.dev/app/relay/publish"
@@ -14,10 +15,8 @@ import (
 	"orly.dev/utils/chk"
 	"orly.dev/utils/log"
 	"strconv"
-	"sync"
 	"time"
 
-	"github.com/fasthttp/websocket"
 	"github.com/rs/cors"
 
 	"orly.dev/interfaces/signer"
@@ -26,30 +25,26 @@ import (
 )
 
 type Server struct {
-	Ctx            context.T
-	Cancel         context.F
-	options        *options.T
-	relay          relay.I
-	clientsMu      sync.Mutex
-	clients        map[*websocket.Conn]struct{}
-	Addr           string
-	mux            *servemux.S
-	httpServer     *http.Server
-	listeners      *publish.S
-	authRequired   bool
-	publicReadable bool
+	Ctx        context.T
+	Cancel     context.F
+	options    *options.T
+	relay      relay.I
+	Addr       string
+	mux        *servemux.S
+	httpServer *http.Server
+	listeners  *publish.S
+	*config.C
 }
 
 type ServerParams struct {
-	Ctx            context.T
-	Cancel         context.F
-	Rl             relay.I
-	DbPath         string
-	MaxLimit       int
-	Admins         []signer.I
-	Owners         [][]byte
-	AuthRequired   bool
-	PublicReadable bool
+	Ctx      context.T
+	Cancel   context.F
+	Rl       relay.I
+	DbPath   string
+	MaxLimit int
+	Admins   []signer.I
+	Owners   [][]byte
+	*config.C
 }
 
 func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
@@ -64,17 +59,13 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 	}
 	serveMux := servemux.NewServeMux()
 	s = &Server{
-		Ctx:     sp.Ctx,
-		Cancel:  sp.Cancel,
-		relay:   sp.Rl,
-		clients: make(map[*websocket.Conn]struct{}),
-		mux:     serveMux,
-		options: op,
-		listeners: publish.New(
-			socketapi.New(),
-		),
-		authRequired:   sp.AuthRequired,
-		publicReadable: sp.PublicReadable,
+		Ctx:       sp.Ctx,
+		Cancel:    sp.Cancel,
+		relay:     sp.Rl,
+		mux:       serveMux,
+		options:   op,
+		listeners: publish.New(socketapi.New()),
+		C:         sp.C,
 	}
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {

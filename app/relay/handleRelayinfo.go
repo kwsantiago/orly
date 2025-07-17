@@ -42,7 +42,7 @@ func (s *Server) handleRelayInfo(w http.ResponseWriter, r *http.Request) {
 			Nips:        supportedNIPs, Software: version.URL,
 			Version: version.V,
 			Limitation: relayinfo.Limits{
-				AuthRequired: s.authRequired,
+				AuthRequired: s.C.AuthRequired,
 			},
 			Icon: "https://cdn.satellite.earth/ac9778868fbf23b63c47c769a74e163377e6ea94d3f0f31711931663d035c4f6.png",
 		}

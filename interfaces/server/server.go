@@ -27,7 +27,6 @@ type I interface {
 		message []byte,
 	)
 	Context() context.T
-	Disconnect()
 	Publisher() *publish.S
 	Publish(c context.T, evt *event.E) (err error)
 	Relay() relay.I

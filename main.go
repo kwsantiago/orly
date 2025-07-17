@@ -59,13 +59,12 @@ func main() {
 	go app.MonitorResources(c)
 	var server *relay.Server
 	serverParams := &relay.ServerParams{
-		Ctx:            c,
-		Cancel:         cancel,
-		Rl:             r,
-		DbPath:         cfg.DataDir,
-		MaxLimit:       512, // Default max limit for events
-		AuthRequired:   cfg.AuthRequired,
-		PublicReadable: cfg.PublicReadable,
+		Ctx:      c,
+		Cancel:   cancel,
+		Rl:       r,
+		DbPath:   cfg.DataDir,
+		MaxLimit: 512, // Default max limit for events
+		C:        cfg,
 	}
 	var opts []options.O
 	if server, err = relay.NewServer(serverParams, opts...); chk.E(err) {
