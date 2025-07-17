@@ -64,7 +64,7 @@ node_modules/**
 !.gitmodules
 !*.txt
 !*.sum
-!version
+!pkg/version
 !*.service
 !*.benc
 !*.png
@@ -90,7 +90,7 @@ node_modules/**
 /blocklist.json
 /gui/gui/main.wasm
 /gui/gui/index.html
-database/testrealy
+pkg/database/testrealy
 /.idea/workspace.xml
 /.idea/dictionaries/project.xml
 /.idea/shelf/Add_tombstone_handling__enhance_event_ID_logic__update_imports.xml

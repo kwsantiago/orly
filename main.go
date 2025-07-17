@@ -8,19 +8,18 @@ import (
 	"github.com/pkg/profile"
 	"net/http"
 	_ "net/http/pprof"
-	"orly.dev/app/relay"
-	"orly.dev/app/relay/options"
-	"orly.dev/utils/chk"
-	"orly.dev/utils/interrupt"
-	"orly.dev/utils/log"
-	"orly.dev/version"
+	app2 "orly.dev/pkg/app"
+	"orly.dev/pkg/app/config"
+	"orly.dev/pkg/app/relay"
+	"orly.dev/pkg/app/relay/options"
+	"orly.dev/pkg/database"
+	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/interrupt"
+	"orly.dev/pkg/utils/log"
+	"orly.dev/pkg/utils/lol"
+	"orly.dev/pkg/version"
 	"os"
-
-	"orly.dev/app"
-	"orly.dev/app/config"
-	"orly.dev/database"
-	"orly.dev/utils/context"
-	"orly.dev/utils/lol"
 )
 
 func main() {
@@ -55,8 +54,8 @@ func main() {
 	if chk.E(err) {
 		os.Exit(1)
 	}
-	r := &app.Relay{C: cfg, Store: storage}
-	go app.MonitorResources(c)
+	r := &app2.Relay{C: cfg, Store: storage}
+	go app2.MonitorResources(c)
 	var server *relay.Server
 	serverParams := &relay.ServerParams{
 		Ctx:      c,

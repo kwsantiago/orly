@@ -4,14 +4,12 @@ package tests
 
 import (
 	"encoding/base64"
-	"orly.dev/crypto/p256k"
-	"orly.dev/utils/chk"
-
 	"lukechampine.com/frand"
-
-	"orly.dev/encoders/event"
-	"orly.dev/encoders/kind"
-	"orly.dev/encoders/timestamp"
+	"orly.dev/pkg/crypto/p256k"
+	"orly.dev/pkg/encoders/event"
+	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/encoders/timestamp"
+	"orly.dev/pkg/utils/chk"
 )
 
 // GenerateEvent creates events full of random kinds and content data.

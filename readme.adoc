@@ -1,4 +1,4 @@
-= image:./orly.png[orly.dev]
+= image:./docs/orly.png[orly.dev]
 :toc:
 :note-caption: note 👉
 
