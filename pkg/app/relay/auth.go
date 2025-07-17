@@ -10,11 +10,14 @@ import (
 	"orly.dev/pkg/utils/lol"
 )
 
-// ServiceURL determines the service URL based on the request headers.
+// ServiceURL constructs the service URL based on the incoming HTTP request. It
+// checks for authentication requirements and determines the protocol (ws or
+// wss) based on headers like X-Forwarded-Host, X-Forwarded-Proto, and the host
+// itself.
 //
 // Parameters:
 //
-// - req: The HTTP request object containing header information.
+// - req: A pointer to an http.Request object representing the incoming request.
 //
 // Return Values:
 //
@@ -22,15 +25,14 @@ import (
 //
 // Expected Behaviour:
 //
-// - Checks if authentication is required. If not, returns an empty string.
+// - Checks if authentication is required.
 //
-// - Retrieves the host from the "X-Forwarded-Host" header or uses the request's
-// Host if not present.
+// - Retrieves the host from X-Forwarded-Host or falls back to req.Host.
 //
-// - Determines the protocol (ws or wss) based on the "X-Forwarded-Proto" header
-// or other conditions like the presence of a port or IP address.
+// - Determines the protocol (ws or wss) based on various conditions including
+// headers and host details.
 //
-// - Constructs and returns the service URL in the format "protocol://host".
+// - Returns the constructed URL string.
 func (s *Server) ServiceURL(req *http.Request) (st string) {
 	lol.Tracer("ServiceURL")
 	defer func() { lol.Tracer("end ServiceURL", st) }()
