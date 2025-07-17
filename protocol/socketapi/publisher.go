@@ -96,7 +96,8 @@ func (p *S) Deliver(ev *event.E) {
 		log.I.F("%v %s", subs, w.RealRemote())
 		for id, subscriber := range subs {
 			log.T.F(
-				"subscriber %s\n%s", w.RealRemote(), subscriber.Marshal(nil),
+				"subscriber %s\n%s", w.RealRemote(),
+				subscriber.Marshal(nil),
 			)
 			if !subscriber.Match(ev) {
 				continue

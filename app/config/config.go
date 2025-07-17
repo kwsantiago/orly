@@ -27,18 +27,19 @@ import (
 // present, or if a .env file is found in ~/.config/orly/ that is read instead
 // and overrides anything else.
 type C struct {
-	AppName        string `env:"ORLY_APP_NAME" default:"orly"`
-	Config         string `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style"`
-	State          string `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces"`
-	DataDir        string `env:"ORLY_DATA_DIR" usage:"storage location for the event store"`
-	Listen         string `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
-	DNS            string `env:"ORLY_DNS" usage:"external DNS name that points at the relay"`
-	Port           int    `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
-	LogLevel       string `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	DbLogLevel     string `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	Pprof          bool   `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
-	AuthRequired   bool   `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
-	PublicReadable bool   `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to the whether or not authed"`
+	AppName        string   `env:"ORLY_APP_NAME" default:"orly"`
+	Config         string   `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style" default:"~/.config/orly"`
+	State          string   `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces" default:"~/.local/state/orly"`
+	DataDir        string   `env:"ORLY_DATA_DIR" usage:"storage location for the event store" default:"~/.local/cache/orly"`
+	Listen         string   `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
+	Port           int      `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
+	LogLevel       string   `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	DbLogLevel     string   `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	Pprof          bool     `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
+	AuthRequired   bool     `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
+	PublicReadable bool     `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to the whether or not authed"`
+	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)"`
+	Owners         []string `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 }
 
 // New creates a new config.C.
@@ -47,11 +48,14 @@ func New() (cfg *C, err error) {
 	if err = env.Load(cfg, &env.Options{SliceSep: ","}); chk.T(err) {
 		return
 	}
-	if cfg.Config == "" {
+	if cfg.Config == "" || strings.Contains(cfg.State, "~") {
 		cfg.Config = filepath.Join(xdg.ConfigHome, cfg.AppName)
 	}
-	if cfg.DataDir == "" {
+	if cfg.DataDir == "" || strings.Contains(cfg.State, "~") {
 		cfg.DataDir = filepath.Join(xdg.DataHome, cfg.AppName)
+	}
+	if cfg.State == "" || strings.Contains(cfg.State, "~") {
+		cfg.State = filepath.Join(xdg.StateHome, cfg.AppName)
 	}
 	envPath := filepath.Join(cfg.Config, ".env")
 	if apputil.FileExists(envPath) {
@@ -189,8 +193,9 @@ func PrintHelp(cfg *C, printer io.Writer) {
 			" this file will be created on first startup.\nenvironment overrides it and "+
 			"you can also edit the file to set configuration options\n\n"+
 			"use the parameter 'env' to print out the current configuration to the terminal\n\n"+
-			"set the environment using\n\n\t%s env > %s/.env\n", os.Args[0],
+			"set the environment using\n\n\t%s env > %s/.env\n",
 		cfg.Config,
+		os.Args[0],
 		cfg.Config,
 	)
 
