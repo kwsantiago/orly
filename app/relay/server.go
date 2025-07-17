@@ -19,7 +19,6 @@ import (
 
 	"github.com/rs/cors"
 
-	"orly.dev/interfaces/signer"
 	"orly.dev/protocol/socketapi"
 	"orly.dev/utils/context"
 )
@@ -42,8 +41,6 @@ type ServerParams struct {
 	Rl       relay.I
 	DbPath   string
 	MaxLimit int
-	Admins   []signer.I
-	Owners   [][]byte
 	*config.C
 }
 

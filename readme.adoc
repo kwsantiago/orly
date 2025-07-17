@@ -4,7 +4,7 @@
 
 image:https://img.shields.io/badge/godoc-documentation-blue.svg[Documentation,link=https://pkg.go.dev/orly.lol]
 image:https://img.shields.io/badge/donate-geyser_crowdfunding_project_page-orange.svg[Support this project,link=https://geyser.fund/project/orly]
-zap me: ⚡️mleku@getalby.com
+zap me: ⚡️mlekudev@getalby.com
 
 image:./orly.png[orly.png]
 
