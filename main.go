@@ -5,9 +5,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/pkg/profile"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+
+	"github.com/pkg/profile"
 	app2 "orly.dev/pkg/app"
 	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay"
@@ -19,7 +21,6 @@ import (
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
 	"orly.dev/pkg/version"
-	"os"
 )
 
 func main() {
