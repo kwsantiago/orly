@@ -1,12 +1,10 @@
-= orly.lol
+= image:./orly.png[orly.dev]
 :toc:
 :note-caption: note 👉
 
 image:https://img.shields.io/badge/godoc-documentation-blue.svg[Documentation,link=https://pkg.go.dev/orly.lol]
 image:https://img.shields.io/badge/donate-geyser_crowdfunding_project_page-orange.svg[Support this project,link=https://geyser.fund/project/orly]
 zap me: ⚡️mlekudev@getalby.com
-
-image:./orly.png[orly.png]
 
 nostr relay built from a heavily modified fork of https://github.com/nbd-wtf/go-nostr[nbd-wtf/go-nostr]
 and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum performance, simplicity and memory efficiency.
