@@ -79,16 +79,19 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// standard nostr protocol only governs the "root" path of the relay and
 	// websockets
-	if r.URL.Path == "/" && r.Header.Get("Accept") == "application/nostr+json" {
-		s.handleRelayInfo(w, r)
-		return
-	}
-	if r.URL.Path == "/" && r.Header.Get("Upgrade") == "websocket" {
-		s.handleWebsocket(w, r)
-		return
+	if r.URL.Path == "/" {
+		if r.Header.Get("Upgrade") == "websocket" {
+			s.handleWebsocket(w, r)
+			return
+		}
+		if r.Header.Get("Accept") == "application/nostr+json" {
+			s.handleRelayInfo(w, r)
+			return
+		}
 	}
 	log.I.F(
-		"http request: %s from %s", r.URL.String(), helpers.GetRemoteFromReq(r),
+		"http request: %s from %s",
+		r.URL.String(), helpers.GetRemoteFromReq(r),
 	)
 	s.mux.ServeHTTP(w, r)
 }

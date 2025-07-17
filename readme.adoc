@@ -13,14 +13,14 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 
 == Features
 
-* new HTTP REST API available in addition to standard websocket access, simplifying writing applications and tools, and building a standard API method set for future extensions for more flexible features
+* new HTTP REST API available in addition to standard websocket access, simplifying writing applications and tools, and building a standard API method set for future extensions for more flexible features.
 * a lot of other bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android)
-* a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd)
+* a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd).
 * AVX/AVX2 optimized SHA256 and SIMD hex encoder
-* https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here])
+* https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here]).
 * efficient, mutable byte slice based hash/pubkey/signature encoding in memory (zero allocation decode from wire, can tolerate whitespace, at a speed penalty)
-* custom badger based event store with an optional garbage collector that deletes least recent once the store exceeds a specified size access, and data encoded using a more space efficient format based on the nostr canonical json array event form
-* link:cmd/vainstr[vainstr] vanity npub generator that can mine a 5 letter suffix in around 15 minutes on a 6 core Ryzen 5 processor using the CGO bitcoin core signature library
+* custom badger based event store with an optional garbage collector that uses fast binary encoder for storage of events.
+* link:cmd/vainstr[vainstr] vanity npub generator that can mine a 5 letter suffix in around 15 minutes on a 6 core Ryzen 5 processor using the CGO bitcoin core signature library.
 * reverse proxy tool link:cmd/lerproxy[lerproxy] with support for Go vanity imports and https://github.com/nostr-protocol/nips/blob/master/05.md[nip-05] npub DNS verification and own TLS certificates
 * link:https://github.com/nostr-protocol/nips/blob/master/98.md[nip-98] implementation with new expiring variant for vanilla HTTP tools and browsers.
 
@@ -32,8 +32,7 @@ The commits on these tags will explain what state the commit is at.
 
 In general, the most stable versions are new minor tags, eg v1.2.0 or v1.23.0, and minor patch versions may not be stable and occasionally may not compile (not very often).
 
-Go 1.24 or better is recommended.
-Go 1.23.1 is minimum required.
+Go 1.24 or better is required.
 
 == Repository Policy
 
