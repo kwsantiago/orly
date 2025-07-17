@@ -125,7 +125,8 @@ func (r *Relay) AcceptFilter(
 //   - id - the ID of the request.
 //   - ff - a set of filters that have been applied to the event, represented
 //     as a filters.T object.
-//   - authedPubkey - the public key, if authed, of the client for this connection.
+//   - authedPubkey - the public key, if authed, of the client for this
+//     connection.
 //
 // Return Values:
 //
