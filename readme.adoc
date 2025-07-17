@@ -13,7 +13,7 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 == Features
 
 * new HTTP REST API available in addition to standard websocket access, simplifying writing applications and tools, and building a standard API method set for future extensions for more flexible features.
-* a lot of other bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android)
+* a lot of other bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android) (todo: this is mostly built and designed but not currently available)
 * a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd).
 * AVX/AVX2 optimized SHA256 and SIMD hex encoder
 * https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here]).
@@ -35,7 +35,7 @@ Go 1.24 or better is required.
 
 == Repository Policy
 
-In general, the main `dev` branch will build, but occasionally may not.
+In general, the `main` branch will build, but occasionally may not.
 It is where new commits are added once they are working, mostly, and allows people to easily see ongoing activity.
 
 WARNING: IT IS NOT GUARANTEED TO BE STABLE... but it is getting there.
@@ -112,6 +112,8 @@ The database is stored in `$HOME/.local/share/orly` and if need be you can stop 
 
 [#_simplified_nostr]
 === Simplified Nostr
+
+NOTE: this is not currently implemented. coming soon TM
 
 Rather than write a text that will likely fall out of date very quickly, simply run `orly` and visit its listener address (eg link:http://localhost:3334/api[http://localhost:3334/api]) to see the full documentation.
 
