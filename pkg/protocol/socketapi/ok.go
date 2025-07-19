@@ -6,8 +6,15 @@ import (
 	"orly.dev/pkg/interfaces/eventId"
 )
 
+// OK represents a function that processes events or operations, using provided
+// parameters to generate formatted messages and return errors if any issues
+// occur during processing.
 type OK func(a *A, env eventId.Ider, format string, params ...any) (err error)
 
+// OKs provides a collection of handler functions for managing different types
+// of operational outcomes, each corresponding to specific error or status
+// conditions such as authentication requirements, rate limiting, and invalid
+// inputs.
 type OKs struct {
 	AuthRequired OK
 	PoW          OK
@@ -20,6 +27,10 @@ type OKs struct {
 	Restricted   OK
 }
 
+// Ok provides a collection of handler functions for managing different types of
+// operational outcomes, each corresponding to specific error or status
+// conditions such as authentication requirements, rate limiting, and invalid
+// inputs.
 var Ok = OKs{
 	AuthRequired: func(
 		a *A, env eventId.Ider, format string, params ...any,

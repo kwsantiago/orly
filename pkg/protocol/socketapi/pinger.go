@@ -9,29 +9,30 @@ import (
 	"github.com/fasthttp/websocket"
 )
 
-// Pinger sends periodic WebSocket ping messages to ensure the connection is
-// alive and responsive. It terminates the connection if pings fail or the
-// context is canceled.
+// Pinger sends periodic WebSocket ping messages to maintain an active
+// connection and handles clean-up when the context is cancelled or the ticker
+// triggers.
 //
 // # Parameters
 //
-//   - ctx: A context object used to monitor cancellation signals and
-//     manage termination of the method execution.
+//   - ctx (context.T): The context controlling the operation lifecycle, used to
+//     detect cancellation or completion signals.
 //
-//   - ticker: A time.Ticker object that triggers periodic pings based on
-//     its configured interval.
+//   - ticker (*time.Ticker): A timer that triggers periodic ping messages at
+//     regular intervals.
 //
-//   - cancel: A context.CancelFunc called to gracefully terminate operations
-//     associated with the WebSocket connection.
+//   - cancel (context.F): A function to cancel the context when the operation
+//     should terminate, typically called on shutdown or error.
 //
-//   - s: An interface representing the server context, allowing interactions
-//     related to the connection.
+//   - s (server.I): The server interface provides contextual information for the
+//     connection, though not directly used within this method.
 //
-// Expected behavior:
+// # Expected behaviour
 //
-// The method writes ping messages to the WebSocket connection at intervals
-// dictated by the ticker. If the ping write fails or the context is canceled,
-// it stops the ticker, invokes the cancel function, and closes the connection.
+// Sends WebSocket ping messages at intervals defined by the ticker. If an error
+// occurs during transmission, logs the failure and closes the underlying
+// connection. Cleans up resources by stopping the ticker and cancelling the
+// context when the operation completes or is interrupted.
 func (a *A) Pinger(
 	ctx context.T, ticker *time.Ticker, cancel context.F, s server.I,
 ) {

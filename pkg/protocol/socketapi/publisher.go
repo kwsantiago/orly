@@ -24,13 +24,22 @@ type Map map[*ws.Listener]map[string]*filters.T
 
 type W struct {
 	*ws.Listener
+
 	// If Cancel is true, this is a close command.
 	Cancel bool
+
 	// Id is the subscription Id. If Cancel is true, cancel the named
 	// subscription, otherwise, cancel the publisher for the socket.
-	Id       string
+	Id string
+
+	// The Receiver holds the event channel for receiving notifications or data
+	// relevant to this WebSocket connection.
 	Receiver event.C
-	Filters  *filters.T
+
+	// Filters holds a collection of filters used to match or process events
+	// associated with this WebSocket connection. It is used to determine which
+	// notifications or data should be received by the subscriber.
+	Filters *filters.T
 }
 
 func (w *W) Type() (typeName string) { return Type }
@@ -40,6 +49,9 @@ type Close struct {
 	Id string
 }
 
+// S is a structure that manages subscriptions and associated filters for
+// websocket listeners. It uses a mutex to synchronize access to a map storing
+// subscriber connections and their filter configurations.
 type S struct {
 	// Mx is the mutex for the Map.
 	Mx sync.Mutex
@@ -53,6 +65,23 @@ func New() (publisher *S) { return &S{Map: make(Map)} }
 
 func (p *S) Type() (typeName string) { return Type }
 
+// Receive handles incoming messages to manage websocket listener subscriptions
+// and associated filters.
+//
+// # Parameters
+//
+// - msg (publisher.Message): The incoming message to process; expected to be of
+// type *W to trigger subscription management actions.
+//
+// # Expected behaviour
+//
+// - Checks if the message is of type *W.
+//
+// - If Cancel is true, removes a subscriber by ID or the entire listener.
+//
+// - Otherwise, adds the subscription to the map under a mutex lock.
+//
+// - Logs actions related to subscription creation or removal.
 func (p *S) Receive(msg publisher.Message) {
 	if m, ok := msg.(*W); ok {
 		if m.Cancel {
@@ -87,6 +116,25 @@ func (p *S) Receive(msg publisher.Message) {
 	}
 }
 
+// Deliver sends an event to all subscribers whose filters match the event
+//
+// # Parameters
+//
+// - ev (*event.E): The event to deliver to matching subscribers
+//
+// # Expected behaviour
+//
+// # Locks the mutex to synchronize access to subscriber data
+//
+// # Iterates over all websocket connections and their associated subscriptions
+//
+// # Checks if each subscription's filter matches the event being delivered
+//
+// # Creates an event envelope result for matching subscriptions
+//
+// # Writes the result to the corresponding websocket connection
+//
+// Logs details about event delivery and any errors encountered
 func (p *S) Deliver(ev *event.E) {
 	log.T.F("delivering event %0x to subscribers", ev.Id)
 	var err error

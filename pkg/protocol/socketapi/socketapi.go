@@ -46,7 +46,7 @@ type A struct {
 //
 //   - s: The server context object that manages request lifecycle and state.
 //
-// Expected behavior:
+// # Expected Behaviour
 //
 // The method upgrades the HTTP connection to a WebSocket connection, sets up
 // read and write limits, handles pings and pongs for keeping the connection

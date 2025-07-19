@@ -7,27 +7,29 @@ import (
 	"orly.dev/pkg/utils/log"
 )
 
-// HandleClose processes a CLOSE envelope, intended to cancel a specific
-// subscription, and notifies the server to handle the cancellation.
+// HandleClose processes a CLOSE envelope by unmarshalling the request,
+// validates the presence of an <id> field, and signals cancellation for
+// the associated listener through the server's publisher mechanism.
 //
 // # Parameters
 //
-//   - req: A byte slice containing the raw CLOSE envelope data to process.
+//   - req ([]byte): The raw byte slice containing the CLOSE envelope data.
 //
-//   - srv: The server instance responsible for managing subscription
-//     operations, such as cancellation.
+//   - srv (server.I): A reference to the server interface used to access
+//     publishing capabilities.
 //
 // # Return Values
 //
-//   - note: A byte slice containing an error message if issues occur during
-//     processing; otherwise, an empty slice.
+//   - note ([]byte): An empty byte slice if successful, or an error message
+//     if the envelope is invalid or missing required fields.
 //
-// Expected behavior:
+// # Expected behaviour
 //
-// The method parses and validates the CLOSE envelope. If valid, it cancels the
-// corresponding subscription by notifying the server's publisher. If the
-// envelope is malformed or the subscription ID is missing, an error message is
-// returned instead. Logs any remaining unprocessed data for diagnostics.
+// Processes the CLOSE envelope by unmarshalling it into a structured
+// format, checks for remaining data after unmarshalling, verifies the
+// presence of a non-empty <id> field, and sends a cancellation signal to
+// the publisher with the associated listener and ID. Returns an error
+// message if the envelope lacks a valid <id>.
 func (a *A) HandleClose(
 	req []byte,
 	srv server.I,

@@ -12,20 +12,19 @@ import (
 	"orly.dev/pkg/utils/log"
 )
 
-// HandleMessage processes an incoming message, identifies its type, and
-// delegates handling to the appropriate method based on the message's envelope
-// type.
+// HandleMessage processes an incoming byte slice message by identifying its type
+// and routing it to the appropriate handler method, generating and sending a
+// notice response if necessary.
 //
 // # Parameters
 //
-//   - msg: A byte slice representing the raw message to be processed.
+// - msg ([]byte): The incoming message data to be processed.
 //
-// Expected behavior:
+// # Expected behaviour
 //
-// The method identifies the message type by examining its envelope label and
-// passes the message payload to the corresponding handler function. If the type
-// is unrecognized, it logs an error and generates an appropriate notice
-// message. Handles errors in message identification or writing responses.
+// Processes the message by identifying its envelope type, routes it to the
+// corresponding handler method, generates a notice for errors or unknown types,
+// logs the notice, and writes it back to the listener if required.
 func (a *A) HandleMessage(msg []byte) {
 	var notice []byte
 	var err error

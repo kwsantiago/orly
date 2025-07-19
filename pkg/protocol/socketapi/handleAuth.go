@@ -10,6 +10,29 @@ import (
 	"orly.dev/pkg/utils/log"
 )
 
+// HandleAuth processes authentication data received from a remote client,
+// validates it against the server's challenge, and sets up authentication if
+// successful.
+//
+// # Parameters
+//
+// - b ([]byte): The raw byte slice containing the authentication response to be
+// processed.
+//
+// - srv (server.I): A reference to the server interface that provides context
+// for the authentication process.
+//
+// # Return Values
+//
+// - msg ([]byte): An optional message returned if the authentication fails or
+// requires further action.
+//
+// # Expected behaviour
+//
+// Handles the authentication process by checking if authentication is required,
+// unmarshalling and validating the response against a challenge, logging
+// relevant information, and setting up the authenticated state on successful
+// validation.
 func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 	if a.I.AuthRequired() {
 		log.I.F("AUTH:\n%s", b)

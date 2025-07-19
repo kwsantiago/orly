@@ -22,25 +22,25 @@ import (
 //
 // # Parameters
 //
-//   - c: A context object used for managing deadlines, cancellation signals,
+//   - c: a context object used for managing deadlines, cancellation signals,
 //     and other request-scoped values.
 //
-//   - req: A byte slice representing the raw request data to be processed.
+//   - req: a byte slice representing the raw request data to be processed.
 //
 //   - srv: An interface representing the server, providing access to storage
 //     and subscription management.
 //
 // # Return Values
 //
-//   - r: A byte slice containing the response or error message generated
+//   - r: a byte slice containing the response or error message generated
 //     during processing.
 //
-// Expected behavior:
+// # Expected behaviour
 //
 // The method parses and validates the incoming request envelope, querying
 // events from the server storage based on filters provided. It sends results
 // through the associated subscription or writes error messages to the listener.
-// If the subscription should be canceled due to completed query results, it
+// If the subscription should be cancelled due to completed query results, it
 // generates and sends a closure envelope.
 func (a *A) HandleReq(
 	c context.T, req []byte, srv server.I,
