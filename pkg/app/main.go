@@ -88,23 +88,34 @@ func (r *Relay) AcceptEvent(
 	return
 }
 
-// AcceptFilter checks the provided filter against a set of accepted filters and
-// determines if the filter should be accepted or not.
+// AcceptFilter checks if a filter is allowed based on authentication status and
+// relay policies
 //
 // Parameters:
 //
-//   - c - a context.T for signalling if the task has been canceled.
-//   - hr - an *http.Request containing the information about the current
-//     connection.
-//   - f - a *filter.S that needs to be checked.
-//   - authedPubkey - the public key, if authed, of the client for this
-//     connection.
+//   - c: Context for task cancellation.
 //
-// Return Values:
+//   - hr: HTTP request containing connection information.
 //
-//   - allowed - the filtered filter if it is accepted or nil otherwise
-//   - ok - true if the filter is accepted, false otherwise
-//   - modified - a boolean indicating whether the filter was modified
+//   - f: Filter to evaluate for acceptance.
+//
+//   - authedPubkey: Public key of authenticated client, if applicable.
+//
+// Return values:
+//
+//   - allowed: The filter if permitted; may be modified during processing.
+//
+//   - ok: Boolean indicating whether the filter is accepted.
+//
+//   - modified: Boolean indicating whether the filter was altered during
+//     evaluation.
+//
+// Expected behaviour:
+//
+// The method evaluates whether the provided filter should be allowed based on
+// authentication status and relay-specific rules. If permitted, returns the
+// filter (possibly modified) and true for ok; otherwise returns nil or false
+// for ok accordingly.
 func (r *Relay) AcceptFilter(
 	c context.T, hr *http.Request, f *filter.S,
 	authedPubkey []byte,
@@ -114,25 +125,36 @@ func (r *Relay) AcceptFilter(
 	return
 }
 
-// AcceptReq checks an event and determines whether the event should be
-// accepted and if the client has the authority to submit it.
+// AcceptReq evaluates whether the provided filters are allowed based on
+// authentication status and relay policies for an incoming HTTP request.
 //
 // Parameters:
 //
-//   - c - a context.T for signalling if the task has been canceled.
-//   - hr - an *http.Request containing the information about the current
-//     connection.
-//   - id - the ID of the request.
-//   - ff - a set of filters that have been applied to the event, represented
-//     as a filters.T object.
-//   - authedPubkey - the public key, if authed, of the client for this
-//     connection.
+//   - c: Context for task cancellation.
 //
-// Return Values:
+//   - hr: HTTP request containing connection information.
 //
-//   - allowed - a filters.T object representing the accepted filters.
-//   - ok - true if the event is accepted, false otherwise.
-//   - modified - a boolean indicating whether the filters were modified.
+//   - id: Identifier associated with the request.
+//
+//   - ff: Filters to evaluate for acceptance.
+//
+//   - authedPubkey: Public key of authenticated client, if applicable.
+//
+// Return values:
+//
+//   - allowed: The filters if permitted; may be modified during processing.
+//
+//   - ok: Boolean indicating whether the filters are accepted.
+//
+//   - modified: Boolean indicating whether the filters were altered during
+//     evaluation.
+//
+// Expected behaviour:
+//
+// The method evaluates whether the provided filters should be allowed based on
+// authentication status and relay-specific rules. If permitted, returns the
+// filters (possibly modified) and true for ok; otherwise returns nil or false
+// for ok accordingly.
 func (r *Relay) AcceptReq(
 	c context.T, hr *http.Request, id []byte,
 	ff *filters.T, authedPubkey []byte,

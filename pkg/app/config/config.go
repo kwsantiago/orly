@@ -23,7 +23,7 @@ import (
 )
 
 // C holds application configuration settings loaded from environment variables
-// and default values. It defines parameters for app behavior, storage
+// and default values. It defines parameters for app behaviour, storage
 // locations, logging, and network settings used across the relay service.
 type C struct {
 	AppName        string   `env:"ORLY_APP_NAME" default:"orly"`
@@ -52,7 +52,7 @@ type C struct {
 //   - err: An error object that is non-nil if any operation during
 //     initialization fails
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // Initializes a new configuration instance by loading environment variables and
 // checking for a .env file in the default configuration directory. Sets logging
@@ -97,7 +97,7 @@ func New() (cfg *C, err error) {
 //   - help: A boolean value indicating true if a help flag was detected in the
 //     command line arguments, false otherwise
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // The function checks the first command line argument for common help flags and
 // returns true if any of them are present. Returns false if no help flag is found
@@ -119,10 +119,10 @@ func HelpRequested() (help bool) {
 //   - requested: A boolean indicating true if the 'env' argument was
 //     provided, false otherwise.
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // The function returns true when the first command line argument is "env"
-// (case-insensitive), signaling that the environment configuration should be
+// (case-insensitive), signalling that the environment configuration should be
 // printed. Otherwise, it returns false.
 func GetEnv() (requested bool) {
 	if len(os.Args) > 1 {
@@ -158,7 +158,7 @@ func (kv KVSlice) Swap(i, j int)      { kv[i], kv[j] = kv[j], kv[i] }
 //   - out: A new KVSlice containing all entries from both slices, with keys
 //     from kv2 taking precedence over keys from the receiver.
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // The method returns a new KVSlice that combines the contents of the receiver
 // and kv2. If any key exists in both slices, the value from kv2 is used. The
@@ -192,7 +192,7 @@ out:
 //
 //   - m: A KVSlice containing key/value pairs derived from the config's env tags
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // Processes each field of the config object, extracting values tagged with
 // "env" and converting them to strings. Skips fields without an "env" tag.
@@ -233,7 +233,7 @@ func EnvKV(cfg any) (m KVSlice) {
 //
 //   - printer: Destination for the output, typically an io.Writer implementation
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // Outputs each environment variable derived from the config's struct tags in
 // sorted order, formatted as "key=value\n" to the specified writer
@@ -255,10 +255,10 @@ func PrintEnv(cfg *C, printer io.Writer) {
 //
 //   - printer: Output destination for the help text
 //
-// Expected behavior:
+// Expected behaviour:
 //
 // Prints application name and version followed by environment variable
-// configuration details, explains .env file behavior including automatic
+// configuration details, explains .env file behaviour including automatic
 // loading and custom path options, and displays current configuration values
 // using PrintEnv. Outputs all information to the specified writer
 func PrintHelp(cfg *C, printer io.Writer) {
