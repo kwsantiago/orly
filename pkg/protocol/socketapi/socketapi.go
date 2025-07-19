@@ -37,7 +37,7 @@ type A struct {
 // managing the WebSocket connection, and delegating received messages for
 // processing.
 //
-// Parameters:
+// # Parameters
 //
 //   - w: The HTTP response writer used to manage the connection upgrade.
 //

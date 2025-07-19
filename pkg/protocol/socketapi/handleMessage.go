@@ -16,7 +16,7 @@ import (
 // delegates handling to the appropriate method based on the message's envelope
 // type.
 //
-// Parameters:
+// # Parameters
 //
 //   - msg: A byte slice representing the raw message to be processed.
 //

@@ -10,14 +10,14 @@ import (
 // HandleClose processes a CLOSE envelope, intended to cancel a specific
 // subscription, and notifies the server to handle the cancellation.
 //
-// Parameters:
+// # Parameters
 //
 //   - req: A byte slice containing the raw CLOSE envelope data to process.
 //
 //   - srv: The server instance responsible for managing subscription
 //     operations, such as cancellation.
 //
-// Return values:
+// # Return Values
 //
 //   - note: A byte slice containing an error message if issues occur during
 //     processing; otherwise, an empty slice.

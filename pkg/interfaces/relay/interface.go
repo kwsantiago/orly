@@ -11,7 +11,7 @@ import (
 // I is the main interface for implementing a nostr relay.
 type I interface {
 	// Name is used as the "name" field in NIP-11 and as a prefix in default
-	// S logging. For other NIP-11 fields, see [Informationer].
+	// S logging. For other NIP-11 fields, see [Informer].
 	Name() string
 	// Init is called at the very beginning by [S.Start], allowing a realy
 	// to initialize its internal resources.
@@ -20,10 +20,10 @@ type I interface {
 	Storage() store.I
 }
 
-// Informationer is called to compose NIP-11 response to an HTTP request
+// Informer is called to compose NIP-11 response to an HTTP request
 // with application/nostr+json mime type.
 // See also [I.Name].
-type Informationer interface {
+type Informer interface {
 	GetNIP11InformationDocument() *relayinfo.T
 }
 

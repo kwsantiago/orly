@@ -44,7 +44,7 @@ type C struct {
 // New creates and initializes a new configuration object for the relay
 // application
 //
-// Return values:
+// # Return Values
 //
 //   - cfg: A pointer to the initialized configuration struct containing default
 //     or environment-provided values
@@ -52,7 +52,7 @@ type C struct {
 //   - err: An error object that is non-nil if any operation during
 //     initialization fails
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // Initializes a new configuration instance by loading environment variables and
 // checking for a .env file in the default configuration directory. Sets logging
@@ -92,12 +92,12 @@ func New() (cfg *C, err error) {
 
 // HelpRequested determines if the command line arguments indicate a request for help
 //
-// Return values:
+// # Return Values
 //
 //   - help: A boolean value indicating true if a help flag was detected in the
 //     command line arguments, false otherwise
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // The function checks the first command line argument for common help flags and
 // returns true if any of them are present. Returns false if no help flag is found
@@ -114,12 +114,12 @@ func HelpRequested() (help bool) {
 // GetEnv checks if the first command line argument is "env" and returns
 // whether the environment configuration should be printed.
 //
-// Return values:
+// # Return Values
 //
 //   - requested: A boolean indicating true if the 'env' argument was
 //     provided, false otherwise.
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // The function returns true when the first command line argument is "env"
 // (case-insensitive), signalling that the environment configuration should be
@@ -149,16 +149,16 @@ func (kv KVSlice) Swap(i, j int)      { kv[i], kv[j] = kv[j], kv[i] }
 // Compose merges two KVSlice instances into a new slice where key-value pairs
 // from the second slice override any duplicate keys from the first slice.
 //
-// Parameters:
+// # Parameters
 //
 //   - kv2: The second KVSlice whose entries will be merged with the receiver.
 //
-// Return values:
+// # Return Values
 //
 //   - out: A new KVSlice containing all entries from both slices, with keys
 //     from kv2 taking precedence over keys from the receiver.
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // The method returns a new KVSlice that combines the contents of the receiver
 // and kv2. If any key exists in both slices, the value from kv2 is used. The
@@ -184,15 +184,15 @@ out:
 
 // EnvKV generates key/value pairs from a configuration object's struct tags
 //
-// Parameters:
+// # Parameters
 //
 //   - cfg: A configuration object whose struct fields are processed for env tags
 //
-// Return values:
+// # Return Values
 //
 //   - m: A KVSlice containing key/value pairs derived from the config's env tags
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // Processes each field of the config object, extracting values tagged with
 // "env" and converting them to strings. Skips fields without an "env" tag.
@@ -227,13 +227,13 @@ func EnvKV(cfg any) (m KVSlice) {
 // PrintEnv outputs sorted environment key/value pairs from a configuration object
 // to the provided writer
 //
-// Parameters:
+// # Parameters
 //
 //   - cfg: Pointer to the configuration object containing env tags
 //
 //   - printer: Destination for the output, typically an io.Writer implementation
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // Outputs each environment variable derived from the config's struct tags in
 // sorted order, formatted as "key=value\n" to the specified writer
@@ -249,13 +249,13 @@ func PrintEnv(cfg *C, printer io.Writer) {
 // variable configuration, and details about .env file handling to the provided
 // writer
 //
-// Parameters:
+// # Parameters
 //
 //   - cfg: Configuration object containing app name and config directory path
 //
 //   - printer: Output destination for the help text
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // Prints application name and version followed by environment variable
 // configuration details, explains .env file behaviour including automatic

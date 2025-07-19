@@ -28,11 +28,11 @@ type Relay struct {
 
 // Name returns the name of the application represented by this relay.
 //
-// Return Values:
+// # Return Values
 //
 //   - string: the name of the application.
 //
-// Expected behaviour:
+// # Expected behaviour
 //
 // This function simply returns the AppName field from the configuration.
 func (r *Relay) Name() string { return r.C.AppName }
@@ -42,11 +42,11 @@ func (r *Relay) Storage() store.I { return r.Store }
 
 // Init initializes and sets up the relay for Nostr events.
 //
-// Return Values:
+// #Return Values
 //
 //   - err: an error if any issues occurred during initialization.
 //
-// Expected behaviour:
+// #Expected behaviour
 //
 // This function is responsible for setting up the relay, configuring it,
 // and initializing the necessary components to handle Nostr events.
@@ -57,25 +57,30 @@ func (r *Relay) Init() (err error) {
 // AcceptEvent checks an event and determines whether the event should be
 // accepted and if the client has the authority to submit it.
 //
-// Parameters:
+// # Parameters
 //
 //   - c - a context.T for signalling if the task has been canceled.
+//
 //   - evt - an *event.E that is being evaluated.
+//
 //   - hr - an *http.Request containing the information about the current
 //     connection.
+//
 //   - origin - the address of the client.
+//
 //   - authedPubkey - the public key, if authed, of the client for this
 //     connection.
 //
-// Return Values:
+// # Return Values
 //
 //   - accept - returns true if the event is accepted.
-//   - notice - if it is not accepted,
-//     a message in the form of `machine-readable-prefix: reason for
-//     error/blocked/rate-limited/etc`
+//
+//   - notice - if it is not accepted, a message in the form of
+//     `machine-readable-prefix: reason for error/blocked/rate-limited/etc`
+//
 //   - afterSave - a closure to run after the event has been stored.
 //
-// Expected behaviour:
+// # Expected behaviour
 //
 // This function checks whether the client has permission to store the event,
 // and if they don't, returns false and some kind of error message. If they do,
@@ -91,7 +96,7 @@ func (r *Relay) AcceptEvent(
 // AcceptFilter checks if a filter is allowed based on authentication status and
 // relay policies
 //
-// Parameters:
+// # Parameters
 //
 //   - c: Context for task cancellation.
 //
@@ -101,7 +106,7 @@ func (r *Relay) AcceptEvent(
 //
 //   - authedPubkey: Public key of authenticated client, if applicable.
 //
-// Return values:
+// # Return values
 //
 //   - allowed: The filter if permitted; may be modified during processing.
 //
@@ -110,7 +115,7 @@ func (r *Relay) AcceptEvent(
 //   - modified: Boolean indicating whether the filter was altered during
 //     evaluation.
 //
-// Expected behaviour:
+// # Expected behaviour
 //
 // The method evaluates whether the provided filter should be allowed based on
 // authentication status and relay-specific rules. If permitted, returns the
@@ -128,7 +133,7 @@ func (r *Relay) AcceptFilter(
 // AcceptReq evaluates whether the provided filters are allowed based on
 // authentication status and relay policies for an incoming HTTP request.
 //
-// Parameters:
+// # Parameters
 //
 //   - c: Context for task cancellation.
 //
@@ -140,7 +145,7 @@ func (r *Relay) AcceptFilter(
 //
 //   - authedPubkey: Public key of authenticated client, if applicable.
 //
-// Return values:
+// # Return Values
 //
 //   - allowed: The filters if permitted; may be modified during processing.
 //
@@ -149,7 +154,7 @@ func (r *Relay) AcceptFilter(
 //   - modified: Boolean indicating whether the filters were altered during
 //     evaluation.
 //
-// Expected behaviour:
+// # Expected Behaviour:
 //
 // The method evaluates whether the provided filters should be allowed based on
 // authentication status and relay-specific rules. If permitted, returns the

@@ -15,15 +15,15 @@ import (
 // wss) based on headers like X-Forwarded-Host, X-Forwarded-Proto, and the host
 // itself.
 //
-// Parameters:
+// # Parameters
 //
 // - req: A pointer to an http.Request object representing the incoming request.
 //
-// Return Values:
+// # Return Values
 //
 // - st: A string representing the constructed service URL.
 //
-// Expected Behaviour:
+// # Expected Behaviour:
 //
 // - Checks if authentication is required.
 //

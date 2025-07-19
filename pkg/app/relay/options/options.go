@@ -1,7 +1,7 @@
 // Package options provides some option configurations for the relay.
 //
 // None of this package is actually in use, and the skip event function has not
-// been implemented. In theory this could be used for something but it currently
+// been implemented. In theory, this could be used for something but it currently
 // isn't.
 package options
 

@@ -72,7 +72,7 @@ type ServerParams struct {
 // - Initializes storage with the provided database path.
 //
 // - Configures the server's options using the default settings and applies any
-//   optional settings provided.
+// optional settings provided.
 //
 // - Sets up a ServeMux for handling HTTP requests.
 //
@@ -121,7 +121,7 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 //
 // - For WebSocket upgrades, calls handleWebsocket method.
 //
-// - If "Accept" header is "application/nostr+json", calls handleRelayInfo
+// - If "Accept" header is "application/nostr+json", calls HandleRelayInfo
 // method.
 //
 // - Logs the HTTP request details for non-standard requests.
@@ -136,7 +136,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if r.Header.Get("Accept") == "application/nostr+json" {
-			s.handleRelayInfo(w, r)
+			s.HandleRelayInfo(w, r)
 			return
 		}
 	}

@@ -20,7 +20,7 @@ import (
 // and interacts with the server storage and subscription mechanisms to query
 // events or manage subscriptions.
 //
-// Parameters:
+// # Parameters
 //
 //   - c: A context object used for managing deadlines, cancellation signals,
 //     and other request-scoped values.
@@ -30,7 +30,7 @@ import (
 //   - srv: An interface representing the server, providing access to storage
 //     and subscription management.
 //
-// Return values:
+// # Return Values
 //
 //   - r: A byte slice containing the response or error message generated
 //     during processing.

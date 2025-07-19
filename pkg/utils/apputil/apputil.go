@@ -11,7 +11,7 @@ import (
 // necessary directories if they don't exist. It ensures that all parent
 // directories in the path are created with the appropriate permissions.
 //
-// Parameters:
+// # Parameters
 //
 //   - fileName: The full path to the file for which directories need to be
 //     created.
@@ -37,7 +37,7 @@ func EnsureDir(fileName string) (merr error) {
 
 // FileExists reports whether the named file or directory exists.
 //
-// Parameters:
+// # Parameters
 //
 //   - filePath: The full path to the file or directory to check.
 //

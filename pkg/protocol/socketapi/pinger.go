@@ -13,7 +13,7 @@ import (
 // alive and responsive. It terminates the connection if pings fail or the
 // context is canceled.
 //
-// Parameters:
+// # Parameters
 //
 //   - ctx: A context object used to monitor cancellation signals and
 //     manage termination of the method execution.

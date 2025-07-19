@@ -8,19 +8,19 @@ import (
 // GenerateDescription generates a detailed description containing the provided
 // text and an optional list of scopes.
 //
-// Parameters:
+// # Parameters
 //
 //   - text: A string representing the base description.
 //
 //   - scopes: A slice of strings indicating scopes to be included in the
 //     description.
 //
-// Return values:
+// # Return Values
 //
 //   - A string combining the base description and a formatted list of
 //     scopes, if provided.
 //
-// Expected behavior:
+// # Expected behaviour
 //
 // The function appends a formatted list of scopes to the base description if
 // any scopes are provided. If no scopes are provided, it returns the base
@@ -40,20 +40,20 @@ func GenerateDescription(text string, scopes []string) string {
 // GetRemoteFromReq retrieves the originating IP address of the client from
 // an HTTP request, considering standard and non-standard proxy headers.
 //
-// Parameters:
+// # Parameters
 //
 //   - r: The HTTP request object containing details of the client and
 //     routing information.
 //
-// Return values:
+// # Return Values
 //
 //   - rr: A string value representing the IP address of the originating
 //     remote client.
 //
-// Expected behavior:
+// # Expected behaviour
 //
 // The function first checks for the standardized "Forwarded" header (RFC 7239)
-// to identify the original client IP. If that's not available, it falls back to
+// to identify the original client IP. If that isn't available, it falls back to
 // the "X-Forwarded-For" header. If both headers are absent, it defaults to
 // using the request's RemoteAddr.
 //
@@ -83,7 +83,6 @@ func GetRemoteFromReq(r *http.Request) (rr string) {
 			}
 		}
 	}
-
 	// If the Forwarded header is not available or doesn't contain "for"
 	// parameter, fall back to X-Forwarded-For
 	rem := r.Header.Get("X-Forwarded-For")

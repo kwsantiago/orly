@@ -11,11 +11,25 @@ import (
 	"sort"
 )
 
-func (s *Server) handleRelayInfo(w http.ResponseWriter, r *http.Request) {
+// HandleRelayInfo generates and returns a relay information document in JSON
+// format based on the server's configuration and supported NIPs.
+//
+// # Parameters
+//
+//   - w: HTTP response writer used to send the generated document.
+//
+//   - r: HTTP request object containing incoming client request data.
+//
+// # Expected Behaviour
+//
+// The function constructs a relay information document using either the
+// Informer interface implementation or predefined server configuration. It
+// returns this document as a JSON response to the client.
+func (s *Server) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
 	log.I.Ln("handling relay information document")
 	var info *relayinfo.T
-	if informationer, ok := s.relay.(relay.Informationer); ok {
+	if informationer, ok := s.relay.(relay.Informer); ok {
 		info = informationer.GetNIP11InformationDocument()
 	} else {
 		supportedNIPs := relayinfo.GetList(

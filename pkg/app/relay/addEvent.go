@@ -16,24 +16,37 @@ import (
 // AddEvent processes an incoming event, saves it if valid, and delivers it to
 // subscribers.
 //
-// Parameters:
+// # Parameters
+//
 //   - c: context for request handling
+//
 //   - rl: relay interface
+//
 //   - ev: the event to be added
+//
 //   - hr: HTTP request related to the event (if any)
+//
 //   - origin: origin of the event (if any)
+//
 //   - authedPubkey: public key of the authenticated user (if any)
 //
-// Return Values:
+// # Return Values
+//
 //   - accepted: true if the event was successfully processed, false otherwise
+//
 //   - message: additional information or error message related to the
 //     processing
 //
-// Expected Behaviour:
+// # Expected Behaviour:
+//
 // - Validates the incoming event.
+//
 // - Saves the event using the Publish method if it is not ephemeral.
+//
 // - Handles duplicate events by returning an appropriate error message.
+//
 // - Delivers the event to subscribers via the listeners' Deliver method.
+//
 // - Returns a boolean indicating whether the event was accepted and any
 // relevant message.
 func (s *Server) AddEvent(
