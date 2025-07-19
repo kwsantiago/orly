@@ -84,7 +84,7 @@ node_modules/**
 !*.xml
 !.name
 !.gitignore
-
+!version
 # ...even if they are in subdirectories
 !*/
 /blocklist.json
