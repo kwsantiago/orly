@@ -4,7 +4,7 @@ package tcpkeepalive
 
 import (
 	"net"
-	"orly.dev/pkg/cmd/lerproxy/timeout"
+	"orly.dev/cmd/lerproxy/timeout"
 	"orly.dev/pkg/utils/chk"
 	"time"
 )

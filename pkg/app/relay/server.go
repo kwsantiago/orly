@@ -36,6 +36,7 @@ type Server struct {
 	httpServer *http.Server
 	listeners  *publish.S
 	*config.C
+	Lists
 }
 
 // ServerParams represents the configuration parameters for initializing a
@@ -180,6 +181,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Start(
 	host string, port int, started ...chan bool,
 ) (err error) {
+	if len(s.C.Owners) > 0 {
+		// start up spider
+		if err = s.Spider(); chk.E(err) {
+			// there wasn't any owners, or they couldn't be found on the spider
+			// seeds.
+		}
+	}
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	log.I.F("starting relay listener at %s", addr)
 	ln, err := net.Listen("tcp", addr)

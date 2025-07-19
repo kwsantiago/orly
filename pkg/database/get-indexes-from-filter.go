@@ -15,8 +15,8 @@ type Range struct {
 	Start, End []byte
 }
 
-// isHexString checks if the byte slice contains only hex characters
-func isHexString(data []byte) (isHex bool) {
+// IsHexString checks if the byte slice contains only hex characters
+func IsHexString(data []byte) (isHex bool) {
 	if len(data)%2 != 0 {
 		return false
 	}
@@ -28,13 +28,13 @@ func isHexString(data []byte) (isHex bool) {
 	return true
 }
 
-// createIdHashFromData creates an IdHash from data that could be hex or binary
-func createIdHashFromData(data []byte) (i *types2.IdHash, err error) {
+// CreateIdHashFromData creates an IdHash from data that could be hex or binary
+func CreateIdHashFromData(data []byte) (i *types2.IdHash, err error) {
 	i = new(types2.IdHash)
 
 	// If data looks like hex string and has the right length for hex-encoded
 	// sha256
-	if len(data) == 64 && isHexString(data) {
+	if len(data) == 64 && IsHexString(data) {
 		if err = i.FromIdHex(string(data)); chk.E(err) {
 			return
 		}
@@ -47,13 +47,13 @@ func createIdHashFromData(data []byte) (i *types2.IdHash, err error) {
 	return
 }
 
-// createPubHashFromData creates a PubHash from data that could be hex or binary
-func createPubHashFromData(data []byte) (p *types2.PubHash, err error) {
+// CreatePubHashFromData creates a PubHash from data that could be hex or binary
+func CreatePubHashFromData(data []byte) (p *types2.PubHash, err error) {
 	p = new(types2.PubHash)
 
 	// If data looks like hex string and has the right length for hex-encoded
 	// pubkey
-	if len(data) == 64 && isHexString(data) {
+	if len(data) == 64 && IsHexString(data) {
 		if err = p.FromPubkeyHex(string(data)); chk.E(err) {
 			return
 		}
@@ -83,7 +83,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		for _, id := range f.Ids.ToSliceOfBytes() {
 			if err = func() (err error) {
 				var i *types2.IdHash
-				if i, err = createIdHashFromData(id); chk.E(err) {
+				if i, err = CreateIdHashFromData(id); chk.E(err) {
 					return
 				}
 				buf := new(bytes.Buffer)
@@ -138,7 +138,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 						kind := new(types2.Uint16)
 						kind.Set(k)
 						var p *types2.PubHash
-						if p, err = createPubHashFromData(author); chk.E(err) {
+						if p, err = CreatePubHashFromData(author); chk.E(err) {
 							return
 						}
 						keyBytes := tag.B(0)
@@ -227,7 +227,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 			for _, tag := range f.Tags.ToSliceOfTags() {
 				if tag.Len() >= 2 && (len(tag.S(0)) == 1 || (len(tag.S(0)) == 2 && tag.S(0)[0] == '#')) {
 					var p *types2.PubHash
-					if p, err = createPubHashFromData(author); chk.E(err) {
+					if p, err = CreatePubHashFromData(author); chk.E(err) {
 						return
 					}
 					keyBytes := tag.B(0)

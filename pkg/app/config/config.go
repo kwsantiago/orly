@@ -36,7 +36,7 @@ type C struct {
 	DbLogLevel     string   `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
 	Pprof          bool     `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
 	AuthRequired   bool     `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
-	PublicReadable bool     `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to the whether or not authed"`
+	PublicReadable bool     `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to regardless of whether the client is authed"`
 	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/"`
 	Owners         []string `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 }
@@ -97,7 +97,7 @@ func New() (cfg *C, err error) {
 //   - help: A boolean value indicating true if a help flag was detected in the
 //     command line arguments, false otherwise
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // The function checks the first command line argument for common help flags and
 // returns true if any of them are present. Returns false if no help flag is found
@@ -119,7 +119,7 @@ func HelpRequested() (help bool) {
 //   - requested: A boolean indicating true if the 'env' argument was
 //     provided, false otherwise.
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // The function returns true when the first command line argument is "env"
 // (case-insensitive), signalling that the environment configuration should be
@@ -158,7 +158,7 @@ func (kv KVSlice) Swap(i, j int)      { kv[i], kv[j] = kv[j], kv[i] }
 //   - out: A new KVSlice containing all entries from both slices, with keys
 //     from kv2 taking precedence over keys from the receiver.
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // The method returns a new KVSlice that combines the contents of the receiver
 // and kv2. If any key exists in both slices, the value from kv2 is used. The
@@ -192,7 +192,7 @@ out:
 //
 //   - m: A KVSlice containing key/value pairs derived from the config's env tags
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // Processes each field of the config object, extracting values tagged with
 // "env" and converting them to strings. Skips fields without an "env" tag.
@@ -233,7 +233,7 @@ func EnvKV(cfg any) (m KVSlice) {
 //
 //   - printer: Destination for the output, typically an io.Writer implementation
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // Outputs each environment variable derived from the config's struct tags in
 // sorted order, formatted as "key=value\n" to the specified writer
@@ -255,7 +255,7 @@ func PrintEnv(cfg *C, printer io.Writer) {
 //
 //   - printer: Output destination for the help text
 //
-// # Expected Behaviour:
+// # Expected Behaviour
 //
 // Prints application name and version followed by environment variable
 // configuration details, explains .env file behaviour including automatic
@@ -266,12 +266,10 @@ func PrintHelp(cfg *C, printer io.Writer) {
 		printer,
 		"%s %s\n\n", cfg.AppName, version.V,
 	)
-
 	_, _ = fmt.Fprintf(
 		printer,
 		"Environment variables that configure %s:\n\n", cfg.AppName,
 	)
-
 	env.Usage(cfg, printer, &env.Options{SliceSep: ","})
 	_, _ = fmt.Fprintf(
 		printer,
@@ -286,7 +284,6 @@ func PrintHelp(cfg *C, printer io.Writer) {
 		os.Args[0],
 		cfg.Config,
 	)
-
 	fmt.Fprintf(printer, "\ncurrent configuration:\n\n")
 	PrintEnv(cfg, printer)
 	fmt.Fprintln(printer)

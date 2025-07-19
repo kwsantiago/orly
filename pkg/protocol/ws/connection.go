@@ -45,7 +45,7 @@ func NewConnection(
 	}
 	conn, _, hs, err := dialer.Dial(c, url)
 	if err != nil {
-		return nil, errorf.E("failed to dial: %w", err)
+		return nil, err
 	}
 	enableCompression := false
 	state := ws.StateClientSide

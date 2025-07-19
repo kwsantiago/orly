@@ -175,7 +175,9 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 	}
 	conn, err := NewConnection(ctx, r.URL, r.RequestHeader, tlsConfig)
 	if err != nil {
-		return errorf.E("error opening websocket to '%s': %w", r.URL, err)
+		return errorf.E(
+			"error opening websocket to '%s': %s", r.URL, err.Error(),
+		)
 	}
 	r.Connection = conn
 	// ping every 29 seconds (??)
@@ -240,7 +242,7 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 				break
 			}
 			message := buf.Bytes()
-			log.D.F("{%s} %v\n", r.URL, message)
+			// log.D.F("{%s} %s\n", r.URL, message)
 
 			var t string
 			if t, message, err = envelopes.Identify(message); chk.E(err) {

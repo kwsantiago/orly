@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"orly.dev/pkg/cmd/lerproxy/util"
+	"orly.dev/cmd/lerproxy/util"
 	"orly.dev/pkg/utils/log"
 )
 

@@ -7,7 +7,6 @@ import (
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
-	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
@@ -40,7 +39,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		at := a.Marshal(nil)
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
-				Authors: tag.New(hex.Enc(ev.Pubkey)),
+				Authors: tag.New(ev.Pubkey),
 				Kinds:   kinds.New(kind.Deletion),
 				Tags:    tags.New(tag.New([]byte("#a"), at)),
 			},
@@ -88,9 +87,9 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		var idxs []Range
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
-				Authors: tag.New(hex.Enc(ev.Pubkey)),
+				Authors: tag.New(ev.Pubkey),
 				Kinds:   kinds.New(kind.Deletion),
-				Tags:    tags.New(tag.New("#e", hex.Enc(ev.Id))),
+				Tags:    tags.New(tag.New([]byte("#e"), ev.Id)),
 			},
 		); chk.E(err) {
 			return

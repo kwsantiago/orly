@@ -158,7 +158,7 @@ func (sub *Subscription) Close() {
 		closeMsg := closeenvelope.NewFrom(id)
 		var b []byte
 		b = closeMsg.Marshal(nil)
-		log.D.F("{%s} sending %v", sub.Relay.URL, b)
+		log.T.F("{%s} sending %s", sub.Relay.URL, b)
 		<-sub.Relay.Write(b)
 	}
 }
