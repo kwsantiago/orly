@@ -22,9 +22,9 @@ import (
 	"go-simpler.org/env"
 )
 
-// C is the configuration for the relay. These are read from the environment if
-// present, or if a .env file is found in ~/.config/orly/ that is read instead
-// and overrides anything else.
+// C holds application configuration settings loaded from environment variables
+// and default values. It defines parameters for app behavior, storage
+// locations, logging, and network settings used across the relay service.
 type C struct {
 	AppName        string   `env:"ORLY_APP_NAME" default:"orly"`
 	Config         string   `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style" default:"~/.config/orly"`
@@ -41,7 +41,23 @@ type C struct {
 	Owners         []string `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 }
 
-// New creates a new config.C.
+// New creates and initializes a new configuration object for the relay
+// application
+//
+// Return values:
+//
+//   - cfg: A pointer to the initialized configuration struct containing default
+//     or environment-provided values
+//
+//   - err: An error object that is non-nil if any operation during
+//     initialization fails
+//
+// Expected behavior:
+//
+// Initializes a new configuration instance by loading environment variables and
+// checking for a .env file in the default configuration directory. Sets logging
+// levels based on configuration values and returns the populated configuration
+// or an error if any step fails
 func New() (cfg *C, err error) {
 	cfg = &C{}
 	if err = env.Load(cfg, &env.Options{SliceSep: ","}); chk.T(err) {
@@ -74,8 +90,17 @@ func New() (cfg *C, err error) {
 	return
 }
 
-// HelpRequested returns true if any of the common types of help invocation are
-// found as the first command line parameter/flag.
+// HelpRequested determines if the command line arguments indicate a request for help
+//
+// Return values:
+//
+//   - help: A boolean value indicating true if a help flag was detected in the
+//     command line arguments, false otherwise
+//
+// Expected behavior:
+//
+// The function checks the first command line argument for common help flags and
+// returns true if any of them are present. Returns false if no help flag is found
 func HelpRequested() (help bool) {
 	if len(os.Args) > 1 {
 		switch strings.ToLower(os.Args[1]) {
@@ -86,8 +111,19 @@ func HelpRequested() (help bool) {
 	return
 }
 
-// GetEnv processes os.Args to detect a request for printing the current
-// settings as a list of environment variable key/values.
+// GetEnv checks if the first command line argument is "env" and returns
+// whether the environment configuration should be printed.
+//
+// Return values:
+//
+//   - requested: A boolean indicating true if the 'env' argument was
+//     provided, false otherwise.
+//
+// Expected behavior:
+//
+// The function returns true when the first command line argument is "env"
+// (case-insensitive), signaling that the environment configuration should be
+// printed. Otherwise, it returns false.
 func GetEnv() (requested bool) {
 	if len(os.Args) > 1 {
 		switch strings.ToLower(os.Args[1]) {
@@ -101,16 +137,32 @@ func GetEnv() (requested bool) {
 // KV is a key/value pair.
 type KV struct{ Key, Value string }
 
-// KVSlice is a collection of key/value pairs.
+// KVSlice is a sortable slice of key/value pairs, designed for managing
+// configuration data and enabling operations like merging and sorting based on
+// keys.
 type KVSlice []KV
 
 func (kv KVSlice) Len() int           { return len(kv) }
 func (kv KVSlice) Less(i, j int) bool { return kv[i].Key < kv[j].Key }
 func (kv KVSlice) Swap(i, j int)      { kv[i], kv[j] = kv[j], kv[i] }
 
-// Compose merges two KVSlice together, replacing the values of earlier keys
-// with the same named KV items later in the slice (enabling compositing two
-// together as a .env, as well as them being composed as structs.
+// Compose merges two KVSlice instances into a new slice where key-value pairs
+// from the second slice override any duplicate keys from the first slice.
+//
+// Parameters:
+//
+//   - kv2: The second KVSlice whose entries will be merged with the receiver.
+//
+// Return values:
+//
+//   - out: A new KVSlice containing all entries from both slices, with keys
+//     from kv2 taking precedence over keys from the receiver.
+//
+// Expected behavior:
+//
+// The method returns a new KVSlice that combines the contents of the receiver
+// and kv2. If any key exists in both slices, the value from kv2 is used. The
+// resulting slice remains sorted by keys as per the KVSlice implementation.
 func (kv KVSlice) Compose(kv2 KVSlice) (out KVSlice) {
 	// duplicate the initial KVSlice
 	for _, p := range kv {
@@ -130,12 +182,22 @@ out:
 	return
 }
 
-// EnvKV turns a struct with `env` keys (used with go-simpler/env) into a
-// standard formatted environment variable key/value pair list, one per line.
-// Note you must dereference a pointer type to use this. This allows the
-// composition of the config in this file with an extended form with a
-// customized variant of the relay to produce correct environment variables both
-// read and write.
+// EnvKV generates key/value pairs from a configuration object's struct tags
+//
+// Parameters:
+//
+//   - cfg: A configuration object whose struct fields are processed for env tags
+//
+// Return values:
+//
+//   - m: A KVSlice containing key/value pairs derived from the config's env tags
+//
+// Expected behavior:
+//
+// Processes each field of the config object, extracting values tagged with
+// "env" and converting them to strings. Skips fields without an "env" tag.
+// Handles various value types including strings, integers, booleans, durations,
+// and string slices by joining elements with commas.
 func EnvKV(cfg any) (m KVSlice) {
 	t := reflect.TypeOf(cfg)
 	for i := 0; i < t.NumField(); i++ {
@@ -162,7 +224,19 @@ func EnvKV(cfg any) (m KVSlice) {
 	return
 }
 
-// PrintEnv renders the key/values of a config.C to a provided io.Writer.
+// PrintEnv outputs sorted environment key/value pairs from a configuration object
+// to the provided writer
+//
+// Parameters:
+//
+//   - cfg: Pointer to the configuration object containing env tags
+//
+//   - printer: Destination for the output, typically an io.Writer implementation
+//
+// Expected behavior:
+//
+// Outputs each environment variable derived from the config's struct tags in
+// sorted order, formatted as "key=value\n" to the specified writer
 func PrintEnv(cfg *C, printer io.Writer) {
 	kvs := EnvKV(*cfg)
 	sort.Sort(kvs)
@@ -171,8 +245,22 @@ func PrintEnv(cfg *C, printer io.Writer) {
 	}
 }
 
-// PrintHelp outputs a help text listing the configuration options and default
-// values to a provided io.Writer (usually os.Stderr or os.Stdout).
+// PrintHelp prints help information including application version, environment
+// variable configuration, and details about .env file handling to the provided
+// writer
+//
+// Parameters:
+//
+//   - cfg: Configuration object containing app name and config directory path
+//
+//   - printer: Output destination for the help text
+//
+// Expected behavior:
+//
+// Prints application name and version followed by environment variable
+// configuration details, explains .env file behavior including automatic
+// loading and custom path options, and displays current configuration values
+// using PrintEnv. Outputs all information to the specified writer
 func PrintHelp(cfg *C, printer io.Writer) {
 	_, _ = fmt.Fprintf(
 		printer,
