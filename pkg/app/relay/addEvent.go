@@ -3,15 +3,39 @@ package relay
 import (
 	"errors"
 	"net/http"
+	"strings"
+
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/interfaces/store"
 	"orly.dev/pkg/protocol/socketapi"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/normalize"
-	"strings"
 )
 
+// AddEvent processes an incoming event, saves it if valid, and delivers it to
+// subscribers.
+//
+// Parameters:
+//   - c: context for request handling
+//   - rl: relay interface
+//   - ev: the event to be added
+//   - hr: HTTP request related to the event (if any)
+//   - origin: origin of the event (if any)
+//   - authedPubkey: public key of the authenticated user (if any)
+//
+// Return Values:
+//   - accepted: true if the event was successfully processed, false otherwise
+//   - message: additional information or error message related to the
+//     processing
+//
+// Expected Behaviour:
+// - Validates the incoming event.
+// - Saves the event using the Publish method if it is not ephemeral.
+// - Handles duplicate events by returning an appropriate error message.
+// - Delivers the event to subscribers via the listeners' Deliver method.
+// - Returns a boolean indicating whether the event was accepted and any
+// relevant message.
 func (s *Server) AddEvent(
 	c context.T, rl relay.I, ev *event.E,
 	hr *http.Request, origin string,

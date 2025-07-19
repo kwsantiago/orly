@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
+	"time"
+
 	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay/helpers"
 	"orly.dev/pkg/app/relay/options"
@@ -16,12 +19,13 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
-	"strconv"
-	"time"
 
 	"github.com/rs/cors"
 )
 
+// Server represents the core structure for running a nostr relay. It
+// encapsulates various components such as context, cancel function, options,
+// relay interface, address, HTTP server, and configuration settings.
 type Server struct {
 	Ctx        context.T
 	Cancel     context.F
@@ -34,6 +38,9 @@ type Server struct {
 	*config.C
 }
 
+// ServerParams represents the configuration parameters for initializing a
+// server. It encapsulates various components such as context, cancel function,
+// relay interface, database path, maximum limit, and configuration settings.
 type ServerParams struct {
 	Ctx      context.T
 	Cancel   context.F
@@ -43,6 +50,33 @@ type ServerParams struct {
 	*config.C
 }
 
+// NewServer initializes and returns a new Server instance based on the provided
+// ServerParams and optional settings. It sets up storage, initializes the
+// relay, and configures necessary components for server operation.
+//
+// # Parameters
+//
+// - sp (*ServerParams): The configuration parameters for initializing the
+// server.
+//
+// - opts (...options.O): Optional settings that modify the server's behavior.
+//
+// # Return Values
+//
+// - s (*Server): The newly created Server instance.
+//
+// - err (error): An error if any step fails during initialization.
+//
+// # Expected Behaviour
+//
+// - Initializes storage with the provided database path.
+//
+// - Configures the server's options using the default settings and applies any
+//   optional settings provided.
+//
+// - Sets up a ServeMux for handling HTTP requests.
+//
+// - Initializes the relay, starting its operation in a separate goroutine.
 func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 	op := options.Default()
 	for _, opt := range opts {
@@ -71,7 +105,28 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 	return s, nil
 }
 
-// ServeHTTP implements the relay's http handler.
+// ServeHTTP handles incoming HTTP requests according to the standard Nostr
+// protocol. It specifically processes WebSocket upgrades and
+// "application/nostr+json" Accept headers.
+//
+// # Parameters
+//
+// - w (http.ResponseWriter): The response writer for sending responses.
+//
+// - r (*http.Request): The request object containing client's details and data.
+//
+// # Expected Behaviour
+//
+// - Checks if the request URL path is "/".
+//
+// - For WebSocket upgrades, calls handleWebsocket method.
+//
+// - If "Accept" header is "application/nostr+json", calls handleRelayInfo
+// method.
+//
+// - Logs the HTTP request details for non-standard requests.
+//
+// - For all other paths, delegates to the internal mux's ServeHTTP method.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// standard nostr protocol only governs the "root" path of the relay and
 	// websockets
@@ -92,7 +147,36 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-// Start up the relay.
+// Start initializes the server by setting up a TCP listener and serving HTTP
+// requests.
+//
+// # Parameters
+//
+// - host (string): The hostname or IP address to listen on.
+//
+// - port (int): The port number to bind to.
+//
+// - started (...chan bool): Optional channels that are closed after the server
+// starts successfully.
+//
+// # Return Values
+//
+// - err (error): An error if any step fails during the server startup process.
+//
+// # Expected Behaviour
+//
+// - Joins the host and port into a full address string.
+//
+// - Logs the intention to start the relay listener at the specified address.
+//
+// - Listens for TCP connections on the specified address.
+//
+// - Configures an HTTP server with CORS middleware, sets timeouts, and binds it
+// to the listener.
+//
+// - If any started channels are provided, closes them upon successful startup.
+//
+// - Starts serving requests using the configured HTTP server.
 func (s *Server) Start(
 	host string, port int, started ...chan bool,
 ) (err error) {
@@ -117,7 +201,21 @@ func (s *Server) Start(
 	return nil
 }
 
-// Shutdown the relay.
+// Shutdown gracefully shuts down the server and its components. It ensures that
+// all resources are properly released.
+//
+// # Expected Behaviour
+//
+// - Logs shutting down message.
+//
+// - Cancels the context to stop ongoing operations.
+//
+// - Closes the event store, logging the action and checking for errors.
+//
+// - Shuts down the HTTP server, logging the action and checking for errors.
+//
+// - If the relay implements ShutdownAware, it calls OnShutdown with the
+// context.
 func (s *Server) Shutdown() {
 	log.I.Ln("shutting down relay")
 	s.Cancel()
@@ -130,8 +228,16 @@ func (s *Server) Shutdown() {
 	}
 }
 
-// Router returns the servemux that handles paths on the HTTP server of the
-// relay.
+// Router retrieves and returns the HTTP ServeMux associated with the server.
+//
+// # Return Values
+//
+// - router (*http.ServeMux): The ServeMux instance used for routing HTTP
+// requests.
+//
+// # Expected Behaviour
+//
+// - Returns the ServeMux that handles incoming HTTP requests to the server.
 func (s *Server) Router() (router *http.ServeMux) {
 	return s.mux.ServeMux
 }

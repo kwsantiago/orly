@@ -2,15 +2,37 @@ package relay
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
+
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
-	"strconv"
-	"strings"
 )
 
-// ServiceURL returns the address of the relay to send back in auth responses.
-// If auth is disabled, this returns an empty string.
+// ServiceURL constructs the service URL based on the incoming HTTP request. It
+// checks for authentication requirements and determines the protocol (ws or
+// wss) based on headers like X-Forwarded-Host, X-Forwarded-Proto, and the host
+// itself.
+//
+// Parameters:
+//
+// - req: A pointer to an http.Request object representing the incoming request.
+//
+// Return Values:
+//
+// - st: A string representing the constructed service URL.
+//
+// Expected Behaviour:
+//
+// - Checks if authentication is required.
+//
+// - Retrieves the host from X-Forwarded-Host or falls back to req.Host.
+//
+// - Determines the protocol (ws or wss) based on various conditions including
+// headers and host details.
+//
+// - Returns the constructed URL string.
 func (s *Server) ServiceURL(req *http.Request) (st string) {
 	lol.Tracer("ServiceURL")
 	defer func() { lol.Tracer("end ServiceURL", st) }()

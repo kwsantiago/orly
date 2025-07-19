@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/kinds"
@@ -17,9 +18,27 @@ import (
 	"orly.dev/pkg/utils/normalize"
 )
 
-// Publish processes and saves an event based on its type and rules.
-// It handles replaceable, ephemeral, and parameterized replaceable events.
-// Duplicate or conflicting events are managed before saving the new one.
+// Publish processes and stores an event in the server's storage. It handles different types of events: ephemeral, replaceable, and parameterized replaceable.
+//
+// # Parameters
+//
+// - c (context.Context): The context for the operation.
+//
+// - evt (*event.E): The event to be published.
+//
+// # Return Values
+//
+// - err (error): An error if any step fails during the publishing process.
+//
+// # Expected Behaviour
+//
+// - For ephemeral events, the method does not store them and returns
+// immediately.
+//
+// - For replaceable events, it first queries for existing similar events,
+// deletes older ones, and then stores the new event.
+//
+// - For parameterized replaceable events, it performs a similar process but uses additional tags to identify duplicates.
 func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 	sto := s.relay.Storage()
 	if evt.Kind.IsEphemeral() {
