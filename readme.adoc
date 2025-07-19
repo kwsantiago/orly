@@ -12,7 +12,7 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 
 == Features
 
-* a lot of other bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android) (todo: this is mostly built and designed but not currently available)
+* a lot of bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android) (todo: this is mostly built and designed but not currently available)
 * a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd). (todo: HTTP API not in this repo yet but coming soon TM)
 * AVX/AVX2 optimized SHA256 and SIMD hex encoder
 * https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here]).
