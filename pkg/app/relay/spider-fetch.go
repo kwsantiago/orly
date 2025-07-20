@@ -13,6 +13,7 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
 	"sort"
+	"sync"
 )
 
 func (s *Server) SpiderFetch(
@@ -48,28 +49,40 @@ func (s *Server) SpiderFetch(
 				Authors: batchPkList,
 			}
 
+			var mx sync.Mutex
+			var wg sync.WaitGroup
+
 			for _, seed := range s.C.SpiderSeeds {
-				select {
-				case <-s.Ctx.Done():
-					return
-				default:
-				}
-				var evss event.S
-				var cli *ws.Client
-				if cli, err = ws.RelayConnect(context.Bg(), seed); chk.E(err) {
-					err = nil
-					continue
-				}
-				if evss, err = cli.QuerySync(
-					context.Bg(), batchFilter,
-				); chk.E(err) {
-					err = nil
-					continue
-				}
-				for _, ev := range evss {
-					evs = append(evs, ev)
-				}
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					select {
+					case <-s.Ctx.Done():
+						return
+					default:
+					}
+					var evss event.S
+					var cli *ws.Client
+					if cli, err = ws.RelayConnect(
+						context.Bg(), seed,
+					); chk.E(err) {
+						err = nil
+						return
+					}
+					if evss, err = cli.QuerySync(
+						context.Bg(), batchFilter,
+					); chk.E(err) {
+						err = nil
+						return
+					}
+					mx.Lock()
+					for _, ev := range evss {
+						evs = append(evs, ev)
+					}
+					mx.Unlock()
+				}()
 			}
+			wg.Wait()
 		}
 		// save the events to the database
 		for _, ev := range evs {
