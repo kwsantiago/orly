@@ -16,7 +16,7 @@ func (s *Server) Publisher() *publish.S { return s.listeners }
 
 func (s *Server) Context() context.T { return s.Ctx }
 
-func (s *Server) AuthRequired() bool { return s.C.AuthRequired }
+func (s *Server) AuthRequired() bool { return s.C.AuthRequired || s.LenOwnersPubkeys() > 0 }
 
 func (s *Server) PublicReadable() bool { return s.C.PublicReadable }
 

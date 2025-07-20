@@ -7,7 +7,6 @@ import (
 	types2 "orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/utils/chk"
-	"orly.dev/pkg/utils/log"
 	"sort"
 )
 
@@ -34,15 +33,16 @@ func CreateIdHashFromData(data []byte) (i *types2.IdHash, err error) {
 
 	// If data looks like hex string and has the right length for hex-encoded
 	// sha256
-	if len(data) == 64 && IsHexString(data) {
+	if len(data) == 64 {
 		if err = i.FromIdHex(string(data)); chk.E(err) {
+			err = nil
+		} else {
 			return
 		}
-	} else {
-		// Assume it's binary data
-		if err = i.FromId(data); chk.E(err) {
-			return
-		}
+	}
+	// Assume it's binary data
+	if err = i.FromId(data); chk.E(err) {
+		return
 	}
 	return
 }
@@ -53,8 +53,10 @@ func CreatePubHashFromData(data []byte) (p *types2.PubHash, err error) {
 
 	// If data looks like hex string and has the right length for hex-encoded
 	// pubkey
-	if len(data) == 64 && IsHexString(data) {
+	if len(data) == 64 {
 		if err = p.FromPubkeyHex(string(data)); chk.E(err) {
+			err = nil
+		} else {
 			return
 		}
 	} else {
@@ -74,7 +76,6 @@ func CreatePubHashFromData(data []byte) (p *types2.PubHash, err error) {
 // complete set of combinations of all fields in the event, thus there is no
 // need to decode events until they are to be delivered.
 func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
-	log.T.F("getting range indexes for filter: %s", f.Serialize())
 	// Id eid
 	//
 	// If there is any Ids in the filter, none of the other fields matter. It

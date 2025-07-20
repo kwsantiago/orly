@@ -2,7 +2,6 @@ package relay
 
 import (
 	"net/http"
-
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/utils/context"
 )
@@ -38,13 +37,14 @@ import (
 //
 // - Otherwise, accept the request.
 func (s *Server) AcceptReq(
-	c context.T, hr *http.Request, f *filters.T,
+	c context.T, hr *http.Request, ff *filters.T,
 	authedPubkey []byte, remote string,
 ) (allowed *filters.T, accept bool, modified bool) {
 	// if auth is required, and not public readable, reject
 	if s.AuthRequired() && len(authedPubkey) == 0 && !s.PublicReadable() {
 		return
 	}
+	allowed = ff
 	accept = true
 	return
 }

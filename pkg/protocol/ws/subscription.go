@@ -180,7 +180,7 @@ func (sub *Subscription) Fire() (err error) {
 	} else {
 		b = countenvelope.NewRequest(id, sub.Filters).Marshal(b)
 	}
-	log.I.F("{%s} sending %s", sub.Relay.URL, b)
+	// log.T.F("{%s} sending %s", sub.Relay.URL, b)
 	sub.live.Store(true)
 	if err = <-sub.Relay.Write(b); chk.T(err) {
 		sub.cancel()

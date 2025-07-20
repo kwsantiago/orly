@@ -36,7 +36,7 @@ type Server struct {
 	httpServer *http.Server
 	listeners  *publish.S
 	*config.C
-	Lists
+	*Lists
 }
 
 // ServerParams represents the configuration parameters for initializing a
@@ -97,6 +97,7 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 		options:   op,
 		listeners: publish.New(socketapi.New()),
 		C:         sp.C,
+		Lists:     new(Lists),
 	}
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {

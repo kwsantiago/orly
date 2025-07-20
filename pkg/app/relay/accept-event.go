@@ -1,6 +1,7 @@
 package relay
 
 import (
+	"bytes"
 	"net/http"
 
 	"orly.dev/pkg/encoders/event"
@@ -44,6 +45,14 @@ func (s *Server) AcceptEvent(
 	if s.AuthRequired() && len(authedPubkey) == 0 {
 		return
 	}
-	accept = true
+	// check if the authed user is on the lists
+	list := append(s.OwnersFollowed(), s.FollowedFollows()...)
+	for _, u := range list {
+		if bytes.Equal(u, authedPubkey) {
+			accept = true
+			break
+		}
+	}
+	// todo: check if event author is on owners' mute lists or block list
 	return
 }

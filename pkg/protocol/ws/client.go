@@ -278,10 +278,10 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 					continue
 				}
 				if sub, ok := r.Subscriptions.Load(env.Subscription.String()); !ok {
-					log.D.F(
-						"{%s} no subscription with id '%s'\n", r.URL,
-						env.Subscription,
-					)
+					// log.D.F(
+					// 	"{%s} no subscription with id '%s'\n", r.URL,
+					// 	env.Subscription,
+					// )
 					continue
 				} else {
 					// check if the event matches the desired filter, ignore

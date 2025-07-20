@@ -16,6 +16,7 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
+	"orly.dev/pkg/utils/log"
 	"sort"
 )
 
@@ -37,6 +38,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 			DTag:   t.Value(),
 		}
 		at := a.Marshal(nil)
+		log.I.S(at)
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
 				Authors: tag.New(ev.Pubkey),
@@ -85,6 +87,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		}
 	} else {
 		var idxs []Range
+		// log.I.S(ev.Pubkey)
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
 				Authors: tag.New(ev.Pubkey),
@@ -94,6 +97,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		); chk.E(err) {
 			return
 		}
+		// log.I.S(idxs)
 		var sers types.Uint40s
 		for _, idx := range idxs {
 			var s types.Uint40s
