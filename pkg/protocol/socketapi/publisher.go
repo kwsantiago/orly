@@ -5,6 +5,8 @@ import (
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/interfaces/publisher"
+	"orly.dev/pkg/interfaces/server"
+	"orly.dev/pkg/protocol/auth"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
@@ -57,11 +59,13 @@ type S struct {
 	Mx sync.Mutex
 	// Map is the map of subscribers and subscriptions from the websocket api.
 	Map
+	// Server is an interface to the server.
+	Server server.I
 }
 
 var _ publisher.I = &S{}
 
-func New() (publisher *S) { return &S{Map: make(Map)} }
+func New(s server.I) (publisher *S) { return &S{Map: make(Map), Server: s} }
 
 func (p *S) Type() (typeName string) { return Type }
 
@@ -98,6 +102,7 @@ func (p *S) Receive(msg publisher.Message) {
 			return
 		}
 		p.Mx.Lock()
+		defer p.Mx.Unlock()
 		if subs, ok := p.Map[m.Listener]; !ok {
 			subs = make(map[string]*filters.T)
 			subs[m.Id] = m.Filters
@@ -112,33 +117,25 @@ func (p *S) Receive(msg publisher.Message) {
 				"added subscription %s for %s", m.Id, m.Listener.RealRemote(),
 			)
 		}
-		p.Mx.Unlock()
 	}
 }
 
-// Deliver sends an event to all subscribers whose filters match the event
+// Deliver processes and distributes an event to all matching subscribers based on their filter configurations.
 //
 // # Parameters
 //
-// - ev (*event.E): The event to deliver to matching subscribers
+// - ev (*event.E): The event to be delivered to subscribed clients.
 //
 // # Expected behaviour
 //
-// # Locks the mutex to synchronize access to subscriber data
-//
-// # Iterates over all websocket connections and their associated subscriptions
-//
-// # Checks if each subscription's filter matches the event being delivered
-//
-// # Creates an event envelope result for matching subscriptions
-//
-// # Writes the result to the corresponding websocket connection
-//
-// Logs details about event delivery and any errors encountered
+// Delivers the event to all subscribers whose filters match the event. It
+// applies authentication checks if required by the server, and skips delivery
+// for unauthenticated users when events are privileged.
 func (p *S) Deliver(ev *event.E) {
 	log.T.F("delivering event %0x to subscribers", ev.Id)
 	var err error
 	p.Mx.Lock()
+	defer p.Mx.Unlock()
 	for w, subs := range p.Map {
 		log.I.F("%v %s", subs, w.RealRemote())
 		for id, subscriber := range subs {
@@ -149,17 +146,21 @@ func (p *S) Deliver(ev *event.E) {
 			if !subscriber.Match(ev) {
 				continue
 			}
-			var res *eventenvelope.Result
-			if res, err = eventenvelope.NewResultWith(id, ev); chk.E(err) {
-				continue
+			if p.Server.AuthRequired() {
+				if auth.CheckPrivilege(w.AuthedPubkey(), ev) {
+					continue
+				}
+				var res *eventenvelope.Result
+				if res, err = eventenvelope.NewResultWith(id, ev); chk.E(err) {
+					continue
+				}
+				if err = res.Write(w); chk.E(err) {
+					continue
+				}
+				log.T.F("dispatched event %0x to subscription %s", ev.Id, id)
 			}
-			if err = res.Write(w); chk.E(err) {
-				continue
-			}
-			log.T.F("dispatched event %0x to subscription %s", ev.Id, id)
 		}
 	}
-	p.Mx.Unlock()
 }
 
 // removeSubscriberId removes a specific subscription from a subscriber

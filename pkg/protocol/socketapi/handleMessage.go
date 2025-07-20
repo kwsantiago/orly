@@ -26,6 +26,7 @@ import (
 // corresponding handler method, generates a notice for errors or unknown types,
 // logs the notice, and writes it back to the listener if required.
 func (a *A) HandleMessage(msg []byte) {
+	log.T.F("received message:\n%s", string(msg))
 	var notice []byte
 	var err error
 	var t string

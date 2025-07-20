@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"orly.dev/pkg/protocol/socketapi"
 	"strconv"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"orly.dev/pkg/app/relay/publish"
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/protocol/servemux"
-	"orly.dev/pkg/protocol/socketapi"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
@@ -90,15 +90,15 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 	}
 	serveMux := servemux.NewServeMux()
 	s = &Server{
-		Ctx:       sp.Ctx,
-		Cancel:    sp.Cancel,
-		relay:     sp.Rl,
-		mux:       serveMux,
-		options:   op,
-		listeners: publish.New(socketapi.New()),
-		C:         sp.C,
-		Lists:     new(Lists),
+		Ctx:     sp.Ctx,
+		Cancel:  sp.Cancel,
+		relay:   sp.Rl,
+		mux:     serveMux,
+		options: op,
+		C:       sp.C,
+		Lists:   new(Lists),
 	}
+	s.listeners = publish.New(socketapi.New(s))
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {
 			s.Shutdown()

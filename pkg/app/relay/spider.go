@@ -44,90 +44,92 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		// there is no OwnersPubkeys, so there is nothing to do.
 		return
 	}
-	dontFetch := false
-	if len(noFetch) > 0 && noFetch[0] {
-		dontFetch = true
-	}
-	log.I.F("getting ownersFollowed")
-	var ownersFollowed [][]byte
-	if ownersFollowed, err = s.SpiderFetch(
-		kind.FollowList, dontFetch, ownersPubkeys...,
-	); chk.E(err) {
-		return
-	}
-	log.I.F("getting followedFollows")
-	var followedFollows [][]byte
-	if followedFollows, err = s.SpiderFetch(
-		kind.FollowList, dontFetch, ownersFollowed...,
-	); chk.E(err) {
-		return
-	}
-	log.I.F("getting ownersMuted")
-	var ownersMuted [][]byte
-	if ownersMuted, err = s.SpiderFetch(
-		kind.MuteList, dontFetch, ownersPubkeys...,
-	); chk.E(err) {
-		return
-	}
-	// remove the ownersFollowed and ownersMuted items from the followedFollows
-	// list
-	filteredFollows := make([][]byte, 0, len(followedFollows))
-	for _, follow := range followedFollows {
-		found := false
-		for _, owner := range ownersFollowed {
-			if bytes.Equal(follow, owner) {
-				found = true
-				break
+	go func() {
+		dontFetch := false
+		if len(noFetch) > 0 && noFetch[0] {
+			dontFetch = true
+		}
+		log.I.F("getting ownersFollowed")
+		var ownersFollowed [][]byte
+		if ownersFollowed, err = s.SpiderFetch(
+			kind.FollowList, dontFetch, ownersPubkeys...,
+		); chk.E(err) {
+			return
+		}
+		log.I.F("getting followedFollows")
+		var followedFollows [][]byte
+		if followedFollows, err = s.SpiderFetch(
+			kind.FollowList, dontFetch, ownersFollowed...,
+		); chk.E(err) {
+			return
+		}
+		log.I.F("getting ownersMuted")
+		var ownersMuted [][]byte
+		if ownersMuted, err = s.SpiderFetch(
+			kind.MuteList, dontFetch, ownersPubkeys...,
+		); chk.E(err) {
+			return
+		}
+		// remove the ownersFollowed and ownersMuted items from the followedFollows
+		// list
+		filteredFollows := make([][]byte, 0, len(followedFollows))
+		for _, follow := range followedFollows {
+			found := false
+			for _, owner := range ownersFollowed {
+				if bytes.Equal(follow, owner) {
+					found = true
+					break
+				}
+			}
+			for _, owner := range ownersMuted {
+				if bytes.Equal(follow, owner) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				filteredFollows = append(filteredFollows, follow)
 			}
 		}
-		for _, owner := range ownersMuted {
-			if bytes.Equal(follow, owner) {
-				found = true
-				break
-			}
+		followedFollows = filteredFollows
+		own := "owner"
+		if len(ownersPubkeys) > 1 {
+			own = "owners"
 		}
-		if !found {
-			filteredFollows = append(filteredFollows, follow)
+		fol := "pubkey"
+		if len(ownersFollowed) > 1 {
+			fol = "pubkeys"
 		}
-	}
-	followedFollows = filteredFollows
-	own := "owner"
-	if len(ownersPubkeys) > 1 {
-		own = "owners"
-	}
-	fol := "pubkey"
-	if len(ownersFollowed) > 1 {
-		fol = "pubkeys"
-	}
-	folfol := "pubkey"
-	if len(followedFollows) > 1 {
-		folfol = "pubkeys"
-	}
-	mut := "pubkey"
-	if len(ownersMuted) > 1 {
-		mut = "pubkeys"
-	}
-	log.T.F(
-		"found %d %s with a total of %d followed %s and %d followed's follows %s, and excluding %d owner muted %s",
-		len(ownersPubkeys), own,
-		len(ownersFollowed), fol,
-		len(followedFollows), folfol,
-		len(ownersMuted), mut,
-	)
-	// add the owners
-	ownersFollowed = append(ownersFollowed, ownersPubkeys...)
-	s.SetOwnersPubkeys(ownersPubkeys)
-	s.SetOwnersFollowed(ownersFollowed)
-	s.SetFollowedFollows(followedFollows)
-	s.SetOwnersMuted(ownersMuted)
-	// lastly, update users profile metadata and relay lists in the background
-	if !dontFetch {
-		go func() {
-			everyone := append(ownersFollowed, followedFollows...)
-			s.SpiderFetch(kind.ProfileMetadata, false, everyone...)
-			s.SpiderFetch(kind.RelayListMetadata, false, everyone...)
-			s.SpiderFetch(kind.DMRelaysList, false, everyone...)
-		}()
-	}
+		folfol := "pubkey"
+		if len(followedFollows) > 1 {
+			folfol = "pubkeys"
+		}
+		mut := "pubkey"
+		if len(ownersMuted) > 1 {
+			mut = "pubkeys"
+		}
+		log.T.F(
+			"found %d %s with a total of %d followed %s and %d followed's follows %s, and excluding %d owner muted %s",
+			len(ownersPubkeys), own,
+			len(ownersFollowed), fol,
+			len(followedFollows), folfol,
+			len(ownersMuted), mut,
+		)
+		// add the owners
+		ownersFollowed = append(ownersFollowed, ownersPubkeys...)
+		s.SetOwnersPubkeys(ownersPubkeys)
+		s.SetOwnersFollowed(ownersFollowed)
+		s.SetFollowedFollows(followedFollows)
+		s.SetOwnersMuted(ownersMuted)
+		// lastly, update users profile metadata and relay lists in the background
+		if !dontFetch {
+			go func() {
+				everyone := append(ownersFollowed, followedFollows...)
+				s.SpiderFetch(kind.ProfileMetadata, false, everyone...)
+				s.SpiderFetch(kind.RelayListMetadata, false, everyone...)
+				s.SpiderFetch(kind.DMRelaysList, false, everyone...)
+			}()
+		}
+	}()
 	return
 }

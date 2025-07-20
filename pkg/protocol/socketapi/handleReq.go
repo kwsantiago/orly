@@ -1,7 +1,6 @@
 package socketapi
 
 import (
-	"bytes"
 	"errors"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/pkg/encoders/envelopes/closedenvelope"
@@ -9,9 +8,8 @@ import (
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
 	"orly.dev/pkg/encoders/envelopes/reqenvelope"
 	"orly.dev/pkg/encoders/event"
-	"orly.dev/pkg/encoders/hex"
-	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/server"
+	"orly.dev/pkg/protocol/auth"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
@@ -91,39 +89,12 @@ func (a *A) HandleReq(
 		if srv.AuthRequired() {
 			var tmp event.S
 			for _, ev := range events {
-				if ev.Kind.IsPrivileged() {
-					authedPubkey := a.Listener.AuthedPubkey()
-					if len(authedPubkey) == 0 {
-						// this is a shortcut because none of the following
-						// tests would return true.
-						continue
-					}
-					// authed users when auth is required must be present in the
-					// event if it is privileged.
-					authedIsAuthor := bytes.Equal(ev.Pubkey, authedPubkey)
-					// if the authed pubkey matches the event author, it is
-					// allowed.
-					if !authedIsAuthor {
-						// check whether one of the p (mention) tags is
-						// present designating the authed pubkey, as this means
-						// the author wants the designated pubkey to be able to
-						// access the event. this is the case for nip-4, nip-44
-						// DMs, and gift-wraps. The query would usually have
-						// been for precisely a p tag with their pubkey.
-						eTags := ev.Tags.GetAll(tag.New("p"))
-						var hexAuthedKey []byte
-						hex.EncAppend(hexAuthedKey, authedPubkey)
-						var authedIsMentioned bool
-						for _, e := range eTags.ToSliceOfTags() {
-							if bytes.Equal(e.Value(), hexAuthedKey) {
-								authedIsMentioned = true
-								break
-							}
-						}
-						if !authedIsMentioned {
-							continue
-						}
-					}
+				if auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
+					log.W.F(
+						"not privileged %0x ev pubkey %0x",
+						a.Listener.AuthedPubkey(), ev.Pubkey,
+					)
+					continue
 				}
 				tmp = append(tmp, ev)
 			}
