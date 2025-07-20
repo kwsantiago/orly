@@ -42,7 +42,6 @@ func main() {
 		config.PrintHelp(cfg, os.Stderr)
 		os.Exit(0)
 	}
-	log.I.Ln("log level", cfg.LogLevel)
 	lol.SetLogLevel(cfg.LogLevel)
 	if cfg.Pprof {
 		defer profile.Start(profile.MemProfile).Stop()

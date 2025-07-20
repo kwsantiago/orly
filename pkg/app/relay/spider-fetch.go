@@ -33,7 +33,6 @@ func (s *Server) SpiderFetch(
 	if len(evs) < len(pubkeys) && !noFetch {
 		// we need to search the spider seeds.
 		// Break up pubkeys into batches of 512
-		log.I.F("breaking up %d pubkeys into batches of 512", len(pubkeys))
 		for i := 0; i < len(pubkeys); i += 512 {
 			end := i + 512
 			if end > len(pubkeys) {
@@ -41,7 +40,8 @@ func (s *Server) SpiderFetch(
 			}
 			batchPubkeys := pubkeys[i:end]
 			log.I.F(
-				"processing batch %d to %d of %d pubkeys", i, end, len(pubkeys),
+				"processing batch %d to %d of %d for kind %s",
+				i, end, len(pubkeys), k.Name(),
 			)
 			batchPkList := tag.New(batchPubkeys...)
 			batchFilter := &filter.F{
@@ -91,6 +91,9 @@ func (s *Server) SpiderFetch(
 				continue
 			}
 		}
+	}
+	if !k.Equal(kind.FollowList) {
+		return
 	}
 	// deduplicate and take the newest
 	var tmp event.S

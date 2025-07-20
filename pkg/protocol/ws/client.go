@@ -103,7 +103,6 @@ func RelayConnect(ctx context.T, url string, opts ...RelayOption) (
 ) {
 	r := NewRelay(context.Bg(), url, opts...)
 	err := r.Connect(ctx)
-	log.T.F("connected to %s", url)
 	return r, err
 }
 

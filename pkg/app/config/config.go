@@ -87,7 +87,6 @@ func New() (cfg *C, err error) {
 		lol.SetLogLevel(cfg.LogLevel)
 		log.I.F("loaded configuration from %s", envPath)
 	}
-	log.I.S(cfg)
 	return
 }
 

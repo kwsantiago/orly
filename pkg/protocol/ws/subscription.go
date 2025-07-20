@@ -10,7 +10,6 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
-	"orly.dev/pkg/utils/log"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -158,7 +157,6 @@ func (sub *Subscription) Close() {
 		closeMsg := closeenvelope.NewFrom(id)
 		var b []byte
 		b = closeMsg.Marshal(nil)
-		log.T.F("{%s} sending %s", sub.Relay.URL, b)
 		<-sub.Relay.Write(b)
 	}
 }
