@@ -18,9 +18,9 @@ func JSONKey(dst, k []byte) (b []byte) {
 	return
 }
 
-// UnmarshalHex takes a byte string that should contain a quoted hexadecimal encoded value,
-// decodes it in-place using a SIMD hex codec and returns the decoded truncated bytes (the other
-// half will be as it was but no allocation is required).
+// UnmarshalHex takes a byte string that should contain a quoted hexadecimal
+// encoded value, decodes it using a SIMD hex codec and returns the decoded
+// bytes in a newly allocated buffer.
 func UnmarshalHex(b []byte) (h []byte, rem []byte, err error) {
 	rem = b[:]
 	var inQuote bool
@@ -32,24 +32,28 @@ func UnmarshalHex(b []byte) (h []byte, rem []byte, err error) {
 				start = i + 1
 			}
 		} else if b[i] == '"' {
-			h = b[start:i]
+			hexStr := b[start:i]
 			rem = b[i+1:]
-			break
+			l := len(hexStr)
+			if l%2 != 0 {
+				err = errorf.E(
+					"invalid length for hex: %d, %0x",
+					len(hexStr), hexStr,
+				)
+				return
+			}
+			// Allocate a new buffer for the decoded data
+			h = make([]byte, l/2)
+			if err = xhex.Decode(h, hexStr); chk.E(err) {
+				return
+			}
+			return
 		}
 	}
 	if !inQuote {
 		err = io.EOF
 		return
 	}
-	l := len(h)
-	if l%2 != 0 {
-		err = errorf.E("invalid length for hex: %d, %0x", len(h), h)
-		return
-	}
-	if err = xhex.Decode(h, h); chk.E(err) {
-		return
-	}
-	h = h[:l/2]
 	return
 }
 

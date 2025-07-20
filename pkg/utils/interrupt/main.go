@@ -23,7 +23,7 @@ type HandlerWithSource struct {
 var (
 	// RestartRequested is set true after restart is requested.
 	RestartRequested bool // = true
-	requested atomic.Bool
+	requested        atomic.Bool
 
 	// ch is used to receive SIGINT (Ctrl+C) signals.
 	ch chan os.Signal
@@ -63,6 +63,8 @@ func Listener() {
 		HandlersDone.Q()
 		if RestartRequested {
 			Restart()
+		} else {
+			os.Exit(0)
 		}
 	}
 out:

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
+	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
@@ -32,21 +32,22 @@ import (
 //
 // # Expected Behaviour
 //
-// - For ephemeral events, the method does not store them and returns
+// - For ephemeral events, the method doesn't store them and returns
 // immediately.
 //
 // - For replaceable events, it first queries for existing similar events,
 // deletes older ones, and then stores the new event.
 //
-// - For parameterized replaceable events, it performs a similar process but uses additional tags to identify duplicates.
+// - For parameterized replaceable events, it performs a similar process but
+// uses additional tags to identify duplicates.
 func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 	sto := s.relay.Storage()
 	if evt.Kind.IsEphemeral() {
-		// do not store ephemeral events
+		// don't store ephemeral events
 		return nil
 
 	} else if evt.Kind.IsReplaceable() {
-		// replaceable event, delete before storing
+		// replaceable event, delete old after storing
 		var evs []*event.E
 		f := filter.New()
 		f.Authors = tag.New(evt.Pubkey)
@@ -66,13 +67,63 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
-					return errorf.W(string(normalize.Invalid.F("not replacing newer replaceable event")))
+					return errorf.W(
+						string(
+							normalize.Invalid.F(
+								"not replacing newer replaceable event",
+							),
+						),
+					)
 				}
-				// not deleting these events because some clients are retarded
-				// and the query will pull the new one, but a backup can recover
-				// the data of old ones
-				if ev.Kind.IsDirectoryEvent() {
-					del = false
+				if evt.Kind.Equal(kind.FollowList) {
+					// if the event is from someone on ownersFollowed or
+					// followedFollows, for now add to this list so they're
+					// immediately effective.
+					var isFollowed bool
+					ownersFollowed := s.OwnersFollowed()
+					for _, pk := range ownersFollowed {
+						if bytes.Equal(evt.Pubkey, pk) {
+							isFollowed = true
+						}
+					}
+					if isFollowed {
+						if _, _, err = sto.SaveEvent(
+							c, evt,
+						); err != nil && !errors.Is(
+							err, store.ErrDupEvent,
+						) {
+							return
+						}
+						// we need to trigger the spider with no fetch
+						if err = s.Spider(true); chk.E(err) {
+							err = nil
+						}
+						// event has been saved and lists updated.
+						return
+					}
+
+				}
+				if evt.Kind.Equal(kind.MuteList) {
+					// check if this is one of the owners, if so, the mute list
+					// should be applied immediately.
+					owners := s.OwnersPubkeys()
+					for _, pk := range owners {
+						if bytes.Equal(evt.Pubkey, pk) {
+							if _, _, err = sto.SaveEvent(
+								c, evt,
+							); err != nil && !errors.Is(
+								err, store.ErrDupEvent,
+							) {
+								return
+							}
+							// we need to trigger the spider with no fetch
+							if err = s.Spider(true); chk.E(err) {
+								err = nil
+							}
+							// event has been saved and lists updated.
+							return
+						}
+					}
 				}
 				// defer the delete until after the save, further down, has
 				// completed.

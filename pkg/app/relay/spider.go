@@ -10,7 +10,7 @@ import (
 	"orly.dev/pkg/utils/log"
 )
 
-func (s *Server) Spider() (err error) {
+func (s *Server) Spider(noFetch ...bool) (err error) {
 	var ownersPubkeys [][]byte
 	for _, v := range s.C.Owners {
 		var prf []byte
@@ -44,24 +44,28 @@ func (s *Server) Spider() (err error) {
 		// there is no OwnersPubkeys, so there is nothing to do.
 		return
 	}
+	dontFetch := false
+	if len(noFetch) > 0 && noFetch[0] {
+		dontFetch = true
+	}
 	log.I.F("getting ownersFollowed")
 	var ownersFollowed [][]byte
 	if ownersFollowed, err = s.SpiderFetch(
-		kind.FollowList, ownersPubkeys...,
+		kind.FollowList, dontFetch, ownersPubkeys...,
 	); chk.E(err) {
 		return
 	}
 	log.I.F("getting followedFollows")
 	var followedFollows [][]byte
 	if followedFollows, err = s.SpiderFetch(
-		kind.FollowList, ownersFollowed...,
+		kind.FollowList, dontFetch, ownersFollowed...,
 	); chk.E(err) {
 		return
 	}
 	log.I.F("getting ownersMuted")
 	var ownersMuted [][]byte
 	if ownersMuted, err = s.SpiderFetch(
-		kind.MuteList, ownersPubkeys...,
+		kind.MuteList, dontFetch, ownersPubkeys...,
 	); chk.E(err) {
 		return
 	}
@@ -116,5 +120,14 @@ func (s *Server) Spider() (err error) {
 	s.SetOwnersFollowed(ownersFollowed)
 	s.SetFollowedFollows(followedFollows)
 	s.SetOwnersMuted(ownersMuted)
+	// lastly, update users profile metadata and relay lists in the background
+	if !dontFetch {
+		go func() {
+			everyone := append(ownersFollowed, followedFollows...)
+			s.SpiderFetch(kind.ProfileMetadata, false, everyone...)
+			s.SpiderFetch(kind.RelayListMetadata, false, everyone...)
+			s.SpiderFetch(kind.DMRelaysList, false, everyone...)
+		}()
+	}
 	return
 }

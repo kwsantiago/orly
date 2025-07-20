@@ -184,11 +184,29 @@ func (s *Server) Start(
 ) (err error) {
 	if len(s.C.Owners) > 0 {
 		// start up spider
-		if err = s.Spider(); chk.E(err) {
+		if err = s.Spider(s.C.Private); chk.E(err) {
 			// there wasn't any owners, or they couldn't be found on the spider
 			// seeds.
+			err = nil
 		}
 	}
+	// start up a spider run to trigger every 30 minutes
+	ticker := time.NewTicker(30 * time.Minute)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				if err = s.Spider(s.C.Private); chk.E(err) {
+					// there wasn't any owners, or they couldn't be found on the spider
+					// seeds.
+					err = nil
+				}
+			case <-s.Ctx.Done():
+				log.I.F("stopping spider ticker")
+				return
+			}
+		}
+	}()
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	log.I.F("starting relay listener at %s", addr)
 	ln, err := net.Listen("tcp", addr)
@@ -230,8 +248,10 @@ func (s *Server) Shutdown() {
 	s.Cancel()
 	log.W.Ln("closing event store")
 	chk.E(s.relay.Storage().Close())
-	log.W.Ln("shutting down relay listener")
-	chk.E(s.httpServer.Shutdown(s.Ctx))
+	if s.httpServer != nil {
+		log.W.Ln("shutting down relay listener")
+		chk.E(s.httpServer.Shutdown(s.Ctx))
+	}
 	if f, ok := s.relay.(relay.ShutdownAware); ok {
 		f.OnShutdown(s.Ctx)
 	}
