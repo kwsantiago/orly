@@ -378,6 +378,7 @@ var Map = map[uint16]string{
 	SearchRelaysList.K:            "SearchRelaysList",
 	InterestsList.K:               "InterestsList",
 	UserEmojiList.K:               "UserEmojiList",
+	DMRelaysList.K:                "DMRelaysList",
 	FileStorageServerList.K:       "FileStorageServerList",
 	NWCWalletInfo.K:               "NWCWalletInfo",
 	LightningPubRPC.K:             "LightningPubRPC",

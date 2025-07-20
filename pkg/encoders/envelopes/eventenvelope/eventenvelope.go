@@ -158,7 +158,7 @@ func (en *Result) Unmarshal(b []byte) (r []byte, err error) {
 // envelope into it.
 func ParseResult(b []byte) (t *Result, rem []byte, err error) {
 	t = NewResult()
-	if rem, err = t.Unmarshal(b); chk.E(err) {
+	if rem, err = t.Unmarshal(b); chk.T(err) {
 		return
 	}
 	return

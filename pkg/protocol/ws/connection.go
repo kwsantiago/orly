@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/flate"
 	"crypto/tls"
-	"errors"
 	"github.com/gobwas/httphead"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsflate"
@@ -113,7 +112,10 @@ func NewConnection(
 func (cn *Connection) WriteMessage(c context.T, data []byte) (err error) {
 	select {
 	case <-c.Done():
-		return errors.New("context canceled")
+		return errorf.E(
+			"%s context canceled",
+			cn.conn.RemoteAddr(),
+		)
 	default:
 	}
 	if cn.msgStateW.IsCompressed() && cn.enableCompression {
@@ -121,19 +123,35 @@ func (cn *Connection) WriteMessage(c context.T, data []byte) (err error) {
 		if _, err := io.Copy(
 			cn.flateWriter, bytes.NewReader(data),
 		); chk.T(err) {
-			return errorf.E("failed to write message: %w", err)
+			return errorf.E(
+				"%s failed to write message: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 
 		if err := cn.flateWriter.Close(); chk.T(err) {
-			return errorf.E("failed to close flate writer: %w", err)
+			return errorf.E(
+				"%s failed to close flate writer: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 	} else {
 		if _, err := io.Copy(cn.writer, bytes.NewReader(data)); chk.T(err) {
-			return errorf.E("failed to write message: %w", err)
+			return errorf.E(
+				"%s failed to write message: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 	}
 	if err := cn.writer.Flush(); chk.T(err) {
-		return errorf.E("failed to flush writer: %w", err)
+		return errorf.E(
+			"%s failed to flush writer: %w",
+			cn.conn.RemoteAddr(),
+			err,
+		)
 	}
 	return nil
 }
@@ -143,34 +161,57 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) (err error) {
 	for {
 		select {
 		case <-c.Done():
-			return errors.New("context canceled")
+			return errorf.D(
+				"%s context canceled",
+				cn.conn.RemoteAddr(),
+			)
 		default:
 		}
 		h, err := cn.reader.NextFrame()
 		if err != nil {
 			cn.conn.Close()
-			return errorf.E("failed to advance frame: %w", err)
+			return errorf.E(
+				"%s failed to advance frame: %s",
+				cn.conn.RemoteAddr(),
+				err.Error(),
+			)
 		}
 		if h.OpCode.IsControl() {
 			if err := cn.controlHandler(h, cn.reader); chk.T(err) {
-				return errorf.E("failed to handle control frame: %w", err)
+				return errorf.E(
+					"%s failed to handle control frame: %w",
+					cn.conn.RemoteAddr(),
+					err,
+				)
 			}
 		} else if h.OpCode == ws.OpBinary ||
 			h.OpCode == ws.OpText {
 			break
 		}
 		if err := cn.reader.Discard(); chk.T(err) {
-			return errorf.E("failed to discard: %w", err)
+			return errorf.E(
+				"%s failed to discard: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 	}
 	if cn.msgStateR.IsCompressed() && cn.enableCompression {
 		cn.flateReader.Reset(cn.reader)
 		if _, err := io.Copy(buf, cn.flateReader); chk.T(err) {
-			return errorf.E("failed to read message: %w", err)
+			return errorf.E(
+				"%s failed to read message: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 	} else {
 		if _, err := io.Copy(buf, cn.reader); chk.T(err) {
-			return errorf.E("failed to read message: %w", err)
+			return errorf.E(
+				"%s failed to read message: %w",
+				cn.conn.RemoteAddr(),
+				err,
+			)
 		}
 	}
 	return nil

@@ -191,7 +191,7 @@ func (s *Server) Start(
 		}
 	}
 	// start up a spider run to trigger every 30 minutes
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(time.Hour)
 	go func() {
 		for {
 			select {
