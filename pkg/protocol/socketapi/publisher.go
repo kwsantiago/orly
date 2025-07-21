@@ -147,7 +147,7 @@ func (p *S) Deliver(ev *event.E) {
 				continue
 			}
 			if p.Server.AuthRequired() {
-				if auth.CheckPrivilege(w.AuthedPubkey(), ev) {
+				if !auth.CheckPrivilege(w.AuthedPubkey(), ev) {
 					continue
 				}
 				var res *eventenvelope.Result

@@ -36,6 +36,8 @@ func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
 				}
 			}
 		}
+	} else {
+		privileged = true
 	}
 	return
 }
