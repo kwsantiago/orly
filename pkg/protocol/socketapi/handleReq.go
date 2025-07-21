@@ -89,7 +89,7 @@ func (a *A) HandleReq(
 		if srv.AuthRequired() {
 			var tmp event.S
 			for _, ev := range events {
-				if auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
+				if !auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
 					log.W.F(
 						"not privileged %0x ev pubkey %0x",
 						a.Listener.AuthedPubkey(), ev.Pubkey,
