@@ -3,14 +3,18 @@ package relay
 import (
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/interfaces/store"
-	"orly.dev/pkg/protocol/socketapi"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/normalize"
+)
+
+var (
+	NIP20prefixmatcher = regexp.MustCompile(`^\w+: `)
 )
 
 // AddEvent processes an incoming event, saves it if valid, and delivers it to
@@ -50,9 +54,7 @@ import (
 // - Returns a boolean indicating whether the event was accepted and any
 // relevant message.
 func (s *Server) AddEvent(
-	c context.T, rl relay.I, ev *event.E,
-	hr *http.Request, origin string,
-	authedPubkey []byte,
+	c context.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
 ) (accepted bool, message []byte) {
 
 	if ev == nil {
@@ -65,9 +67,12 @@ func (s *Server) AddEvent(
 				return false, []byte(saveErr.Error())
 			}
 			errmsg := saveErr.Error()
-			if socketapi.NIP20prefixmatcher.MatchString(errmsg) {
+			if NIP20prefixmatcher.MatchString(errmsg) {
 				if strings.Contains(errmsg, "tombstone") {
-					return false, normalize.Error.F("event was deleted, not storing it again")
+					return false, normalize.Error.F(
+						"%s event was deleted, not storing it again",
+						origin,
+					)
 				}
 				if strings.HasPrefix(errmsg, string(normalize.Blocked)) {
 					return false, []byte(errmsg)

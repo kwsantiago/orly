@@ -35,7 +35,20 @@ func NewChallengeWith[V string | []byte](challenge V) *Challenge {
 // Label returns the label of a authenvelope.Challenge.
 func (en *Challenge) Label() string { return L }
 
-// Write the authenvelope.Challenge to a provided io.Writer.
+// Write encodes and writes the Challenge instance to the provided writer.
+//
+// # Parameters
+//
+// - w (io.Writer): The destination where the encoded data will be written.
+//
+// # Return Values
+//
+// - err (error): An error if writing to the writer fails.
+//
+// # Expected behaviour
+//
+// Encodes the Challenge instance into a byte slice using Marshal, logs the
+// encoded challenge, and writes it to the provided io.Writer.
 func (en *Challenge) Write(w io.Writer) (err error) {
 	var b []byte
 	b = en.Marshal(b)
@@ -44,8 +57,26 @@ func (en *Challenge) Write(w io.Writer) (err error) {
 	return
 }
 
-// Marshal a authenvelope.Challenge to minified JSON, appending to a provided destination
-// slice. Note that this ensures correct string escaping on the challenge field.
+// Marshal encodes the Challenge instance into a byte slice, formatting it as
+// a JSON-like structure with a specific label and escaping rules applied to
+// its content.
+//
+// # Parameters
+//
+// - dst ([]byte): The destination buffer where the encoded data will be written.
+//
+// # Return Values
+//
+// - b ([]byte): The byte slice containing the encoded Challenge data.
+//
+// # Expected behaviour
+//
+// - Prepares the destination buffer and applies a label to it.
+//
+// - Escapes the challenge content according to Nostr-specific rules before
+// appending it to the output.
+//
+// - Returns the resulting byte slice with the complete encoded structure.
 func (en *Challenge) Marshal(dst []byte) (b []byte) {
 	b = dst
 	var err error
@@ -63,9 +94,24 @@ func (en *Challenge) Marshal(dst []byte) (b []byte) {
 	return
 }
 
-// Unmarshal a authenvelope.Challenge from minified JSON, returning the remainder after the
-// end of the envelope. Note that this ensures the challenge string was
-// correctly escaped by NIP-01 escaping rules.
+// Unmarshal parses the provided byte slice and extracts the challenge value,
+// leaving any remaining bytes after parsing.
+//
+// # Parameters
+//
+// - b ([]byte): The byte slice containing the encoded challenge data.
+//
+// # Return Values
+//
+// - r ([]byte): Any remaining bytes after parsing the challenge.
+//
+// - err (error): An error if parsing fails.
+//
+// # Expected behaviour
+//
+// - Extracts the quoted challenge string from the input byte slice.
+//
+// - Trims any trailing characters following the closing quote.
 func (en *Challenge) Unmarshal(b []byte) (r []byte, err error) {
 	r = b
 	if en.Challenge, r, err = text2.UnmarshalQuoted(r); chk.E(err) {
@@ -80,8 +126,26 @@ func (en *Challenge) Unmarshal(b []byte) (r []byte, err error) {
 	return
 }
 
-// ParseChallenge reads a authenvelope.Challenge encoded in minified JSON and unpacks it to
-// the runtime format.
+// ParseChallenge parses the provided byte slice into a new Challenge instance,
+// extracting the challenge value and returning any remaining bytes after parsing.
+//
+// # Parameters
+//
+// - b ([]byte): The byte slice containing the encoded challenge data.
+//
+// # Return Values
+//
+//   - t (*Challenge): A pointer to the newly created and populated Challenge
+//     instance.
+//
+// - rem ([]byte): Any remaining bytes in the input slice after parsing.
+//
+// - err (error): An error if parsing fails.
+//
+// # Expected behaviour
+//
+// Parses the byte slice into a new Challenge instance using Unmarshal,
+// returning any remaining bytes and an error if parsing fails.
 func ParseChallenge(b []byte) (t *Challenge, rem []byte, err error) {
 	t = NewChallenge()
 	if rem, err = t.Unmarshal(b); chk.E(err) {

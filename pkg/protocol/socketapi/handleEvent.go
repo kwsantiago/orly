@@ -161,16 +161,6 @@ func (a *A) HandleEvent(
 					if len(split) != 3 {
 						continue
 					}
-					// Check if the deletion event is trying to delete itself
-					if bytes.Equal(split[2], env.E.Id) {
-						if err = Ok.Blocked(
-							a, env,
-							"deletion event cannot reference its own ID",
-						); chk.E(err) {
-							return
-						}
-						return
-					}
 					var pk []byte
 					if pk, err = hex.DecAppend(nil, split[1]); chk.E(err) {
 						if err = Ok.Invalid(
@@ -185,7 +175,8 @@ func (a *A) HandleEvent(
 					kin := ints.New(uint16(0))
 					if _, err = kin.Unmarshal(split[0]); chk.E(err) {
 						if err = Ok.Invalid(
-							a, env, "delete event a tag kind value invalid: %s",
+							a, env, "delete event a tag kind value "+
+								"invalid: %s",
 							t.Value(),
 						); chk.E(err) {
 							return
@@ -195,7 +186,8 @@ func (a *A) HandleEvent(
 					kk := kind.New(kin.Uint16())
 					if kk.Equal(kind.Deletion) {
 						if err = Ok.Blocked(
-							a, env, "delete event kind may not be deleted",
+							a, env, "delete event kind may not be "+
+								"deleted",
 						); chk.E(err) {
 							return
 						}
@@ -204,7 +196,8 @@ func (a *A) HandleEvent(
 					if !kk.IsParameterizedReplaceable() {
 						if err = Ok.Error(
 							a, env,
-							"delete tags with a tags containing non-parameterized-replaceable events can't be processed",
+							"delete tags with a tags containing "+
+								"non-parameterized-replaceable events can't be processed",
 						); chk.E(err) {
 							return
 						}
@@ -325,9 +318,7 @@ func (a *A) HandleEvent(
 		}
 	}
 	var reason []byte
-	ok, reason = srv.AddEvent(
-		c, rl, env.E, a.Req(), a.RealRemote(), a.Listener.AuthedPubkey(),
-	)
+	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote())
 	log.I.F("event %0x added %v, %s", env.E.Id, ok, reason)
 	if err = okenvelope.NewFrom(env.E.Id, ok).Write(a.Listener); chk.E(err) {
 		return

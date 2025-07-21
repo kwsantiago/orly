@@ -10,15 +10,10 @@ import (
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
-	"regexp"
 	"sync"
 )
 
 const Type = "socketapi"
-
-var (
-	NIP20prefixmatcher = regexp.MustCompile(`^\w+: `)
-)
 
 // Map is a map of filters associated with a collection of ws.Listener
 // connections.
