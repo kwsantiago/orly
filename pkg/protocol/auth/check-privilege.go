@@ -16,10 +16,10 @@ func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
 		}
 		// authed users when auth is required must be present in the
 		// event if it is privileged.
-		authedIsAuthor := bytes.Equal(ev.Pubkey, authedPubkey)
+		privileged = bytes.Equal(ev.Pubkey, authedPubkey)
 		// if the authed pubkey matches the event author, it is
 		// allowed.
-		if !authedIsAuthor {
+		if !privileged {
 			// check whether one of the p (mention) tags is
 			// present designating the authed pubkey, as this means
 			// the author wants the designated pubkey to be able to
@@ -29,15 +29,11 @@ func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
 			eTags := ev.Tags.GetAll(tag.New("p"))
 			var hexAuthedKey []byte
 			hex.EncAppend(hexAuthedKey, authedPubkey)
-			var authedIsMentioned bool
 			for _, e := range eTags.ToSliceOfTags() {
 				if bytes.Equal(e.Value(), hexAuthedKey) {
-					authedIsMentioned = true
+					privileged = true
 					break
 				}
-			}
-			if !authedIsMentioned {
-				return
 			}
 		}
 	}

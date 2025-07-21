@@ -92,9 +92,6 @@ func (s *Server) SpiderFetch(
 			}
 		}
 	}
-	if !k.Equal(kind.FollowList) {
-		return
-	}
 	// deduplicate and take the newest
 	var tmp event.S
 	evMap := make(map[string]event.S)
