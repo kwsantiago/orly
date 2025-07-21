@@ -20,12 +20,8 @@ type I interface {
 		authedPubkey []byte, remote string,
 	) (allowed *filters.T, accept bool, modified bool)
 	AddEvent(
-		c context.T, rl relay.I, ev *event.E, hr *http.Request,
-		origin string, authedPubkey []byte,
-	) (
-		accepted bool,
-		message []byte,
-	)
+		c context.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
+	) (accepted bool, message []byte)
 	Context() context.T
 	Publisher() *publish.S
 	Publish(c context.T, evt *event.E) (err error)
