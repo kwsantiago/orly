@@ -8,6 +8,7 @@ import (
 	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/interfaces/store"
 	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/errorf"
 )
 
 func (d *D) GetFullIdPubkeyBySerial(ser *types.Uint40) (
@@ -52,6 +53,12 @@ func (d *D) GetFullIdPubkeyBySerial(ser *types.Uint40) (
 		},
 	); chk.E(err) {
 		return
+	}
+	if fidpk != nil {
+		err = errorf.E(
+			"failed to fetch full id pubkey by serial %d",
+			ser.Get(),
+		)
 	}
 	return
 }
