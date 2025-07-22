@@ -90,8 +90,9 @@ func (a *A) HandleReq(
 			for _, ev := range events {
 				if !auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
 					log.W.F(
-						"not privileged %0x ev pubkey %0x kind %s privileged: %v",
-						a.Listener.AuthedPubkey(), ev.Pubkey, ev.Kind.Name(),
+						"not privileged %0x ev pubkey %0x ev pubkey %0x kind %s privileged: %v",
+						a.Listener.AuthedPubkey(), ev.Pubkey,
+						a.Listener.AuthedPubkey(), ev.Kind.Name(),
 						ev.Kind.IsPrivileged(),
 					)
 					continue

@@ -144,8 +144,9 @@ func (p *S) Deliver(ev *event.E) {
 			if p.Server.AuthRequired() {
 				if !auth.CheckPrivilege(w.AuthedPubkey(), ev) {
 					log.W.F(
-						"not privileged %0x ev pubkey %0x kind %s privileged: %v",
-						w.AuthedPubkey(), ev.Pubkey, ev.Kind.Name(),
+						"not privileged %0x ev pubkey %0x ev pubkey %0x kind %s privileged: %v",
+						w.AuthedPubkey(), ev.Pubkey,
+						w.AuthedPubkey(), ev.Kind.Name(),
 						ev.Kind.IsPrivileged(),
 					)
 					continue

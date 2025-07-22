@@ -38,7 +38,8 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 					if err = ev.UnmarshalBinary(evBuf); chk.E(err) {
 						continue
 					}
-					if _, err = evBuf.WriteTo(w); chk.E(err) {
+					// Serialize the event to JSON and write it to the output
+					if _, err = w.Write(ev.Serialize()); chk.E(err) {
 						continue
 					}
 					if _, err = w.Write([]byte{'\n'}); chk.E(err) {
@@ -78,7 +79,8 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 						if err = ev.UnmarshalBinary(evBuf); chk.E(err) {
 							continue
 						}
-						if _, err = evBuf.WriteTo(w); chk.E(err) {
+						// Serialize the event to JSON and write it to the output
+						if _, err = w.Write(ev.Serialize()); chk.E(err) {
 							continue
 						}
 						if _, err = w.Write([]byte{'\n'}); chk.E(err) {

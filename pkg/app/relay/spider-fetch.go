@@ -41,7 +41,7 @@ func (s *Server) SpiderFetch(
 	// 	o += fmt.Sprintf("%s\n\n", ev.Marshal(nil))
 	// }
 	// log.I.F("%s", o)
-	if len(evs) < len(pubkeys) && !noFetch {
+	if !noFetch {
 		// we need to search the spider seeds.
 		// Break up pubkeys into batches of 128
 		for i := 0; i < len(pubkeys); i += 128 {
