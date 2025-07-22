@@ -31,6 +31,9 @@ func (d *D) QueryForSerials(c context.T, f *filter.F) (
 			if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 				return
 			}
+			if fidpk == nil {
+				continue
+			}
 			idPkTs = append(idPkTs, *fidpk)
 			// sort by timestamp
 			sort.Slice(

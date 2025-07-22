@@ -43,6 +43,9 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 						return
 					}
+					if fidpk == nil {
+						continue
+					}
 					tagIdPkTs = append(tagIdPkTs, *fidpk)
 				}
 			} else {
@@ -58,6 +61,9 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					var fidpk *store.IdPkTs
 					if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 						return
+					}
+					if fidpk == nil {
+						continue
 					}
 					temp = append(temp, *fidpk)
 				}
@@ -92,6 +98,9 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 				var fidpk *store.IdPkTs
 				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 					return
+				}
+				if fidpk == nil {
+					continue
 				}
 				idPkTs = append(idPkTs, *fidpk)
 			}

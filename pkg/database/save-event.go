@@ -66,6 +66,9 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
 					return
 				}
+				if fidpk == nil {
+					continue
+				}
 				idPkTss = append(idPkTss, fidpk)
 			}
 			// sort by timestamp, so the first is the newest
