@@ -11,6 +11,7 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
+	"runtime/debug"
 	"sync"
 )
 
@@ -129,6 +130,7 @@ func (s *Server) SpiderFetch(
 						evss[i] = nil
 					}
 					chk.E(s.Storage().Sync())
+					debug.FreeOSMemory()
 				}()
 			}
 			wg.Wait()
