@@ -6,6 +6,7 @@ import (
 	"orly.dev/pkg/encoders/bech32encoding"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 )
@@ -52,21 +53,22 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		log.I.F("getting ownersFollowed")
 		var ownersFollowed [][]byte
 		if ownersFollowed, err = s.SpiderFetch(
-			kind.FollowList, dontFetch, ownersPubkeys...,
+			kinds.New(kind.FollowList), dontFetch, false, ownersPubkeys...,
 		); chk.E(err) {
 			return
 		}
+		// log.I.S(ownersFollowed)
 		log.I.F("getting followedFollows")
 		var followedFollows [][]byte
 		if followedFollows, err = s.SpiderFetch(
-			kind.FollowList, dontFetch, ownersFollowed...,
+			kinds.New(kind.FollowList), dontFetch, false, ownersFollowed...,
 		); chk.E(err) {
 			return
 		}
 		log.I.F("getting ownersMuted")
 		var ownersMuted [][]byte
 		if ownersMuted, err = s.SpiderFetch(
-			kind.MuteList, dontFetch, ownersPubkeys...,
+			kinds.New(kind.MuteList), dontFetch, false, ownersPubkeys...,
 		); chk.E(err) {
 			return
 		}
@@ -74,22 +76,17 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		// list
 		filteredFollows := make([][]byte, 0, len(followedFollows))
 		for _, follow := range followedFollows {
-			found := false
 			for _, owner := range ownersFollowed {
 				if bytes.Equal(follow, owner) {
-					found = true
 					break
 				}
 			}
 			for _, owner := range ownersMuted {
 				if bytes.Equal(follow, owner) {
-					found = true
 					break
 				}
 			}
-			if !found {
-				filteredFollows = append(filteredFollows, follow)
-			}
+			filteredFollows = append(filteredFollows, follow)
 		}
 		followedFollows = filteredFollows
 		own := "owner"
@@ -115,7 +112,7 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 			len(followedFollows), folfol,
 			len(ownersMuted), mut,
 		)
-		// add the owners
+		// add the owners to the ownersFollowed
 		ownersFollowed = append(ownersFollowed, ownersPubkeys...)
 		s.SetOwnersPubkeys(ownersPubkeys)
 		s.SetOwnersFollowed(ownersFollowed)
@@ -125,9 +122,12 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		if !dontFetch {
 			go func() {
 				everyone := append(ownersFollowed, followedFollows...)
-				s.SpiderFetch(kind.ProfileMetadata, false, everyone...)
-				s.SpiderFetch(kind.RelayListMetadata, false, everyone...)
-				s.SpiderFetch(kind.DMRelaysList, false, everyone...)
+				s.SpiderFetch(
+					kinds.New(
+						kind.ProfileMetadata, kind.RelayListMetadata,
+						kind.DMRelaysList,
+					), false, true, everyone...,
+				)
 			}()
 		}
 	}()

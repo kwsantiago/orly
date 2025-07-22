@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/flate"
 	"crypto/tls"
+	"fmt"
 	"github.com/gobwas/httphead"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsflate"
@@ -170,7 +171,7 @@ func (cn *Connection) ReadMessage(c context.T, buf io.Writer) (err error) {
 		h, err := cn.reader.NextFrame()
 		if err != nil {
 			cn.conn.Close()
-			return errorf.E(
+			return fmt.Errorf(
 				"%s failed to advance frame: %s",
 				cn.conn.RemoteAddr(),
 				err.Error(),

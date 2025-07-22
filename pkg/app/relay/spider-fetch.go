@@ -5,7 +5,6 @@ import (
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/hex"
-	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/protocol/ws"
@@ -17,12 +16,12 @@ import (
 )
 
 func (s *Server) SpiderFetch(
-	k *kind.T, noFetch bool, pubkeys ...[]byte,
+	k *kinds.T, noFetch, noExtract bool, pubkeys ...[]byte,
 ) (pks [][]byte, err error) {
 	// first search the local database
 	pkList := tag.New(pubkeys...)
 	f := &filter.F{
-		Kinds:   kinds.New(k),
+		Kinds:   k,
 		Authors: pkList,
 	}
 	var evs event.S
@@ -30,23 +29,37 @@ func (s *Server) SpiderFetch(
 		// none were found, so we need to scan the spiders
 		err = nil
 	}
+	var kindsList string
+	for i, kk := range k.K {
+		if i > 0 {
+			kindsList += ","
+		}
+		kindsList += kk.Name()
+	}
+	log.I.F("%d events found of type %s", len(evs), kindsList)
+	// for _, ev := range evs {
+	// 	o += fmt.Sprintf("%s\n\n", ev.Marshal(nil))
+	// }
+	// log.I.F("%s", o)
 	if len(evs) < len(pubkeys) && !noFetch {
 		// we need to search the spider seeds.
-		// Break up pubkeys into batches of 512
-		for i := 0; i < len(pubkeys); i += 512 {
-			end := i + 512
+		// Break up pubkeys into batches of 128
+		for i := 0; i < len(pubkeys); i += 128 {
+			end := i + 128
 			if end > len(pubkeys) {
 				end = len(pubkeys)
 			}
 			batchPubkeys := pubkeys[i:end]
 			log.I.F(
 				"processing batch %d to %d of %d for kind %s",
-				i, end, len(pubkeys), k.Name(),
+				i, end, len(pubkeys), kindsList,
 			)
 			batchPkList := tag.New(batchPubkeys...)
+			lim := uint(batchPkList.Len())
 			batchFilter := &filter.F{
-				Kinds:   kinds.New(k),
+				Kinds:   k,
 				Authors: batchPkList,
+				Limit:   &lim,
 			}
 
 			var mx sync.Mutex
@@ -76,6 +89,16 @@ func (s *Server) SpiderFetch(
 						return
 					}
 					mx.Lock()
+					// save the events to the database
+					for _, ev := range evss {
+						log.I.F("saving event:\n%s", ev.Marshal(nil))
+						if _, _, err = s.Storage().SaveEvent(
+							s.Ctx, ev,
+						); chk.E(err) {
+							err = nil
+							continue
+						}
+					}
 					for _, ev := range evss {
 						evs = append(evs, ev)
 					}
@@ -83,13 +106,6 @@ func (s *Server) SpiderFetch(
 				}()
 			}
 			wg.Wait()
-		}
-		// save the events to the database
-		for _, ev := range evs {
-			if _, _, err = s.Storage().SaveEvent(s.Ctx, ev); chk.E(err) {
-				err = nil
-				continue
-			}
 		}
 	}
 	// deduplicate and take the newest
@@ -108,7 +124,10 @@ func (s *Server) SpiderFetch(
 		tmp = append(tmp, evm[0])
 	}
 	evs = tmp
-	// we have all we're going to get now
+	// we have all we're going to get now, extract the p tags
+	if noExtract {
+		return
+	}
 	pkMap := make(map[string]struct{})
 	for _, ev := range evs {
 		t := ev.Tags.GetAll(tag.New("p"))
@@ -118,7 +137,7 @@ func (s *Server) SpiderFetch(
 				continue
 			}
 			pk := make([]byte, schnorr.PubKeyBytesLen)
-			if _, err = hex.DecBytes(pk, pkh); chk.E(err) {
+			if _, err = hex.DecBytes(pk, pkh); err != nil {
 				err = nil
 				continue
 			}

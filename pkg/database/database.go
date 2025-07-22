@@ -80,11 +80,6 @@ func (d *D) Import(r io.Reader) {
 	panic("implement me")
 }
 
-func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (d *D) SetLogLevel(level string) {
 	d.Logger.SetLogLevel(lol.GetLogLevel(level))
 }

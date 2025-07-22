@@ -78,8 +78,7 @@ func (a *A) HandleReq(
 				continue
 			}
 		}
-		if events, err = sto.QueryEvents(c, f); chk.E(err) {
-			log.E.F("eventstore: %v", err)
+		if events, err = sto.QueryEvents(c, f); err != nil {
 			if errors.Is(err, badger.ErrDBClosed) {
 				return
 			}
@@ -91,8 +90,9 @@ func (a *A) HandleReq(
 			for _, ev := range events {
 				if !auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
 					log.W.F(
-						"not privileged %0x ev pubkey %0x",
-						a.Listener.AuthedPubkey(), ev.Pubkey,
+						"not privileged %0x ev pubkey %0x kind %s privileged: %v",
+						a.Listener.AuthedPubkey(), ev.Pubkey, ev.Kind.Name(),
+						ev.Kind.IsPrivileged(),
 					)
 					continue
 				}

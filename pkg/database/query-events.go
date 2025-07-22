@@ -32,7 +32,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			}
 			// fetch the events
 			var ev *event.E
-			if ev, err = d.FetchEventBySerial(ser); chk.E(err) {
+			if ev, err = d.FetchEventBySerial(ser); err != nil {
 				continue
 			}
 			evs = append(evs, ev)

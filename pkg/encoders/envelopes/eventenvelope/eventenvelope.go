@@ -145,7 +145,7 @@ func (en *Result) Unmarshal(b []byte) (r []byte, err error) {
 		return
 	}
 	en.Event = event.New()
-	if r, err = en.Event.Unmarshal(r); chk.E(err) {
+	if r, err = en.Event.Unmarshal(r); err != nil {
 		return
 	}
 	if r, err = envelopes.SkipToTheEnd(r); chk.E(err) {
@@ -158,7 +158,7 @@ func (en *Result) Unmarshal(b []byte) (r []byte, err error) {
 // envelope into it.
 func ParseResult(b []byte) (t *Result, rem []byte, err error) {
 	t = NewResult()
-	if rem, err = t.Unmarshal(b); chk.T(err) {
+	if rem, err = t.Unmarshal(b); err != nil {
 		return
 	}
 	return

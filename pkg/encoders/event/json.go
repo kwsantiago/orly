@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/minio/sha256-simd"
 	"io"
 	"orly.dev/pkg/crypto/ec/schnorr"
@@ -300,7 +301,7 @@ AfterClose:
 	}
 	return
 invalid:
-	err = errorf.E(
+	err = fmt.Errorf(
 		"invalid key,\n'%s'\n'%s'\n'%s'", string(b), string(b[:len(r)]),
 		string(r),
 	)

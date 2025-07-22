@@ -234,9 +234,10 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 	// general message reader loop
 	go func() {
 		buf := new(bytes.Buffer)
+		var err error
 		for {
 			buf.Reset()
-			if err := conn.ReadMessage(r.connectionContext, buf); chk.T(err) {
+			if err = conn.ReadMessage(r.connectionContext, buf); err != nil {
 				r.ConnectionError = err
 				r.Close()
 				break
@@ -270,10 +271,12 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 				}
 				r.challenge = env.Challenge
 			case eventenvelope.L:
+				// log.I.F("message: %s", message)
 				env := eventenvelope.NewResult()
-				if env, message, err = eventenvelope.ParseResult(message); chk.E(err) {
+				if env, message, err = eventenvelope.ParseResult(message); err != nil {
 					continue
 				}
+				// log.I.F("%s", env.Event.Marshal(nil))
 				if len(env.Subscription.T) == 0 {
 					continue
 				}
@@ -497,12 +500,13 @@ func (r *Client) PrepareSubscription(
 	return sub
 }
 
-// QuerySync is only used in tests. The realy query method is synchronous now
+// QuerySync is only used in tests. The relay query method is synchronous now
 // anyway (it ensures sort order is respected).
 func (r *Client) QuerySync(
 	ctx context.T, f *filter.F,
 	opts ...SubscriptionOption,
 ) ([]*event.E, error) {
+	// log.T.F("QuerySync:\n%s", f.Marshal(nil))
 	sub, err := r.Subscribe(ctx, filters.New(f), opts...)
 	if err != nil {
 		return nil, err
