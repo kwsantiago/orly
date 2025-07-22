@@ -46,6 +46,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 	} else {
 		var idPkTs []store.IdPkTs
 		if idPkTs, err = d.QueryForIds(c, f); chk.E(err) {
+			return
 		}
 
 		// Create a map to store the latest version of replaceable events
