@@ -11,9 +11,17 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
-	"sort"
 	"sync"
 )
+
+// IdPkTs is a map of event IDs to their id, pubkey, and timestamp
+// This is used to reduce memory usage by storing only the essential information
+// instead of the full events
+type IdPkTs struct {
+	Id        []byte
+	Pubkey    []byte
+	Timestamp int64
+}
 
 func (s *Server) SpiderFetch(
 	k *kinds.T, noFetch, noExtract bool, pubkeys ...[]byte,
@@ -25,9 +33,20 @@ func (s *Server) SpiderFetch(
 		Authors: pkList,
 	}
 	var evs event.S
+	// Map to store id, pubkey, and timestamp for each event
+	idPkTsMap := make(map[string]*IdPkTs)
 	if evs, err = s.Storage().QueryEvents(s.Ctx, f); chk.E(err) {
 		// none were found, so we need to scan the spiders
 		err = nil
+	}
+	// Extract id, pubkey, and timestamp from initial events
+	for _, ev := range evs {
+		idStr := ev.IdString()
+		idPkTsMap[idStr] = &IdPkTs{
+			Id:        ev.Id,
+			Pubkey:    ev.Pubkey,
+			Timestamp: ev.CreatedAtInt64(),
+		}
 	}
 	var kindsList string
 	for i, kk := range k.K {
@@ -37,10 +56,6 @@ func (s *Server) SpiderFetch(
 		kindsList += kk.Name()
 	}
 	log.I.F("%d events found of type %s", len(evs), kindsList)
-	// for _, ev := range evs {
-	// 	o += fmt.Sprintf("%s\n\n", ev.Marshal(nil))
-	// }
-	// log.I.F("%s", o)
 	if !noFetch {
 		// we need to search the spider seeds.
 		// Break up pubkeys into batches of 128
@@ -88,9 +103,8 @@ func (s *Server) SpiderFetch(
 						err = nil
 						return
 					}
-					mx.Lock()
-					// save the events to the database
-					for _, ev := range evss {
+					// save the events to the database and extract id, pubkey, and timestamp
+					for i, ev := range evss {
 						log.I.F("saving event:\n%s", ev.Marshal(nil))
 						if _, _, err = s.Storage().SaveEvent(
 							s.Ctx, ev,
@@ -98,38 +112,57 @@ func (s *Server) SpiderFetch(
 							err = nil
 							continue
 						}
-					}
-					for _, ev := range evss {
+
+						// Extract id, pubkey, and timestamp
+						idStr := ev.IdString()
+						mx.Lock()
+						idPkTsMap[idStr] = &IdPkTs{
+							Id:        ev.Id,
+							Pubkey:    ev.Pubkey,
+							Timestamp: ev.CreatedAtInt64(),
+						}
+						// Append the event to evs for further processing
 						evs = append(evs, ev)
+						mx.Unlock()
+
+						// Nil the event in the slice to free memory
+						evss[i] = nil
 					}
-					mx.Unlock()
 				}()
 			}
 			wg.Wait()
 		}
 	}
 	// deduplicate and take the newest
-	var tmp event.S
-	evMap := make(map[string]event.S)
-	for _, ev := range evs {
-		evMap[ev.PubKeyString()] = append(evMap[ev.PubKeyString()], ev)
-	}
-	for _, evm := range evMap {
-		if len(evm) < 1 {
-			continue
-		}
-		if len(evm) > 1 {
-			sort.Sort(evm)
-		}
-		tmp = append(tmp, evm[0])
-	}
-	evs = tmp
-	// we have all we're going to get now, extract the p tags
+	// We need to query the database for the events we need to extract p tags from
+	// since we've niled the events in memory
 	if noExtract {
 		return
 	}
+
+	// Create a list of event IDs to query
+	var eventIds [][]byte
+	for _, idPkTs := range idPkTsMap {
+		eventIds = append(eventIds, idPkTs.Id)
+	}
+
+	// Query the database for the events
+	var eventsForExtraction event.S
+	if len(eventIds) > 0 {
+		// Create a filter for the event IDs
+		idFilter := &filter.F{
+			Ids: tag.New(eventIds...),
+		}
+
+		// Query the database
+		if eventsForExtraction, err = s.Storage().QueryEvents(s.Ctx, idFilter); chk.E(err) {
+			err = nil
+		}
+	}
+
+	// Extract the p tags
 	pkMap := make(map[string]struct{})
-	for _, ev := range evs {
+	for _, ev := range eventsForExtraction {
 		t := ev.Tags.GetAll(tag.New("p"))
 		for _, tt := range t.ToSliceOfTags() {
 			pkh := tt.Value()
@@ -143,6 +176,9 @@ func (s *Server) SpiderFetch(
 			}
 			pkMap[string(pk)] = struct{}{}
 		}
+
+		// Nil the event after extraction to free memory
+		ev = nil
 	}
 	for pk := range pkMap {
 		pks = append(pks, []byte(pk))
