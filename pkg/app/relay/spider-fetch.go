@@ -128,6 +128,7 @@ func (s *Server) SpiderFetch(
 						// Nil the event in the slice to free memory
 						evss[i] = nil
 					}
+					chk.E(s.Storage().Sync())
 				}()
 			}
 			wg.Wait()
@@ -155,7 +156,9 @@ func (s *Server) SpiderFetch(
 		}
 
 		// Query the database
-		if eventsForExtraction, err = s.Storage().QueryEvents(s.Ctx, idFilter); chk.E(err) {
+		if eventsForExtraction, err = s.Storage().QueryEvents(
+			s.Ctx, idFilter,
+		); chk.E(err) {
 			err = nil
 		}
 	}

@@ -101,6 +101,7 @@ func (d *D) Init(path string) (err error) {
 
 // Sync flushes the database buffers to disk.
 func (d *D) Sync() (err error) {
+	chk.E(d.DB.RunValueLogGC(0.5))
 	return d.DB.Sync()
 }
 
