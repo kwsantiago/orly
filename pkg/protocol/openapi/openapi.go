@@ -5,7 +5,6 @@ import (
 
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/protocol/servemux"
-	"orly.dev/pkg/utils/lol"
 )
 
 type Operations struct {
@@ -19,8 +18,6 @@ func New(
 	s server.I, name, version, description string, path string,
 	sm *servemux.S,
 ) {
-	lol.Tracer("New", name, version, description, path)
-	defer func() { lol.Tracer("end New") }()
 	a := NewHuma(sm, name, version, description)
 	huma.AutoRegister(a, &Operations{I: s, path: path})
 	return

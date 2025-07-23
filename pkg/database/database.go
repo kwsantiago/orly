@@ -2,7 +2,6 @@ package database
 
 import (
 	"github.com/dgraph-io/badger/v4"
-	"io"
 	"orly.dev/pkg/encoders/eventidserial"
 	"orly.dev/pkg/utils/apputil"
 	"orly.dev/pkg/utils/chk"
@@ -75,11 +74,6 @@ func (d *D) Wipe() (err error) {
 	panic("implement me")
 }
 
-func (d *D) Import(r io.Reader) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (d *D) SetLogLevel(level string) {
 	d.Logger.SetLogLevel(lol.GetLogLevel(level))
 }
@@ -101,7 +95,7 @@ func (d *D) Init(path string) (err error) {
 
 // Sync flushes the database buffers to disk.
 func (d *D) Sync() (err error) {
-	chk.E(d.DB.RunValueLogGC(0.5))
+	d.DB.RunValueLogGC(0.5)
 	return d.DB.Sync()
 }
 

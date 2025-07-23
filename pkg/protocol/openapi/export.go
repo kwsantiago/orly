@@ -6,7 +6,6 @@ import (
 	"orly.dev/pkg/app/relay/helpers"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
-	"orly.dev/pkg/utils/lol"
 )
 
 // ExportInput is the parameters for the HTTP API Export method.
@@ -14,14 +13,12 @@ type ExportInput struct {
 	Auth string `header:"Authorization" doc:"nostr nip-98 (and expiring variant)" required:"true"`
 }
 
-// ExportOutput is the return value of Export. It usually will be line structured JSON. In
-// future there may be more output formats.
+// ExportOutput is the return value of Export. It usually will be line
+// structured JSON.
 type ExportOutput struct{ RawBody []byte }
 
 // RegisterExport implements the Export HTTP API method.
 func (x *Operations) RegisterExport(api huma.API) {
-	lol.Tracer("RegisterExport")
-	defer func() { lol.Tracer("end RegisterExport") }()
 	name := "Export"
 	description := "Export all events (only works with NIP-98 capable client, will not work with UI)"
 	path := x.path + "/export"
