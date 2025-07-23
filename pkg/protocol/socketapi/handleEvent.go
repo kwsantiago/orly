@@ -69,7 +69,7 @@ func (a *A) HandleEvent(
 			Write(a.Listener); chk.E(err) {
 			return
 		}
-		// return
+		return
 	}
 	log.T.F(
 		"handleEvent %s %s authed: %0x", a.RealRemote(), req,
