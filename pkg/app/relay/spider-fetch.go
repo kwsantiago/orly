@@ -12,7 +12,6 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
 	"runtime/debug"
-	"sync"
 )
 
 // IdPkTs is a map of event IDs to their id, pubkey, and timestamp
@@ -78,62 +77,52 @@ func (s *Server) SpiderFetch(
 				Limit:   &lim,
 			}
 
-			var mx sync.Mutex
-			var wg sync.WaitGroup
-
 			for _, seed := range s.C.SpiderSeeds {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					select {
-					case <-s.Ctx.Done():
-						return
-					default:
-					}
-					var evss event.S
-					var cli *ws.Client
-					if cli, err = ws.RelayConnect(
-						context.Bg(), seed,
+				select {
+				case <-s.Ctx.Done():
+					return
+				default:
+				}
+				var evss event.S
+				var cli *ws.Client
+				if cli, err = ws.RelayConnect(
+					context.Bg(), seed,
+				); chk.E(err) {
+					err = nil
+					return
+				}
+				if evss, err = cli.QuerySync(
+					context.Bg(), batchFilter,
+				); chk.E(err) {
+					err = nil
+					return
+				}
+				// save the events to the database and extract id, pubkey, and timestamp
+				for i, ev := range evss {
+					log.I.F("saving event:\n%s", ev.Marshal(nil))
+					if _, _, err = s.Storage().SaveEvent(
+						s.Ctx, ev,
 					); chk.E(err) {
 						err = nil
-						return
+						continue
 					}
-					if evss, err = cli.QuerySync(
-						context.Bg(), batchFilter,
-					); chk.E(err) {
-						err = nil
-						return
-					}
-					// save the events to the database and extract id, pubkey, and timestamp
-					for i, ev := range evss {
-						log.I.F("saving event:\n%s", ev.Marshal(nil))
-						if _, _, err = s.Storage().SaveEvent(
-							s.Ctx, ev,
-						); chk.E(err) {
-							err = nil
-							continue
-						}
 
-						// Extract id, pubkey, and timestamp
-						idStr := ev.IdString()
-						mx.Lock()
-						idPkTsMap[idStr] = &IdPkTs{
-							Id:        ev.Id,
-							Pubkey:    ev.Pubkey,
-							Timestamp: ev.CreatedAtInt64(),
-						}
-						// Append the event to evs for further processing
-						evs = append(evs, ev)
-						mx.Unlock()
-
-						// Nil the event in the slice to free memory
-						evss[i] = nil
+					// Extract id, pubkey, and timestamp
+					idStr := ev.IdString()
+					idPkTsMap[idStr] = &IdPkTs{
+						Id:        ev.Id,
+						Pubkey:    ev.Pubkey,
+						Timestamp: ev.CreatedAtInt64(),
 					}
-					chk.E(s.Storage().Sync())
-					debug.FreeOSMemory()
-				}()
+					// Append the event to evs for further processing
+					evs = append(evs, ev)
+
+					// Nil the event in the slice to free memory
+					evss[i] = nil
+				}
+				chk.E(s.Storage().Sync())
+				debug.FreeOSMemory()
 			}
-			wg.Wait()
 		}
 	}
 	// deduplicate and take the newest
@@ -185,6 +174,8 @@ func (s *Server) SpiderFetch(
 		// Nil the event after extraction to free memory
 		ev = nil
 	}
+	chk.E(s.Storage().Sync())
+	debug.FreeOSMemory()
 	for pk := range pkMap {
 		pks = append(pks, []byte(pk))
 	}
