@@ -88,9 +88,8 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			for _, ev := range events {
 				if !auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
 					log.W.F(
-						"not privileged %0x ev pubkey %0x ev pubkey %0x kind %s privileged: %v",
-						a.Listener.AuthedPubkey(), ev.Pubkey,
-						a.Listener.AuthedPubkey(), ev.Kind.Name(),
+						"not privileged: client pubkey '%0x' event pubkey '%0x' kind %s privileged: %v",
+						a.Listener.AuthedPubkey(), ev.Pubkey, ev.Kind.Name(),
 						ev.Kind.IsPrivileged(),
 					)
 					continue

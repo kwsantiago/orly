@@ -117,10 +117,11 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 				websocket.CloseGoingAway,
 				websocket.CloseNoStatusReceived,
 				websocket.CloseAbnormalClosure,
+				websocket.CloseProtocolError, // invalid UTF error?
 			) {
 				log.W.F(
-					"unexpected close error from %s: %v",
-					helpers.GetRemoteFromReq(r), err,
+					"unexpected close error from %s: %v\n%s",
+					helpers.GetRemoteFromReq(r), err, message,
 				)
 			}
 			return
