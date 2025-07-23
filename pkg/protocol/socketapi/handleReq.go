@@ -3,11 +3,14 @@ package socketapi
 import (
 	"errors"
 	"github.com/dgraph-io/badger/v4"
+	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/encoders/envelopes/closedenvelope"
 	"orly.dev/pkg/encoders/envelopes/eoseenvelope"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
+	"orly.dev/pkg/encoders/envelopes/okenvelope"
 	"orly.dev/pkg/encoders/envelopes/reqenvelope"
 	"orly.dev/pkg/encoders/event"
+	"orly.dev/pkg/encoders/reason"
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/protocol/auth"
 	"orly.dev/pkg/utils/chk"
@@ -45,6 +48,27 @@ import (
 // generates and sends a closure envelope.
 func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	var err error
+	log.I.F(
+		"auth required %v client authed %v", a.I.AuthRequired(),
+		a.Listener.IsAuthed(),
+	)
+	if a.I.AuthRequired() && a.Listener.IsAuthed() {
+		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+		a.Listener.RequestAuth()
+		okEnv := okenvelope.New()
+		okEnv.OK = false
+		okEnv.Reason = reason.AuthRequired.F("auth enabled, please auth")
+		if err = okEnv.Write(a.Listener); chk.E(err) {
+			return
+		}
+		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
+			Write(a.Listener); chk.E(err) {
+			return
+		}
+		if !a.I.PublicReadable() {
+			return
+		}
+	}
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()
 	var rem []byte

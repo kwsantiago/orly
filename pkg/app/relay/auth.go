@@ -7,7 +7,6 @@ import (
 
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
-	"orly.dev/pkg/utils/lol"
 )
 
 // ServiceURL constructs the service URL based on the incoming HTTP request. It
@@ -34,8 +33,6 @@ import (
 //
 // - Returns the constructed URL string.
 func (s *Server) ServiceURL(req *http.Request) (st string) {
-	lol.Tracer("ServiceURL")
-	defer func() { lol.Tracer("end ServiceURL", st) }()
 	if !s.AuthRequired() {
 		log.T.F("auth not required")
 		return

@@ -64,6 +64,9 @@ func (ei *T) String() string {
 
 // ByteString renders an eventid.T as bytes in ASCII hex.
 func (ei *T) ByteString(src []byte) (b []byte) {
+	if ei == nil {
+		return
+	}
 	return hex.EncAppend(src, ei[:])
 }
 

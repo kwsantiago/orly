@@ -3,7 +3,6 @@ package socketapi
 import (
 	"net/http"
 	"orly.dev/pkg/app/relay/helpers"
-	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
@@ -84,14 +83,6 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 			return nil
 		},
 	)
-	if a.I.AuthRequired() {
-		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
-		a.Listener.RequestAuth()
-		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
-			Write(a.Listener); chk.E(err) {
-			return
-		}
-	}
 	go a.Pinger(a.Ctx, ticker, cancel, a.I)
 	var message []byte
 	var typ int

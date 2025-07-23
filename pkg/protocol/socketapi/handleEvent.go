@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"orly.dev/pkg/crypto/sha256"
+	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
 	"orly.dev/pkg/encoders/envelopes/okenvelope"
 	"orly.dev/pkg/encoders/event"
@@ -12,11 +13,13 @@ import (
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/ints"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/encoders/reason"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
+	"strings"
 )
 
 // HandleEvent processes an incoming event by validating its signature, verifying
@@ -48,8 +51,30 @@ func (a *A) HandleEvent(
 	c context.T, req []byte, srv server.I,
 ) (msg []byte) {
 
-	log.T.F("handleEvent %s %s", a.RealRemote(), req)
 	var err error
+	log.I.F(
+		"auth required %v client authed %v", a.I.AuthRequired(),
+		a.Listener.IsAuthed(),
+	)
+	if a.I.AuthRequired() && a.Listener.IsAuthed() {
+		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+		a.Listener.RequestAuth()
+		okEnv := okenvelope.New()
+		okEnv.OK = false
+		okEnv.Reason = reason.AuthRequired.F("auth enabled, please auth")
+		if err = okEnv.Write(a.Listener); chk.E(err) {
+			return
+		}
+		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
+			Write(a.Listener); chk.E(err) {
+			return
+		}
+		// return
+	}
+	log.T.F(
+		"handleEvent %s %s authed: %0x", a.RealRemote(), req,
+		a.Listener.AuthedPubkey(),
+	)
 	var rem []byte
 	sto := srv.Storage()
 	if sto == nil {
@@ -99,10 +124,13 @@ func (a *A) HandleEvent(
 		a.Listener.RealRemote(),
 	)
 	if !accept {
-		if err = Ok.Blocked(
-			a, env, notice,
-		); chk.E(err) {
-			return
+		if strings.Contains(notice, "auth") {
+			if err = Ok.AuthRequired(
+				a, env, notice,
+			); chk.E(err) {
+				return
+			}
+
 		}
 		return
 	}
