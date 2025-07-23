@@ -71,7 +71,7 @@ func TestGetSerialById(t *testing.T) {
 	testEvent := events[3] // Using the same event as in QueryForIds test
 
 	// Get the serial by ID
-	serial, err := db.GetSerialById(testEvent.Id)
+	serial, err := db.GetSerialById(testEvent.ID)
 	if err != nil {
 		t.Fatalf("Failed to get serial by ID: %v", err)
 	}
@@ -82,10 +82,10 @@ func TestGetSerialById(t *testing.T) {
 	}
 
 	// Test with a non-existent ID
-	nonExistentId := make([]byte, len(testEvent.Id))
+	nonExistentId := make([]byte, len(testEvent.ID))
 	// Ensure it's different from any real ID
 	for i := range nonExistentId {
-		nonExistentId[i] = ^testEvent.Id[i]
+		nonExistentId[i] = ^testEvent.ID[i]
 	}
 
 	serial, err = db.GetSerialById(nonExistentId)

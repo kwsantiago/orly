@@ -15,7 +15,7 @@ import (
 )
 
 // ToCanonical converts the event to the canonical encoding used to derive the
-// event Id.
+// event ID.
 func (ev *E) ToCanonical(dst []byte) (b []byte) {
 	b = dst
 	b = append(b, "[0,\""...)
@@ -88,8 +88,8 @@ func (ev *E) FromCanonical(b []byte) (rem []byte, err error) {
 			return
 		}
 	}
-	// create the event, use the Id hash to populate the Id
-	ev.Id = id
+	// create the event, use the ID hash to populate the ID
+	ev.ID = id
 	// unwrap the pubkey
 	if v, ok := x[1].(*json.Hex); !ok {
 		err = errorf.E(

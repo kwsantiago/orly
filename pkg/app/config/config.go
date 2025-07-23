@@ -73,6 +73,9 @@ func New() (cfg *C, err error) {
 	if cfg.State == "" || strings.Contains(cfg.State, "~") {
 		cfg.State = filepath.Join(xdg.StateHome, cfg.AppName)
 	}
+	if len(cfg.Owners) > 0 {
+		cfg.AuthRequired = true
+	}
 	envPath := filepath.Join(cfg.Config, ".env")
 	if apputil.FileExists(envPath) {
 		var e env2.Env

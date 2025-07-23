@@ -76,7 +76,7 @@ func CreatePubHashFromData(data []byte) (p *types2.PubHash, err error) {
 // complete set of combinations of all fields in the event, thus there is no
 // need to decode events until they are to be delivered.
 func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
-	// Id eid
+	// ID eid
 	//
 	// If there is any Ids in the filter, none of the other fields matter. It
 	// should be an error, but convention just ignores it.

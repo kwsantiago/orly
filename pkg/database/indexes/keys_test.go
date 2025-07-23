@@ -83,7 +83,7 @@ func TestPrefixFunction(t *testing.T) {
 		expected I
 	}{
 		{"Event", Event, EventPrefix},
-		{"Id", Id, IdPrefix},
+		{"ID", Id, IdPrefix},
 		{"FullIdPubkey", FullIdPubkey, FullIdPubkeyPrefix},
 		{"Pubkey", Pubkey, PubkeyPrefix},
 		{"CreatedAt", CreatedAt, CreatedAtPrefix},
@@ -122,7 +122,7 @@ func TestIdentify(t *testing.T) {
 		expected int
 	}{
 		{"Event", EventPrefix, Event},
-		{"Id", IdPrefix, Id},
+		{"ID", IdPrefix, Id},
 		{"FullIdPubkey", FullIdPubkeyPrefix, FullIdPubkey},
 		{"Pubkey", PubkeyPrefix, Pubkey},
 		{"CreatedAt", CreatedAtPrefix, CreatedAt},

@@ -11,10 +11,10 @@ import (
 
 // compareEvents compares two events and reports any differences
 func compareEvents(t *testing.T, expected, actual *E, context string) {
-	if !bytes.Equal(expected.Id, actual.Id) {
+	if !bytes.Equal(expected.ID, actual.ID) {
 		t.Errorf(
-			"%s: Id mismatch: expected %s, got %s", context,
-			hex.Enc(expected.Id), hex.Enc(actual.Id),
+			"%s: ID mismatch: expected %s, got %s", context,
+			hex.Enc(expected.ID), hex.Enc(actual.ID),
 		)
 	}
 	if !bytes.Equal(expected.Pubkey, actual.Pubkey) {
@@ -52,7 +52,7 @@ func compareEvents(t *testing.T, expected, actual *E, context string) {
 func TestMarshalUnmarshalWithWhitespace(t *testing.T) {
 	// Create a sample event with predefined values
 	original := &E{
-		Id:        bytes.Repeat([]byte{0x01}, 32), // 32 bytes of 0x01
+		ID:        bytes.Repeat([]byte{0x01}, 32), // 32 bytes of 0x01
 		Pubkey:    bytes.Repeat([]byte{0x02}, 32), // 32 bytes of 0x02
 		CreatedAt: timestamp.FromUnix(1609459200), // 2021-01-01 00:00:00 UTC
 		Kind:      kind.TextNote,                  // Kind 1 (text note)
@@ -73,7 +73,7 @@ func TestMarshalUnmarshalWithWhitespace(t *testing.T) {
 	// Test 2: Manually created JSON with extra whitespace
 	jsonWithExtraWhitespace := []byte(`
 	{
-		"id": "` + hex.Enc(original.Id) + `",
+		"id": "` + hex.Enc(original.ID) + `",
 		"pubkey": "` + hex.Enc(original.Pubkey) + `",
 		"created_at": 1609459200,
 		"kind": 1,
@@ -93,7 +93,7 @@ func TestMarshalUnmarshalWithWhitespace(t *testing.T) {
 
 	// Test 3: JSON with mixed whitespace (spaces, tabs, newlines)
 	jsonWithMixedWhitespace := []byte(`{
-	"id"  :  "` + hex.Enc(original.Id) + `",
+	"id"  :  "` + hex.Enc(original.ID) + `",
 	  "pubkey":	"` + hex.Enc(original.Pubkey) + `",
  "created_at":	 1609459200 ,
 		"kind":1,
@@ -115,7 +115,7 @@ func TestMarshalUnmarshalWithWhitespace(t *testing.T) {
 
 	{ 
 
-		"id" : "` + hex.Enc(original.Id) + `" , 
+		"id" : "` + hex.Enc(original.ID) + `" , 
 		"pubkey" : "` + hex.Enc(original.Pubkey) + `" , 
 		"created_at" : 1609459200 , 
 		"kind" : 1 , 

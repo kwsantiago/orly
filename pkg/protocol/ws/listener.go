@@ -33,6 +33,7 @@ func NewListener(
 	ws.setRemoteFromReq(req)
 	if authRequired {
 		ws.SetChallenge(auth.GenerateChallenge())
+		ws.SetAuthedPubkey(nil)
 	}
 	return
 }

@@ -32,7 +32,7 @@ func NewId[V string | []byte](s V) (*Id, error) {
 		// remove invalid return value
 		si.T = si.T[:0]
 		return si, errorf.E(
-			"invalid subscription Id - length %d < 1 or > 64", len(si.T),
+			"invalid subscription ID - length %d < 1 or > 64", len(si.T),
 		)
 	}
 }
@@ -77,7 +77,7 @@ func (si *Id) Marshal(dst []byte) (b []byte) {
 	ue := text.NostrEscape(nil, si.T)
 	if len(ue) < 1 || len(ue) > 64 {
 		log.E.F(
-			"invalid subscription Id, must be between 1 and 64 "+
+			"invalid subscription ID, must be between 1 and 64 "+
 				"characters, got %d (possibly due to escaping)", len(ue),
 		)
 		return

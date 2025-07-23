@@ -36,7 +36,7 @@ func (ev *E) Marshal(dst []byte) (b []byte) {
 func (ev *E) MarshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	// open parentheses
 	dst = append(dst, '{')
-	// Id
+	// ID
 	if on {
 		dst = append(dst, '\n', '\t')
 	}
@@ -44,7 +44,7 @@ func (ev *E) MarshalWithWhitespace(dst []byte, on bool) (b []byte) {
 	if on {
 		dst = append(dst, ' ')
 	}
-	dst = text2.AppendQuote(dst, ev.Id, hex.EncAppend)
+	dst = text2.AppendQuote(dst, ev.ID, hex.EncAppend)
 	dst = append(dst, ',')
 	// Pubkey
 	if on {
@@ -188,12 +188,12 @@ InVal:
 		}
 		if len(id) != sha256.Size {
 			err = errorf.E(
-				"invalid Id, require %d got %d", sha256.Size,
+				"invalid ID, require %d got %d", sha256.Size,
 				len(id),
 			)
 			return
 		}
-		ev.Id = id
+		ev.ID = id
 		goto BetweenKV
 	case jPubkey[0]:
 		if !bytes.Equal(jPubkey, key) {

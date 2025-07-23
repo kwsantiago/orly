@@ -140,7 +140,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 
 	// Add an e-tag referencing the regular event
 	deletionEvent.Tags = deletionEvent.Tags.AppendTags(
-		tag.New([]byte{'e'}, []byte(hex.Enc(regularEvent.Id))),
+		tag.New([]byte{'e'}, []byte(hex.Enc(regularEvent.ID))),
 	)
 
 	deletionEvent.Sign(sign)

@@ -186,7 +186,7 @@ func EventDec(ser *types.Uint40) (enc *T) { return New(NewPrefix(), ser) }
 // Id contains a truncated 8-byte hash of an event index. This is the secondary
 // key of an event, the primary key is the serial found in the Event.
 //
-//	3 prefix|8 Id hash|5 serial
+//	3 prefix|8 ID hash|5 serial
 var Id = next()
 
 func IdVars() (id *types.IdHash, ser *types.Uint40) {
@@ -202,7 +202,7 @@ func IdDec(id *types.IdHash, ser *types.Uint40) (enc *T) {
 // FullIdPubkey is an index designed to enable sorting and filtering of
 // results found via other indexes, without having to decode the event.
 //
-//	3 prefix|5 serial|32 Id|8 pubkey hash|8 timestamp
+//	3 prefix|5 serial|32 ID|8 pubkey hash|8 timestamp
 var FullIdPubkey = next()
 
 func FullIdPubkeyVars() (

@@ -58,177 +58,211 @@ func compareTags(t *testing.T, expected, actual *tags.T, context string) {
 // tags with fields containing escaped JSON that has been escaped using NostrEscape.
 func TestUnmarshalEscapedJSONInTags(t *testing.T) {
 	// Test 1: Tag with a field containing escaped JSON
-	t.Run("SimpleEscapedJSON", func(t *testing.T) {
-		// Create a tag with a field containing JSON that needs escaping
-		jsonContent := `{"key":"value","nested":{"array":[1,2,3]}}`
+	t.Run(
+		"SimpleEscapedJSON", func(t *testing.T) {
+			// Create a tag with a field containing JSON that needs escaping
+			jsonContent := `{"key":"value","nested":{"array":[1,2,3]}}`
 
-		// Create the event with the tag containing JSON
-		originalEvent := &E{
-			Id:        bytes.Repeat([]byte{0x01}, 32),
-			Pubkey:    bytes.Repeat([]byte{0x02}, 32),
-			CreatedAt: timestamp.FromUnix(1609459200),
-			Kind:      kind.TextNote,
-			Tags:      tags.New(),
-			Content:   []byte("Event with JSON in tag"),
-			Sig:       bytes.Repeat([]byte{0x03}, 64),
-		}
+			// Create the event with the tag containing JSON
+			originalEvent := &E{
+				ID:        bytes.Repeat([]byte{0x01}, 32),
+				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
+				CreatedAt: timestamp.FromUnix(1609459200),
+				Kind:      kind.TextNote,
+				Tags:      tags.New(),
+				Content:   []byte("Event with JSON in tag"),
+				Sig:       bytes.Repeat([]byte{0x03}, 64),
+			}
 
-		// Add a tag with JSON content
-		jsonTag := tag.New("j", jsonContent)
-		originalEvent.Tags.AppendTags(jsonTag)
+			// Add a tag with JSON content
+			jsonTag := tag.New("j", jsonContent)
+			originalEvent.Tags.AppendTags(jsonTag)
 
-		// Marshal the event
-		marshaled := originalEvent.Marshal(nil)
+			// Marshal the event
+			marshaled := originalEvent.Marshal(nil)
 
-		// Unmarshal back into a new event
-		unmarshaledEvent := &E{}
-		_, err := unmarshaledEvent.Unmarshal(marshaled)
-		if err != nil {
-			t.Fatalf("Failed to unmarshal event with JSON in tag: %v", err)
-		}
+			// Unmarshal back into a new event
+			unmarshaledEvent := &E{}
+			_, err := unmarshaledEvent.Unmarshal(marshaled)
+			if err != nil {
+				t.Fatalf("Failed to unmarshal event with JSON in tag: %v", err)
+			}
 
-		// Verify the tag was correctly unmarshaled
-		if unmarshaledEvent.Tags.Len() != 1 {
-			t.Fatalf("Expected 1 tag, got %d", unmarshaledEvent.Tags.Len())
-		}
+			// Verify the tag was correctly unmarshaled
+			if unmarshaledEvent.Tags.Len() != 1 {
+				t.Fatalf("Expected 1 tag, got %d", unmarshaledEvent.Tags.Len())
+			}
 
-		unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
-		if unmarshaledTag.Len() != 2 {
-			t.Fatalf("Expected tag with 2 elements, got %d", unmarshaledTag.Len())
-		}
+			unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
+			if unmarshaledTag.Len() != 2 {
+				t.Fatalf(
+					"Expected tag with 2 elements, got %d", unmarshaledTag.Len(),
+				)
+			}
 
-		if string(unmarshaledTag.B(0)) != "j" {
-			t.Errorf("Expected tag key 'j', got '%s'", unmarshaledTag.B(0))
-		}
+			if string(unmarshaledTag.B(0)) != "j" {
+				t.Errorf("Expected tag key 'j', got '%s'", unmarshaledTag.B(0))
+			}
 
-		if string(unmarshaledTag.B(1)) != jsonContent {
-			t.Errorf("Expected tag value '%s', got '%s'", jsonContent, unmarshaledTag.B(1))
-		}
-	})
+			if string(unmarshaledTag.B(1)) != jsonContent {
+				t.Errorf(
+					"Expected tag value '%s', got '%s'", jsonContent,
+					unmarshaledTag.B(1),
+				)
+			}
+		},
+	)
 
 	// Test 2: Tag with a field containing escaped JSON with special characters
-	t.Run("EscapedJSONWithSpecialChars", func(t *testing.T) {
-		// JSON with characters that need escaping: quotes, backslashes, control chars
-		jsonContent := `{"text":"This has \"quotes\" and \\ backslashes","newlines":"\n\r\t"}`
+	t.Run(
+		"EscapedJSONWithSpecialChars", func(t *testing.T) {
+			// JSON with characters that need escaping: quotes, backslashes, control chars
+			jsonContent := `{"text":"This has \"quotes\" and \\ backslashes","newlines":"\n\r\t"}`
 
-		// Create the event with the tag containing JSON with special chars
-		originalEvent := &E{
-			Id:        bytes.Repeat([]byte{0x01}, 32),
-			Pubkey:    bytes.Repeat([]byte{0x02}, 32),
-			CreatedAt: timestamp.FromUnix(1609459200),
-			Kind:      kind.TextNote,
-			Tags:      tags.New(),
-			Content:   []byte("Event with JSON containing special chars in tag"),
-			Sig:       bytes.Repeat([]byte{0x03}, 64),
-		}
+			// Create the event with the tag containing JSON with special chars
+			originalEvent := &E{
+				ID:        bytes.Repeat([]byte{0x01}, 32),
+				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
+				CreatedAt: timestamp.FromUnix(1609459200),
+				Kind:      kind.TextNote,
+				Tags:      tags.New(),
+				Content:   []byte("Event with JSON containing special chars in tag"),
+				Sig:       bytes.Repeat([]byte{0x03}, 64),
+			}
 
-		// Add a tag with JSON content containing special chars
-		jsonTag := tag.New("j", jsonContent)
-		originalEvent.Tags.AppendTags(jsonTag)
+			// Add a tag with JSON content containing special chars
+			jsonTag := tag.New("j", jsonContent)
+			originalEvent.Tags.AppendTags(jsonTag)
 
-		// Marshal the event
-		marshaled := originalEvent.Marshal(nil)
+			// Marshal the event
+			marshaled := originalEvent.Marshal(nil)
 
-		// Unmarshal back into a new event
-		unmarshaledEvent := &E{}
-		_, err := unmarshaledEvent.Unmarshal(marshaled)
-		if err != nil {
-			t.Fatalf("Failed to unmarshal event with JSON containing special chars: %v", err)
-		}
+			// Unmarshal back into a new event
+			unmarshaledEvent := &E{}
+			_, err := unmarshaledEvent.Unmarshal(marshaled)
+			if err != nil {
+				t.Fatalf(
+					"Failed to unmarshal event with JSON containing special chars: %v",
+					err,
+				)
+			}
 
-		// Verify the tag was correctly unmarshaled
-		unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
-		if string(unmarshaledTag.B(1)) != jsonContent {
-			t.Errorf("Expected tag value '%s', got '%s'", jsonContent, unmarshaledTag.B(1))
-		}
-	})
+			// Verify the tag was correctly unmarshaled
+			unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
+			if string(unmarshaledTag.B(1)) != jsonContent {
+				t.Errorf(
+					"Expected tag value '%s', got '%s'", jsonContent,
+					unmarshaledTag.B(1),
+				)
+			}
+		},
+	)
 
- // Test 3: Tag with nested JSON that contains already escaped content
-	t.Run("NestedEscapedJSON", func(t *testing.T) {
-		// JSON with already escaped content
-		jsonContent := `{"escaped":"This JSON contains \\\"already escaped\\\" content"}`
+	// Test 3: Tag with nested JSON that contains already escaped content
+	t.Run(
+		"NestedEscapedJSON", func(t *testing.T) {
+			// JSON with already escaped content
+			jsonContent := `{"escaped":"This JSON contains \\\"already escaped\\\" content"}`
 
-		// Create the event with the tag containing nested escaped JSON
-		originalEvent := &E{
-			Id:        bytes.Repeat([]byte{0x01}, 32),
-			Pubkey:    bytes.Repeat([]byte{0x02}, 32),
-			CreatedAt: timestamp.FromUnix(1609459200),
-			Kind:      kind.TextNote,
-			Tags:      tags.New(),
-			Content:   []byte("Event with nested escaped JSON in tag"),
-			Sig:       bytes.Repeat([]byte{0x03}, 64),
-		}
+			// Create the event with the tag containing nested escaped JSON
+			originalEvent := &E{
+				ID:        bytes.Repeat([]byte{0x01}, 32),
+				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
+				CreatedAt: timestamp.FromUnix(1609459200),
+				Kind:      kind.TextNote,
+				Tags:      tags.New(),
+				Content:   []byte("Event with nested escaped JSON in tag"),
+				Sig:       bytes.Repeat([]byte{0x03}, 64),
+			}
 
-		// Add a tag with nested escaped JSON content
-		jsonTag := tag.New("j", jsonContent)
-		originalEvent.Tags.AppendTags(jsonTag)
+			// Add a tag with nested escaped JSON content
+			jsonTag := tag.New("j", jsonContent)
+			originalEvent.Tags.AppendTags(jsonTag)
 
-		// Marshal the event
-		marshaled := originalEvent.Marshal(nil)
+			// Marshal the event
+			marshaled := originalEvent.Marshal(nil)
 
-		// Unmarshal back into a new event
-		unmarshaledEvent := &E{}
-		_, err := unmarshaledEvent.Unmarshal(marshaled)
-		if err != nil {
-			t.Fatalf("Failed to unmarshal event with nested escaped JSON: %v", err)
-		}
+			// Unmarshal back into a new event
+			unmarshaledEvent := &E{}
+			_, err := unmarshaledEvent.Unmarshal(marshaled)
+			if err != nil {
+				t.Fatalf(
+					"Failed to unmarshal event with nested escaped JSON: %v",
+					err,
+				)
+			}
 
-		// Verify the tag was correctly unmarshaled
-		unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
-		if string(unmarshaledTag.B(1)) != jsonContent {
-			t.Errorf("Expected tag value '%s', got '%s'", jsonContent, unmarshaledTag.B(1))
-		}
-	})
+			// Verify the tag was correctly unmarshaled
+			unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
+			if string(unmarshaledTag.B(1)) != jsonContent {
+				t.Errorf(
+					"Expected tag value '%s', got '%s'", jsonContent,
+					unmarshaledTag.B(1),
+				)
+			}
+		},
+	)
 
 	// Test 4: Tag with JSON that has been explicitly escaped using NostrEscape
-	t.Run("ExplicitlyEscapedJSON", func(t *testing.T) {
-		// Original JSON with characters that need escaping
-		originalJSON := []byte(`{"key":"value with "quotes"","nested":{"array":[1,2,3],"special":"\n\r\t"}}`)
+	t.Run(
+		"ExplicitlyEscapedJSON", func(t *testing.T) {
+			// Original JSON with characters that need escaping
+			originalJSON := []byte(`{"key":"value with "quotes"","nested":{"array":[1,2,3],"special":"\n\r\t"}}`)
 
-		// Explicitly escape the JSON using NostrEscape
-		escapedJSON := make([]byte, 0, len(originalJSON)*2)
-		escapedJSON = text2.NostrEscape(escapedJSON, originalJSON)
+			// Explicitly escape the JSON using NostrEscape
+			escapedJSON := make([]byte, 0, len(originalJSON)*2)
+			escapedJSON = text2.NostrEscape(escapedJSON, originalJSON)
 
-		// Create the event with the tag containing explicitly escaped JSON
-		originalEvent := &E{
-			Id:        bytes.Repeat([]byte{0x01}, 32),
-			Pubkey:    bytes.Repeat([]byte{0x02}, 32),
-			CreatedAt: timestamp.FromUnix(1609459200),
-			Kind:      kind.TextNote,
-			Tags:      tags.New(),
-			Content:   []byte("Event with explicitly escaped JSON in tag"),
-			Sig:       bytes.Repeat([]byte{0x03}, 64),
-		}
+			// Create the event with the tag containing explicitly escaped JSON
+			originalEvent := &E{
+				ID:        bytes.Repeat([]byte{0x01}, 32),
+				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
+				CreatedAt: timestamp.FromUnix(1609459200),
+				Kind:      kind.TextNote,
+				Tags:      tags.New(),
+				Content:   []byte("Event with explicitly escaped JSON in tag"),
+				Sig:       bytes.Repeat([]byte{0x03}, 64),
+			}
 
-		// Add a tag with the explicitly escaped JSON content
-		jsonTag := tag.New("j", string(escapedJSON))
-		originalEvent.Tags.AppendTags(jsonTag)
+			// Add a tag with the explicitly escaped JSON content
+			jsonTag := tag.New("j", string(escapedJSON))
+			originalEvent.Tags.AppendTags(jsonTag)
 
-		// Marshal the event
-		marshaled := originalEvent.Marshal(nil)
+			// Marshal the event
+			marshaled := originalEvent.Marshal(nil)
 
-		// Unmarshal back into a new event
-		unmarshaledEvent := &E{}
-		_, err := unmarshaledEvent.Unmarshal(marshaled)
-		if err != nil {
-			t.Fatalf("Failed to unmarshal event with explicitly escaped JSON: %v", err)
-		}
+			// Unmarshal back into a new event
+			unmarshaledEvent := &E{}
+			_, err := unmarshaledEvent.Unmarshal(marshaled)
+			if err != nil {
+				t.Fatalf(
+					"Failed to unmarshal event with explicitly escaped JSON: %v",
+					err,
+				)
+			}
 
-		// Verify the tag was correctly unmarshaled
-		unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
-		if string(unmarshaledTag.B(1)) != string(escapedJSON) {
-			t.Errorf("Expected tag value '%s', got '%s'", string(escapedJSON), unmarshaledTag.B(1))
-		}
+			// Verify the tag was correctly unmarshaled
+			unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
+			if string(unmarshaledTag.B(1)) != string(escapedJSON) {
+				t.Errorf(
+					"Expected tag value '%s', got '%s'", string(escapedJSON),
+					unmarshaledTag.B(1),
+				)
+			}
 
-		// Unescape the unmarshaled JSON to verify it matches the original
-		unescapedJSON := make([]byte, len(unmarshaledTag.B(1)))
-		copy(unescapedJSON, unmarshaledTag.B(1))
-		unescapedJSON = text2.NostrUnescape(unescapedJSON)
+			// Unescape the unmarshaled JSON to verify it matches the original
+			unescapedJSON := make([]byte, len(unmarshaledTag.B(1)))
+			copy(unescapedJSON, unmarshaledTag.B(1))
+			unescapedJSON = text2.NostrUnescape(unescapedJSON)
 
-		if string(unescapedJSON) != string(originalJSON) {
-			t.Errorf("Unescaped JSON doesn't match original. Expected '%s', got '%s'", string(originalJSON), string(unescapedJSON))
-		}
-	})
+			if string(unescapedJSON) != string(originalJSON) {
+				t.Errorf(
+					"Unescaped JSON doesn't match original. Expected '%s', got '%s'",
+					string(originalJSON), string(unescapedJSON),
+				)
+			}
+		},
+	)
 }
 
 func TestUnmarshalTags(t *testing.T) {
@@ -238,7 +272,7 @@ func TestUnmarshalTags(t *testing.T) {
 			jsonWithEmptyTags := []byte(`{"id":"0101010101010101010101010101010101010101010101010101010101010101","pubkey":"0202020202020202020202020202020202020202020202020202020202020202","created_at":1609459200,"kind":1,"tags":[],"content":"This is a test event","sig":"03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303"}`)
 
 			expected := &E{
-				Id:        bytes.Repeat([]byte{0x01}, 32),
+				ID:        bytes.Repeat([]byte{0x01}, 32),
 				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
 				CreatedAt: timestamp.FromUnix(1609459200),
 				Kind:      kind.TextNote,
@@ -263,7 +297,7 @@ func TestUnmarshalTags(t *testing.T) {
 			jsonWithSimpleTags := []byte(`{"id":"0101010101010101010101010101010101010101010101010101010101010101","pubkey":"0202020202020202020202020202020202020202020202020202020202020202","created_at":1609459200,"kind":1,"tags":[["e","1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"],["p","abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"]],"content":"This is a test event","sig":"03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303"}`)
 
 			expected := &E{
-				Id:        bytes.Repeat([]byte{0x01}, 32),
+				ID:        bytes.Repeat([]byte{0x01}, 32),
 				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
 				CreatedAt: timestamp.FromUnix(1609459200),
 				Kind:      kind.TextNote,
@@ -299,7 +333,7 @@ func TestUnmarshalTags(t *testing.T) {
 			jsonWithComplexTags := []byte(`{"id":"0101010101010101010101010101010101010101010101010101010101010101","pubkey":"0202020202020202020202020202020202020202020202020202020202020202","created_at":1609459200,"kind":1,"tags":[["e","1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef","wss://relay.example.com","root"],["p","abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890","wss://relay.example.com"],["t","hashtag","topic"]],"content":"This is a test event","sig":"03030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303"}`)
 
 			expected := &E{
-				Id:        bytes.Repeat([]byte{0x01}, 32),
+				ID:        bytes.Repeat([]byte{0x01}, 32),
 				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
 				CreatedAt: timestamp.FromUnix(1609459200),
 				Kind:      kind.TextNote,
@@ -346,7 +380,7 @@ func TestUnmarshalTags(t *testing.T) {
 		}`)
 
 			expected := &E{
-				Id:        bytes.Repeat([]byte{0x01}, 32),
+				ID:        bytes.Repeat([]byte{0x01}, 32),
 				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
 				CreatedAt: timestamp.FromUnix(1609459200),
 				Kind:      kind.TextNote,
@@ -393,7 +427,7 @@ func TestUnmarshalTags(t *testing.T) {
 		}`)
 
 			expected := &E{
-				Id:        bytes.Repeat([]byte{0x01}, 32),
+				ID:        bytes.Repeat([]byte{0x01}, 32),
 				Pubkey:    bytes.Repeat([]byte{0x02}, 32),
 				CreatedAt: timestamp.FromUnix(1609459200),
 				Kind:      kind.TextNote,

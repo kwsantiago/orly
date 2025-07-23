@@ -31,7 +31,7 @@ func NewSubmissionWith(ev *event.E) *Submission { return &Submission{E: ev} }
 // Label returns the label of a event eventenvelope.Submission envelope.
 func (en *Submission) Label() string { return L }
 
-func (en *Submission) Id() []byte { return en.E.Id }
+func (en *Submission) Id() []byte { return en.E.ID }
 
 // Write the Submission to a provided io.Writer.
 func (en *Submission) Write(w io.Writer) (err error) {
@@ -104,7 +104,7 @@ func NewResultWith[V string | []byte](s V, ev *event.E) (
 	return &Result{subscription.MustNew(s), ev}, nil
 }
 
-func (en *Result) Id() []byte { return en.Event.Id }
+func (en *Result) Id() []byte { return en.Event.ID }
 
 // Label returns the label of a event eventenvelope.Result envelope.
 func (en *Result) Label() string { return L }

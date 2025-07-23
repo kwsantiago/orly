@@ -19,7 +19,7 @@ import (
 
 // TestGetIndexesFromFilter tests the GetIndexesFromFilter function
 func TestGetIndexesFromFilter(t *testing.T) {
-	t.Run("Id", testIdFilter)
+	t.Run("ID", testIdFilter)
 	t.Run("Pubkey", testPubkeyFilter)
 	t.Run("CreatedAt", testCreatedAtFilter)
 	t.Run("CreatedAtUntil", testCreatedAtUntilFilter)
@@ -77,9 +77,9 @@ func verifyIndex(
 	}
 }
 
-// Test Id filter
+// Test ID filter
 func testIdFilter(t *testing.T) {
-	// Create a filter with an Id
+	// Create a filter with an ID
 	f := filter.New()
 	id := make([]byte, sha256.Size)
 	for i := range id {
@@ -102,7 +102,7 @@ func testIdFilter(t *testing.T) {
 	expectedIdx := indexes.IdEnc(idHash, nil)
 
 	// Verify the generated index
-	// For Id filter, both start and end indexes are the same
+	// For ID filter, both start and end indexes are the same
 	verifyIndex(t, idxs, expectedIdx, expectedIdx)
 }
 

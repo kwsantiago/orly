@@ -177,7 +177,7 @@ func (en *Response) Unmarshal(b []byte) (r []byte, err error) {
 	r = b
 	var inID, inCount bool
 	for ; len(r) > 0; r = r[1:] {
-		// first we should be finding a subscription Id
+		// first we should be finding a subscription ID
 		if !inID && r[0] == '"' {
 			r = r[1:]
 			// so we don't do this twice

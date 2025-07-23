@@ -136,7 +136,7 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.Id) {
+			if bytes.Equal(result.Id, ev.ID) {
 				found = true
 				if ev.Kind.K != testKind.K {
 					t.Fatalf(

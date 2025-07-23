@@ -41,8 +41,13 @@ func (s *Server) AcceptEvent(
 	c context.T, ev *event.E, hr *http.Request, authedPubkey []byte,
 	remote string,
 ) (accept bool, notice string, afterSave func()) {
+	if !s.AuthRequired() {
+		accept = true
+		return
+	}
 	// if auth is required and the user is not authed, reject
 	if s.AuthRequired() && len(authedPubkey) == 0 {
+		notice = "client isn't authed"
 		return
 	}
 	// check if the authed user is on the lists
@@ -53,6 +58,14 @@ func (s *Server) AcceptEvent(
 			break
 		}
 	}
-	// todo: check if event author is on owners' mute lists or block list
+	if !accept {
+		return
+	}
+	for _, u := range s.OwnersMuted() {
+		if bytes.Equal(u, authedPubkey) {
+			notice = "event author is banned from this relay"
+			return
+		}
+	}
 	return
 }

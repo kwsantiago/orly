@@ -90,7 +90,7 @@ func TestQueryEventsByID(t *testing.T) {
 
 	evs, err := db.QueryEvents(
 		ctx, &filter.F{
-			Ids: tag.New(testEvent.Id),
+			Ids: tag.New(testEvent.ID),
 		},
 	)
 	if err != nil {
@@ -103,10 +103,10 @@ func TestQueryEventsByID(t *testing.T) {
 	}
 
 	// Verify it's the correct event
-	if !bytes.Equal(evs[0].Id, testEvent.Id) {
+	if !bytes.Equal(evs[0].ID, testEvent.ID) {
 		t.Fatalf(
-			"Event ID doesn't match. Got %x, expected %x", evs[0].Id,
-			testEvent.Id,
+			"Event ID doesn't match. Got %x, expected %x", evs[0].ID,
+			testEvent.ID,
 		)
 	}
 }
@@ -223,7 +223,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	// Query for the original event by ID
 	evs, err := db.QueryEvents(
 		ctx, &filter.F{
-			Ids: tag.New(replaceableEvent.Id),
+			Ids: tag.New(replaceableEvent.ID),
 		},
 	)
 	if err != nil {
@@ -239,10 +239,10 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the original event
-	if !bytes.Equal(evs[0].Id, replaceableEvent.Id) {
+	if !bytes.Equal(evs[0].ID, replaceableEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for replaced event. Got %x, expected %x",
-			evs[0].Id, replaceableEvent.Id,
+			evs[0].ID, replaceableEvent.ID,
 		)
 	}
 
@@ -269,10 +269,10 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the newer event
-	if !bytes.Equal(evs[0].Id, newerEvent.Id) {
+	if !bytes.Equal(evs[0].ID, newerEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for replaceable events. Got %x, expected %x",
-			evs[0].Id, newerEvent.Id,
+			evs[0].ID, newerEvent.ID,
 		)
 	}
 
@@ -289,7 +289,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 
 	// Add an e-tag referencing the replaceable event
 	deletionEvent.Tags = deletionEvent.Tags.AppendTags(
-		tag.New([]byte{'e'}, []byte(hex.Enc(replaceableEvent.Id))),
+		tag.New([]byte{'e'}, []byte(hex.Enc(replaceableEvent.ID))),
 	)
 
 	// Save the deletion event
@@ -319,17 +319,17 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's still the newer event
-	if !bytes.Equal(evs[0].Id, newerEvent.Id) {
+	if !bytes.Equal(evs[0].ID, newerEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match after deletion. Got %x, expected %x",
-			evs[0].Id, newerEvent.Id,
+			evs[0].ID, newerEvent.ID,
 		)
 	}
 
 	// Query for the original event by ID
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
-			Ids: tag.New(replaceableEvent.Id),
+			Ids: tag.New(replaceableEvent.ID),
 		},
 	)
 	if err != nil {
@@ -345,10 +345,10 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the original event
-	if !bytes.Equal(evs[0].Id, replaceableEvent.Id) {
+	if !bytes.Equal(evs[0].ID, replaceableEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for deleted event by ID. Got %x, expected %x",
-			evs[0].Id, replaceableEvent.Id,
+			evs[0].ID, replaceableEvent.ID,
 		)
 	}
 }
@@ -433,7 +433,7 @@ func TestParameterizedReplaceableEventsAndDeletion(t *testing.T) {
 	paramDeletionEvent2.Tags = tags.New()
 	// Add an e-tag referencing the parameterized replaceable event
 	paramDeletionEvent2.Tags = paramDeletionEvent2.Tags.AppendTags(
-		tag.New([]byte{'e'}, []byte(hex.Enc(paramEvent.Id))),
+		tag.New([]byte{'e'}, []byte(hex.Enc(paramEvent.ID))),
 	)
 	paramDeletionEvent2.Sign(sign)
 
@@ -483,7 +483,7 @@ func TestParameterizedReplaceableEventsAndDeletion(t *testing.T) {
 	// Query for the parameterized event by ID
 	evs, err = db.QueryEvents(
 		ctx, &filter.F{
-			Ids: tag.New(paramEvent.Id),
+			Ids: tag.New(paramEvent.ID),
 		},
 	)
 	if err != nil {
@@ -501,10 +501,10 @@ func TestParameterizedReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the correct event
-	if !bytes.Equal(evs[0].Id, paramEvent.Id) {
+	if !bytes.Equal(evs[0].ID, paramEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for deleted parameterized event by ID. Got %x, expected %x",
-			evs[0].Id, paramEvent.Id,
+			evs[0].ID, paramEvent.ID,
 		)
 	}
 }

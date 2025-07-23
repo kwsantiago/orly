@@ -13,7 +13,7 @@ type Profile struct {
 	Relays    [][]byte `json:"relays,omitempty"`
 }
 
-// Event pointer is the combination of an event Id, relay hints, author, pubkey,
+// Event pointer is the combination of an event ID, relay hints, author, pubkey,
 // and kind.
 type Event struct {
 	ID     *eventid.T `json:"id"`

@@ -78,7 +78,7 @@ func TestFetchEventBySerial(t *testing.T) {
 	var sers types.Uint40s
 	sers, err = db.QueryForSerials(
 		ctx, &filter.F{
-			Ids: tag.New(testEvent.Id),
+			Ids: tag.New(testEvent.ID),
 		},
 	)
 	if err != nil {
@@ -102,10 +102,10 @@ func TestFetchEventBySerial(t *testing.T) {
 	}
 
 	// Verify the fetched event has the same ID as the original event
-	if !bytes.Equal(fetchedEvent.Id, testEvent.Id) {
+	if !bytes.Equal(fetchedEvent.ID, testEvent.ID) {
 		t.Fatalf(
 			"Fetched event ID doesn't match original event ID. Got %x, expected %x",
-			fetchedEvent.Id, testEvent.Id,
+			fetchedEvent.ID, testEvent.ID,
 		)
 	}
 

@@ -218,7 +218,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			isIdInFilter := false
 			if f.Ids != nil && f.Ids.Len() > 0 {
 				for i := 0; i < f.Ids.Len(); i++ {
-					if bytes.Equal(ev.Id, f.Ids.B(i)) {
+					if bytes.Equal(ev.ID, f.Ids.B(i)) {
 						isIdInFilter = true
 						break
 					}

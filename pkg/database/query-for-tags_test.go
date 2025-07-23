@@ -126,7 +126,7 @@ func TestQueryForTags(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.Id) {
+			if bytes.Equal(result.Id, ev.ID) {
 				found = true
 
 				// Check if the event has the tag we're looking for

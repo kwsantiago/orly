@@ -86,34 +86,34 @@ func TestQueryForIds(t *testing.T) {
 			len(idTsPk),
 		)
 	}
-	if !bytes.Equal(idTsPk[0].Id, events[5474].Id) {
+	if !bytes.Equal(idTsPk[0].Id, events[5474].ID) {
 		t.Fatalf(
 			"failed to get expected event, got %0x, expected %0x", idTsPk[0].Id,
-			events[5474].Id,
+			events[5474].ID,
 		)
 	}
-	if !bytes.Equal(idTsPk[1].Id, events[272].Id) {
+	if !bytes.Equal(idTsPk[1].Id, events[272].ID) {
 		t.Fatalf(
 			"failed to get expected event, got %0x, expected %0x", idTsPk[1].Id,
-			events[272].Id,
+			events[272].ID,
 		)
 	}
-	if !bytes.Equal(idTsPk[2].Id, events[1].Id) {
+	if !bytes.Equal(idTsPk[2].Id, events[1].ID) {
 		t.Fatalf(
 			"failed to get expected event, got %0x, expected %0x", idTsPk[2].Id,
-			events[1].Id,
+			events[1].ID,
 		)
 	}
-	if !bytes.Equal(idTsPk[3].Id, events[80].Id) {
+	if !bytes.Equal(idTsPk[3].Id, events[80].ID) {
 		t.Fatalf(
 			"failed to get expected event, got %0x, expected %0x", idTsPk[3].Id,
-			events[80].Id,
+			events[80].ID,
 		)
 	}
-	if !bytes.Equal(idTsPk[4].Id, events[123].Id) {
+	if !bytes.Equal(idTsPk[4].Id, events[123].ID) {
 		t.Fatalf(
 			"failed to get expected event, got %0x, expected %0x", idTsPk[4].Id,
-			events[123].Id,
+			events[123].ID,
 		)
 	}
 
@@ -141,7 +141,7 @@ func TestQueryForIds(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.Id) {
+			if bytes.Equal(result.Id, ev.ID) {
 				found = true
 				if ev.Kind.K != testKind.K {
 					t.Fatalf(
@@ -207,7 +207,7 @@ func TestQueryForIds(t *testing.T) {
 			// Find the event with this ID
 			var found bool
 			for _, ev := range events {
-				if bytes.Equal(result.Id, ev.Id) {
+				if bytes.Equal(result.Id, ev.ID) {
 					found = true
 
 					// Check if the event has the tag we're looking for
@@ -258,7 +258,7 @@ func TestQueryForIds(t *testing.T) {
 				// Find the event with this ID
 				var found bool
 				for _, ev := range events {
-					if bytes.Equal(result.Id, ev.Id) {
+					if bytes.Equal(result.Id, ev.ID) {
 						found = true
 						if ev.Kind.K != testKind.K {
 							t.Fatalf(
@@ -305,7 +305,7 @@ func TestQueryForIds(t *testing.T) {
 			// Find the event with this ID
 			var found bool
 			for _, ev := range events {
-				if bytes.Equal(result.Id, ev.Id) {
+				if bytes.Equal(result.Id, ev.ID) {
 					found = true
 					if ev.Kind.K != testEvent.Kind.K {
 						t.Fatalf(
@@ -366,7 +366,7 @@ func TestQueryForIds(t *testing.T) {
 			// Find the event with this ID
 			var found bool
 			for _, ev := range events {
-				if bytes.Equal(result.Id, ev.Id) {
+				if bytes.Equal(result.Id, ev.ID) {
 					found = true
 					if ev.Kind.K != testEvent.Kind.K {
 						t.Fatalf(
@@ -433,7 +433,7 @@ func TestQueryForIds(t *testing.T) {
 			// Find the event with this ID
 			var found bool
 			for _, ev := range events {
-				if bytes.Equal(result.Id, ev.Id) {
+				if bytes.Equal(result.Id, ev.ID) {
 					found = true
 
 					if !bytes.Equal(ev.Pubkey, testEvent.Pubkey) {
@@ -506,7 +506,7 @@ func TestQueryForIds(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.Id) {
+			if bytes.Equal(result.Id, ev.ID) {
 				found = true
 				break
 			}

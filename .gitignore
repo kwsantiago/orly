@@ -103,3 +103,4 @@ pkg/database/testrealy
 /.idea/codeStyles/codeStyleConfig.xml
 /.idea/material_theme_project_new.xml
 /.idea/orly.iml
+/.idea/go.imports.xml

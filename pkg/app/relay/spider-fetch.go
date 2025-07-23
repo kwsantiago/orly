@@ -70,7 +70,7 @@ func (s *Server) SpiderFetch(
 		// If it doesn't exist or the new event is newer, store it
 		if !exists || ev.CreatedAtInt64() > existing.Timestamp {
 			pkKindMap[pkKindKey] = &IdPkTs{
-				Id:        ev.Id,
+				Id:        ev.ID,
 				Pubkey:    ev.Pubkey,
 				Kind:      ev.Kind.ToU16(),
 				Timestamp: ev.CreatedAtInt64(),
@@ -157,8 +157,8 @@ func (s *Server) SpiderFetch(
 					// If it doesn't exist or the new event is newer, store it and save to database
 					if !exists || ev.CreatedAtInt64() > existing.Timestamp {
 						var ser *types.Uint40
-						if ser, err = s.Storage().GetSerialById(ev.Id); err == nil && ser != nil {
-							err = errorf.E("event already exists: %0x", ev.Id)
+						if ser, err = s.Storage().GetSerialById(ev.ID); err == nil && ser != nil {
+							err = errorf.E("event already exists: %0x", ev.ID)
 							return
 						} else {
 							// verify the signature
@@ -166,7 +166,7 @@ func (s *Server) SpiderFetch(
 							if valid, err = ev.Verify(); chk.E(err) || !valid {
 								continue
 							}
-							log.I.F("event %0x is valid", ev.Id)
+							log.I.F("event %0x is valid", ev.ID)
 						}
 
 						// Save the event to the database
@@ -185,12 +185,12 @@ func (s *Server) SpiderFetch(
 								},
 							)
 						} else {
-							log.I.F("saved event: %0x", ev.Id)
+							log.I.F("saved event: %0x", ev.ID)
 						}
 
 						// Store the essential information
 						pkKindMap[pkKindKey] = &IdPkTs{
-							Id:        ev.Id,
+							Id:        ev.ID,
 							Pubkey:    ev.Pubkey,
 							Kind:      ev.Kind.ToU16(),
 							Timestamp: ev.CreatedAtInt64(),

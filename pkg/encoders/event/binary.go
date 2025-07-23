@@ -13,7 +13,7 @@ import (
 
 // MarshalBinary writes a binary encoding of an event.
 //
-// [ 32 bytes Id ]
+// [ 32 bytes ID ]
 // [ 32 bytes Pubkey ]
 // [ varint CreatedAt ]
 // [ 2 bytes Kind ]
@@ -27,7 +27,7 @@ import (
 // [ varint Content length ]
 // [ 64 bytes Sig ]
 func (ev *E) MarshalBinary(w io.Writer) {
-	_, _ = w.Write(ev.Id)
+	_, _ = w.Write(ev.ID)
 	_, _ = w.Write(ev.Pubkey)
 	varint.Encode(w, uint64(ev.CreatedAt.V))
 	varint.Encode(w, uint64(ev.Kind.K))
@@ -46,8 +46,8 @@ func (ev *E) MarshalBinary(w io.Writer) {
 }
 
 func (ev *E) UnmarshalBinary(r io.Reader) (err error) {
-	ev.Id = make([]byte, 32)
-	if _, err = r.Read(ev.Id); chk.E(err) {
+	ev.ID = make([]byte, 32)
+	if _, err = r.Read(ev.ID); chk.E(err) {
 		return
 	}
 	ev.Pubkey = make([]byte, 32)

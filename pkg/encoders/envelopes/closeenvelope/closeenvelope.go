@@ -24,7 +24,7 @@ var _ codec.Envelope = (*T)(nil)
 // New creates an empty new standard formatted closeenvelope.T.
 func New() *T { return &T{ID: subscription.NewStd()} }
 
-// NewFrom creates a new closeenvelope.T populated with subscription Id.
+// NewFrom creates a new closeenvelope.T populated with subscription ID.
 func NewFrom(id *subscription.Id) *T { return &T{ID: id} }
 
 // Label returns the label of a closeenvelope.T.

@@ -1,5 +1,5 @@
-// Package event provides a codec for nostr events, for the wire format (with Id
-// and signature), for the canonical form, that is hashed to generate the Id,
+// Package event provides a codec for nostr events, for the wire format (with ID
+// and signature), for the canonical form, that is hashed to generate the ID,
 // and a fast binary form that uses io.Reader/io.Writer.
 package event
 
@@ -24,8 +24,8 @@ import (
 // defines its JSON string-based format.
 type E struct {
 
-	// Id is the SHA256 hash of the canonical encoding of the event in binary format
-	Id []byte
+	// ID is the SHA256 hash of the canonical encoding of the event in binary format
+	ID []byte
 
 	// Pubkey is the public key of the event creator in binary format
 	Pubkey []byte
@@ -38,14 +38,14 @@ type E struct {
 	Kind *kind.T
 
 	// Tags are a list of tags, which are a list of strings usually structured
-	// as a 3 layer scheme indicating specific features of an event.
+	// as a 3-layer scheme indicating specific features of an event.
 	Tags *tags.T
 
 	// Content is an arbitrary string that can contain anything, but usually
 	// conforming to a specification relating to the Kind and the Tags.
 	Content []byte
 
-	// Sig is the signature on the Id hash that validates as coming from the
+	// Sig is the signature on the ID hash that validates as coming from the
 	// Pubkey in binary format.
 	Sig []byte
 }
@@ -77,15 +77,17 @@ func (ev *E) SerializeIndented() (b []byte) {
 	return ev.MarshalWithWhitespace(nil, true)
 }
 
-// EventId returns the event.E Id as an eventid.T.
+// EventId returns the event.E ID as an eventid.T.
 func (ev *E) EventId() (eid *eventid.T) {
-	return eventid.NewWith(ev.Id)
+	return eventid.NewWith(ev.ID)
 }
 
 // stringy/numbery functions for retarded other libraries
 
-// IdString returns the event Id as a hex-encoded string.
-func (ev *E) IdString() (s string) { return hex.Enc(ev.Id) }
+// IdString returns the event ID as a hex-encoded string.
+func (ev *E) IdString() (s string) { return hex.Enc(ev.ID) }
+
+func (ev *E) Id() []byte { return ev.ID }
 
 // CreatedAtInt64 returns the created_at timestamp as a standard int64.
 func (ev *E) CreatedAtInt64() (i int64) { return ev.CreatedAt.I64() }
@@ -108,9 +110,9 @@ func (ev *E) ContentString() (s string) { return string(ev.Content) }
 // J is an event.E encoded in more basic types than used in this library.
 type J struct {
 	Id        string     `json:"id"`
-	Pubkey    string    `json:"pubkey"`
-	CreatedAt unix.Time `json:"created_at"`
-	Kind      int32     `json:"kind"`
+	Pubkey    string     `json:"pubkey"`
+	CreatedAt unix.Time  `json:"created_at"`
+	Kind      int32      `json:"kind"`
 	Tags      [][]string `json:"tags"`
 	Content   string     `json:"content"`
 	Sig       string     `json:"sig"`
@@ -129,9 +131,9 @@ func (ev *E) ToEventJ() (j *J) {
 	return
 }
 
-// IdFromString decodes an event ID and loads it into an event.E Id.
+// IdFromString decodes an event ID and loads it into an event.E ID.
 func (ev *E) IdFromString(s string) (err error) {
-	ev.Id, err = hex.Dec(s)
+	ev.ID, err = hex.Dec(s)
 	return
 }
 

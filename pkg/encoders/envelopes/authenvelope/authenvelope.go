@@ -171,7 +171,7 @@ func NewResponseWith(event *event.E) *Response { return &Response{Event: event} 
 // Label returns the label of a auth Response envelope.
 func (en *Response) Label() string { return L }
 
-func (en *Response) Id() []byte { return en.Event.Id }
+func (en *Response) Id() []byte { return en.Event.ID }
 
 // Write the Response to a provided io.Writer.
 func (en *Response) Write(w io.Writer) (err error) {

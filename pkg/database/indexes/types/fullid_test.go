@@ -43,7 +43,7 @@ func TestFromId(t *testing.T) {
 }
 
 func TestIdMarshalWriteUnmarshalRead(t *testing.T) {
-	// Create a Id with a known value
+	// Create a ID with a known value
 	fi1 := &Id{}
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
@@ -80,7 +80,7 @@ func TestIdMarshalWriteUnmarshalRead(t *testing.T) {
 }
 
 func TestIdUnmarshalReadWithCorruptedData(t *testing.T) {
-	// Create a Id with a known value
+	// Create a ID with a known value
 	fi1 := &Id{}
 	validId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {
@@ -91,7 +91,7 @@ func TestIdUnmarshalReadWithCorruptedData(t *testing.T) {
 		t.Fatalf("FromId failed: %v", err)
 	}
 
-	// Create a second Id with a different value
+	// Create a second ID with a different value
 	fi2 := &Id{}
 	differentId := make([]byte, sha256.Size)
 	for i := 0; i < sha256.Size; i++ {

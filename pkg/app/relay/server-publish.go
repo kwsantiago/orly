@@ -60,7 +60,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			log.T.F("found %d possible duplicate events", len(evs))
 			for _, ev := range evs {
 				del := true
-				if bytes.Equal(ev.Id, evt.Id) {
+				if bytes.Equal(ev.ID, evt.ID) {
 					continue
 				}
 				log.I.F(

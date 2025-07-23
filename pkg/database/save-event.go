@@ -26,8 +26,8 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 	if !noVerify {
 		// check if the event already exists
 		var ser *types.Uint40
-		if ser, err = d.GetSerialById(ev.Id); err == nil && ser != nil {
-			err = errorf.E("event already exists: %0x", ev.Id)
+		if ser, err = d.GetSerialById(ev.ID); err == nil && ser != nil {
+			err = errorf.E("event already exists: %0x", ev.ID)
 			return
 		}
 	}
@@ -86,7 +86,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 			if ev.CreatedAt.I64() < idPkTss[0].Ts {
 				err = errorf.E(
 					"blocked: %0x was deleted by address %s because it is older than the delete: event: %d delete: %d",
-					ev.Id, at, ev.CreatedAt.I64(), idPkTss[0].Ts,
+					ev.ID, at, ev.CreatedAt.I64(), idPkTss[0].Ts,
 				)
 				return
 			}
@@ -98,7 +98,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 			&filter.F{
 				Authors: tag.New(ev.Pubkey),
 				Kinds:   kinds.New(kind.Deletion),
-				Tags:    tags.New(tag.New([]byte("#e"), ev.Id)),
+				Tags:    tags.New(tag.New([]byte("#e"), ev.ID)),
 			},
 		); chk.E(err) {
 			return
@@ -115,7 +115,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 			// really there can only be one of these; the chances of an idhash
 			// collision are basically zero in practice, at least, one in a
 			// billion or more anyway, more than a human is going to create.
-			err = errorf.E("blocked: %0x was deleted by event Id", ev.Id)
+			err = errorf.E("blocked: %0x was deleted by event ID", ev.ID)
 			return
 		}
 	}

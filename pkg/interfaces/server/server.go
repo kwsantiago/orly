@@ -26,6 +26,9 @@ type I interface {
 	AdminAuth(
 		r *http.Request, remote string, tolerance ...time.Duration,
 	) (authed bool, pubkey []byte)
+	UserAuth(
+		r *http.Request, remote string, tolerance ...time.Duration,
+	) (authed bool, pubkey []byte)
 	Context() context.T
 	Publisher() *publish.S
 	Publish(c context.T, evt *event.E) (err error)

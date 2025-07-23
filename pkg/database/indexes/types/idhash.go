@@ -23,7 +23,7 @@ func (i *IdHash) Set(idh []byte) {
 func (i *IdHash) FromId(id []byte) (err error) {
 	if len(id) != sha256.Size {
 		err = errorf.E(
-			"FromId: invalid Id length, got %d require %d", len(id),
+			"FromId: invalid ID length, got %d require %d", len(id),
 			sha256.Size,
 		)
 		return
@@ -43,7 +43,7 @@ func (i *IdHash) FromIdBase64(idb64 string) (err error) {
 	// Check if the decoded ID has the correct length
 	if len(decoded) != sha256.Size {
 		err = errorf.E(
-			"FromIdBase64: invalid Id length, got %d require %d", len(decoded),
+			"FromIdBase64: invalid ID length, got %d require %d", len(decoded),
 			sha256.Size,
 		)
 		return
@@ -62,7 +62,7 @@ func (i *IdHash) FromIdHex(idh string) (err error) {
 	}
 	if len(id) != sha256.Size {
 		err = errorf.E(
-			"FromIdHex: invalid Id length, got %d require %d", len(id),
+			"FromIdHex: invalid ID length, got %d require %d", len(id),
 			sha256.Size,
 		)
 		return

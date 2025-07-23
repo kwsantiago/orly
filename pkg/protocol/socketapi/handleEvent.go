@@ -2,6 +2,7 @@ package socketapi
 
 import (
 	"bytes"
+	"fmt"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
 	"orly.dev/pkg/encoders/envelopes/okenvelope"
@@ -49,7 +50,6 @@ func (a *A) HandleEvent(
 
 	log.T.F("handleEvent %s %s", a.RealRemote(), req)
 	var err error
-	var ok bool
 	var rem []byte
 	sto := srv.Storage()
 	if sto == nil {
@@ -63,22 +63,29 @@ func (a *A) HandleEvent(
 	if len(rem) > 0 {
 		log.I.F("extra '%s'", rem)
 	}
-	if !bytes.Equal(env.GetIDBytes(), env.E.Id) {
+	calculatedId := env.E.GetIDBytes()
+	if !bytes.Equal(calculatedId, env.E.ID) {
 		if err = Ok.Invalid(
-			a, env, "event id is computed incorrectly",
+			a, env, "event id is computed incorrectly, "+
+				"event has ID %0x, but when computed it is %0x",
+			env.E.ID, calculatedId,
 		); chk.E(err) {
 			return
 		}
 		return
 	}
+	var ok bool
 	if ok, err = env.Verify(); chk.T(err) {
 		if err = Ok.Error(
-			a, env, "failed to verify signature",
+			a, env, fmt.Sprintf(
+				"failed to verify signature: %s",
+				err.Error(),
+			),
 		); chk.E(err) {
 			return
 		}
 	} else if !ok {
-		if err = Ok.Error(
+		if err = Ok.Invalid(
 			a, env,
 			"signature is invalid",
 		); chk.E(err) {
@@ -86,6 +93,33 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
+	// check that relay policy allows this event
+	accept, notice, _ := srv.AcceptEvent(
+		c, env.E, a.Listener.Request, a.Listener.AuthedPubkey(),
+		a.Listener.RealRemote(),
+	)
+	if !accept {
+		if err = Ok.Blocked(
+			a, env, notice,
+		); chk.E(err) {
+			return
+		}
+		return
+	}
+	// check for protected tag (NIP-70)
+	protectedTag := env.E.Tags.GetFirst(tag.New("-"))
+	if protectedTag != nil && a.AuthRequired() {
+		// check that the pubkey of the event matches the authed pubkey
+		if !bytes.Equal(a.Listener.AuthedPubkey(), env.E.Pubkey) {
+			if err = Ok.Blocked(
+				a, env,
+				"protected tag may only be published by client authed to the same pubkey",
+			); chk.E(err) {
+				return
+			}
+		}
+	}
+	// check and process delete
 	if env.E.Kind.K == kind.Deletion.K {
 		log.I.F("delete event\n%s", env.E.Serialize())
 		for _, t := range env.Tags.ToSliceOfTags() {
@@ -240,7 +274,7 @@ func (a *A) HandleEvent(
 			for _, target := range res {
 				if target.Kind.K == kind.Deletion.K {
 					if err = Ok.Error(
-						a, env, "cannot delete delete event %s", env.E.Id,
+						a, env, "cannot delete delete event %s", env.E.ID,
 					); chk.E(err) {
 						return
 					}
@@ -290,9 +324,7 @@ func (a *A) HandleEvent(
 			res = nil
 		}
 		// Send a success response after processing all deletions
-		if err = okenvelope.NewFrom(
-			env.E.Id, ok,
-		).Write(a.Listener); chk.E(err) {
+		if err = Ok.Ok(a, env, ""); chk.E(err) {
 			return
 		}
 		// Check if this event has been deleted before
@@ -301,7 +333,7 @@ func (a *A) HandleEvent(
 			// event ID
 			f := filter.New()
 			f.Kinds.K = []*kind.T{kind.Deletion}
-			f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.Id))
+			f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.ID))
 
 			// Query for deletion events
 			var deletionEvents []*event.E
@@ -309,7 +341,7 @@ func (a *A) HandleEvent(
 			if err == nil && len(deletionEvents) > 0 {
 				// Found deletion events for this ID, don't save it
 				if err = Ok.Blocked(
-					a, env, "event was deleted, not storing it again",
+					a, env, "the event was deleted, not storing it again",
 				); chk.E(err) {
 					return
 				}
@@ -319,8 +351,8 @@ func (a *A) HandleEvent(
 	}
 	var reason []byte
 	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote())
-	log.I.F("event %0x added %v, %s", env.E.Id, ok, reason)
-	if err = okenvelope.NewFrom(env.E.Id, ok).Write(a.Listener); chk.E(err) {
+	log.I.F("event %0x added %v %s", env.E.ID, ok, reason)
+	if err = okenvelope.NewFrom(env.E.ID, ok).Write(a.Listener); chk.E(err) {
 		return
 	}
 	return

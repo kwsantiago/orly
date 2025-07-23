@@ -19,7 +19,7 @@ import (
 )
 
 // S is a simplified filter that only covers the nip-01 REQ filter minus the
-// separate and superseding Id list. The search field is from a different NIP,
+// separate and superseding ID list. The search field is from a different NIP,
 // but it is a separate API for which reason it is also not here.
 type S struct {
 	Kinds   *kinds.T     `json:"kinds,omitempty"`

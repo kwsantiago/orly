@@ -16,6 +16,7 @@ type OK func(a *A, env eventId.Ider, format string, params ...any) (err error)
 // conditions such as authentication requirements, rate limiting, and invalid
 // inputs.
 type OKs struct {
+	Ok           OK
 	AuthRequired OK
 	PoW          OK
 	Duplicate    OK
@@ -32,6 +33,13 @@ type OKs struct {
 // conditions such as authentication requirements, rate limiting, and invalid
 // inputs.
 var Ok = OKs{
+	Ok: func(
+		a *A, env eventId.Ider, format string, params ...any,
+	) (err error) {
+		return okenvelope.NewFrom(
+			env.Id(), true, nil,
+		).Write(a.Listener)
+	},
 	AuthRequired: func(
 		a *A, env eventId.Ider, format string, params ...any,
 	) (err error) {

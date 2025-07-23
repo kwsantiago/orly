@@ -61,7 +61,7 @@ func TestSignerVerify(t *testing.T) {
 			continue
 		}
 		if valid, err = signer.Verify(id, ev.Sig); chk.E(err) {
-			t.Errorf("failed to verify: %s\n%0x", err, ev.Id)
+			t.Errorf("failed to verify: %s\n%0x", err, ev.ID)
 			continue
 		}
 		if !valid {

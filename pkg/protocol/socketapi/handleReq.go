@@ -43,9 +43,7 @@ import (
 // through the associated subscription or writes error messages to the listener.
 // If the subscription should be cancelled due to completed query results, it
 // generates and sends a closure envelope.
-func (a *A) HandleReq(
-	c context.T, req []byte, srv server.I,
-) (r []byte) {
+func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	var err error
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()

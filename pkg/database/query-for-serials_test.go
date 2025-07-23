@@ -65,7 +65,7 @@ func TestQueryForSerials(t *testing.T) {
 		}
 
 		// Get the serial for this event
-		serial, err := db.GetSerialById(ev.Id)
+		serial, err := db.GetSerialById(ev.ID)
 		if err != nil {
 			t.Fatalf(
 				"Failed to get serial for event #%d: %v", eventCount+1, err,
@@ -73,7 +73,7 @@ func TestQueryForSerials(t *testing.T) {
 		}
 
 		if serial != nil {
-			eventSerials[string(ev.Id)] = serial
+			eventSerials[string(ev.ID)] = serial
 		}
 
 		eventCount++
@@ -91,7 +91,7 @@ func TestQueryForSerials(t *testing.T) {
 
 	serials, err := db.QueryForSerials(
 		ctx, &filter.F{
-			Ids: tag.New(testEvent.Id),
+			Ids: tag.New(testEvent.ID),
 		},
 	)
 	if err != nil {
@@ -110,10 +110,10 @@ func TestQueryForSerials(t *testing.T) {
 		t.Fatalf("Failed to fetch event for serial: %v", err)
 	}
 
-	if !bytes.Equal(ev.Id, testEvent.Id) {
+	if !bytes.Equal(ev.ID, testEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match. Got %x, expected %x",
-			ev.Id, testEvent.Id,
+			ev.ID, testEvent.ID,
 		)
 	}
 

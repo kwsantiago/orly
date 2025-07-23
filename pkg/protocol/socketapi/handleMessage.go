@@ -25,7 +25,7 @@ import (
 // Processes the message by identifying its envelope type, routes it to the
 // corresponding handler method, generates a notice for errors or unknown types,
 // logs the notice, and writes it back to the listener if required.
-func (a *A) HandleMessage(msg []byte) {
+func (a *A) HandleMessage(msg, authedPubkey []byte) {
 	log.T.F("%s received message:\n%s", a.Listener.RealRemote(), string(msg))
 	var notice []byte
 	var err error
@@ -38,10 +38,7 @@ func (a *A) HandleMessage(msg []byte) {
 	case eventenvelope.L:
 		notice = a.HandleEvent(a.Context(), rem, a.I)
 	case reqenvelope.L:
-		notice = a.HandleReq(
-			a.Context(), rem,
-			a.I,
-		)
+		notice = a.HandleReq(a.Context(), rem, a.I)
 	case closeenvelope.L:
 		notice = a.HandleClose(rem, a.I)
 	case authenvelope.L:

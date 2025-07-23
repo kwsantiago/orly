@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (s *Server) AdminAuth(
+func (s *Server) UserAuth(
 	r *http.Request, remote string,
 	tolerance ...time.Duration,
 ) (authed bool, pubkey []byte) {
@@ -29,7 +29,7 @@ func (s *Server) AdminAuth(
 		)
 		return
 	}
-	for _, pk := range s.ownersPubkeys {
+	for _, pk := range append(s.ownersFollowed, s.followedFollows...) {
 		if bytes.Equal(pk, pubkey) {
 			authed = true
 			return

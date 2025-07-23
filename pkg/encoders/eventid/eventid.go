@@ -36,7 +36,7 @@ func (ei *T) Set(b []byte) (err error) {
 	}
 	if len(b) != sha256.Size {
 		err = errorf.E(
-			"Id bytes incorrect size, got %d require %d",
+			"ID bytes incorrect size, got %d require %d",
 			len(b), sha256.Size,
 		)
 		return
@@ -45,7 +45,7 @@ func (ei *T) Set(b []byte) (err error) {
 	return
 }
 
-// NewFromBytes creates a new eventid.T from the raw event Id hash.
+// NewFromBytes creates a new eventid.T from the raw event ID hash.
 func NewFromBytes(b []byte) (ei *T, err error) {
 	ei = New()
 	if err = ei.Set(b); chk.E(err) {
@@ -104,7 +104,7 @@ func (ei *T) Unmarshal(b []byte) (rem []byte, err error) {
 	b = b[1 : 2*sha256.Size+1]
 	if len(b) != 2*sha256.Size {
 		err = errorf.E(
-			"event Id hex incorrect size, got %d require %d",
+			"event ID hex incorrect size, got %d require %d",
 			len(b), 2*sha256.Size,
 		)
 		log.E.Ln(string(b))
@@ -123,7 +123,7 @@ func (ei *T) Unmarshal(b []byte) (rem []byte, err error) {
 func NewFromString(s string) (ei *T, err error) {
 	if len(s) != 2*sha256.Size {
 		return nil, errorf.E(
-			"event Id hex wrong size, got %d require %d",
+			"event ID hex wrong size, got %d require %d",
 			len(s), 2*sha256.Size,
 		)
 	}
@@ -134,7 +134,7 @@ func NewFromString(s string) (ei *T, err error) {
 	return
 }
 
-// Gen creates a fake pseudorandom generated event Id for tests.
+// Gen creates a fake pseudorandom generated event ID for tests.
 func Gen() (ei *T) {
 	b := frand.Bytes(sha256.Size)
 	ei = &T{}

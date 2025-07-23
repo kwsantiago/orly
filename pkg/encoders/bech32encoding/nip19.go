@@ -232,7 +232,7 @@ func EncodeEvent(
 	return bech32.Encode(NeventHRP, bits5)
 }
 
-// EncodeEntity encodes a pubkey, kind, event Id, and relay hints.
+// EncodeEntity encodes a pubkey, kind, event ID, and relay hints.
 func EncodeEntity(pk []byte, k *kind.T, id []byte, relays [][]byte) (
 	s []byte, err error,
 ) {

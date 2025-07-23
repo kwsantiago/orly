@@ -39,9 +39,9 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	if err = ser.Set(serial); chk.E(err) {
 		return
 	}
-	// Id index
+	// ID index
 	idHash := new(IdHash)
-	if err = idHash.FromId(ev.Id); chk.E(err) {
+	if err = idHash.FromId(ev.ID); chk.E(err) {
 		return
 	}
 	idIndex := indexes.IdEnc(idHash, ser)
@@ -50,7 +50,7 @@ func GetIndexesForEvent(ev *event.E, serial uint64) (
 	}
 	// FullIdPubkey index
 	fullID := new(Id)
-	if err = fullID.FromId(ev.Id); chk.E(err) {
+	if err = fullID.FromId(ev.ID); chk.E(err) {
 		return
 	}
 	pubHash := new(PubHash)

@@ -12,12 +12,12 @@ import (
 // Sign the event using the signer.I. Uses github.com/bitcoin-core/secp256k1 if
 // available for much faster signatures.
 //
-// Note that this only populates the Pubkey, Id and Sig. The caller must
+// Note that this only populates the Pubkey, ID and Sig. The caller must
 // set the CreatedAt timestamp as intended.
 func (ev *E) Sign(keys signer.I) (err error) {
 	ev.Pubkey = keys.Pub()
-	ev.Id = ev.GetIDBytes()
-	if ev.Sig, err = keys.Sign(ev.Id); chk.E(err) {
+	ev.ID = ev.GetIDBytes()
+	if ev.Sig, err = keys.Sign(ev.ID); chk.E(err) {
 		return
 	}
 	return
@@ -30,17 +30,17 @@ func (ev *E) Verify() (valid bool, err error) {
 	if err = keys.InitPub(ev.Pubkey); chk.E(err) {
 		return
 	}
-	if valid, err = keys.Verify(ev.Id, ev.Sig); chk.T(err) {
-		// check that this isn't because of a bogus Id
+	if valid, err = keys.Verify(ev.ID, ev.Sig); chk.T(err) {
+		// check that this isn't because of a bogus ID
 		id := ev.GetIDBytes()
-		if !bytes.Equal(id, ev.Id) {
-			log.E.Ln("event Id incorrect")
-			ev.Id = id
+		if !bytes.Equal(id, ev.ID) {
+			log.E.Ln("event ID incorrect")
+			ev.ID = id
 			err = nil
-			if valid, err = keys.Verify(ev.Id, ev.Sig); chk.E(err) {
+			if valid, err = keys.Verify(ev.ID, ev.Sig); chk.E(err) {
 				return
 			}
-			err = errorf.W("event Id incorrect but signature is valid on correct Id")
+			err = errorf.W("event ID incorrect but signature is valid on correct ID")
 		}
 		return
 	}

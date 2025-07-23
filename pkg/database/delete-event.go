@@ -23,7 +23,7 @@ func (d *D) DeleteEvent(c context.T, eid *eventid.T) (err error) {
 		return
 	}
 	if ser == nil {
-		// Event not found, nothing to delete
+		// Event wasn't found, nothing to delete
 		return
 	}
 	// Fetch the event to get its data
@@ -33,7 +33,7 @@ func (d *D) DeleteEvent(c context.T, eid *eventid.T) (err error) {
 		return
 	}
 	if ev == nil {
-		// Event not found, nothing to delete
+		// Event wasn't found, nothing to delete
 		return
 	}
 	// Get all indexes for the event

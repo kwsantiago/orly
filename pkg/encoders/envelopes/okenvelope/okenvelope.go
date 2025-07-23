@@ -40,7 +40,7 @@ func NewFrom[V string | []byte](eid V, ok bool, msg ...V) *T {
 	}
 	if len(eid) != sha256.Size {
 		log.W.F(
-			"event Id unexpected length, expect %d got %d",
+			"event ID unexpected length, expect %d got %d",
 			len(eid), sha256.Size,
 		)
 	}
@@ -96,7 +96,7 @@ func (en *T) Unmarshal(b []byte) (r []byte, err error) {
 	}
 	if len(idHex) != sha256.Size {
 		err = errorf.E(
-			"invalid size for Id, require %d got %d",
+			"invalid size for ID, require %d got %d",
 			len(idHex), sha256.Size,
 		)
 	}

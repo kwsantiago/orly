@@ -60,7 +60,7 @@ func testBasicEvent(t *testing.T) {
 	for i := range id {
 		id[i] = byte(i)
 	}
-	ev.Id = id
+	ev.ID = id
 
 	// Set Pubkey
 	pubkey := make([]byte, 32)
@@ -92,7 +92,7 @@ func testBasicEvent(t *testing.T) {
 
 	// Create and verify the expected indexes
 
-	// 1. Id index
+	// 1. ID index
 	ser := new(types2.Uint40)
 	err = ser.Set(serial)
 	if chk.E(err) {
@@ -100,7 +100,7 @@ func testBasicEvent(t *testing.T) {
 	}
 
 	idHash := new(types2.IdHash)
-	err = idHash.FromId(ev.Id)
+	err = idHash.FromId(ev.ID)
 	if chk.E(err) {
 		t.Fatalf("Failed to create IdHash: %v", err)
 	}
@@ -109,9 +109,9 @@ func testBasicEvent(t *testing.T) {
 
 	// 2. FullIdPubkey index
 	fullID := new(types2.Id)
-	err = fullID.FromId(ev.Id)
+	err = fullID.FromId(ev.ID)
 	if chk.E(err) {
-		t.Fatalf("Failed to create Id: %v", err)
+		t.Fatalf("Failed to create ID: %v", err)
 	}
 
 	pubHash := new(types2.PubHash)
@@ -156,7 +156,7 @@ func testEventWithTags(t *testing.T) {
 	for i := range id {
 		id[i] = byte(i)
 	}
-	ev.Id = id
+	ev.ID = id
 
 	// Set Pubkey
 	pubkey := make([]byte, 32)
@@ -210,7 +210,7 @@ func testEventWithTags(t *testing.T) {
 	}
 
 	idHash := new(types2.IdHash)
-	err = idHash.FromId(ev.Id)
+	err = idHash.FromId(ev.ID)
 	if chk.E(err) {
 		t.Fatalf("Failed to create IdHash: %v", err)
 	}
@@ -268,7 +268,7 @@ func testErrorHandling(t *testing.T) {
 	for i := range id {
 		id[i] = byte(i)
 	}
-	ev.Id = id
+	ev.ID = id
 
 	// Set Pubkey
 	pubkey := make([]byte, 32)

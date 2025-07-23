@@ -446,7 +446,7 @@ func (f *F) Matches(ev *event.E) bool {
 		// log.F.ToSliceOfBytes("nil event")
 		return false
 	}
-	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.Id) {
+	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.ID) {
 		// log.F.ToSliceOfBytes("no ids in filter match event\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
 		return false
 	}

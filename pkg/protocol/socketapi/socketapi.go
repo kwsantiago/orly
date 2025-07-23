@@ -85,7 +85,7 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 		},
 	)
 	if a.I.AuthRequired() {
-		log.T.F("requesting auth from client from %s", a.Listener.RealRemote())
+		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
 		a.Listener.RequestAuth()
 		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
 			Write(a.Listener); chk.E(err) {
@@ -132,6 +132,6 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 			}
 			continue
 		}
-		go a.HandleMessage(message)
+		go a.HandleMessage(message, a.Listener.AuthedPubkey())
 	}
 }

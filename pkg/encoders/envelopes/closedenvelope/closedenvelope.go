@@ -30,7 +30,7 @@ func New() *T {
 	return &T{Subscription: subscription.NewStd()}
 }
 
-// NewFrom creates a new closedenvelope.T populated with subscription Id and Reason.
+// NewFrom creates a new closedenvelope.T populated with subscription ID and Reason.
 func NewFrom(id *subscription.Id, msg []byte) *T {
 	return &T{
 		Subscription: id, Reason: msg,

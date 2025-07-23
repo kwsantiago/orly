@@ -62,7 +62,7 @@ func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 			return reason.Error.F("auth response does not validate")
 		} else {
 			if err = okenvelope.NewFrom(
-				env.Event.Id, true,
+				env.Event.ID, true,
 			).Write(a.Listener); chk.E(err) {
 				return
 			}

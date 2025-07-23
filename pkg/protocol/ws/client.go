@@ -302,7 +302,7 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 						if ok = r.signatureChecker(env.Event); !ok {
 							log.E.F(
 								"{%s} bad signature on %s\n", r.URL,
-								env.Event.Id,
+								env.Event.ID,
 							)
 							continue
 						}

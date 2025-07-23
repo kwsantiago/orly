@@ -73,7 +73,7 @@ func TestPublish(t *testing.T) {
 			// send back an ok nip-20 command result
 			var res []byte
 			if res = okenvelope.NewFrom(
-				textNote.Id, true, nil,
+				textNote.ID, true, nil,
 			).Marshal(res); chk.E(err) {
 				t.Fatal(err)
 			}
@@ -121,7 +121,7 @@ func TestPublishBlocked(t *testing.T) {
 			// send back a not ok nip-20 command result
 			var res []byte
 			if res = okenvelope.NewFrom(
-				textNote.Id, false,
+				textNote.ID, false,
 				normalize.Msg(normalize.Blocked, "no reason"),
 			).Marshal(res); chk.E(err) {
 				t.Fatal(err)
@@ -129,7 +129,7 @@ func TestPublishBlocked(t *testing.T) {
 			if err := websocket.Message.Send(conn, res); chk.T(err) {
 				t.Errorf("websocket.JSON.Send: %v", err)
 			}
-			// res := []any{"OK", textNote.Id, false, "blocked"}
+			// res := []any{"OK", textNote.ID, false, "blocked"}
 			chk.E(websocket.JSON.Send(conn, res))
 		},
 	)
@@ -256,7 +256,9 @@ func newWebsocketServer(handler func(*websocket.Conn)) (server *httptest.Server)
 // anyOriginHandshake is an alternative to default in golang.org/x/net/websocket
 // which checks for origin. nostr client sends no origin and it makes no difference
 // for the tests here anyway.
-var anyOriginHandshake = func(conf *websocket.Config, r *http.Request) (err error) {
+var anyOriginHandshake = func(
+	conf *websocket.Config, r *http.Request,
+) (err error) {
 	return nil
 }
 

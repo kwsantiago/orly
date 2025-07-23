@@ -65,7 +65,7 @@ func TestGetSerialsByRange(t *testing.T) {
 		}
 
 		// Get the serial for this event
-		serial, err := db.GetSerialById(ev.Id)
+		serial, err := db.GetSerialById(ev.ID)
 		if err != nil {
 			t.Fatalf(
 				"Failed to get serial for event #%d: %v", eventCount+1, err,
@@ -73,7 +73,7 @@ func TestGetSerialsByRange(t *testing.T) {
 		}
 
 		if serial != nil {
-			eventSerials[string(ev.Id)] = serial
+			eventSerials[string(ev.ID)] = serial
 		}
 
 		eventCount++

@@ -127,7 +127,7 @@ func (p *S) Receive(msg publisher.Message) {
 // applies authentication checks if required by the server, and skips delivery
 // for unauthenticated users when events are privileged.
 func (p *S) Deliver(ev *event.E) {
-	log.T.F("delivering event %0x to subscribers", ev.Id)
+	log.T.F("delivering event %0x to subscribers", ev.ID)
 	var err error
 	p.Mx.Lock()
 	defer p.Mx.Unlock()
@@ -158,7 +158,7 @@ func (p *S) Deliver(ev *event.E) {
 				if err = res.Write(w); chk.E(err) {
 					continue
 				}
-				log.T.F("dispatched event %0x to subscription %s", ev.Id, id)
+				log.T.F("dispatched event %0x to subscription %s", ev.ID, id)
 			}
 		}
 	}
