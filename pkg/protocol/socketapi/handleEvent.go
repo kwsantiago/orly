@@ -13,7 +13,6 @@ import (
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/ints"
 	"orly.dev/pkg/encoders/kind"
-	"orly.dev/pkg/encoders/reason"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/utils/chk"
@@ -52,25 +51,6 @@ func (a *A) HandleEvent(
 ) (msg []byte) {
 
 	var err error
-	log.I.F(
-		"auth required %v client authed %v", a.I.AuthRequired(),
-		a.Listener.IsAuthed(),
-	)
-	if a.I.AuthRequired() && a.Listener.IsAuthed() {
-		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
-		a.Listener.RequestAuth()
-		okEnv := okenvelope.New()
-		okEnv.OK = false
-		okEnv.Reason = reason.AuthRequired.F("auth enabled, please auth")
-		if err = okEnv.Write(a.Listener); chk.E(err) {
-			return
-		}
-		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
-			Write(a.Listener); chk.E(err) {
-			return
-		}
-		return
-	}
 	log.T.F(
 		"handleEvent %s %s authed: %0x", a.RealRemote(), req,
 		a.Listener.AuthedPubkey(),
@@ -87,6 +67,19 @@ func (a *A) HandleEvent(
 	}
 	if len(rem) > 0 {
 		log.I.F("extra '%s'", rem)
+	}
+	if a.I.AuthRequired() && !a.Listener.IsAuthed() {
+		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+		a.Listener.RequestAuth()
+		if err = Ok.AuthRequired(a, env.E, "auth required"); chk.E(err) {
+			return
+		}
+		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
+			Write(a.Listener); chk.E(err) {
+			return
+		}
+		// a.Listener.SetPendingEvent(env.E)
+		return
 	}
 	calculatedId := env.E.GetIDBytes()
 	if !bytes.Equal(calculatedId, env.E.ID) {

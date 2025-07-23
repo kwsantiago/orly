@@ -7,7 +7,6 @@ import (
 	"orly.dev/pkg/encoders/envelopes/closedenvelope"
 	"orly.dev/pkg/encoders/envelopes/eoseenvelope"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
-	"orly.dev/pkg/encoders/envelopes/okenvelope"
 	"orly.dev/pkg/encoders/envelopes/reqenvelope"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/reason"
@@ -52,23 +51,6 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 		"auth required %v client authed %v", a.I.AuthRequired(),
 		a.Listener.IsAuthed(),
 	)
-	if a.I.AuthRequired() && a.Listener.IsAuthed() {
-		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
-		a.Listener.RequestAuth()
-		okEnv := okenvelope.New()
-		okEnv.OK = false
-		okEnv.Reason = reason.AuthRequired.F("auth enabled, please auth")
-		if err = okEnv.Write(a.Listener); chk.E(err) {
-			return
-		}
-		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
-			Write(a.Listener); chk.E(err) {
-			return
-		}
-		if !a.I.PublicReadable() {
-			return
-		}
-	}
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()
 	var rem []byte
@@ -78,6 +60,22 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	}
 	if len(rem) > 0 {
 		log.I.F("extra '%s'", rem)
+	}
+	if a.I.AuthRequired() && !a.Listener.IsAuthed() {
+		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+		a.Listener.RequestAuth()
+		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
+			Write(a.Listener); chk.E(err) {
+			return
+		}
+		if err = closedenvelope.NewFrom(
+			env.Subscription, reason.AuthRequired.F("auth enabled"),
+		).Write(a.Listener); chk.E(err) {
+			return
+		}
+		if !a.I.PublicReadable() {
+			return
+		}
 	}
 	var accept bool
 	allowed, accept, _ := srv.AcceptReq(

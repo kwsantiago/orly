@@ -4,6 +4,7 @@ package ws
 import (
 	"net/http"
 	"orly.dev/pkg/app/relay/helpers"
+	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/protocol/auth"
 	atomic2 "orly.dev/pkg/utils/atomic"
 	"strings"
@@ -22,6 +23,7 @@ type Listener struct {
 	authRequested atomic2.Bool
 	isAuthed      atomic2.Bool
 	challenge     atomic2.Bytes
+	pendingEvent  *event.E
 }
 
 // NewListener creates a new Listener for listening for inbound connections for
@@ -115,4 +117,14 @@ func (ws *Listener) AuthRequested() (read bool) {
 // RequestAuth stores when auth has been required from a client.
 func (ws *Listener) RequestAuth() {
 	ws.authRequested.Store(true)
+}
+
+func (ws *Listener) SetPendingEvent(ev *event.E) {
+	ws.pendingEvent = ev
+}
+
+func (ws *Listener) GetPendingEvent() (ev *event.E) {
+	ev = ws.pendingEvent
+	ws.pendingEvent = nil
+	return
 }
