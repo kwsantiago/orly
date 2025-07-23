@@ -9,6 +9,7 @@ package store
 import (
 	"io"
 	"orly.dev/pkg/app/config"
+	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/eventid"
 	"orly.dev/pkg/encoders/eventidserial"
@@ -33,6 +34,7 @@ type I interface {
 	LogLeveler
 	EventIdSerialer
 	Initer
+	SerialByIder
 }
 
 type Initer interface {
@@ -81,7 +83,7 @@ type Deleter interface {
 
 type Saver interface {
 	// SaveEvent is called once relay.AcceptEvent reports true.
-	SaveEvent(c context.T, ev *event.E) (kc, vc int, err error)
+	SaveEvent(c context.T, ev *event.E, noVerify bool) (kc, vc int, err error)
 }
 
 type Importer interface {
@@ -128,4 +130,8 @@ type EventIdSerialer interface {
 		evs []eventidserial.E,
 		err error,
 	)
+}
+
+type SerialByIder interface {
+	GetSerialById(id []byte) (ser *types.Uint40, err error)
 }

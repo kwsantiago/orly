@@ -1,28 +1,26 @@
 // Package main is a nostr relay with a simple follow/mute list authentication
-// scheme and the new HTTP REST based protocol. Configuration is via environment
+// scheme and the new HTTP REST-based protocol. Configuration is via environment
 // variables or an optional .env file.
 package main
 
 import (
 	"fmt"
-	"net/http"
-	_ "net/http/pprof"
-	"orly.dev/pkg/protocol/openapi"
-	"orly.dev/pkg/protocol/servemux"
-	"os"
-
 	"github.com/pkg/profile"
+	_ "net/http/pprof"
 	app2 "orly.dev/pkg/app"
 	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay"
 	"orly.dev/pkg/app/relay/options"
 	"orly.dev/pkg/database"
+	"orly.dev/pkg/protocol/openapi"
+	"orly.dev/pkg/protocol/servemux"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/interrupt"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
 	"orly.dev/pkg/version"
+	"os"
 )
 
 func main() {
@@ -45,11 +43,18 @@ func main() {
 		os.Exit(0)
 	}
 	lol.SetLogLevel(cfg.LogLevel)
-	if cfg.Pprof {
-		defer profile.Start(profile.MemProfile).Stop()
-		go func() {
-			chk.E(http.ListenAndServe("127.0.0.1:6060", nil))
-		}()
+	if cfg.Pprof != "" {
+		switch cfg.Pprof {
+		case "cpu":
+			prof := profile.Start(profile.CPUProfile)
+			defer prof.Stop()
+		case "memory":
+			prof := profile.Start(profile.MemProfile)
+			defer prof.Stop()
+		case "allocation":
+			prof := profile.Start(profile.MemProfileAllocs)
+			defer prof.Stop()
+		}
 	}
 	c, cancel := context.Cancel(context.Bg())
 	var storage *database.D

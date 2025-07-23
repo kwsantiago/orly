@@ -55,7 +55,7 @@ func TestExport(t *testing.T) {
 		}
 
 		// Save the event to the database
-		if _, _, err = db.SaveEvent(ctx, ev); err != nil {
+		if _, _, err = db.SaveEvent(ctx, ev, false); err != nil {
 			t.Fatalf("Failed to save event: %v", err)
 		}
 

@@ -72,7 +72,7 @@ type writeRequest struct {
 }
 
 // NewRelay returns a new relay. The relay connection will be closed when the
-// context is canceled.
+// context is cancelled.
 func NewRelay(c context.T, url string, opts ...RelayOption) *Client {
 	ctx, cancel := context.Cancel(c)
 	r := &Client{

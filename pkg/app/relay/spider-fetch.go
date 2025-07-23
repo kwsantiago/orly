@@ -1,7 +1,9 @@
 package relay
 
 import (
+	"fmt"
 	"orly.dev/pkg/crypto/ec/schnorr"
+	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/hex"
@@ -10,7 +12,9 @@ import (
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
+	"orly.dev/pkg/utils/lol"
 	"runtime/debug"
 )
 
@@ -126,7 +130,11 @@ func (s *Server) SpiderFetch(
 				var evss event.S
 				var cli *ws.Client
 				if cli, err = ws.RelayConnect(
-					context.Bg(), seed,
+					context.Bg(), seed, ws.WithSignatureChecker(
+						func(e *event.E) bool {
+							return true
+						},
+					),
 				); chk.E(err) {
 					err = nil
 					return
@@ -148,13 +156,36 @@ func (s *Server) SpiderFetch(
 
 					// If it doesn't exist or the new event is newer, store it and save to database
 					if !exists || ev.CreatedAtInt64() > existing.Timestamp {
+						var ser *types.Uint40
+						if ser, err = s.Storage().GetSerialById(ev.Id); err == nil && ser != nil {
+							err = errorf.E("event already exists: %0x", ev.Id)
+							return
+						} else {
+							// verify the signature
+							var valid bool
+							if valid, err = ev.Verify(); chk.E(err) || !valid {
+								continue
+							}
+							log.I.F("event %0x is valid", ev.Id)
+						}
+
 						// Save the event to the database
-						log.I.F("saving event:\n%s", ev.Marshal(nil))
 						if _, _, err = s.Storage().SaveEvent(
-							s.Ctx, ev,
+							s.Ctx, ev, true, // already verified
 						); chk.E(err) {
 							err = nil
 							continue
+						}
+						if lol.Level.Load() == lol.Trace {
+							log.T.C(
+								func() string {
+									return fmt.Sprintf(
+										"saved event:\n%s", ev.Marshal(nil),
+									)
+								},
+							)
+						} else {
+							log.I.F("saved event: %0x", ev.Id)
 						}
 
 						// Store the essential information
@@ -186,12 +217,11 @@ func (s *Server) SpiderFetch(
 					// Nil the event in the slice to free memory
 					evss[i] = nil
 				}
-
-				chk.E(s.Storage().Sync())
-				debug.FreeOSMemory()
 			}
 		}
 	}
+	chk.E(s.Storage().Sync())
+	debug.FreeOSMemory()
 
 	// If we're in noExtract mode, just return
 	if noExtract {

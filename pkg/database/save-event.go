@@ -20,11 +20,17 @@ import (
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
-func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
-	// Get a buffer from the pool
-	buf := new(bytes.Buffer)
-	// Marshal the event to binary
-	ev.MarshalBinary(buf)
+func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
+	kc, vc int, err error,
+) {
+	if !noVerify {
+		// check if the event already exists
+		var ser *types.Uint40
+		if ser, err = d.GetSerialById(ev.Id); err == nil && ser != nil {
+			err = errorf.E("event already exists: %0x", ev.Id)
+			return
+		}
+	}
 
 	// check if an existing delete event references this event submission
 	if ev.Kind.IsParameterizedReplaceable() {
@@ -59,7 +65,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 			// stable value but refers to any event from the author, of the
 			// kind, with the identifier. so we need to fetch the full ID index
 			// to get the timestamp and ensure that the event post-dates it.
-			// otherwise it should be rejected.
+			// otherwise, it should be rejected.
 			var idPkTss []*store.IdPkTs
 			for _, ser := range sers {
 				var fidpk *store.IdPkTs
@@ -88,7 +94,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		}
 	} else {
 		var idxs []Range
-		// log.I.S(ev.Pubkey)
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
 				Authors: tag.New(ev.Pubkey),
@@ -98,7 +103,6 @@ func (d *D) SaveEvent(c context.T, ev *event.E) (kc, vc int, err error) {
 		); chk.E(err) {
 			return
 		}
-		// log.I.S(idxs)
 		var sers types.Uint40s
 		for _, idx := range idxs {
 			var s types.Uint40s

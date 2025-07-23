@@ -34,7 +34,7 @@ type C struct {
 	Port           int      `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
 	LogLevel       string   `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
 	DbLogLevel     string   `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	Pprof          bool     `env:"ORLY_PPROF" default:"false" usage:"enable pprof on 127.0.0.1:6060"`
+	Pprof          string   `env:"ORLY_PPROF" usage:"enable pprof on 127.0.0.1:6060" enum:"cpu,memory,allocation"`
 	AuthRequired   bool     `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
 	PublicReadable bool     `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to regardless of whether the client is authed"`
 	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/"`

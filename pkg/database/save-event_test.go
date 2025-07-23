@@ -64,7 +64,7 @@ func TestSaveEvents(t *testing.T) {
 
 		// Save the event to the database
 		var k, v int
-		if k, v, err = db.SaveEvent(ctx, ev); err != nil {
+		if k, v, err = db.SaveEvent(ctx, ev, false); err != nil {
 			t.Fatalf("Failed to save event #%d: %v", eventCount+1, err)
 		}
 		kc += k
@@ -125,7 +125,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 	regularEvent.Sign(sign)
 
 	// Save the regular event
-	if _, _, err := db.SaveEvent(ctx, regularEvent); err != nil {
+	if _, _, err := db.SaveEvent(ctx, regularEvent, false); err != nil {
 		t.Fatalf("Failed to save regular event: %v", err)
 	}
 
@@ -146,7 +146,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 	deletionEvent.Sign(sign)
 
 	// Try to save the deletion event, it should be rejected
-	_, _, err = db.SaveEvent(ctx, deletionEvent)
+	_, _, err = db.SaveEvent(ctx, deletionEvent, false)
 	if err == nil {
 		t.Fatal("Expected deletion event with e-tag to be rejected, but it was accepted")
 	}
@@ -154,6 +154,66 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 	// Verify the error message
 	expectedError := "deletion events referencing other events with 'e' tag are not allowed"
 	if err.Error() != expectedError {
-		t.Fatalf("Expected error message '%s', got '%s'", expectedError, err.Error())
+		t.Fatalf(
+			"Expected error message '%s', got '%s'", expectedError, err.Error(),
+		)
+	}
+}
+
+// TestSaveExistingEvent tests that attempting to save an event that already exists
+// returns an error.
+func TestSaveExistingEvent(t *testing.T) {
+	// Create a temporary directory for the database
+	tempDir, err := os.MkdirTemp("", "test-db-*")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir) // Clean up after the test
+
+	// Create a context and cancel function for the database
+	ctx, cancel := context.Cancel(context.Bg())
+	defer cancel()
+
+	// Initialize the database
+	db, err := New(ctx, cancel, tempDir, "info")
+	if err != nil {
+		t.Fatalf("Failed to create database: %v", err)
+	}
+	defer db.Close()
+
+	// Create a signer
+	sign := new(p256k.Signer)
+	if err := sign.Generate(); chk.E(err) {
+		t.Fatal(err)
+	}
+
+	// Create an event
+	ev := event.New()
+	ev.Kind = kind.TextNote // Kind 1 is a text note
+	ev.Pubkey = sign.Pub()
+	ev.CreatedAt = new(timestamp.T)
+	ev.CreatedAt.V = timestamp.Now().V
+	ev.Content = []byte("Test event")
+	ev.Tags = tags.New()
+	ev.Sign(sign)
+
+	// Save the event for the first time
+	if _, _, err := db.SaveEvent(ctx, ev, false); err != nil {
+		t.Fatalf("Failed to save event: %v", err)
+	}
+
+	// Try to save the same event again, it should be rejected
+	_, _, err = db.SaveEvent(ctx, ev, false)
+	if err == nil {
+		t.Fatal("Expected error when saving an existing event, but got nil")
+	}
+
+	// Verify the error message
+	expectedErrorPrefix := "event already exists: "
+	if !bytes.HasPrefix([]byte(err.Error()), []byte(expectedErrorPrefix)) {
+		t.Fatalf(
+			"Expected error message to start with '%s', got '%s'",
+			expectedErrorPrefix, err.Error(),
+		)
 	}
 }
