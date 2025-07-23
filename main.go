@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
+	"orly.dev/pkg/protocol/openapi"
+	"orly.dev/pkg/protocol/servemux"
 	"os"
 
 	"github.com/pkg/profile"
@@ -50,8 +52,10 @@ func main() {
 		}()
 	}
 	c, cancel := context.Cancel(context.Bg())
-	storage, err := database.New(c, cancel, cfg.DataDir, cfg.DbLogLevel)
-	if chk.E(err) {
+	var storage *database.D
+	if storage, err = database.New(
+		c, cancel, cfg.DataDir, cfg.DbLogLevel,
+	); chk.E(err) {
 		os.Exit(1)
 	}
 	r := &app2.Relay{C: cfg, Store: storage}
@@ -66,9 +70,20 @@ func main() {
 		C:        cfg,
 	}
 	var opts []options.O
-	if server, err = relay.NewServer(serverParams, opts...); chk.E(err) {
+	serveMux := servemux.NewServeMux()
+	if server, err = relay.NewServer(
+		serverParams, serveMux, opts...,
+	); chk.E(err) {
 		os.Exit(1)
 	}
+	openapi.New(
+		server,
+		cfg.AppName,
+		version.V,
+		version.Description,
+		"/api",
+		serveMux,
+	)
 	if err != nil {
 		log.F.F("failed to create server: %v", err)
 	}

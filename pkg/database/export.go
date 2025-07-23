@@ -17,6 +17,8 @@ import (
 // JSON.
 func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 	var err error
+	evB := make([]byte, 0, units.Mb)
+	evBuf := bytes.NewBuffer(evB)
 	if len(pubkeys) == 0 {
 		if err = d.View(
 			func(txn *badger.Txn) (err error) {
@@ -26,25 +28,29 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 					return
 				}
 				it := txn.NewIterator(badger.IteratorOptions{Prefix: buf.Bytes()})
-				evB := make([]byte, 0, units.Mb)
 				defer it.Close()
 				for it.Rewind(); it.Valid(); it.Next() {
 					item := it.Item()
-					if evB, err = item.ValueCopy(evB); chk.E(err) {
+					if err = item.Value(
+						func(val []byte) (err error) {
+							evBuf.Write(val)
+							return
+						},
+					); chk.E(err) {
 						continue
 					}
-					evBuf := bytes.NewBuffer(evB)
 					ev := event.New()
 					if err = ev.UnmarshalBinary(evBuf); chk.E(err) {
 						continue
 					}
 					// Serialize the event to JSON and write it to the output
 					if _, err = w.Write(ev.Serialize()); chk.E(err) {
-						continue
+						return
 					}
 					if _, err = w.Write([]byte{'\n'}); chk.E(err) {
-						continue
+						return
 					}
+					evBuf.Reset()
 				}
 				return
 			},
@@ -67,14 +73,17 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 						return
 					}
 					it := txn.NewIterator(badger.IteratorOptions{Prefix: pkBuf.Bytes()})
-					evB := make([]byte, 0, units.Mb)
 					defer it.Close()
 					for it.Rewind(); it.Valid(); it.Next() {
 						item := it.Item()
-						if evB, err = item.ValueCopy(evB); chk.E(err) {
+						if err = item.Value(
+							func(val []byte) (err error) {
+								evBuf.Write(val)
+								return
+							},
+						); chk.E(err) {
 							continue
 						}
-						evBuf := bytes.NewBuffer(evB)
 						ev := event.New()
 						if err = ev.UnmarshalBinary(evBuf); chk.E(err) {
 							continue
@@ -86,6 +95,7 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 						if _, err = w.Write([]byte{'\n'}); chk.E(err) {
 							continue
 						}
+						evBuf.Reset()
 					}
 					return
 				},

@@ -7,14 +7,11 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 
 	"orly.dev/pkg/protocol/servemux"
-	"orly.dev/pkg/utils/lol"
 )
 
 // ExposeMiddleware adds the http.Request and http.ResponseWriter to the context
 // for the Operations handler.
 func ExposeMiddleware(ctx huma.Context, next func(huma.Context)) {
-	lol.Tracer("ExposeMiddleware")
-	defer func() { lol.Tracer("end ExposeMiddleware") }()
 	// Unwrap the request and response objects.
 	r, w := humago.Unwrap(ctx)
 	ctx = huma.WithValue(ctx, "http-request", r)
@@ -27,8 +24,6 @@ func ExposeMiddleware(ctx huma.Context, next func(huma.Context)) {
 func NewHuma(
 	router *servemux.S, name, version, description string,
 ) (api huma.API) {
-	lol.Tracer("NewHuma", name, version, description)
-	defer func() { lol.Tracer("end NewHuma") }()
 	config := huma.DefaultConfig(name, version)
 	config.Info.Description = description
 	config.DocsPath = ""

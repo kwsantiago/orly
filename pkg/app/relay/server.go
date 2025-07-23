@@ -37,6 +37,7 @@ type Server struct {
 	listeners  *publish.S
 	*config.C
 	*Lists
+	Mux *servemux.S
 }
 
 // ServerParams represents the configuration parameters for initializing a
@@ -48,6 +49,7 @@ type ServerParams struct {
 	Rl       relay.I
 	DbPath   string
 	MaxLimit int
+	Mux      *servemux.S
 	*config.C
 }
 
@@ -78,7 +80,9 @@ type ServerParams struct {
 // - Sets up a ServeMux for handling HTTP requests.
 //
 // - Initializes the relay, starting its operation in a separate goroutine.
-func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
+func NewServer(
+	sp *ServerParams, serveMux *servemux.S, opts ...options.O,
+) (s *Server, err error) {
 	op := options.Default()
 	for _, opt := range opts {
 		opt(op)
@@ -88,7 +92,6 @@ func NewServer(sp *ServerParams, opts ...options.O) (s *Server, err error) {
 			return nil, fmt.Errorf("storage init: %w", err)
 		}
 	}
-	serveMux := servemux.NewServeMux()
 	s = &Server{
 		Ctx:     sp.Ctx,
 		Cancel:  sp.Cancel,
@@ -209,8 +212,8 @@ func (s *Server) Start(
 	}()
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	log.I.F("starting relay listener at %s", addr)
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
+	var ln net.Listener
+	if ln, err = net.Listen("tcp", addr); err != nil {
 		return err
 	}
 	s.httpServer = &http.Server{

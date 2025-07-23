@@ -8,6 +8,7 @@ import (
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/interfaces/store"
 	"orly.dev/pkg/utils/context"
+	"time"
 )
 
 type I interface {
@@ -22,6 +23,9 @@ type I interface {
 	AddEvent(
 		c context.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
 	) (accepted bool, message []byte)
+	AdminAuth(
+		r *http.Request, remote string, tolerance ...time.Duration,
+	) (authed bool, pubkey []byte)
 	Context() context.T
 	Publisher() *publish.S
 	Publish(c context.T, evt *event.E) (err error)

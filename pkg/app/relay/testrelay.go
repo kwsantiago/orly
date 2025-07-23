@@ -7,6 +7,7 @@ import (
 	"orly.dev/pkg/encoders/eventid"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/protocol/servemux"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/units"
 	"testing"
@@ -14,6 +15,7 @@ import (
 
 func startTestRelay(c context.T, t *testing.T, tr *testRelay) *Server {
 	t.Helper()
+	serveMux := servemux.NewServeMux()
 	srv, _ := NewServer(
 		&ServerParams{
 			Ctx:      c,
@@ -21,6 +23,7 @@ func startTestRelay(c context.T, t *testing.T, tr *testRelay) *Server {
 			Rl:       tr,
 			MaxLimit: 500 * units.Kb,
 		},
+		serveMux,
 	)
 	started := make(chan bool)
 	go srv.Start("127.0.0.1", 0, started)
