@@ -38,4 +38,5 @@ type I interface {
 	AuthRequired() bool
 	PublicReadable() bool
 	ServiceURL(req *http.Request) (s string)
+	OwnersPubkeys() (pks [][]byte)
 }

@@ -3,10 +3,12 @@ package socketapi
 import (
 	"errors"
 	"github.com/dgraph-io/badger/v4"
+	"orly.dev/pkg/encoders/bech32encoding"
 	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/encoders/envelopes/closedenvelope"
 	"orly.dev/pkg/encoders/envelopes/eoseenvelope"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
+	"orly.dev/pkg/encoders/envelopes/noticeenvelope"
 	"orly.dev/pkg/encoders/envelopes/reqenvelope"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/reason"
@@ -74,6 +76,23 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			return
 		}
 		if !a.I.PublicReadable() {
+			// send a notice in case the client renders it to explain why auth is required
+			opks := a.I.OwnersPubkeys()
+			var npubList string
+			for i, pk := range opks {
+				var npub []byte
+				if npub, err = bech32encoding.BinToNpub(pk); chk.E(err) {
+					continue
+				}
+				npubList += string(npub)
+				if i < len(opks)-1 {
+					npubList += ", "
+				}
+			}
+			if err = noticeenvelope.NewFrom("relay whitelists read access to users within the second degree of the social graph of " + npubList).Write(a.Listener); chk.E(err) {
+				err = nil
+			}
+
 			return
 		}
 	}
