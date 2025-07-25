@@ -20,7 +20,9 @@ type ExportOutput struct{ RawBody []byte }
 // RegisterExport implements the Export HTTP API method.
 func (x *Operations) RegisterExport(api huma.API) {
 	name := "Export"
-	description := "Export all events (only works with NIP-98 capable client, will not work with UI)"
+	description := `Export all events (only works with NIP-98 capable client, will not work with UI)
+
+Returns the events as line structured JSON (JSONL) in the order that they were received by the relay.`
 	path := x.path + "/export"
 	scopes := []string{"admin", "read"}
 	method := http.MethodGet

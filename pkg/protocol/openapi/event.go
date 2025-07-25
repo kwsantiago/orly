@@ -19,15 +19,62 @@ import (
 	"orly.dev/pkg/utils/log"
 )
 
+var EventBody = &huma.RequestBody{
+	Description: "a signed nostr event",
+	Content: map[string]*huma.MediaType{
+		"application/json": {
+			Schema: &huma.Schema{
+				Type: huma.TypeObject,
+				Properties: map[string]*huma.Schema{
+					"id": {
+						Type:        huma.TypeString,
+						Description: "SHA256 hash of event in canonical (JSON array with fixed ordering) form, 64 characters hex",
+					},
+					"pubkey": {
+						Type:        huma.TypeString,
+						Description: "BIP-340 Schnorr public key, 64 characters hex",
+					},
+					"created_at": {
+						Type:        huma.TypeInteger,
+						Description: "unix timestamp of time of event creation",
+					},
+					"kind": {
+						Type:        huma.TypeInteger,
+						Description: "kind number of event",
+					},
+					"tags": {
+						Type:        huma.TypeArray,
+						Description: "array of arrays of strings",
+						Items: &huma.Schema{
+							Type: huma.TypeArray,
+							Items: &huma.Schema{
+								Type: huma.TypeString,
+							},
+						},
+					},
+					"content": {
+						Type:        huma.TypeString,
+						Description: "content of event, escaped using NIP-01 standard escapes and UTF-8 encoding",
+					},
+					"sig": {
+						Type:        huma.TypeString,
+						Description: "BIP-340 Schnorr signature, 128 characters hex",
+					},
+				},
+			},
+		},
+	},
+}
+
 // EventInput is the parameters for the Event HTTP API method.
 type EventInput struct {
-	Auth   string `header:"Authorization" doc:"nostr nip-98 (and expiring variant)" required:"false"`
-	Accept string `header:"Accept" default:"application/nostr+json"`
-	Body   string `doc:"event JSON"`
+	Auth   string   `header:"Authorization" doc:"nostr nip-98 (and expiring variant)" required:"false"`
+	Accept string   `header:"Accept" default:"application/nostr+json"`
+	Body   *event.J `doc:"event JSON"`
 }
 
 // EventOutput is the return parameters for the HTTP API Event method.
-type EventOutput struct{ Body string }
+type EventOutput struct{}
 
 // RegisterEvent is the implementation of the HTTP API Event method.
 func (x *Operations) RegisterEvent(api huma.API) {
@@ -43,6 +90,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			Path:        path,
 			Method:      method,
 			Tags:        []string{"events"},
+			RequestBody: EventBody,
 			Description: helpers.GenerateDescription(description, scopes),
 			Security:    []map[string][]string{{"auth": scopes}},
 		}, func(ctx context.T, input *EventInput) (
@@ -63,16 +111,12 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					return
 				}
 			}
-			ev := &event.E{}
-			var rem []byte
-			if rem, err = ev.Unmarshal([]byte(input.Body)); chk.T(err) {
+			var ev *event.E
+			if ev, err = input.Body.ToEvent(); chk.E(err) {
 				err = huma.Error422UnprocessableEntity(
-					"Failed to parse event", err,
+					"Failed to convert event", err,
 				)
 				return
-			}
-			if len(rem) > 0 {
-				log.D.F("remainder:\n%s", rem)
 			}
 			// these aliases make it so most of the following code can be copied
 			// verbatim from its counterpart in socketapi.HandleEvent, with the
@@ -393,7 +437,6 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					return
 				}
 			}
-			output = &EventOutput{"event accepted"}
 			return
 		},
 	)

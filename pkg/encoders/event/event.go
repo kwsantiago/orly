@@ -14,7 +14,6 @@ import (
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/encoders/timestamp"
-	"orly.dev/pkg/encoders/unix"
 	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
@@ -92,6 +91,9 @@ func (ev *E) Id() []byte { return ev.ID }
 // CreatedAtInt64 returns the created_at timestamp as a standard int64.
 func (ev *E) CreatedAtInt64() (i int64) { return ev.CreatedAt.I64() }
 
+// KindInt returns the kind as an int, as is often needed for JSON.
+func (ev *E) KindInt() (i int) { return int(ev.Kind.K) }
+
 // KindInt32 returns the kind as an int32, as is often needed for JSON.
 func (ev *E) KindInt32() (i int32) { return int32(ev.Kind.K) }
 
@@ -109,13 +111,13 @@ func (ev *E) ContentString() (s string) { return string(ev.Content) }
 
 // J is an event.E encoded in more basic types than used in this library.
 type J struct {
-	Id        string     `json:"id"`
-	Pubkey    string     `json:"pubkey"`
-	CreatedAt unix.Time  `json:"created_at"`
-	Kind      int32      `json:"kind"`
-	Tags      [][]string `json:"tags"`
-	Content   string     `json:"content"`
-	Sig       string     `json:"sig"`
+	Id        string     `json:"id" doc:"event id (SHA256 hash of canonical form of event, 64 characters hex)"`
+	Pubkey    string     `json:"pubkey" doc:"public key of author of event, required to verify signature (BIP-340 Schnorr public key, 64 characters hex)"`
+	CreatedAt int64      `json:"created_at" doc:"unix timestamp of time when event was created"`
+	Kind      int        `json:"kind" doc:"kind number of event"`
+	Tags      [][]string `json:"tags" doc:"tags that add metadata to the event"`
+	Content   string     `json:"content" doc:"content of event"`
+	Sig       string     `json:"sig" doc:"signature of event (BIP-340 schnorr signature, 128 characters hex)"`
 }
 
 // ToEventJ converts an event.E into an event.J.
@@ -123,8 +125,8 @@ func (ev *E) ToEventJ() (j *J) {
 	j = &J{}
 	j.Id = ev.IdString()
 	j.Pubkey = ev.PubKeyString()
-	j.CreatedAt = unix.Time{ev.CreatedAt.Time()}
-	j.Kind = ev.KindInt32()
+	j.CreatedAt = ev.CreatedAt.I64()
+	j.Kind = ev.KindInt()
 	j.Content = ev.ContentString()
 	j.Tags = ev.Tags.ToStringsSlice()
 	j.Sig = ev.SigString()
@@ -146,6 +148,13 @@ func (ev *E) CreatedAtFromInt64(i int64) {
 
 // KindFromInt32 encodes an int32 representation of a kind.T into an event.E.
 func (ev *E) KindFromInt32(i int32) {
+	ev.Kind = &kind.T{}
+	ev.Kind.K = uint16(i)
+	return
+}
+
+// KindFromInt encodes an int representation of a kind.T into an event.E.
+func (ev *E) KindFromInt(i int) {
 	ev.Kind = &kind.T{}
 	ev.Kind.K = uint16(i)
 	return
@@ -200,8 +209,8 @@ func (e J) ToEvent() (ev *E, err error) {
 	if err = ev.IdFromString(e.Id); chk.E(err) {
 		return
 	}
-	ev.CreatedAtFromInt64(e.CreatedAt.Unix())
-	ev.KindFromInt32(e.Kind)
+	ev.CreatedAtFromInt64(e.CreatedAt)
+	ev.KindFromInt(e.Kind)
 	if err = ev.PubKeyFromString(e.Pubkey); chk.E(err) {
 		return
 	}
