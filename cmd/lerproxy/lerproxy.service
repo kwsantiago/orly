@@ -1,0 +1,16 @@
+# systemd unit to run lerproxy as a service
+[Unit]
+Description=lerproxy
+
+[Service]
+Type=simple
+User=mleku
+ExecStart=/home/mleku/.local/bin/lerproxy -m /home/mleku/mapping.txt
+Restart=always
+Wants=network-online.target
+# waits for wireguard service to come up before starting, remove the wg-quick@wg0 section if running it directly on an
+# internet routeable connection
+After=network.target network-online.target wg-quick@wg0.service
+
+[Install]
+WantedBy=multi-user.target
