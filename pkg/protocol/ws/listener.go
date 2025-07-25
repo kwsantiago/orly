@@ -21,7 +21,6 @@ type Listener struct {
 	remote        atomic2.String
 	authedPubkey  atomic2.Bytes
 	authRequested atomic2.Bool
-	isAuthed      atomic2.Bool
 	challenge     atomic2.Bytes
 	pendingEvent  *event.E
 }
@@ -95,11 +94,9 @@ func (ws *Listener) Req() *http.Request { return ws.Request }
 // Close the Listener connection from the Listener side.
 func (ws *Listener) Close() (err error) { return ws.Conn.Close() }
 
-func (ws *Listener) IsAuthed() bool       { return ws.isAuthed.Load() }
-func (ws *Listener) SetAuthed(b bool)     { ws.isAuthed.Store(b) }
+func (ws *Listener) IsAuthed() bool       { return len(ws.authedPubkey.Load()) > 0 }
 func (ws *Listener) AuthedPubkey() []byte { return ws.authedPubkey.Load() }
 func (ws *Listener) SetAuthedPubkey(b []byte) {
-	ws.isAuthed.Store(true)
 	ws.authedPubkey.Store(b)
 }
 

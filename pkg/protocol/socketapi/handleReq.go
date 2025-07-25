@@ -50,8 +50,8 @@ import (
 func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	var err error
 	log.I.F(
-		"auth required %v client authed %v", a.I.AuthRequired(),
-		a.Listener.IsAuthed(),
+		"auth required %v client authed %v %0x", a.I.AuthRequired(),
+		a.Listener.IsAuthed(), a.Listener.AuthedPubkey(),
 	)
 	log.I.F("REQ:\n%s", req)
 	sto := srv.Storage()
@@ -92,7 +92,8 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			if err = noticeenvelope.NewFrom("relay whitelists read access to users within the second degree of the social graph of " + npubList).Write(a.Listener); chk.E(err) {
 				err = nil
 			}
-
+			// request processing terminates here because auth is required and
+			// the relay is not public-readable.
 			return
 		}
 	}
@@ -158,7 +159,7 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	}
 	receiver := make(event.C, 32)
 	cancel := true
-	// if the query was for just Ids, we know there cannot be any more results,
+	// if the query was for just Ids, we know there can't be any more results,
 	// so cancel the subscription.
 	for _, f := range allowed.F {
 		if f.Ids.Len() < 1 {

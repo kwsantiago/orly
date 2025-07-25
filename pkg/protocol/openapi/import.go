@@ -15,7 +15,7 @@ import (
 // ImportInput is the parameters of an import operation, authentication and the
 // stream of line structured JSON events.
 type ImportInput struct {
-	Auth string `header:"Authorization" doc:"nostr nip-98 token for authentication" required:"true"`
+	Auth string `header:"Authorization" doc:"nostr nip-98 (and expiring variant) token for authentication" required:"true"`
 }
 
 // ImportOutput is nothing, basically; a 204 or 200 status is expected.

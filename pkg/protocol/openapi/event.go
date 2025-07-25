@@ -17,7 +17,6 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
-	"orly.dev/pkg/utils/lol"
 )
 
 // EventInput is the parameters for the Event HTTP API method.
@@ -32,8 +31,6 @@ type EventOutput struct{ Body string }
 
 // RegisterEvent is the implementation of the HTTP API Event method.
 func (x *Operations) RegisterEvent(api huma.API) {
-	lol.Tracer("RegisterEvent")
-	defer lol.Tracer("RegisterEvent")
 	name := "Event"
 	description := "Submit an event"
 	path := x.path + "/event"
