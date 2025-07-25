@@ -589,7 +589,9 @@ type EventsOutput struct {
 // privilege.
 func (x *Operations) RegisterEvents(api huma.API) {
 	name := "Events"
-	description := "query for events, returns raw binary data containing the events in JSON line-structured format (only allows one filter)"
+	description := `Query for events using a standard NIP-01 filter (only allows one filter)
+
+Returns events as a JSON array of event objects.`
 	path := x.path + "/events"
 	scopes := []string{"user", "read"}
 	method := http.MethodPost
