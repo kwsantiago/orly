@@ -148,6 +148,7 @@ func (s *Server) SpiderFetch(
 
 				// Process each event immediately
 				for i, ev := range evss {
+					// log.I.S(ev)
 					// Create a key based on pubkey and kind for deduplication
 					pkKindKey := string(ev.Pubkey) + string(ev.Kind.Marshal(nil))
 

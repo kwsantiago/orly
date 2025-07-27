@@ -5,7 +5,6 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/pkg/database/indexes"
 	"orly.dev/pkg/database/indexes/types"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/utils/chk"
 )
@@ -13,8 +12,7 @@ import (
 func (d *D) FetchEventBySerial(ser *types.Uint40) (ev *event.E, err error) {
 	if err = d.View(
 		func(txn *badger.Txn) (err error) {
-			buf := codecbuf.Get()
-			defer codecbuf.Put(buf)
+			buf := new(bytes.Buffer)
 			if err = indexes.EventEnc(ser).MarshalWrite(buf); chk.E(err) {
 				return
 			}

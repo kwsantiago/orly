@@ -1,8 +1,8 @@
 package types
 
 import (
+	"bytes"
 	"io"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/utils/chk"
 )
 
@@ -35,8 +35,7 @@ func (w *Word) MarshalWrite(wr io.Writer) (err error) {
 
 // UnmarshalRead reads the word from the reader, stopping at the zero-byte marker
 func (w *Word) UnmarshalRead(r io.Reader) error {
-	buf := codecbuf.Get()
-	defer codecbuf.Put(buf)
+	buf := new(bytes.Buffer)
 	tmp := make([]byte, 1)
 	foundEndMarker := false
 

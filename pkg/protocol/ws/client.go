@@ -233,10 +233,9 @@ func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
 	}()
 	// general message reader loop
 	go func() {
-		buf := new(bytes.Buffer)
 		var err error
 		for {
-			buf.Reset()
+			buf := new(bytes.Buffer)
 			if err = conn.ReadMessage(r.connectionContext, buf); err != nil {
 				r.ConnectionError = err
 				r.Close()

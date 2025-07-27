@@ -3,7 +3,6 @@ package types
 import (
 	"bytes"
 	"io"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/utils/chk"
 )
 
@@ -29,7 +28,7 @@ func (ts *Timestamp) ToTimestamp() (timestamp int64) {
 func (ts *Timestamp) Bytes() (b []byte, err error) {
 	v := new(Uint64)
 	v.Set(uint64(ts.val))
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	if err = v.MarshalWrite(buf); chk.E(err) {
 		return
 	}

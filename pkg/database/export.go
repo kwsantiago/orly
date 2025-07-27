@@ -6,7 +6,6 @@ import (
 	"io"
 	"orly.dev/pkg/database/indexes"
 	"orly.dev/pkg/database/indexes/types"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
@@ -22,8 +21,7 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 	if len(pubkeys) == 0 {
 		if err = d.View(
 			func(txn *badger.Txn) (err error) {
-				buf := codecbuf.Get()
-				defer codecbuf.Put(buf)
+				buf := new(bytes.Buffer)
 				if err = indexes.EventEnc(nil).MarshalWrite(buf); chk.E(err) {
 					return
 				}
@@ -61,8 +59,7 @@ func (d *D) Export(c context.T, w io.Writer, pubkeys ...[]byte) {
 		for _, pubkey := range pubkeys {
 			if err = d.View(
 				func(txn *badger.Txn) (err error) {
-					pkBuf := codecbuf.Get()
-					defer codecbuf.Put(pkBuf)
+					pkBuf := new(bytes.Buffer)
 					ph := &types.PubHash{}
 					if err = ph.FromPubkey(pubkey); chk.E(err) {
 						return
