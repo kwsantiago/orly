@@ -6,6 +6,7 @@ import (
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/interfaces/publisher"
 	"orly.dev/pkg/interfaces/server"
+	"orly.dev/pkg/interfaces/typer"
 	"orly.dev/pkg/protocol/auth"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
@@ -81,7 +82,7 @@ func (p *S) Type() (typeName string) { return Type }
 // - Otherwise, adds the subscription to the map under a mutex lock.
 //
 // - Logs actions related to subscription creation or removal.
-func (p *S) Receive(msg publisher.Message) {
+func (p *S) Receive(msg typer.T) {
 	if m, ok := msg.(*W); ok {
 		if m.Cancel {
 			if m.Id == "" {
@@ -127,18 +128,24 @@ func (p *S) Receive(msg publisher.Message) {
 // applies authentication checks if required by the server, and skips delivery
 // for unauthenticated users when events are privileged.
 func (p *S) Deliver(ev *event.E) {
-	log.T.F("delivering event %0x to subscribers", ev.ID)
 	var err error
 	p.Mx.Lock()
 	defer p.Mx.Unlock()
+	log.T.F(
+		"delivering event %0x to websocket subscribers %d", ev.ID, len(p.Map),
+	)
 	for w, subs := range p.Map {
-		// log.I.F("%v %s", subs, w.RealRemote())
+		log.I.F("%v %s", subs, w.RealRemote())
 		for id, subscriber := range subs {
-			// log.T.F(
-			// 	"subscriber %s\n%s", w.RealRemote(),
-			// 	subscriber.Marshal(nil),
-			// )
+			log.T.F(
+				"subscriber %s\n%s", w.RealRemote(),
+				subscriber.Marshal(nil),
+			)
 			if !subscriber.Match(ev) {
+				log.I.F(
+					"subscriber %s filter %s not match", id,
+					subscriber.Marshal(nil),
+				)
 				continue
 			}
 			if p.Server.AuthRequired() {

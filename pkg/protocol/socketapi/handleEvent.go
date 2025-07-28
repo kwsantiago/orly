@@ -129,6 +129,7 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
+	log.I.F("checking if policy allows this event")
 	// check that relay policy allows this event
 	accept, notice, _ := srv.AcceptEvent(
 		c, env.E, a.Listener.Request, a.Listener.AuthedPubkey(),
@@ -145,6 +146,7 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
+	log.I.F("checking for protected tag")
 	// check for protected tag (NIP-70)
 	protectedTag := env.E.Tags.GetFirst(tag.New("-"))
 	if protectedTag != nil && a.AuthRequired() {

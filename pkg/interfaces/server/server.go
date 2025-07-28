@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay/publish"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filters"
@@ -39,4 +40,5 @@ type I interface {
 	PublicReadable() bool
 	ServiceURL(req *http.Request) (s string)
 	OwnersPubkeys() (pks [][]byte)
+	Config() *config.C
 }

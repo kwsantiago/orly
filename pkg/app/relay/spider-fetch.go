@@ -100,7 +100,7 @@ func (s *Server) SpiderFetch(
 
 	log.I.F("%d events found of type %s", len(pkKindMap), kindsList)
 
-	if !noFetch {
+	if !noFetch && len(s.C.SpiderSeeds) > 0 {
 		// we need to search the spider seeds.
 		// Break up pubkeys into batches of 128
 		for i := 0; i < len(pubkeys); i += 128 {

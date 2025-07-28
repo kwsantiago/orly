@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"orly.dev/pkg/protocol/openapi"
 	"orly.dev/pkg/protocol/socketapi"
 	"strconv"
+	"strings"
 	"time"
 
 	"orly.dev/pkg/app/config"
@@ -101,7 +103,7 @@ func NewServer(
 		C:       sp.C,
 		Lists:   new(Lists),
 	}
-	s.listeners = publish.New(socketapi.New(s))
+	s.listeners = publish.New(socketapi.New(s), openapi.NewPublisher(s))
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {
 			s.Shutdown()
@@ -133,6 +135,21 @@ func NewServer(
 //
 // - For all other paths, delegates to the internal mux's ServeHTTP method.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	c := s.Config()
+	remote := helpers.GetRemoteFromReq(r)
+	var whitelisted bool
+	if len(c.Whitelist) > 0 {
+		for _, addr := range c.Whitelist {
+			if strings.HasPrefix(remote, addr) {
+				whitelisted = true
+			}
+		}
+	} else {
+		whitelisted = true
+	}
+	if !whitelisted {
+		return
+	}
 	// standard nostr protocol only governs the "root" path of the relay and
 	// websockets
 	if r.URL.Path == "/" {

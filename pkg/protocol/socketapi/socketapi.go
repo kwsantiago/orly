@@ -54,6 +54,22 @@ type A struct {
 // resources on connection termination or cancellation, adhering to the given
 // context's lifecycle.
 func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
+	c := a.Config()
+	remote := helpers.GetRemoteFromReq(r)
+	var whitelisted bool
+	if len(c.Whitelist) > 0 {
+		for _, addr := range c.Whitelist {
+			if strings.HasPrefix(remote, addr) {
+				whitelisted = true
+			}
+		}
+	} else {
+		whitelisted = true
+	}
+	if !whitelisted {
+		return
+	}
+
 	var err error
 	ticker := time.NewTicker(DefaultPingWait)
 	var cancel context.F

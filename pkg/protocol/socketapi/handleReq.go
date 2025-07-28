@@ -76,7 +76,8 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			return
 		}
 		if !a.I.PublicReadable() {
-			// send a notice in case the client renders it to explain why auth is required
+			// send a notice in case the client renders it to explain why auth
+			// is required
 			opks := a.I.OwnersPubkeys()
 			var npubList string
 			for i, pk := range opks {

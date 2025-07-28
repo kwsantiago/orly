@@ -40,6 +40,7 @@ type C struct {
 	SpiderSeeds    []string `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/"`
 	Owners         []string `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 	Private        bool     `env:"ORLY_PRIVATE" usage:"do not spider for user metadata because the relay is private and this would leak relay memberships" default:"false"`
+	Whitelist      []string `env:"ORLY_WHITELIST" usage:"only allow connections from this list of IP addresses"`
 }
 
 // New creates and initializes a new configuration object for the relay
@@ -90,6 +91,17 @@ func New() (cfg *C, err error) {
 		lol.SetLogLevel(cfg.LogLevel)
 		log.I.F("loaded configuration from %s", envPath)
 	}
+	// if spider seeds has no elements, there still is a single entry with an
+	// empty string; and also if any of the fields are empty strings, they need
+	// to be removed.
+	var seeds []string
+	for _, u := range cfg.SpiderSeeds {
+		if u == "" {
+			continue
+		}
+		seeds = append(seeds, u)
+	}
+	cfg.SpiderSeeds = seeds
 	return
 }
 

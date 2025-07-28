@@ -26,7 +26,8 @@ import (
 // corresponding handler method, generates a notice for errors or unknown types,
 // logs the notice, and writes it back to the listener if required.
 func (a *A) HandleMessage(msg, authedPubkey []byte) {
-	log.T.F("%s received message:\n%s", a.Listener.RealRemote(), string(msg))
+	remote := a.Listener.RealRemote()
+	log.T.F("%s received message:\n%s", remote, string(msg))
 	var notice []byte
 	var err error
 	var t string
