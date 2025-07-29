@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"net"
@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// Period can be changed prior to opening a Listener to alter its'
+// Period can be changed before opening a Listener to alter its
 // KeepAlivePeriod.
 var Period = 3 * time.Minute
 
 // Listener sets TCP keep-alive timeouts on accepted connections.
-// It's used by ListenAndServe and ListenAndServeTLS so dead TCP connections
+// It is used by ListenAndServe and ListenAndServeTLS so dead TCP connections
 // (e.g. closing laptop mid-download) eventually go away.
 type Listener struct {
 	time.Duration
