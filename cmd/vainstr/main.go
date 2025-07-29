@@ -7,13 +7,14 @@ import (
 	"encoding/hex"
 	"fmt"
 	"orly.dev/pkg/crypto/ec/bech32"
-	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
+	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/bech32encoding"
 	"orly.dev/pkg/utils/atomic"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/interrupt"
 	"orly.dev/pkg/utils/log"
+	"orly.dev/pkg/utils/lol"
 	"orly.dev/pkg/utils/qu"
 	"os"
 	"runtime"
@@ -33,9 +34,9 @@ const (
 )
 
 type Result struct {
-	sec  *secp256k1.SecretKey
+	sec  []byte
 	npub []byte
-	pub  *secp256k1.PublicKey
+	pub  []byte
 }
 
 var args struct {
@@ -45,6 +46,7 @@ var args struct {
 }
 
 func main() {
+	lol.SetLogLevel("info")
 	arg.MustParse(&args)
 	if args.String == "" {
 		_, _ = fmt.Fprintln(
@@ -79,7 +81,7 @@ Options:
 	}
 }
 
-func Vanity(str string, where int, threads int) (e error) {
+func Vanity(str string, where int, threads int) (err error) {
 
 	// check the string has valid bech32 ciphers
 	for i := range str {
@@ -122,7 +124,7 @@ out:
 			wm := workingFor % time.Second
 			workingFor -= wm
 			fmt.Printf(
-				"working for %v, attempts %d\n",
+				" working for %v, attempts %d",
 				workingFor, counter.Load(),
 			)
 		case r := <-resC:
@@ -142,20 +144,16 @@ out:
 	wg.Wait()
 
 	fmt.Printf(
-		"generated in %d attempts using %d threads, taking %v\n",
+		"\r# generated in %d attempts using %d threads, taking %v                                                 ",
 		counter.Load(), args.Threads, time.Now().Sub(started),
 	)
-	secBytes := res.sec.Serialize()
-	log.D.Ln(
-		"generated key pair:\n"+
-			"\nhex:\n"+
-			"\tsecret: %s\n"+
-			"\tpublic: %s\n\n",
-		hex.EncodeToString(secBytes),
-		hex.EncodeToString(schnorr.SerializePubKey(res.pub)),
+	fmt.Printf(
+		"\nHSEC = %s\nHPUB = %s\n",
+		hex.EncodeToString(res.sec),
+		hex.EncodeToString(res.pub),
 	)
-	nsec, _ := bech32encoding.SecretKeyToNsec(res.sec)
-	fmt.Printf("\nNSEC = %s\nNPUB = %s\n\n", nsec, res.npub)
+	nsec, _ := bech32encoding.BinToNsec(res.sec)
+	fmt.Printf("NSEC = %s\nNPUB = %s\n", nsec, res.npub)
 	return
 }
 
@@ -185,16 +183,19 @@ out:
 		default:
 		}
 		counter.Inc()
-		r.sec, r.pub, e = GenKeyPair()
+		// r.sec, r.pub, e = GenKeyPair()
+		r.sec, r.pub, e = Gen()
 		if e != nil {
 			log.E.Ln("error generating key: '%v' worker stopping", e)
 			break out
 		}
-		r.npub, e = bech32encoding.PublicKeyToNpub(r.pub)
-		if e != nil {
+		// r.npub, e = bech32encoding.PublicKeyToNpub(r.pub)
+		if r.npub, e = bech32encoding.BinToNpub(r.pub); e != nil {
 			log.E.Ln("fatal error generating npub: %s\n", e)
 			break out
 		}
+		fmt.Printf("\rgenerating key: %s", r.npub)
+		// log.I.F("%s", r.npub)
 		switch where {
 		case PositionBeginning:
 			if bytes.HasPrefix(r.npub, append(prefix, []byte(str)...)) {
@@ -213,6 +214,11 @@ out:
 			}
 		}
 	}
+}
+
+func Gen() (skb, pkb []byte, err error) {
+	skb, pkb, _, _, err = p256k.Generate()
+	return
 }
 
 // GenKeyPair creates a fresh new key pair using the entropy source used by
