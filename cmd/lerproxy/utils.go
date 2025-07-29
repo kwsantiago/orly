@@ -1,7 +1,7 @@
 // Package util provides some helpers for lerproxy, a tool to convert maps of
 // strings to slices of the same strings, and a helper to avoid putting two / in
 // a URL.
-package util
+package main
 
 import "strings"
 

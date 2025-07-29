@@ -1,10 +1,7 @@
-// Package tcpkeepalive implements a net.TCPListener with a singleton set period
-// for a default 3 minute keep-aline.
-package tcpkeepalive
+package main
 
 import (
 	"net"
-	"orly.dev/cmd/lerproxy/timeout"
 	"orly.dev/pkg/utils/chk"
 	"time"
 )
@@ -33,7 +30,7 @@ func (ln Listener) Accept() (conn net.Conn, e error) {
 		return
 	}
 	if ln.Duration != 0 {
-		return timeout.Conn{Duration: ln.Duration, TCPConn: tc}, nil
+		return Conn{Duration: ln.Duration, TCPConn: tc}, nil
 	}
 	return tc, nil
 }

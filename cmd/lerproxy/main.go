@@ -1,6 +1,3 @@
-// Command lerproxy implements https reverse proxy with automatic LetsEncrypt
-// usage for multiple hostnames/backends,your own SSL certificates, nostr NIP-05
-// DNS verification hosting and Go vanity redirects.
 package main
 
 import (
@@ -14,11 +11,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"orly.dev/cmd/lerproxy/buf"
-	"orly.dev/cmd/lerproxy/hsts"
-	"orly.dev/cmd/lerproxy/reverse"
-	"orly.dev/cmd/lerproxy/tcpkeepalive"
-	"orly.dev/cmd/lerproxy/util"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
@@ -35,7 +27,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type runArgs struct {
+type RunArgs struct {
 	Addr  string        `arg:"-l,--listen" default:":https" help:"address to listen at"`
 	Conf  string        `arg:"-m,--map" default:"mapping.txt" help:"file with host/backend mapping"`
 	Cache string        `arg:"-c,--cachedir" default:"/var/cache/letsencrypt" help:"path to directory to cache key and certificates"`
@@ -49,18 +41,18 @@ type runArgs struct {
 	// Rewrites string        `arg:"-r,--rewrites" default:"rewrites.txt"`
 }
 
-var args runArgs
+var args RunArgs
 
 func main() {
 	arg.MustParse(&args)
 	ctx, cancel := signal.NotifyContext(context.Bg(), os.Interrupt)
 	defer cancel()
-	if err := run(ctx, args); chk.T(err) {
+	if err := Run(ctx, args); chk.T(err) {
 		log.F.Ln(err)
 	}
 }
 
-func run(c context.T, args runArgs) (err error) {
+func Run(c context.T, args RunArgs) (err error) {
 
 	if args.Cache == "" {
 		err = log.E.Err("no cache specified")
@@ -69,7 +61,7 @@ func run(c context.T, args runArgs) (err error) {
 
 	var srv *http.Server
 	var httpHandler http.Handler
-	if srv, httpHandler, err = setupServer(args); chk.E(err) {
+	if srv, httpHandler, err = SetupServer(args); chk.E(err) {
 		return
 	}
 	srv.ReadHeaderTimeout = 5 * time.Second
@@ -120,7 +112,7 @@ func run(c context.T, args runArgs) (err error) {
 					return
 				}
 				defer ln.Close()
-				ln = tcpkeepalive.Listener{
+				ln = Listener{
 					Duration:    args.Idle,
 					TCPListener: ln.(*net.TCPListener),
 				}
@@ -141,8 +133,8 @@ func run(c context.T, args runArgs) (err error) {
 	return group.Wait()
 }
 
-// TLSConfig returns a TLSConfig that works with a LetsEncrypt automatic SSL cert issuer as well
-// as any provided .pem certificates from providers.
+// TLSConfig returns a TLSConfig that works with a LetsEncrypt automatic SSL
+// cert issuer as well as any provided .pem certificates from providers.
 //
 // The certs are provided in the form "example.com:/path/to/cert.pem"
 func TLSConfig(m *autocert.Manager, certs ...string) (tc *tls.Config) {
@@ -175,8 +167,9 @@ func TLSConfig(m *autocert.Manager, certs ...string) (tc *tls.Config) {
 				own = i
 				break
 			}
-			// if it got to us and ends in the same name dot tld assume the subdomain was
-			// redirected or it's a wildcard certificate, thus only the ending needs to match.
+			// if it got to us and ends in the same-name dot tld assume the
+			// subdomain was redirected, or it is a wildcard certificate; thus
+			// only the ending needs to match.
 			if strings.HasSuffix(helo.ServerName, i) {
 				own = i
 				break
@@ -192,17 +185,17 @@ func TLSConfig(m *autocert.Manager, certs ...string) (tc *tls.Config) {
 	return
 }
 
-func setupServer(a runArgs) (s *http.Server, h http.Handler, err error) {
+func SetupServer(a RunArgs) (s *http.Server, h http.Handler, err error) {
 	var mapping map[string]string
-	if mapping, err = readMapping(a.Conf); chk.E(err) {
+	if mapping, err = ReadMapping(a.Conf); chk.E(err) {
 		return
 	}
 	var proxy http.Handler
-	if proxy, err = setProxy(mapping); chk.E(err) {
+	if proxy, err = SetProxy(mapping); chk.E(err) {
 		return
 	}
 	if a.HSTS {
-		proxy = &hsts.Proxy{Handler: proxy}
+		proxy = &Proxy{Handler: proxy}
 	}
 	if err = os.MkdirAll(a.Cache, 0700); chk.E(err) {
 		err = fmt.Errorf(
@@ -215,7 +208,7 @@ func setupServer(a runArgs) (s *http.Server, h http.Handler, err error) {
 	m := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache(a.Cache),
-		HostPolicy: autocert.HostWhitelist(util.GetKeys(mapping)...),
+		HostPolicy: autocert.HostWhitelist(GetKeys(mapping)...),
 		Email:      a.Email,
 	}
 	s = &http.Server{
@@ -232,7 +225,7 @@ type NostrJSON struct {
 	Relays map[string][]string `json:"relays"`
 }
 
-func setProxy(mapping map[string]string) (h http.Handler, err error) {
+func SetProxy(mapping map[string]string) (h http.Handler, err error) {
 	if len(mapping) == 0 {
 		return nil, fmt.Errorf("empty mapping")
 	}
@@ -327,7 +320,7 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 		} else if u, err := url.Parse(ba); err == nil {
 			switch u.Scheme {
 			case "http", "https":
-				rp := reverse.NewSingleHostReverseProxy(u)
+				rp := NewSingleHostReverseProxy(u)
 				modifyCORSResponse := func(res *http.Response) error {
 					res.Header.Set(
 						"Access-Control-Allow-Methods",
@@ -341,7 +334,7 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				rp.ErrorLog = stdLog.New(
 					os.Stderr, "lerproxy", stdLog.Llongfile,
 				)
-				rp.BufferPool = buf.Pool{}
+				rp.BufferPool = Pool{}
 				mux.Handle(hn+"/", rp)
 				continue
 			}
@@ -368,14 +361,14 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				},
 			},
 			ErrorLog:   stdLog.New(io.Discard, "", 0),
-			BufferPool: buf.Pool{},
+			BufferPool: Pool{},
 		}
 		mux.Handle(hn+"/", rp)
 	}
 	return mux, nil
 }
 
-func readMapping(file string) (m map[string]string, err error) {
+func ReadMapping(file string) (m map[string]string, err error) {
 	var f *os.File
 	if f, err = os.Open(file); chk.E(err) {
 		return
