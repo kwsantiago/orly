@@ -9,6 +9,7 @@ import (
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
+	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
@@ -16,6 +17,7 @@ import (
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
 	"runtime/debug"
+	"time"
 )
 
 // IdPkTs is a map of event IDs to their id, pubkey, kind, and timestamp
@@ -45,11 +47,15 @@ func (s *Server) SpiderFetch(
 	}
 
 	var kindsList string
-	for i, kk := range k.K {
-		if i > 0 {
-			kindsList += ","
+	if k != nil {
+		for i, kk := range k.K {
+			if i > 0 {
+				kindsList += ","
+			}
+			kindsList += kk.Name()
 		}
-		kindsList += kk.Name()
+	} else {
+		kindsList = "*"
 	}
 
 	// Query local database
@@ -115,12 +121,19 @@ func (s *Server) SpiderFetch(
 			)
 			batchPkList := tag.New(batchPubkeys...)
 			lim := uint(batchPkList.Len())
+			l := &lim
+			var since *timestamp.T
+			if k == nil {
+				since = timestamp.FromTime(time.Now().Add(-1 * time.Hour))
+			} else {
+				l = nil
+			}
 			batchFilter := &filter.F{
 				Kinds:   k,
 				Authors: batchPkList,
-				Limit:   &lim,
+				Since:   since,
+				Limit:   l,
 			}
-
 			for _, seed := range s.C.SpiderSeeds {
 				select {
 				case <-s.Ctx.Done():

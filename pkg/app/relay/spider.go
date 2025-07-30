@@ -118,15 +118,17 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		s.SetOwnersFollowed(ownersFollowed)
 		s.SetFollowedFollows(followedFollows)
 		s.SetOwnersMuted(ownersMuted)
-		// lastly, update users profile metadata and relay lists in the background
+		// lastly, update all followed users new events in the background
 		if !dontFetch {
 			go func() {
 				everyone := append(ownersFollowed, followedFollows...)
 				s.SpiderFetch(
-					kinds.New(
-						kind.ProfileMetadata, kind.RelayListMetadata,
-						kind.DMRelaysList,
-					), false, true, everyone...,
+					// kinds.New(
+					// kind.ProfileMetadata, kind.RelayListMetadata,
+					// kind.DMRelaysList,
+					// ),
+					nil,
+					false, true, everyone...,
 				)
 			}()
 		}
