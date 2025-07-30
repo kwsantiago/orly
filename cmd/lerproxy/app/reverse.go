@@ -11,7 +11,8 @@ import (
 // NewSingleHostReverseProxy is a copy of httputil.NewSingleHostReverseProxy
 // with the addition of forwarding headers:
 //
-// - Legacy X-Forwarded-* headers (X-Forwarded-Proto, X-Forwarded-For, X-Forwarded-Host)
+// - Legacy X-Forwarded-* headers (X-Forwarded-Proto, X-Forwarded-For,
+// X-Forwarded-Host)
 //
 // - Standardized Forwarded header according to RFC 7239
 // (https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded)

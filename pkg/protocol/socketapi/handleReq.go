@@ -90,7 +90,11 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 					npubList += ", "
 				}
 			}
-			if err = noticeenvelope.NewFrom("relay whitelists read access to users within the second degree of the social graph of " + npubList).Write(a.Listener); chk.E(err) {
+			if err = noticeenvelope.NewFrom(
+				"relay whitelists read access to users within the second " +
+					"degree of the follow list graph of " +
+					npubList,
+			).Write(a.Listener); chk.E(err) {
 				err = nil
 			}
 			// request processing terminates here because auth is required and
@@ -131,7 +135,8 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			for _, ev := range events {
 				if !auth.CheckPrivilege(a.Listener.AuthedPubkey(), ev) {
 					log.W.F(
-						"not privileged: client pubkey '%0x' event pubkey '%0x' kind %s privileged: %v",
+						"not privileged: client pubkey '%0x' event "+
+							"pubkey '%0x' kind %s privileged: %v",
 						a.Listener.AuthedPubkey(), ev.Pubkey, ev.Kind.Name(),
 						ev.Kind.IsPrivileged(),
 					)
@@ -155,7 +160,8 @@ func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 			}
 		}
 	}
-	if err = eoseenvelope.NewFrom(env.Subscription).Write(a.Listener); chk.E(err) {
+	if err = eoseenvelope.NewFrom(env.Subscription).
+		Write(a.Listener); chk.E(err) {
 		return
 	}
 	receiver := make(event.C, 32)

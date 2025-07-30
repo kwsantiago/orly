@@ -18,7 +18,9 @@ import (
 	"orly.dev/pkg/utils/normalize"
 )
 
-// Publish processes and stores an event in the server's storage. It handles different types of events: ephemeral, replaceable, and parameterized replaceable.
+// Publish processes and stores an event in the server's storage. It handles
+// different types of events: ephemeral, replaceable, and parameterized
+// replaceable.
 //
 // # Parameters
 //
@@ -61,7 +63,13 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			for _, ev := range evs {
 				del := true
 				if bytes.Equal(ev.ID, evt.ID) {
-					continue
+					return errorf.W(
+						string(
+							normalize.Duplicate.F(
+								"event already in relay database",
+							),
+						),
+					)
 				}
 				log.I.F(
 					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
@@ -74,6 +82,12 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 							),
 						),
 					)
+				}
+				// not deleting these events because some clients are retarded
+				// and the query will pull the new one, but a backup can recover
+				// the data of old ones
+				if ev.Kind.IsDirectoryEvent() {
+					del = false
 				}
 				if evt.Kind.Equal(kind.FollowList) {
 					// if the event is from someone on ownersFollowed or
@@ -99,7 +113,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 							err = nil
 						}
 						// event has been saved and lists updated.
-						return
+						// return
 					}
 
 				}
@@ -121,7 +135,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 								err = nil
 							}
 							// event has been saved and lists updated.
-							return
+							// return
 						}
 					}
 				}
