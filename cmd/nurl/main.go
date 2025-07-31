@@ -190,6 +190,5 @@ func Post(f string, ur *url.URL, sign signer.I) (err error) {
 	if io.Copy(os.Stdout, res.Body); chk.E(err) {
 		return
 	}
-	fmt.Println()
 	return
 }

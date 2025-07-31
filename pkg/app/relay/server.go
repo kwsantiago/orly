@@ -39,6 +39,7 @@ type Server struct {
 	listeners  *publish.S
 	*config.C
 	*Lists
+	*Peers
 	Mux *servemux.S
 }
 
@@ -102,7 +103,11 @@ func NewServer(
 		options: op,
 		C:       sp.C,
 		Lists:   new(Lists),
+		Peers:   new(Peers),
 	}
+	chk.E(
+		s.Peers.Init(sp.C.PeerRelays, sp.C.RelaySecret),
+	)
 	s.listeners = publish.New(socketapi.New(s), openapi.NewPublisher(s))
 	go func() {
 		if err := s.relay.Init(); chk.E(err) {

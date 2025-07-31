@@ -55,7 +55,7 @@ Many browsers have a limited number of SSE channels that can be open at once, so
 			var authed bool
 			var pubkey []byte
 			if x.I.AuthRequired() && !x.I.PublicReadable() {
-				authed, pubkey = x.UserAuth(r, remote)
+				authed, pubkey, _ = x.UserAuth(r, remote)
 				if !authed {
 					err = huma.Error401Unauthorized("Not Authorized")
 					return

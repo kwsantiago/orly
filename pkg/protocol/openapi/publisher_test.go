@@ -54,6 +54,7 @@ func (m *mockServer) AcceptReq(
 
 func (m *mockServer) AddEvent(
 	c ctx.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
+	pubkey []byte,
 ) (accepted bool, message []byte) {
 	return true, nil
 }
@@ -66,8 +67,8 @@ func (m *mockServer) AdminAuth(
 
 func (m *mockServer) UserAuth(
 	r *http.Request, remote string, tolerance ...time.Duration,
-) (authed bool, pubkey []byte) {
-	return false, nil
+) (authed bool, pubkey []byte, super bool) {
+	return false, nil, super
 }
 
 func (m *mockServer) Publish(c ctx.T, evt *event.E) (err error) {

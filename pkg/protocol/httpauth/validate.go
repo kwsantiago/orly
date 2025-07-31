@@ -19,9 +19,10 @@ var ErrMissingKey = fmt.Errorf(
 	"'%s' key missing from request header", HeaderKey,
 )
 
-// CheckAuth verifies a received http.Request has got a valid authentication event in it, withan
-// optional specification for tolerance of before and after, and provides the public key that
-// should be verified to be authorized to access the resource associated with the request.
+// CheckAuth verifies a received http.Request has got a valid authentication
+// event in it, with an optional specification for tolerance of before and
+// after, and provides the public key that should be verified to be authorized
+// to access the resource associated with the request.
 func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 	valid bool,
 	pubkey []byte, err error,
@@ -70,7 +71,7 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			err = errorf.E("rem", rem)
 			return
 		}
-		log.T.F("received http auth event:\n%s\n", ev.SerializeIndented())
+		// log.T.F("received http auth event:\n%s\n", ev.SerializeIndented())
 		// The kind MUST be 27235.
 		if !ev.Kind.Equal(kind.HTTPAuth) {
 			err = errorf.E(
@@ -80,7 +81,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			)
 			return
 		}
-		// if there is an expiration timestamp it supersedes the created_at for validity.
+		// if there is an expiration timestamp, check it supersedes the
+		// created_at for validity.
 		exp := ev.Tags.GetAll(tag.New("expiration"))
 		if exp.Len() > 1 {
 			err = errorf.E(
@@ -106,8 +108,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			}
 			expiring = true
 		} else {
-			// The created_at timestamp MUST be within a reasonable time window (suggestion 60
-			// seconds)
+			// The created_at timestamp MUST be within a reasonable time window
+			// (suggestion 60 seconds)
 			ts := ev.CreatedAt.I64()
 			tn := time.Now().Unix()
 			if ts < tn-tolerate || ts > tn+tolerate {
@@ -126,10 +128,11 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			return
 		}
 		uts := ut.ToSliceOfTags()
-		// The u tag MUST be exactly the same as the absolute request URL (including query
-		// parameters).
+		// The u tag MUST be exactly the same as the absolute request URL
+		// (including query parameters).
 		proto := r.URL.Scheme
-		// if this came through a proxy we need to get the protocol to match the event
+		// if this came through a proxy, we need to get the protocol to match
+		// the event
 		if p := r.Header.Get("X-Forwarded-Proto"); p != "" {
 			proto = p
 		}
@@ -138,11 +141,10 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		}
 		fullUrl := proto + "://" + r.Host + r.URL.RequestURI()
 		evUrl := string(uts[0].Value())
-		// log.I.S(r)
 		log.T.F("full URL: %s event u tag value: %s", fullUrl, evUrl)
 		if expiring {
-			// if it is expiring, the URL only needs to be the same prefix to allow its use with
-			// multiple endpoints.
+			// if it is expiring, the URL only needs to be the same prefix to
+			// allow its use with multiple endpoints.
 			if !strings.HasPrefix(fullUrl, evUrl) {
 				err = errorf.E(
 					"request URL %s is not prefixed with the u tag URL %s",
@@ -158,7 +160,8 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 			return
 		}
 		if !expiring {
-			// The method tag MUST be the same HTTP method used for the requested resource.
+			// The method tag MUST be the same HTTP method used for the
+			// requested resource.
 			mt := ev.Tags.GetAll(tag.New("method"))
 			if mt.Len() != 1 {
 				err = errorf.E(

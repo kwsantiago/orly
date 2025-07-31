@@ -391,7 +391,7 @@ func (a *A) HandleEvent(
 		}
 	}
 	var reason []byte
-	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote())
+	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote(), nil)
 	log.I.F("event %0x added %v %s", env.E.ID, ok, reason)
 	if err = okenvelope.NewFrom(env.E.ID, ok).Write(a.Listener); chk.E(err) {
 		return

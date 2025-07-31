@@ -10,9 +10,8 @@ import (
 )
 
 func (s *Server) UserAuth(
-	r *http.Request, remote string,
-	tolerance ...time.Duration,
-) (authed bool, pubkey []byte) {
+	r *http.Request, remote string, tolerance ...time.Duration,
+) (authed bool, pubkey []byte, super bool) {
 	var valid bool
 	var err error
 	var tolerate time.Duration
@@ -33,6 +32,18 @@ func (s *Server) UserAuth(
 		if bytes.Equal(pk, pubkey) {
 			authed = true
 			return
+		}
+	}
+	// if the client is one of the relay cluster replicas, also set the super
+	// flag to indicate that privilege checks can be bypassed.
+	if len(s.Peers.Pubkeys) > 0 {
+		for _, pk := range s.Peers.Pubkeys {
+			if bytes.Equal(pk, pubkey) {
+				authed = true
+				super = true
+				pubkey = pk
+				return
+			}
 		}
 	}
 	return

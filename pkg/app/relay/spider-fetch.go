@@ -108,9 +108,9 @@ func (s *Server) SpiderFetch(
 
 	if !noFetch && len(s.C.SpiderSeeds) > 0 {
 		// we need to search the spider seeds.
-		// Break up pubkeys into batches of 32
-		for i := 0; i < len(pubkeys); i += 32 {
-			end := i + 32
+		// Break up pubkeys into batches of 128
+		for i := 0; i < len(pubkeys); i += 128 {
+			end := i + 128
 			if end > len(pubkeys) {
 				end = len(pubkeys)
 			}

@@ -610,12 +610,12 @@ Returns events as a JSON array of event objects.`
 		) {
 			r := ctx.Value("http-request").(*http.Request)
 			remote := helpers.GetRemoteFromReq(r)
-			var authed bool
+			var authed, super bool
 			var pubkey []byte
 			// if auth is required and not public readable, the request is not
 			// authorized.
 			if x.I.AuthRequired() && !x.I.PublicReadable() {
-				authed, pubkey = x.UserAuth(r, remote)
+				authed, pubkey, super = x.UserAuth(r, remote)
 				if !authed {
 					err = huma.Error401Unauthorized("Not Authorized")
 					return
@@ -652,7 +652,8 @@ Returns events as a JSON array of event objects.`
 					continue
 				}
 				// filter events the authed pubkey is not privileged to fetch.
-				if x.AuthRequired() && len(pubkey) > 0 {
+				// relay replicas don't have this limitation.
+				if x.AuthRequired() && len(pubkey) > 0 && !super {
 					var tmp event.S
 					for _, ev := range events {
 						if !auth.CheckPrivilege(pubkey, ev) {

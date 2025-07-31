@@ -42,8 +42,7 @@ type C struct {
 	Private        bool     `env:"ORLY_PRIVATE" usage:"do not spider for user metadata because the relay is private and this would leak relay memberships" default:"false"`
 	Whitelist      []string `env:"ORLY_WHITELIST" usage:"only allow connections from this list of IP addresses"`
 	RelaySecret    string   `env:"ORLY_SECRET_KEY" usage:"secret key for relay cluster replication authentication"`
-	PeerRelayURLs  []string `env:"ORLY_PEER_RELAY_URLS" usage:"list of peer relays URLs that new events are pushed to"`
-	PeerRelayKeys  []string `env:"ORLY_PEER_RELAY_KEYS" usage:"list of peer relay public keys that have full read/write privilege"`
+	PeerRelays     []string `env:"ORLY_PEER_RELAYS" usage:"list of peer relays URLs that new events are pushed to in format <pubkey>|<url>"`
 }
 
 // New creates and initializes a new configuration object for the relay

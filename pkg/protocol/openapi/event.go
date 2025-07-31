@@ -98,14 +98,12 @@ func (x *Operations) RegisterEvent(api huma.API) {
 		) {
 			r := ctx.Value("http-request").(*http.Request)
 			remote := helpers.GetRemoteFromReq(r)
-			log.T.F(
-				"%s %s %s", r.URL.String(),
-				remote, input.Body,
-			)
-			var authed bool
+
+			var authed, super bool
+
 			var pubkey []byte
 			if x.I.AuthRequired() {
-				authed, pubkey = x.UserAuth(r, remote)
+				authed, pubkey, super = x.UserAuth(r, remote)
 				if !authed {
 					err = huma.Error401Unauthorized("Not Authorized")
 					return
@@ -118,6 +116,14 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				)
 				return
 			}
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"%s %s %s", r.URL.String(),
+						remote, ev.Marshal(nil),
+					)
+				},
+			)
 			// these aliases make it so most of the following code can be copied
 			// verbatim from its counterpart in socketapi.HandleEvent, with the
 			// aid of a different implementation of the openapi.OK type.
@@ -156,7 +162,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			}
 			// check that relay policy allows this event
 			accept, notice, _ := x.I.AcceptEvent(c, env, r, pubkey, remote)
-			if !accept {
+			if !accept && !super {
 				if err = Ok.Blocked(
 					a, env, notice,
 				); chk.E(err) {
@@ -166,7 +172,9 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			}
 			// check for protected tag (NIP-70)
 			protectedTag := ev.Tags.GetFirst(tag.New("-"))
-			if protectedTag != nil && a.AuthRequired() {
+			// if the super flag was set protected is ignored because the relay
+			// cluster replicas must replicate this event (and all events).
+			if protectedTag != nil && a.AuthRequired() && !super {
 				// check that the pubkey of the event matches the authed pubkey
 				if !bytes.Equal(pubkey, ev.Pubkey) {
 					if err = Ok.Blocked(
@@ -212,13 +220,13 @@ func (x *Operations) RegisterEvent(api huma.API) {
 								return
 							}
 
-							// If we found the referenced event, check if the author
-							// matches
+							// If we found the referenced event, check if the
+							// author matches
 							if len(referencedEvents) > 0 {
 								referencedEvent := referencedEvents[0]
 
-								// Check if the author of the deletion event matches the
-								// author of the referenced event
+								// Check if the author of the deletion event
+								// matches the author of the referenced event
 								if !bytes.Equal(
 									referencedEvent.Pubkey, env.Pubkey,
 								) {
@@ -242,8 +250,8 @@ func (x *Operations) RegisterEvent(api huma.API) {
 									return
 								}
 
-								// Use DeleteEvent to actually delete the referenced
-								// event
+								// Use DeleteEvent to actually delete the
+								// referenced event
 								if err = sto.DeleteEvent(c, eid); chk.E(err) {
 									if err = Ok.Error(
 										a, env,
@@ -404,8 +412,8 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				}
 				// Check if this event has been deleted before
 				if ev.Kind.K != kind.Deletion.K {
-					// Create a filter to check for deletion events that reference this
-					// event ID
+					// Create a filter to check for deletion events that
+					// reference this event ID
 					f := filter.New()
 					f.Kinds.K = []*kind.T{kind.Deletion}
 					f.Tags.AppendTags(tag.New([]byte{'e'}, ev.ID))
@@ -426,11 +434,9 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				}
 			}
 			var reason []byte
-			ok, reason = x.I.AddEvent(
-				c, x.Relay(), ev, r, remote,
-			)
-			log.I.F("event %0x added %v %s", ev.ID, ok, reason)
-			if !ok {
+			ok, reason = x.I.AddEvent(c, x.Relay(), ev, r, remote, pubkey)
+			log.I.F("http API event %0x added %v %s", ev.ID, ok, reason)
+			if !ok && err != nil {
 				if err = Ok.Error(
 					a, env, err.Error(),
 				); chk.E(err) {

@@ -2,41 +2,19 @@ package relay
 
 import (
 	"bytes"
-	"orly.dev/pkg/crypto/ec/bech32"
-	"orly.dev/pkg/encoders/bech32encoding"
-	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/keys"
 	"orly.dev/pkg/utils/log"
 )
 
 func (s *Server) Spider(noFetch ...bool) (err error) {
 	var ownersPubkeys [][]byte
 	for _, v := range s.C.Owners {
-		var prf []byte
 		var pk []byte
-		var bits5 []byte
-		if prf, bits5, err = bech32.DecodeNoLimit([]byte(v)); chk.D(err) {
-			// try hex then
-			if _, err = hex.DecBytes(pk, []byte(v)); chk.E(err) {
-				log.W.F(
-					"owner key %s is neither bech32 npub nor hex",
-					v,
-				)
-				continue
-			}
-		} else {
-			if !bytes.Equal(prf, bech32encoding.NpubHRP) {
-				log.W.F(
-					"owner key %s is neither bech32 npub nor hex",
-					v,
-				)
-				continue
-			}
-			if pk, err = bech32.ConvertBits(bits5, 5, 8, false); chk.E(err) {
-				continue
-			}
+		if pk, err = keys.DecodeNpubOrHex(v); chk.E(err) {
+			continue
 		}
 		// owners themselves are on the OwnersFollowed list as first level
 		ownersPubkeys = append(ownersPubkeys, pk)
