@@ -36,7 +36,7 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 	if len(tolerance) == 0 {
 		tolerance = append(tolerance, time.Minute)
 	}
-	log.I.S(tolerance)
+	// log.I.S(tolerance)
 	if tolerance[0] == 0 {
 		tolerance[0] = time.Minute
 	}

@@ -11,7 +11,6 @@ import (
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/utils/chk"
-	"orly.dev/pkg/utils/log"
 	"strings"
 )
 
@@ -54,7 +53,7 @@ func CreateNIP98Blob(
 	if err = ev.Sign(sign); chk.E(err) {
 		return
 	}
-	log.T.F("nip-98 http auth event:\n%s\n", ev.SerializeIndented())
+	// log.T.F("nip-98 http auth event:\n%s\n", ev.SerializeIndented())
 	blob = base64.URLEncoding.EncodeToString(ev.Serialize())
 	return
 }

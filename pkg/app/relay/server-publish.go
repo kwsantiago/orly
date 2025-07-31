@@ -241,5 +241,10 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 	) {
 		return
 	}
+	log.T.C(
+		func() string {
+			return fmt.Sprintf("saved event:\n%s", evt.Serialize())
+		},
+	)
 	return
 }

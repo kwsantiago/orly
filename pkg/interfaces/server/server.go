@@ -23,7 +23,7 @@ type I interface {
 	) (allowed *filters.T, accept bool, modified bool)
 	AddEvent(
 		c context.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
-		pubkey []byte,
+		pubkeys [][]byte,
 	) (accepted bool, message []byte)
 	AdminAuth(
 		r *http.Request, remote string, tolerance ...time.Duration,

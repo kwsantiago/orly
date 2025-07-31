@@ -17,6 +17,7 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
+	"strings"
 )
 
 var EventBody = &huma.RequestBody{
@@ -109,6 +110,21 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					return
 				}
 			}
+			// get the other pubkeys from the header that will be sent forward
+			// by the other replicas to avoid repeatedly sending the message
+			// back to replicas that already received and forwarded it.
+			pubkeyHeader := r.Header.Get("X-Pubkeys")
+			pubkeys := [][]byte{pubkey}
+			if strings.Contains(pubkeyHeader, ":") {
+				split := strings.Split(pubkeyHeader, ":")
+				for _, pk := range split {
+					var pkb []byte
+					if pkb, err = hex.Dec(pk); chk.E(err) {
+						continue
+					}
+					pubkeys = append(pubkeys, pkb)
+				}
+			}
 			var ev *event.E
 			if ev, err = input.Body.ToEvent(); chk.E(err) {
 				err = huma.Error422UnprocessableEntity(
@@ -116,14 +132,6 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				)
 				return
 			}
-			log.T.C(
-				func() string {
-					return fmt.Sprintf(
-						"%s %s %s", r.URL.String(),
-						remote, ev.Marshal(nil),
-					)
-				},
-			)
 			// these aliases make it so most of the following code can be copied
 			// verbatim from its counterpart in socketapi.HandleEvent, with the
 			// aid of a different implementation of the openapi.OK type.
@@ -434,7 +442,9 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				}
 			}
 			var reason []byte
-			ok, reason = x.I.AddEvent(c, x.Relay(), ev, r, remote, pubkey)
+			ok, reason = x.I.AddEvent(
+				c, x.Relay(), ev, r, remote, pubkeys,
+			)
 			log.I.F("http API event %0x added %v %s", ev.ID, ok, reason)
 			if !ok && err != nil {
 				if err = Ok.Error(
