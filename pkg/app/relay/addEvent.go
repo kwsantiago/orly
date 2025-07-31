@@ -125,7 +125,6 @@ func (s *Server) AddEvent(
 			// (they're unpacked from a string containing both, appended at the
 			// same time), so if the pubkeys from the http event endpoint sent
 			// us here matches the index of this address, we can skip it.
-			log.I.S(pubkeys)
 			for _, pk := range pubkeys {
 				if bytes.Equal(s.Peers.Pubkeys[i], pk) {
 					log.I.F(
@@ -135,7 +134,6 @@ func (s *Server) AddEvent(
 					continue replica
 				}
 			}
-			log.I.F("sending to replica %s", a)
 			var ur *url.URL
 			if ur, err = url.Parse(a + "/api/event"); chk.E(err) {
 				continue
