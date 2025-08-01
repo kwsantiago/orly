@@ -97,16 +97,18 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		s.SetFollowedFollows(followedFollows)
 		s.SetOwnersMuted(ownersMuted)
 		// lastly, update all followed users new events in the background
-		if !dontFetch {
+		if !dontFetch && s.C.SpiderType != "none" {
 			go func() {
+				var k *kinds.T
+				if s.C.SpiderType == "directory" {
+					k = kinds.New(
+						kind.ProfileMetadata, kind.RelayListMetadata,
+						kind.DMRelaysList,
+					)
+				}
 				everyone := append(ownersFollowed, followedFollows...)
-				s.SpiderFetch(
-					// kinds.New(
-					// kind.ProfileMetadata, kind.RelayListMetadata,
-					// kind.DMRelaysList,
-					// ),
-					nil,
-					false, true, everyone...,
+				_, _ = s.SpiderFetch(
+					k, false, true, everyone...,
 				)
 			}()
 		}

@@ -33,6 +33,9 @@ func (p *Peers) Init(
 	addresses []string, sec string,
 ) (err error) {
 	for _, address := range addresses {
+		if len(address) == 0 {
+			continue
+		}
 		split := strings.Split(address, "@")
 		if len(split) != 2 {
 			log.E.F("invalid peer address: %s", address)
