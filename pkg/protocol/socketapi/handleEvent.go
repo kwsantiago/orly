@@ -163,6 +163,12 @@ func (a *A) HandleEvent(
 	// check and process delete
 	if env.E.Kind.K == kind.Deletion.K {
 		log.I.F("delete event\n%s", env.E.Serialize())
+		var ownerDelete bool
+		for _, pk := range a.OwnersPubkeys() {
+			if bytes.Equal(pk, env.Pubkey) {
+				ownerDelete = true
+			}
+		}
 		for _, t := range env.Tags.ToSliceOfTags() {
 			var res []*event.E
 			if t.Len() >= 2 {
@@ -196,15 +202,17 @@ func (a *A) HandleEvent(
 						referencedEvent := referencedEvents[0]
 
 						// Check if the author of the deletion event matches the
-						// author of the referenced event
-						if !bytes.Equal(referencedEvent.Pubkey, env.Pubkey) {
+						// author of the referenced event. Owners can delete
+						// anything.
+						if !bytes.Equal(
+							referencedEvent.Pubkey, env.Pubkey,
+						) && !ownerDelete {
 							if err = Ok.Blocked(
 								a, env,
-								"blocked: cannot delete events from other authors",
+								"blocked: can't delete events from other authors",
 							); chk.E(err) {
 								return
 							}
-							return
 						}
 
 						// Create eventid.T from the event ID bytes
@@ -278,7 +286,7 @@ func (a *A) HandleEvent(
 						}
 						return
 					}
-					if !bytes.Equal(pk, env.E.Pubkey) {
+					if !bytes.Equal(pk, env.E.Pubkey) && !ownerDelete {
 						if err = Ok.Blocked(
 							a, env,
 							"can't delete other users' events (delete by a tag)",
@@ -327,7 +335,7 @@ func (a *A) HandleEvent(
 					)
 					continue
 				}
-				if !bytes.Equal(target.Pubkey, env.Pubkey) {
+				if !bytes.Equal(target.Pubkey, env.Pubkey) && !ownerDelete {
 					if err = Ok.Error(
 						a, env, "only author can delete event",
 					); chk.E(err) {
