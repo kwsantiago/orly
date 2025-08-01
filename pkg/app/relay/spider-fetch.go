@@ -1,7 +1,6 @@
 package relay
 
 import (
-	"fmt"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
@@ -15,7 +14,6 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
-	"orly.dev/pkg/utils/lol"
 	"runtime/debug"
 	"time"
 )
@@ -158,16 +156,13 @@ func (s *Server) SpiderFetch(
 					err = nil
 					return
 				}
-
 				// Process each event immediately
 				for i, ev := range evss {
 					// log.I.S(ev)
 					// Create a key based on pubkey and kind for deduplication
 					pkKindKey := string(ev.Pubkey) + string(ev.Kind.Marshal(nil))
-
 					// Check if we already have an event with this pubkey and kind
 					existing, exists := pkKindMap[pkKindKey]
-
 					// If it doesn't exist or the new event is newer, store it and save to database
 					if !exists || ev.CreatedAtInt64() > existing.Timestamp {
 						var ser *types.Uint40
@@ -180,9 +175,7 @@ func (s *Server) SpiderFetch(
 							if valid, err = ev.Verify(); chk.E(err) || !valid {
 								continue
 							}
-							log.I.F("event %0x is valid", ev.ID)
 						}
-
 						// Save the event to the database
 						if _, _, err = s.Storage().SaveEvent(
 							s.Ctx, ev, true, // already verified
@@ -190,18 +183,6 @@ func (s *Server) SpiderFetch(
 							err = nil
 							continue
 						}
-						if lol.Level.Load() == lol.Trace {
-							log.T.C(
-								func() string {
-									return fmt.Sprintf(
-										"saved event:\n%s", ev.Marshal(nil),
-									)
-								},
-							)
-						} else {
-							log.I.F("saved event: %0x", ev.ID)
-						}
-
 						// Store the essential information
 						pkKindMap[pkKindKey] = &IdPkTs{
 							Id:        ev.ID,
@@ -209,7 +190,6 @@ func (s *Server) SpiderFetch(
 							Kind:      ev.Kind.ToU16(),
 							Timestamp: ev.CreatedAtInt64(),
 						}
-
 						// Extract p tags if not in noExtract mode
 						if !noExtract {
 							t := ev.Tags.GetAll(tag.New("p"))
@@ -227,7 +207,6 @@ func (s *Server) SpiderFetch(
 							}
 						}
 					}
-
 					// Nil the event in the slice to free memory
 					evss[i] = nil
 				}
@@ -236,17 +215,14 @@ func (s *Server) SpiderFetch(
 	}
 	chk.E(s.Storage().Sync())
 	debug.FreeOSMemory()
-
 	// If we're in noExtract mode, just return
 	if noExtract {
 		return
 	}
-
 	// Convert the collected pubkeys to the return format
 	for pk := range pkMap {
 		pks = append(pks, []byte(pk))
 	}
-
 	log.I.F("found %d pks", len(pks))
 	return
 }
