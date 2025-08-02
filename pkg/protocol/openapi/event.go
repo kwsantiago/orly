@@ -16,8 +16,10 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/iptracker"
 	"orly.dev/pkg/utils/log"
 	"strings"
+	"time"
 )
 
 var EventBody = &huma.RequestBody{
@@ -104,9 +106,23 @@ func (x *Operations) RegisterEvent(api huma.API) {
 
 			var pubkey []byte
 			if x.I.AuthRequired() {
+				// Check if the IP is blocked due to too many failed auth attempts
+				if iptracker.Global.IsBlocked(remote) {
+					blockedUntil := iptracker.Global.GetBlockedUntil(remote)
+					err = huma.Error403Forbidden(fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", blockedUntil.Format(time.RFC3339)))
+					return
+				}
+				
 				authed, pubkey, super = x.UserAuth(r, remote)
 				if !authed {
-					err = huma.Error401Unauthorized("Not Authorized")
+					// Record the failed authentication attempt
+					blocked := iptracker.Global.RecordFailedAttempt(remote)
+					if blocked {
+						blockedUntil := iptracker.Global.GetBlockedUntil(remote)
+						err = huma.Error403Forbidden(fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", blockedUntil.Format(time.RFC3339)))
+					} else {
+						err = huma.Error401Unauthorized("Not Authorized")
+					}
 					return
 				}
 			}
