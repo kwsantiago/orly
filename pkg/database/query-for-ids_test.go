@@ -60,7 +60,7 @@ func TestQueryForIds(t *testing.T) {
 		events = append(events, ev)
 
 		// Save the event to the database
-		if _, _, err = db.SaveEvent(ctx, ev, false); err != nil {
+		if _, _, err = db.SaveEvent(ctx, ev, false, nil); err != nil {
 			t.Fatalf("Failed to save event #%d: %v", eventCount+1, err)
 		}
 

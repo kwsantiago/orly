@@ -20,9 +20,9 @@ import (
 )
 
 // SaveEvent saves an event to the database, generating all the necessary indexes.
-func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
-	kc, vc int, err error,
-) {
+func (d *D) SaveEvent(
+	c context.T, ev *event.E, noVerify bool, owners [][]byte,
+) (kc, vc int, err error) {
 	if !noVerify {
 		// check if the event already exists
 		var ser *types.Uint40
@@ -94,9 +94,13 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 		}
 	} else {
 		var idxs []Range
+		keys := [][]byte{ev.Pubkey}
+		for _, owner := range owners {
+			keys = append(keys, owner)
+		}
 		if idxs, err = GetIndexesFromFilter(
 			&filter.F{
-				Authors: tag.New(ev.Pubkey),
+				Authors: tag.New(keys...),
 				Kinds:   kinds.New(kind.Deletion),
 				Tags:    tags.New(tag.New([]byte("#e"), ev.ID)),
 			},
@@ -115,7 +119,7 @@ func (d *D) SaveEvent(c context.T, ev *event.E, noVerify bool) (
 			// really there can only be one of these; the chances of an idhash
 			// collision are basically zero in practice, at least, one in a
 			// billion or more anyway, more than a human is going to create.
-			err = errorf.E("blocked: %0x was deleted by event ID", ev.ID)
+			err = errorf.E("blocked: event %0x deleted by event ID", ev.ID)
 			return
 		}
 	}

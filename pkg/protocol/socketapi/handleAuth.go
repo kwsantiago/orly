@@ -71,16 +71,6 @@ func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 				env.Event.Pubkey,
 			)
 			a.Listener.SetAuthedPubkey(env.Event.Pubkey)
-			// ev := a.Listener.GetPendingEvent()
-			// if ev != nil {
-			// 	var accepted bool
-			// 	if accepted, msg = a.I.AddEvent(
-			// 		context.Bg(), srv.Relay(), ev, a.Listener.Request,
-			// 		a.Listener.RealRemote(),
-			// 	); accepted {
-			// 		log.W.F("saved event %0x", ev.Id)
-			// 	}
-			// }
 		}
 	}
 	return

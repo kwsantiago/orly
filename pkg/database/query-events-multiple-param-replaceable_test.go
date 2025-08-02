@@ -45,7 +45,7 @@ func TestMultipleParameterizedReplaceableEvents(t *testing.T) {
 	baseEvent.Sign(sign)
 
 	// Save the base parameterized replaceable event
-	if _, _, err := db.SaveEvent(ctx, baseEvent, false); err != nil {
+	if _, _, err := db.SaveEvent(ctx, baseEvent, false, nil); err != nil {
 		t.Fatalf("Failed to save base parameterized replaceable event: %v", err)
 	}
 
@@ -63,7 +63,7 @@ func TestMultipleParameterizedReplaceableEvents(t *testing.T) {
 	newerEvent.Sign(sign)
 
 	// Save the newer parameterized replaceable event
-	if _, _, err := db.SaveEvent(ctx, newerEvent, false); err != nil {
+	if _, _, err := db.SaveEvent(ctx, newerEvent, false, nil); err != nil {
 		t.Fatalf(
 			"Failed to save newer parameterized replaceable event: %v", err,
 		)
@@ -83,7 +83,7 @@ func TestMultipleParameterizedReplaceableEvents(t *testing.T) {
 	newestEvent.Sign(sign)
 
 	// Save the newest parameterized replaceable event
-	if _, _, err := db.SaveEvent(ctx, newestEvent, false); err != nil {
+	if _, _, err := db.SaveEvent(ctx, newestEvent, false, nil); err != nil {
 		t.Fatalf(
 			"Failed to save newest parameterized replaceable event: %v", err,
 		)

@@ -56,7 +56,7 @@ func (d *D) Import(rr io.Reader) {
 				continue
 			}
 
-			if _, _, err = d.SaveEvent(d.ctx, ev, false); err != nil {
+			if _, _, err = d.SaveEvent(d.ctx, ev, false, nil); err != nil {
 				continue
 			}
 

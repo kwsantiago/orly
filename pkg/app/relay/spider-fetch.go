@@ -178,7 +178,7 @@ func (s *Server) SpiderFetch(
 						}
 						// Save the event to the database
 						if _, _, err = s.Storage().SaveEvent(
-							s.Ctx, ev, true, // already verified
+							s.Ctx, ev, true, nil,
 						); chk.E(err) {
 							err = nil
 							continue

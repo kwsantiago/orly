@@ -16,11 +16,6 @@ import (
 	"strconv"
 )
 
-// QueryEvents retrieves events based on the provided filter. If the filter
-// contains Ids, it fetches events by those Ids directly, overriding other
-// filter criteria. Otherwise, it queries by other filter criteria and fetches
-// matching events. Results are returned in reverse chronological order of their
-// creation timestamps.
 func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 	// if there is Ids in the query, this overrides anything else
 	if f.Ids != nil && f.Ids.Len() > 0 {

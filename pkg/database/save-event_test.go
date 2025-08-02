@@ -64,7 +64,7 @@ func TestSaveEvents(t *testing.T) {
 
 		// Save the event to the database
 		var k, v int
-		if k, v, err = db.SaveEvent(ctx, ev, false); err != nil {
+		if k, v, err = db.SaveEvent(ctx, ev, false, nil); err != nil {
 			t.Fatalf("Failed to save event #%d: %v", eventCount+1, err)
 		}
 		kc += k
@@ -125,7 +125,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 	regularEvent.Sign(sign)
 
 	// Save the regular event
-	if _, _, err := db.SaveEvent(ctx, regularEvent, false); err != nil {
+	if _, _, err := db.SaveEvent(ctx, regularEvent, false, nil); err != nil {
 		t.Fatalf("Failed to save regular event: %v", err)
 	}
 
@@ -146,7 +146,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 	deletionEvent.Sign(sign)
 
 	// Try to save the deletion event, it should be rejected
-	_, _, err = db.SaveEvent(ctx, deletionEvent, false)
+	_, _, err = db.SaveEvent(ctx, deletionEvent, false, nil)
 	if err == nil {
 		t.Fatal("Expected deletion event with e-tag to be rejected, but it was accepted")
 	}
@@ -198,12 +198,12 @@ func TestSaveExistingEvent(t *testing.T) {
 	ev.Sign(sign)
 
 	// Save the event for the first time
-	if _, _, err := db.SaveEvent(ctx, ev, false); err != nil {
+	if _, _, err := db.SaveEvent(ctx, ev, false, nil); err != nil {
 		t.Fatalf("Failed to save event: %v", err)
 	}
 
 	// Try to save the same event again, it should be rejected
-	_, _, err = db.SaveEvent(ctx, ev, false)
+	_, _, err = db.SaveEvent(ctx, ev, false, nil)
 	if err == nil {
 		t.Fatal("Expected error when saving an existing event, but got nil")
 	}

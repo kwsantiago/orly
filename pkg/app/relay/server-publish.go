@@ -102,7 +102,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					}
 					if isFollowed {
 						if _, _, err = sto.SaveEvent(
-							c, evt, false,
+							c, evt, false, nil,
 						); err != nil && !errors.Is(
 							err, store.ErrDupEvent,
 						) {
@@ -124,7 +124,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					for _, pk := range owners {
 						if bytes.Equal(evt.Pubkey, pk) {
 							if _, _, err = sto.SaveEvent(
-								c, evt, false,
+								c, evt, false, nil,
 							); err != nil && !errors.Is(
 								err, store.ErrDupEvent,
 							) {
@@ -236,7 +236,9 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			}
 		}
 	}
-	if _, _, err = sto.SaveEvent(c, evt, false); err != nil && !errors.Is(
+	if _, _, err = sto.SaveEvent(
+		c, evt, false, append(s.Peers.Pubkeys, s.ownersPubkeys...),
+	); err != nil && !errors.Is(
 		err, store.ErrDupEvent,
 	) {
 		return
