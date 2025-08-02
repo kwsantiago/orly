@@ -7,6 +7,7 @@ import (
 	"orly.dev/pkg/interfaces/server"
 	"orly.dev/pkg/protocol/auth"
 	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/iptracker"
 	"orly.dev/pkg/utils/log"
 )
 
@@ -71,6 +72,9 @@ func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 				env.Event.Pubkey,
 			)
 			a.Listener.SetAuthedPubkey(env.Event.Pubkey)
+			
+			// If authentication is successful, remove any blocks for this IP
+			iptracker.Global.Authenticate(a.Listener.RealRemote())
 		}
 	}
 	return

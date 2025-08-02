@@ -124,6 +124,9 @@ func (x *Operations) RegisterEvent(api huma.API) {
 						err = huma.Error401Unauthorized("Not Authorized")
 					}
 					return
+				} else {
+					// If authentication is successful, remove any blocks for this IP
+					iptracker.Global.Authenticate(remote)
 				}
 			}
 			// get the other pubkeys from the header that will be sent forward
