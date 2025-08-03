@@ -18,6 +18,7 @@ import (
 	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/log"
 	"sync"
 	"time"
 )
@@ -38,7 +39,6 @@ func NewWalletServiceKeyPair(walletKey signer.I, clientPubkey []byte) (
 	if len(clientPubkey) == 0 {
 		return nil, fmt.Errorf("missing client pubkey")
 	}
-
 	return &WalletServiceKeyPair{walletKey, clientPubkey}, nil
 }
 
@@ -61,7 +61,6 @@ func NewWalletService(options *NewWalletServiceOptions) (
 	if options.RelayURL == "" {
 		return nil, fmt.Errorf("missing relay URL")
 	}
-
 	return &WalletService{
 		relayURL: options.RelayURL,
 	}, nil
@@ -163,21 +162,11 @@ func (s *WalletService) Subscribe(
 						go s.handleEvent(ev, keypair, handler)
 					case <-sub.EndOfStoredEvents:
 						// Ignore
-						//
-						// todo: LLM thought there was an Errors channel
-						//  in Subscription. there isn't in go-nostr or here.
-						//
-						// case err = <-sub.:
-						// 	errCh <- fmt.Errorf("subscription error: %w", err)
-						// 	sub.Close()
-						// 	time.Sleep(1 * time.Second)
-						// 	break
 					}
 				}
 			}
 		}
 	}()
-
 	return func() {
 		cancel()
 		<-doneCh
@@ -200,24 +189,22 @@ func (s *WalletService) handleEvent(
 			break
 		}
 	}
-
+	var err error
 	// Decrypt content
-	decryptedContent, err := s.decrypt(keypair, ev.Content, encryptionType)
-	if err != nil {
-		fmt.Printf("Failed to decrypt ev content: %v\n", err)
+	var decryptedContent []byte
+	if decryptedContent, err = s.decrypt(
+		keypair, ev.Content, encryptionType,
+	); chk.E(err) {
 		return
 	}
-
 	// Parse request
 	var request struct {
 		Method Method          `json:"method"`
 		Params json.RawMessage `json:"params"`
 	}
-	if err := json.Unmarshal([]byte(decryptedContent), &request); err != nil {
-		fmt.Printf("Failed to parse request: %v\n", err)
+	if err = json.Unmarshal([]byte(decryptedContent), &request); chk.E(err) {
 		return
 	}
-
 	// Handle request
 	var response *WalletServiceResponse
 	switch request.Method {
@@ -225,22 +212,19 @@ func (s *WalletService) handleEvent(
 		response, err = handler.GetInfo()
 	case MakeInvoice:
 		var params MakeInvoiceRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse make_invoice params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
 			return
 		}
 		response, err = handler.MakeInvoice(&params)
 	case PayInvoice:
 		var params PayInvoiceRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse pay_invoice params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
 			return
 		}
 		response, err = handler.PayInvoice(&params)
 	case PayKeysend:
 		var params PayKeysendRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse pay_keysend params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
 			return
 		}
 		response, err = handler.PayKeysend(&params)
@@ -248,22 +232,20 @@ func (s *WalletService) handleEvent(
 		response, err = handler.GetBalance()
 	case LookupInvoice:
 		var params LookupInvoiceRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse lookup_invoice params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
+			log.E.F("Failed to parse lookup_invoice params: %v\n", err)
 			return
 		}
 		response, err = handler.LookupInvoice(&params)
 	case ListTransactions:
 		var params ListTransactionsRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse list_transactions params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
 			return
 		}
 		response, err = handler.ListTransactions(&params)
 	case SignMessage:
 		var params SignMessageRequest
-		if err := json.Unmarshal(request.Params, &params); err != nil {
-			fmt.Printf("Failed to parse sign_message params: %v\n", err)
+		if err = json.Unmarshal(request.Params, &params); chk.E(err) {
 			return
 		}
 		response, err = handler.SignMessage(&params)
@@ -276,14 +258,11 @@ func (s *WalletService) handleEvent(
 			},
 		}
 	}
-
-	if err != nil {
-		fmt.Printf("Handler error: %v\n", err)
+	if chk.E(err) {
 		return
 	}
-
 	if response == nil {
-		fmt.Printf("Received unsupported method: %s\n", request.Method)
+		log.E.F("Received unsupported method: %s\n", request.Method)
 		response = &WalletServiceResponse{
 			Error: &WalletServiceRequestHandlerError{
 				Code:    "NOT_IMPLEMENTED",
@@ -291,7 +270,6 @@ func (s *WalletService) handleEvent(
 			},
 		}
 	}
-
 	// Create response
 	responseData := struct {
 		ResultType string                            `json:"result_type"`
@@ -302,22 +280,19 @@ func (s *WalletService) handleEvent(
 		Result:     response.Result,
 		Error:      response.Error,
 	}
-
 	// Encrypt response
 	var responseJSON []byte
 	if responseJSON, err = json.Marshal(responseData); chk.E(err) {
-		fmt.Printf("Failed to marshal response: %v\n", err)
+		log.E.F("Failed to marshal response: %v\n", err)
 		return
 	}
-
 	var encryptedContent []byte
 	if encryptedContent, err = s.encrypt(
 		keypair, responseJSON, encryptionType,
 	); chk.E(err) {
-		fmt.Printf("Failed to encrypt response: %v\n", err)
+		log.E.F("Failed to encrypt response: %v\n", err)
 		return
 	}
-
 	// Create response event
 	responseEvent := &event.E{
 		Kind:      kind.New(23195),
@@ -325,17 +300,13 @@ func (s *WalletService) handleEvent(
 		Tags:      tags.New(tag.New([]byte("e"), ev.ID)),
 		Content:   encryptedContent,
 	}
-
 	// Sign response event
 	if err = responseEvent.Sign(keypair.WalletKey); chk.E(err) {
-		fmt.Printf("Failed to sign response ev: %v\n", err)
 		return
 	}
-
 	// Publish response event
 	err = s.relay.Publish(context.Background(), responseEvent)
 	if err != nil {
-		fmt.Printf("Failed to publish response ev: %v\n", err)
 		return
 	}
 }
@@ -410,7 +381,7 @@ func (s *WalletService) decrypt(
 }
 
 // checkConnected checks if the relay is connected and connects if not
-func (s *WalletService) checkConnected() error {
+func (s *WalletService) checkConnected() (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -419,9 +390,9 @@ func (s *WalletService) checkConnected() error {
 	}
 
 	if s.relay == nil {
-		var err error
-		s.relay, err = ws.RelayConnect(context.Background(), s.relayURL)
-		if err != nil {
+		if s.relay, err = ws.RelayConnect(
+			context.Background(), s.relayURL,
+		); chk.E(err) {
 			return NewNetworkError(
 				"Failed to connect to "+s.relayURL,
 				"OTHER",
@@ -429,15 +400,14 @@ func (s *WalletService) checkConnected() error {
 		}
 	} else if !s.relay.IsConnected() {
 		s.relay.Close()
-		var err error
-		s.relay, err = ws.RelayConnect(context.Background(), s.relayURL)
-		if err != nil {
+		if s.relay, err = ws.RelayConnect(
+			context.Background(), s.relayURL,
+		); chk.E(err) {
 			return NewNetworkError(
 				"Failed to connect to "+s.relayURL,
 				"OTHER",
 			)
 		}
 	}
-
 	return nil
 }
