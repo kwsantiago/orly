@@ -452,17 +452,17 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 func (r *Client) Subscribe(
 	c context.T, ff *filters.T,
 	opts ...SubscriptionOption,
-) (*Subscription, error) {
-	sub := r.PrepareSubscription(c, ff, opts...)
+) (sub *Subscription, err error) {
+	sub = r.PrepareSubscription(c, ff, opts...)
 	if r.Connection == nil {
 		return nil, errorf.E("not connected to %s", r.URL)
 	}
-	if err := sub.Fire(); chk.T(err) {
+	if err = sub.Fire(); chk.T(err) {
 		return nil, errorf.E(
 			"couldn't subscribe to %v at %s: %w", ff, r.URL, err,
 		)
 	}
-	return sub, nil
+	return
 }
 
 // PrepareSubscription creates a subscription, but doesn't fire it.

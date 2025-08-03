@@ -43,11 +43,9 @@ func WithCustomNonce(salt []byte) func(opts *Opts) {
 // Encrypt data using a provided symmetric conversation key using NIP-44
 // encryption (chacha20 cipher stream and sha256 HMAC).
 func Encrypt(
-	plaintext string, conversationKey []byte,
-	applyOptions ...func(opts *Opts),
+	plaintext, conversationKey []byte, applyOptions ...func(opts *Opts),
 ) (
-	cipherString string,
-	err error,
+	cipherString []byte, err error,
 ) {
 
 	var o Opts
@@ -70,7 +68,7 @@ func Encrypt(
 	); chk.E(err) {
 		return
 	}
-	plain := []byte(plaintext)
+	plain := plaintext
 	size := len(plain)
 	if size < MinPlaintextSize || size > MaxPlaintextSize {
 		err = errorf.E("plaintext should be between 1b and 64kB")
@@ -93,14 +91,15 @@ func Encrypt(
 	ct = append(ct, o.nonce...)
 	ct = append(ct, cipher...)
 	ct = append(ct, mac...)
-	cipherString = base64.StdEncoding.EncodeToString(ct)
+	cipherString = make([]byte, base64.StdEncoding.EncodedLen(len(ct)))
+	base64.StdEncoding.Encode(cipherString, ct)
 	return
 }
 
 // Decrypt data that has been encoded using a provided symmetric conversation
 // key using NIP-44 encryption (chacha20 cipher stream and sha256 HMAC).
-func Decrypt(b64ciphertextWrapped string, conversationKey []byte) (
-	plaintext string,
+func Decrypt(b64ciphertextWrapped, conversationKey []byte) (
+	plaintext []byte,
 	err error,
 ) {
 	cLen := len(b64ciphertextWrapped)
@@ -108,12 +107,12 @@ func Decrypt(b64ciphertextWrapped string, conversationKey []byte) (
 		err = errorf.E("invalid payload length: %d", cLen)
 		return
 	}
-	if b64ciphertextWrapped[:1] == "#" {
+	if len(b64ciphertextWrapped) > 0 && b64ciphertextWrapped[0] == '#' {
 		err = errorf.E("unknown version")
 		return
 	}
 	var decoded []byte
-	if decoded, err = base64.StdEncoding.DecodeString(b64ciphertextWrapped); chk.E(err) {
+	if decoded, err = base64.StdEncoding.DecodeString(string(b64ciphertextWrapped)); chk.E(err) {
 		return
 	}
 	if decoded[0] != version {
@@ -153,7 +152,7 @@ func Decrypt(b64ciphertextWrapped string, conversationKey []byte) (
 		err = errorf.E("invalid padding")
 		return
 	}
-	plaintext = string(unpadded)
+	plaintext = unpadded
 	return
 }
 

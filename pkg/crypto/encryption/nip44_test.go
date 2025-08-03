@@ -19,10 +19,10 @@ func assertCryptPriv(
 	sk1, sk2, conversationKey, salt, plaintext, expected string,
 ) {
 	var (
-		k1, s             []byte
-		actual, decrypted string
-		ok                bool
-		err               error
+		k1, s, plaintextBytes, actualBytes,
+		expectedBytes, decrypted []byte
+		ok  bool
+		err error
 	)
 	k1, err = hex.Dec(conversationKey)
 	if ok = assert.NoErrorf(
@@ -41,25 +41,27 @@ func assertCryptPriv(
 	); !ok {
 		return
 	}
-	actual, err = Encrypt(plaintext, k1, WithCustomNonce(s))
+	plaintextBytes = []byte(plaintext)
+	actualBytes, err = Encrypt(plaintextBytes, k1, WithCustomNonce(s))
 	if ok = assert.NoError(t, err, "encryption failed: %v", err); !ok {
 		return
 	}
-	if ok = assert.Equalf(t, expected, actual, "wrong encryption"); !ok {
+	expectedBytes = []byte(expected)
+	if ok = assert.Equalf(t, string(expectedBytes), string(actualBytes), "wrong encryption"); !ok {
 		return
 	}
-	decrypted, err = Decrypt(expected, k1)
+	decrypted, err = Decrypt(expectedBytes, k1)
 	if ok = assert.NoErrorf(t, err, "decryption failed: %v", err); !ok {
 		return
 	}
-	assert.Equal(t, decrypted, plaintext, "wrong decryption")
+	assert.Equal(t, decrypted, plaintextBytes, "wrong decryption")
 }
 
 func assertDecryptFail(
 	t *testing.T, conversationKey, plaintext, ciphertext, msg string,
 ) {
 	var (
-		k1  []byte
+		k1, ciphertextBytes []byte
 		ok  bool
 		err error
 	)
@@ -69,7 +71,8 @@ func assertDecryptFail(
 	); !ok {
 		return
 	}
-	_, err = Decrypt(ciphertext, k1)
+	ciphertextBytes = []byte(ciphertext)
+	_, err = Decrypt(ciphertextBytes, k1)
 	assert.ErrorContains(t, err, msg)
 }
 
@@ -196,15 +199,15 @@ func assertMessageKeyGeneration(
 }
 
 func assertCryptLong(
-	t *testing.T, conversationKey, salt, pattern string, repeat int,
+	t *testing.T, conversationKey, salt string, pattern []byte, repeat int,
 	plaintextSha256, payloadSha256 string,
 ) {
 	var (
-		convKey, convSalt                                                    []byte
-		plaintext, actualPlaintextSha256, actualPayload, actualPayloadSha256 string
-		h                                                                    hash.Hash
-		ok                                                                   bool
-		err                                                                  error
+		convKey, convSalt, plaintext, payloadBytes []byte
+		actualPlaintextSha256, actualPayloadSha256 string
+		h                                          hash.Hash
+		ok                                         bool
+		err                                        error
 	)
 	convKey, err = hex.Dec(conversationKey)
 	if ok = assert.NoErrorf(
@@ -218,12 +221,12 @@ func assertCryptLong(
 	); !ok {
 		return
 	}
-	plaintext = ""
+	plaintext = make([]byte, 0, len(pattern)*repeat)
 	for i := 0; i < repeat; i++ {
-		plaintext += pattern
+		plaintext = append(plaintext, pattern...)
 	}
 	h = sha256.New()
-	h.Write([]byte(plaintext))
+	h.Write(plaintext)
 	actualPlaintextSha256 = hex.Enc(h.Sum(nil))
 	if ok = assert.Equalf(
 		t, plaintextSha256, actualPlaintextSha256,
@@ -231,12 +234,14 @@ func assertCryptLong(
 	); !ok {
 		return
 	}
-	actualPayload, err = Encrypt(plaintext, convKey, WithCustomNonce(convSalt))
+	payloadBytes, err = Encrypt(
+		plaintext, convKey, WithCustomNonce(convSalt),
+	)
 	if ok = assert.NoErrorf(t, err, "encryption failed: %v", err); !ok {
 		return
 	}
 	h.Reset()
-	h.Write([]byte(actualPayload))
+	h.Write(payloadBytes)
 	actualPayloadSha256 = hex.Enc(h.Sum(nil))
 	if ok = assert.Equalf(
 		t, payloadSha256, actualPayloadSha256,
@@ -383,7 +388,7 @@ func TestCryptLong001(t *testing.T) {
 		t,
 		"8fc262099ce0d0bb9b89bac05bb9e04f9bc0090acc181fef6840ccee470371ed",
 		"326bcb2c943cd6bb717588c9e5a7e738edf6ed14ec5f5344caa6ef56f0b9cff7",
-		"x",
+		[]byte("x"),
 		65535,
 		"09ab7495d3e61a76f0deb12cb0306f0696cbb17ffc12131368c7a939f12f56d3",
 		"90714492225faba06310bff2f249ebdc2a5e609d65a629f1c87f2d4ffc55330a",
@@ -395,7 +400,7 @@ func TestCryptLong002(t *testing.T) {
 		t,
 		"56adbe3720339363ab9c3b8526ffce9fd77600927488bfc4b59f7a68ffe5eae0",
 		"ad68da81833c2a8ff609c3d2c0335fd44fe5954f85bb580c6a8d467aa9fc5dd0",
-		"!",
+		[]byte("!"),
 		65535,
 		"6af297793b72ae092c422e552c3bb3cbc310da274bd1cf9e31023a7fe4a2d75e",
 		"8013e45a109fad3362133132b460a2d5bce235fe71c8b8f4014793fb52a49844",
@@ -407,7 +412,7 @@ func TestCryptLong003(t *testing.T) {
 		t,
 		"7fc540779979e472bb8d12480b443d1e5eb1098eae546ef2390bee499bbf46be",
 		"34905e82105c20de9a2f6cd385a0d541e6bcc10601d12481ff3a7575dc622033",
-		"🦄",
+		[]byte("🦄"),
 		16383,
 		"a249558d161b77297bc0cb311dde7d77190f6571b25c7e4429cd19044634a61f",
 		"b3348422471da1f3c59d79acfe2fe103f3cd24488109e5b18734cdb5953afd15",
@@ -1309,7 +1314,10 @@ func TestMaxLength(t *testing.T) {
 	rand.Read(salt)
 	conversationKey, _ := GenerateConversationKey(pub2, string(sk1))
 	plaintext := strings.Repeat("a", MaxPlaintextSize)
-	encrypted, err := Encrypt(plaintext, conversationKey, WithCustomNonce(salt))
+	plaintextBytes := []byte(plaintext)
+	encrypted, err := Encrypt(
+		plaintextBytes, conversationKey, WithCustomNonce(salt),
+	)
 	if chk.E(err) {
 		t.Error(err)
 	}
@@ -1321,7 +1329,7 @@ func TestMaxLength(t *testing.T) {
 		fmt.Sprintf("%x", conversationKey),
 		fmt.Sprintf("%x", salt),
 		plaintext,
-		encrypted,
+		string(encrypted),
 	)
 }
 
@@ -1330,10 +1338,10 @@ func assertCryptPub(
 	sk1, pub2, conversationKey, salt, plaintext, expected string,
 ) {
 	var (
-		k1, s             []byte
-		actual, decrypted string
-		ok                bool
-		err               error
+		k1, s, plaintextBytes,
+		actualBytes, expectedBytes, decrypted []byte
+		ok  bool
+		err error
 	)
 	k1, err = hex.Dec(conversationKey)
 	if ok = assert.NoErrorf(
@@ -1352,16 +1360,18 @@ func assertCryptPub(
 	); !ok {
 		return
 	}
-	actual, err = Encrypt(plaintext, k1, WithCustomNonce(s))
+	plaintextBytes = []byte(plaintext)
+	actualBytes, err = Encrypt(plaintextBytes, k1, WithCustomNonce(s))
 	if ok = assert.NoError(t, err, "encryption failed: %v", err); !ok {
 		return
 	}
-	if ok = assert.Equalf(t, expected, actual, "wrong encryption"); !ok {
+	expectedBytes = []byte(expected)
+	if ok = assert.Equalf(t, string(expectedBytes), string(actualBytes), "wrong encryption"); !ok {
 		return
 	}
-	decrypted, err = Decrypt(expected, k1)
+	decrypted, err = Decrypt(expectedBytes, k1)
 	if ok = assert.NoErrorf(t, err, "decryption failed: %v", err); !ok {
 		return
 	}
-	assert.Equal(t, decrypted, plaintext, "wrong decryption")
+	assert.Equal(t, decrypted, plaintextBytes, "wrong decryption")
 }

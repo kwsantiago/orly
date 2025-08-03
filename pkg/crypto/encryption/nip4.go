@@ -5,13 +5,11 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"lukechampine.com/frand"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
-	"strings"
-
-	"lukechampine.com/frand"
 )
 
 // ComputeSharedSecret returns a shared secret key used to encrypt messages. The private and public keys should be hex
@@ -71,22 +69,20 @@ func EncryptNip4(msg string, key []byte) (ct []byte, err error) {
 
 // DecryptNip4 decrypts a content string using the shared secret key. The inverse operation to message ->
 // EncryptNip4(message, key).
-//
-// Deprecated: upgrade to using Decrypt with the NIP-44 algorithm.
-func DecryptNip4(content string, key []byte) (msg []byte, err error) {
-	parts := strings.Split(content, "?iv=")
+func DecryptNip4(content, key []byte) (msg []byte, err error) {
+	parts := bytes.Split(content, []byte("?iv="))
 	if len(parts) < 2 {
 		return nil, errorf.E(
 			"error parsing encrypted message: no initialization vector",
 		)
 	}
-	var ciphertext []byte
-	if ciphertext, err = base64.StdEncoding.DecodeString(parts[0]); chk.E(err) {
+	ciphertext := make([]byte, base64.StdEncoding.EncodedLen(len(parts[0])))
+	if _, err = base64.StdEncoding.Decode(ciphertext, parts[0]); chk.E(err) {
 		err = errorf.E("error decoding ciphertext from base64: %w", err)
 		return
 	}
-	var iv []byte
-	if iv, err = base64.StdEncoding.DecodeString(parts[1]); chk.E(err) {
+	iv := make([]byte, base64.StdEncoding.EncodedLen(len(parts[1])))
+	if _, err = base64.StdEncoding.Decode(iv, parts[1]); chk.E(err) {
 		err = errorf.E("error decoding iv from base64: %w", err)
 		return
 	}
