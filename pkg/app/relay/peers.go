@@ -49,6 +49,9 @@ func (p *Peers) Init(
 		p.Pubkeys = append(p.Pubkeys, pk)
 		log.I.F("peer %s added; pubkey: %0x", split[1], pk)
 	}
+	if sec == "" {
+		return
+	}
 	p.I = &p256k.Signer{}
 	var s []byte
 	if s, err = keys.DecodeNsecOrHex(sec); chk.E(err) {
