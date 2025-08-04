@@ -55,10 +55,20 @@ func (s *Signer) InitPub(pub []byte) (err error) {
 }
 
 // Sec returns the raw secret key bytes.
-func (s *Signer) Sec() (b []byte) { return s.skb }
+func (s *Signer) Sec() (b []byte) {
+	if s == nil {
+		return nil
+	}
+	return s.skb
+}
 
 // Pub returns the raw BIP-340 schnorr public key bytes.
-func (s *Signer) Pub() (b []byte) { return s.pkb }
+func (s *Signer) Pub() (b []byte) {
+	if s == nil {
+		return nil
+	}
+	return s.pkb
+}
 
 // Sign a message with the Signer. Requires an initialised secret key.
 func (s *Signer) Sign(msg []byte) (sig []byte, err error) {

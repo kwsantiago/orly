@@ -10,7 +10,9 @@ import (
 	"golang.org/x/crypto/hkdf"
 	"io"
 	"math"
+	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/crypto/sha256"
+	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 )
@@ -166,8 +168,16 @@ func GenerateConversationKey(pkh, skh string) (ck []byte, err error) {
 		)
 		return
 	}
+	var sign signer.I
+	if sign, err = p256k.NewSecFromHex(skh); chk.E(err) {
+		return
+	}
+	var pk []byte
+	if pk, err = p256k.HexToBin(pkh); chk.E(err) {
+		return
+	}
 	var shared []byte
-	if shared, err = ComputeSharedSecret(pkh, skh); chk.E(err) {
+	if shared, err = sign.ECDH(pk); chk.E(err) {
 		return
 	}
 	ck = hkdf.Extract(sha256.New, shared, []byte("nip44-v2"))

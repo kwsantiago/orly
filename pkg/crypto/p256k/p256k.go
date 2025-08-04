@@ -77,8 +77,18 @@ func (s *Signer) InitPub(pub []byte) (err error) {
 	return
 }
 
-func (s *Signer) Sec() (b []byte) { return s.skb }
-func (s *Signer) Pub() (b []byte) { return s.pkb }
+func (s *Signer) Sec() (b []byte) {
+	if s == nil {
+		return nil
+	}
+	return s.skb
+}
+func (s *Signer) Pub() (b []byte) {
+	if s == nil {
+		return nil
+	}
+	return s.pkb
+}
 
 // func (s *Signer) ECPub() (b []byte) { return s.pkb }
 

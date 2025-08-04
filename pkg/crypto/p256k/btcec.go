@@ -18,3 +18,7 @@ type Signer = btcec.Signer
 type Keygen = btcec.Keygen
 
 func NewKeygen() (k *Keygen) { return new(Keygen) }
+
+var NewSecFromHex = btcec.NewSecFromHex
+var NewPubFromHex = btcec.NewPubFromHex
+var HexToBin = btcec.HexToBin

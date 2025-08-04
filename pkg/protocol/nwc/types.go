@@ -24,67 +24,61 @@ type AuthorizationUrlOptions struct {
 	MaxAmount         *int64              `json:"maxAmount,omitempty"`
 	BudgetRenewal     BudgetRenewalPeriod `json:"budgetRenewal,omitempty"`
 	Isolated          bool                `json:"isolated,omitempty"`
-	Metadata          any                 `json:"metadata,omitempty"`
+	Metadata          interface{}         `json:"metadata,omitempty"`
 }
 
-// Error is the base error type for NIP-47 errors
-type Error struct {
+// Err is the base error type for NIP-47 errors
+type Err struct {
 	Message string
 	Code    string
 }
 
-func (e *Error) Error() string {
+func (e *Err) Error() string {
 	return fmt.Sprintf("%s (code: %s)", e.Message, e.Code)
 }
 
 // NewError creates a new Error
-func NewError(message, code string) *Error {
-	return &Error{
+func NewError(message, code string) *Err {
+	return &Err{
 		Message: message,
 		Code:    code,
 	}
 }
 
 // NetworkError represents a network error in NIP-47 operations
-type NetworkError struct {
-	*Error
-}
+type NetworkError struct{ *Err }
 
 // NewNetworkError creates a new NetworkError
 func NewNetworkError(message, code string) *NetworkError {
 	return &NetworkError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // WalletError represents a wallet error in NIP-47 operations
 type WalletError struct {
-	*Error
+	*Err
 }
 
 // NewWalletError creates a new WalletError
 func NewWalletError(message, code string) *WalletError {
 	return &WalletError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // TimeoutError represents a timeout error in NIP-47 operations
-type TimeoutError struct {
-	*Error
-}
+type TimeoutError struct{ *Err }
 
 // NewTimeoutError creates a new TimeoutError
 func NewTimeoutError(message, code string) *TimeoutError {
 	return &TimeoutError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // PublishTimeoutError represents a publish timeout error in NIP-47 operations
-type PublishTimeoutError struct {
-	*TimeoutError
-}
+type PublishTimeoutError struct{ *TimeoutError }
 
 // NewPublishTimeoutError creates a new PublishTimeoutError
 func NewPublishTimeoutError(message, code string) *PublishTimeoutError {
@@ -94,9 +88,7 @@ func NewPublishTimeoutError(message, code string) *PublishTimeoutError {
 }
 
 // ReplyTimeoutError represents a reply timeout error in NIP-47 operations
-type ReplyTimeoutError struct {
-	*TimeoutError
-}
+type ReplyTimeoutError struct{ *TimeoutError }
 
 // NewReplyTimeoutError creates a new ReplyTimeoutError
 func NewReplyTimeoutError(message, code string) *ReplyTimeoutError {
@@ -106,62 +98,54 @@ func NewReplyTimeoutError(message, code string) *ReplyTimeoutError {
 }
 
 // PublishError represents a publish error in NIP-47 operations
-type PublishError struct {
-	*Error
-}
+type PublishError struct{ *Err }
 
 // NewPublishError creates a new PublishError
 func NewPublishError(message, code string) *PublishError {
 	return &PublishError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // ResponseDecodingError represents a response decoding error in NIP-47 operations
-type ResponseDecodingError struct {
-	*Error
-}
+type ResponseDecodingError struct{ *Err }
 
 // NewResponseDecodingError creates a new ResponseDecodingError
 func NewResponseDecodingError(message, code string) *ResponseDecodingError {
 	return &ResponseDecodingError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // ResponseValidationError represents a response validation error in NIP-47 operations
-type ResponseValidationError struct {
-	*Error
-}
+type ResponseValidationError struct{ *Err }
 
 // NewResponseValidationError creates a new ResponseValidationError
 func NewResponseValidationError(message, code string) *ResponseValidationError {
 	return &ResponseValidationError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // UnexpectedResponseError represents an unexpected response error in NIP-47 operations
-type UnexpectedResponseError struct {
-	*Error
-}
+type UnexpectedResponseError struct{ *Err }
 
 // NewUnexpectedResponseError creates a new UnexpectedResponseError
 func NewUnexpectedResponseError(message, code string) *UnexpectedResponseError {
 	return &UnexpectedResponseError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
 // UnsupportedEncryptionError represents an unsupported encryption error in NIP-47 operations
 type UnsupportedEncryptionError struct {
-	*Error
+	*Err
 }
 
 // NewUnsupportedEncryptionError creates a new UnsupportedEncryptionError
 func NewUnsupportedEncryptionError(message, code string) *UnsupportedEncryptionError {
 	return &UnsupportedEncryptionError{
-		Error: NewError(message, code),
+		Err: NewError(message, code),
 	}
 }
 
@@ -176,42 +160,42 @@ type WithOptionalId struct {
 }
 
 // Method represents a NIP-47 method
-type Method []byte
+type Method string
 
 // SingleMethod represents a single NIP-47 method
-var (
-	GetInfo           = Method("get_info")
-	GetBalance        = Method("get_balance")
-	GetBudget         = Method("get_budget")
-	MakeInvoice       = Method("make_invoice")
-	PayInvoice        = Method("pay_invoice")
-	PayKeysend        = Method("pay_keysend")
-	LookupInvoice     = Method("lookup_invoice")
-	ListTransactions  = Method("list_transactions")
-	SignMessage       = Method("sign_message")
-	CreateConnection  = Method("create_connection")
-	MakeHoldInvoice   = Method("make_hold_invoice")
-	SettleHoldInvoice = Method("settle_hold_invoice")
-	CancelHoldInvoice = Method("cancel_hold_invoice")
+const (
+	GetInfo           Method = "get_info"
+	GetBalance        Method = "get_balance"
+	GetBudget         Method = "get_budget"
+	MakeInvoice       Method = "make_invoice"
+	PayInvoice        Method = "pay_invoice"
+	PayKeysend        Method = "pay_keysend"
+	LookupInvoice     Method = "lookup_invoice"
+	ListTransactions  Method = "list_transactions"
+	SignMessage       Method = "sign_message"
+	CreateConnection  Method = "create_connection"
+	MakeHoldInvoice   Method = "make_hold_invoice"
+	SettleHoldInvoice Method = "settle_hold_invoice"
+	CancelHoldInvoice Method = "cancel_hold_invoice"
 )
 
 // MultiMethod represents a multi NIP-47 method
-var (
-	MultiPayInvoice = Method("multi_pay_invoice")
-	MultiPayKeysend = Method("multi_pay_keysend")
+const (
+	MultiPayInvoice Method = "multi_pay_invoice"
+	MultiPayKeysend Method = "multi_pay_keysend"
 )
 
 // Capability represents a NIP-47 capability
-type Capability []byte
+type Capability string
 
-var (
-	Notifications = Capability("notifications")
+const (
+	Notifications Capability = "notifications"
 )
 
 // BudgetRenewalPeriod represents a budget renewal period
 type BudgetRenewalPeriod string
 
-var (
+const (
 	Daily   BudgetRenewalPeriod = "daily"
 	Weekly  BudgetRenewalPeriod = "weekly"
 	Monthly BudgetRenewalPeriod = "monthly"
@@ -229,7 +213,7 @@ type GetInfoResponse struct {
 	BlockHash     string             `json:"block_hash"`
 	Methods       []Method           `json:"methods"`
 	Notifications []NotificationType `json:"notifications,omitempty"`
-	Metadata      any                `json:"metadata,omitempty"`
+	Metadata      interface{}        `json:"metadata,omitempty"`
 	Lud16         string             `json:"lud16,omitempty"`
 }
 
@@ -277,7 +261,7 @@ type PayKeysendRequestWithID struct {
 // MultiPayInvoiceResponse represents a response to a multi_pay_invoice request
 type MultiPayInvoiceResponse struct {
 	Invoices []MultiPayInvoiceResponseItem `json:"invoices"`
-	Errors   []any                         `json:"errors"` // TODO: add error handling
+	Errors   []interface{}                 `json:"errors"` // TODO: add error handling
 }
 
 // MultiPayInvoiceResponseItem represents an item in a multi_pay_invoice response
@@ -290,7 +274,7 @@ type MultiPayInvoiceResponseItem struct {
 // MultiPayKeysendResponse represents a response to a multi_pay_keysend request
 type MultiPayKeysendResponse struct {
 	Keysends []MultiPayKeysendResponseItem `json:"keysends"`
-	Errors   []any                         `json:"errors"` // TODO: add error handling
+	Errors   []interface{}                 `json:"errors"` // TODO: add error handling
 }
 
 // MultiPayKeysendResponseItem represents an item in a multi_pay_keysend response
@@ -318,7 +302,7 @@ type ListTransactionsResponse struct {
 	TotalCount   int64         `json:"total_count"` // NOTE: non-NIP-47 spec compliant
 }
 
-// TransactionType represents the type of transaction
+// TransactionType represents the type of a transaction
 type TransactionType string
 
 const (
@@ -355,11 +339,11 @@ type Transaction struct {
 
 // TransactionMetadata represents metadata for a transaction
 type TransactionMetadata struct {
-	Comment       string         `json:"comment,omitempty"`        // LUD-12
-	PayerData     *PayerData     `json:"payer_data,omitempty"`     // LUD-18
-	RecipientData *RecipientData `json:"recipient_data,omitempty"` // LUD-18
-	Nostr         *NostrData     `json:"nostr,omitempty"`          // NIP-57
-	ExtraData     map[string]any `json:"-"`                        // For additional fields
+	Comment       string                 `json:"comment,omitempty"`        // LUD-12
+	PayerData     *PayerData             `json:"payer_data,omitempty"`     // LUD-18
+	RecipientData *RecipientData         `json:"recipient_data,omitempty"` // LUD-18
+	Nostr         *NostrData             `json:"nostr,omitempty"`          // NIP-57
+	ExtraData     map[string]interface{} `json:"-"`                        // For additional fields
 }
 
 // PayerData represents payer data for a transaction
@@ -381,12 +365,12 @@ type NostrData struct {
 }
 
 // NotificationType represents a notification type
-type NotificationType []byte
+type NotificationType string
 
-var (
-	PaymentReceived     NotificationType = []byte("payment_received")
-	PaymentSent         NotificationType = []byte("payment_sent")
-	HoldInvoiceAccepted NotificationType = []byte("hold_invoice_accepted")
+const (
+	PaymentReceived     NotificationType = "payment_received"
+	PaymentSent         NotificationType = "payment_sent"
+	HoldInvoiceAccepted NotificationType = "hold_invoice_accepted"
 )
 
 // Notification represents a notification
@@ -407,11 +391,11 @@ type PayKeysendRequest struct {
 	Amount     int64       `json:"amount"` // msats
 	Pubkey     string      `json:"pubkey"`
 	Preimage   string      `json:"preimage,omitempty"`
-	TlvRecords []TLVRecord `json:"tlv_records,omitempty"`
+	TlvRecords []TlvRecord `json:"tlv_records,omitempty"`
 }
 
-// TLVRecord represents a TLV record
-type TLVRecord struct {
+// TlvRecord represents a TLV record
+type TlvRecord struct {
 	Type  int64  `json:"type"`
 	Value string `json:"value"`
 }

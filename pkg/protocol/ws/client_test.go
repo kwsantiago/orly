@@ -85,7 +85,7 @@ func TestPublish(t *testing.T) {
 	defer ws.Close()
 	// connect a client and send the text note
 	rl := mustRelayConnect(ws.URL)
-	err = rl.Publish(context.Background(), textNote)
+	err = rl.Publish(context.Bg(), textNote)
 	if err != nil {
 		t.Errorf("publish should have succeeded")
 	}
@@ -137,7 +137,7 @@ func TestPublishBlocked(t *testing.T) {
 
 	// connect a client and send a text note
 	rl := mustRelayConnect(ws.URL)
-	if err = rl.Publish(context.Background(), textNote); !chk.E(err) {
+	if err = rl.Publish(context.Bg(), textNote); !chk.E(err) {
 		t.Errorf("should have failed to publish")
 	}
 }
@@ -171,7 +171,7 @@ func TestPublishWriteFailed(t *testing.T) {
 	rl := mustRelayConnect(ws.URL)
 	// Force brief period of time so that publish always fails on closed socket.
 	time.Sleep(1 * time.Millisecond)
-	err = rl.Publish(context.Background(), textNote)
+	err = rl.Publish(context.Bg(), textNote)
 	if err == nil {
 		t.Errorf("should have failed to publish")
 	}
@@ -192,7 +192,7 @@ func TestConnectContext(t *testing.T) {
 	defer ws.Close()
 
 	// relay client
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Bg(), 3*time.Second)
 	defer cancel()
 	r, err := RelayConnect(ctx, ws.URL)
 	if err != nil {
@@ -213,7 +213,7 @@ func TestConnectContextCanceled(t *testing.T) {
 	defer ws.Close()
 
 	// relay client
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.Cancel(context.Bg())
 	cancel() // make ctx expired
 	_, err := RelayConnect(ctx, ws.URL)
 	if !errors.Is(err, context.Canceled) {
@@ -230,9 +230,9 @@ func TestConnectWithOrigin(t *testing.T) {
 	defer ws.Close()
 
 	// relay client
-	r := NewRelay(context.Background(), string(normalize.URL(ws.URL)))
+	r := NewRelay(context.Bg(), string(normalize.URL(ws.URL)))
 	r.RequestHeader = http.Header{"origin": {"https://example.com"}}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Bg(), 3*time.Second)
 	defer cancel()
 	err := r.Connect(ctx)
 	if err != nil {
@@ -263,7 +263,7 @@ var anyOriginHandshake = func(
 }
 
 func mustRelayConnect(url string) (client *Client) {
-	rl, err := RelayConnect(context.Background(), url)
+	rl, err := RelayConnect(context.Bg(), url)
 	if err != nil {
 		panic(err.Error())
 	}
