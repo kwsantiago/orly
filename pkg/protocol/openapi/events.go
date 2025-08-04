@@ -580,7 +580,7 @@ type EventsInput struct {
 }
 
 type EventsOutput struct {
-	Body []event.J
+	Body []*event.J
 }
 
 // RegisterEvents is the implementation of the HTTP API Events method.
@@ -667,11 +667,17 @@ Returns events as a JSON array of event objects.`
 						}
 						tmp = append(tmp, ev)
 					}
+					// cap the number of events to 512 to stop excessively large
+					// response.
+					if len(events) > 512 {
+						break
+					}
 					events = tmp
 				}
 			}
+			output = &EventsOutput{}
 			for _, ev := range events {
-				_ = ev
+				output.Body = append(output.Body, ev.ToEventJ())
 			}
 			return
 		},
