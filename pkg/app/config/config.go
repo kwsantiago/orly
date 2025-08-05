@@ -26,26 +26,27 @@ import (
 // and default values. It defines parameters for app behaviour, storage
 // locations, logging, and network settings used across the relay service.
 type C struct {
-	AppName        string        `env:"ORLY_APP_NAME" default:"orly"`
-	Config         string        `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style" default:"~/.config/orly"`
-	State          string        `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces" default:"~/.local/state/orly"`
-	DataDir        string        `env:"ORLY_DATA_DIR" usage:"storage location for the event store" default:"~/.local/cache/orly"`
-	Listen         string        `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
-	Port           int           `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
-	LogLevel       string        `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	DbLogLevel     string        `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
-	Pprof          string        `env:"ORLY_PPROF" usage:"enable pprof on 127.0.0.1:6060" enum:"cpu,memory,allocation"`
-	AuthRequired   bool          `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
-	PublicReadable bool          `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to regardless of whether the client is authed"`
-	SpiderSeeds    []string      `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://profiles.nostr1.com/,wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/"`
-	SpiderType     string        `env:"ORLY_SPIDER_TYPE" usage:"whether to spider, and what degree of spidering: none, directory, follows (follows means to the second degree of the follow graph)" default:"directory"`
-	SpiderTime     time.Duration `env:"ORLY_SPIDER_FREQUENCY" usage:"how often to run the spider, uses notation 0h0m0s" default:"1h"`
-	Owners         []string      `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
-	Private        bool          `env:"ORLY_PRIVATE" usage:"do not spider for user metadata because the relay is private and this would leak relay memberships" default:"false"`
-	Whitelist      []string      `env:"ORLY_WHITELIST" usage:"only allow connections from this list of IP addresses"`
-	Blacklist      []string      `env:"ORLY_BLACKLIST" usage:"list of pubkeys to block when auth is not required (comma separated)"`
-	RelaySecret    string        `env:"ORLY_SECRET_KEY" usage:"secret key for relay cluster replication authentication"`
-	PeerRelays     []string      `env:"ORLY_PEER_RELAYS" usage:"list of peer relays URLs that new events are pushed to in format <pubkey>|<url>"`
+	AppName            string        `env:"ORLY_APP_NAME" default:"orly"`
+	Config             string        `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style" default:"~/.config/orly"`
+	State              string        `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces" default:"~/.local/state/orly"`
+	DataDir            string        `env:"ORLY_DATA_DIR" usage:"storage location for the event store" default:"~/.local/cache/orly"`
+	Listen             string        `env:"ORLY_LISTEN" default:"0.0.0.0" usage:"network listen address"`
+	Port               int           `env:"ORLY_PORT" default:"3334" usage:"port to listen on"`
+	LogLevel           string        `env:"ORLY_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	DbLogLevel         string        `env:"ORLY_DB_LOG_LEVEL" default:"info" usage:"debug level: fatal error warn info debug trace"`
+	Pprof              string        `env:"ORLY_PPROF" usage:"enable pprof on 127.0.0.1:6060" enum:"cpu,memory,allocation"`
+	AuthRequired       bool          `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
+	PublicReadable     bool          `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to regardless of whether the client is authed"`
+	SpiderSeeds        []string      `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://profiles.nostr1.com/,wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/,wss://profiles.nostr1.com/"`
+	SpiderType         string        `env:"ORLY_SPIDER_TYPE" usage:"whether to spider, and what degree of spidering: none, directory, follows (follows means to the second degree of the follow graph)" default:"directory"`
+	SpiderTime         time.Duration `env:"ORLY_SPIDER_FREQUENCY" usage:"how often to run the spider, uses notation 0h0m0s" default:"1h"`
+	SpiderSecondDegree bool          `env:"ORLY_SPIDER_SECOND_DEGREE" default:"true" usage:"whether to enable spidering the second degree of follows for non-directory events if ORLY_SPIDER_TYPE is set to 'follows'"`
+	Owners             []string      `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
+	Private            bool          `env:"ORLY_PRIVATE" usage:"do not spider for user metadata because the relay is private and this would leak relay memberships" default:"false"`
+	Whitelist          []string      `env:"ORLY_WHITELIST" usage:"only allow connections from this list of IP addresses"`
+	Blacklist          []string      `env:"ORLY_BLACKLIST" usage:"list of pubkeys to block when auth is not required (comma separated)"`
+	RelaySecret        string        `env:"ORLY_SECRET_KEY" usage:"secret key for relay cluster replication authentication"`
+	PeerRelays         []string      `env:"ORLY_PEER_RELAYS" usage:"list of peer relays URLs that new events are pushed to in format <pubkey>|<url>"`
 }
 
 // New creates and initializes a new configuration object for the relay

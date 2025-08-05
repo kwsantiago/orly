@@ -12,12 +12,12 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 
 == Features
 
-* a lot of bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android) (todo: this is mostly built and designed but not currently available)
-* a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd). (todo: HTTP API not in this repo yet but coming soon TM)
+* a lot of bits and pieces accumulated from nearly 8 years of working with Go, logging and run control, XDG user data directories (windows, mac, linux, android)
+* a cleaned up and unified fork of the btcd/dcred BIP-340 signatures, including the use of bitcoin core's BIP-340 implementation (more than 4x faster than btcd) (todo: ECDH from the C library tbd).
 * AVX/AVX2 optimized SHA256 and SIMD hex encoder
 * https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here]).
-* efficient, mutable byte slice-based hash/pubkey/signature encoding in memory (zero allocation decode from wire, can tolerate whitespace, at a speed penalty)
-* custom badger-based event store with an optional garbage collector that uses fast binary encoder for storage of events.
+* efficient, mutable byte slice-based hash/pubkey/signature encoding in memory (zero allocation decode from wire of all but id/pubkey/signature, can tolerate whitespace, at a speed penalty)
+* custom badger-based event store that uses fast binary encoder for storage of events, and has a complete set of indexes so it doesn't need to decode events for any query until delivering them.
 * link:cmd/vainstr[vainstr] vanity npub generator that can mine a 5-letter suffix in around 15 minutes on a 6 core Ryzen 5 processor using the CGO bitcoin core signature library.
 * reverse proxy tool link:cmd/lerproxy[lerproxy] with support for Go vanity imports and https://github.com/nostr-protocol/nips/blob/master/05.md[nip-05] npub DNS verification and own TLS certificates
 * link:https://github.com/nostr-protocol/nips/blob/master/98.md[nip-98] implementation with new expiring variant for vanilla HTTP tools and browsers.
@@ -85,6 +85,46 @@ To see the current active configuration:
 orly env
 ----
 
+To see the help information:
+
+----
+orly help
+----
+
+Environment variables that configure orly:
+
+[cols="4"]
+|===
+| Environment variable | type | default | description 
+| ORLY_APP_NAME              | string         | orly |
+| ORLY_CONFIG_DIR            | string         | ~/.config/orly                                                                                                                            | location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style
+| ORLY_STATE_DATA_DIR        | string         | ~/.local/state/orly                                                                                                                       | storage location for state data affected by dynamic interactive interfaces
+| ORLY_DATA_DIR              | string         | ~/.local/cache/orly                                                                                                                       | storage location for the event store
+| ORLY_LISTEN                | string         | 0.0.0.0                                                                                                                                   | network listen address
+| ORLY_PORT                  | int            | 3334                                                                                                                                      | port to listen on
+| ORLY_LOG_LEVEL             | string         | info                                                                                                                                      | debug level: fatal error warn info debug trace
+| ORLY_DB_LOG_LEVEL          | string         | info                                                                                                                                      | debug level: fatal error warn info debug trace
+| ORLY_PPROF                 | string         | <empty>                                                                                                                                   | enable pprof on 127.0.0.1:6060
+| ORLY_AUTH_REQUIRED         | bool           | false                                                                                                                                     | require authentication for all requests
+| ORLY_PUBLIC_READABLE       | bool           | true                                                                                                                                      | allow public read access to regardless of whether the client is authed
+| ORLY_SPIDER_SEEDS          | []string       | wss://profiles.nostr1.com/,
+wss://relay.nostr.band/,
+wss://relay.damus.io/,
+wss://nostr.wine/,
+wss://nostr.land/,
+wss://theforest.nostr1.com/,
+wss://profiles.nostr1.com
+| seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)
+| ORLY_SPIDER_TYPE           | string         | directory                                                                                                                                 | whether to spider, and what degree of spidering: none, directory, follows (follows means to the second degree of the follow graph)
+| ORLY_SPIDER_FREQUENCY      | time.Duration  | 1h                                                                                                                                        | how often to run the spider, uses notation 0h0m0s
+| ORLY_SPIDER_SECOND_DEGREE  | bool           | true                                                                                                                                      | whether to enable spidering the second degree of follows for non-directory events if ORLY_SPIDER_TYPE is set to 'follows'
+| ORLY_OWNERS                | []string       | []                                                                                                                                        | list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)
+| ORLY_PRIVATE               | bool           | false                                                                                                                                     | do not spider for user metadata because the relay is private and this would leak relay memberships
+| ORLY_WHITELIST             | []string       | []                                                                                                                                        | only allow connections from this list of IP addresses
+| ORLY_SECRET_KEY            | string         | <empty>                                                                                                                                   | secret key for relay cluster replication authentication
+| ORLY_PEER_RELAYS           | []string       | []                                                                                                                                        | list of peer relays URLs that new events are pushed to in format <pubkey>\|<url>
+|===
+
 === Create Persistent Configuration
 
 This output can be directed to the profile location to make the settings editable without manually setting them on the
@@ -121,8 +161,6 @@ messages and it uses and parses relay lists, and all that other stuff.
 
 [#_simplified_nostr]
 === Simplified Nostr
-
-NOTE: this is not currently implemented. coming soon TM
 
 Rather than write a text that will likely fall out of date very quickly, simply run `orly` and visit its listener
 address (eg link:http://localhost:3334/api[http://localhost:3334/api]) to see the full documentation.

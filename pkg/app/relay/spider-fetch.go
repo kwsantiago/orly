@@ -122,7 +122,7 @@ func (s *Server) SpiderFetch(
 			l := &lim
 			var since *timestamp.T
 			if k == nil {
-				since = timestamp.FromTime(time.Now().Add(-1 * time.Hour))
+				since = timestamp.FromTime(time.Now().Add(-1 * s.C.SpiderTime * 3 / 2))
 			} else {
 				l = nil
 			}
