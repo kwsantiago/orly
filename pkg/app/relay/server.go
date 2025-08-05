@@ -20,6 +20,7 @@ import (
 	"orly.dev/pkg/protocol/servemux"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/keys"
 	"orly.dev/pkg/utils/log"
 
 	"github.com/rs/cors"
@@ -29,14 +30,15 @@ import (
 // encapsulates various components such as context, cancel function, options,
 // relay interface, address, HTTP server, and configuration settings.
 type Server struct {
-	Ctx        context.T
-	Cancel     context.F
-	options    *options.T
-	relay      relay.I
-	Addr       string
-	mux        *servemux.S
-	httpServer *http.Server
-	listeners  *publish.S
+	Ctx              context.T
+	Cancel           context.F
+	options          *options.T
+	relay            relay.I
+	Addr             string
+	mux              *servemux.S
+	httpServer       *http.Server
+	listeners        *publish.S
+	blacklistPubkeys [][]byte
 	*config.C
 	*Lists
 	*Peers
@@ -104,6 +106,14 @@ func NewServer(
 		C:       sp.C,
 		Lists:   new(Lists),
 		Peers:   new(Peers),
+	}
+	// Parse blacklist pubkeys
+	for _, v := range s.C.Blacklist {
+		var pk []byte
+		if pk, err = keys.DecodeNpubOrHex(v); chk.E(err) {
+			continue
+		}
+		s.blacklistPubkeys = append(s.blacklistPubkeys, pk)
 	}
 	chk.E(
 		s.Peers.Init(sp.C.PeerRelays, sp.C.RelaySecret),

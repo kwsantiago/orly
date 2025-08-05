@@ -72,7 +72,7 @@ func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 				env.Event.Pubkey,
 			)
 			a.Listener.SetAuthedPubkey(env.Event.Pubkey)
-			
+
 			// If authentication is successful, remove any blocks for this IP
 			iptracker.Global.Authenticate(a.Listener.RealRemote())
 		}

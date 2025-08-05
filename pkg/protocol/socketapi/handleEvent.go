@@ -75,43 +75,43 @@ func (a *A) HandleEvent(
 	if a.I.AuthRequired() && !a.Listener.IsAuthed() {
 		remoteIP := a.Listener.RealRemote()
 		log.I.F("requesting auth from client from %s", remoteIP)
-		
+
 		// Check if the IP is blocked due to too many failed auth attempts
 		if iptracker.Global.IsBlocked(remoteIP) {
 			blockedUntil := iptracker.Global.GetBlockedUntil(remoteIP)
-			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", 
+			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s",
 				blockedUntil.Format(time.RFC3339))
-			
+
 			// Send a notice to the client explaining why they're blocked
 			if err = noticeenvelope.NewFrom(blockMsg).Write(a.Listener); chk.E(err) {
 				err = nil
 			}
-			
+
 			// Close the connection
 			log.I.F("closing connection from %s due to too many failed auth attempts", remoteIP)
 			a.Listener.Close()
 			return
 		}
-		
+
 		// Record the failed authentication attempt
 		blocked := iptracker.Global.RecordFailedAttempt(remoteIP)
 		if blocked {
 			// If this attempt caused the IP to be blocked, close the connection
 			blockedUntil := iptracker.Global.GetBlockedUntil(remoteIP)
-			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", 
+			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s",
 				blockedUntil.Format(time.RFC3339))
-			
+
 			// Send a notice to the client explaining why they're blocked
 			if err = noticeenvelope.NewFrom(blockMsg).Write(a.Listener); chk.E(err) {
 				err = nil
 			}
-			
+
 			// Close the connection
 			log.I.F("closing connection from %s due to too many failed auth attempts", remoteIP)
 			a.Listener.Close()
 			return
 		}
-		
+
 		// Continue with normal auth flow for non-blocked IPs
 		a.Listener.RequestAuth()
 		if err = Ok.AuthRequired(a, env.E, "auth required"); chk.E(err) {

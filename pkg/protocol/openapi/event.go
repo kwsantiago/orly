@@ -112,7 +112,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					err = huma.Error403Forbidden(fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", blockedUntil.Format(time.RFC3339)))
 					return
 				}
-				
+
 				authed, pubkey, super = x.UserAuth(r, remote)
 				if !authed {
 					// Record the failed authentication attempt
