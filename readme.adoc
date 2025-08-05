@@ -85,6 +85,46 @@ To see the current active configuration:
 orly env
 ----
 
+To see the help information:
+
+----
+orly help
+----
+
+Environment variables that configure orly:
+
+[cols="4"]
+|===
+| Environment variable | type | default | description 
+| ORLY_APP_NAME              | string         | orly |
+| ORLY_CONFIG_DIR            | string         | ~/.config/orly                                                                                                                            | location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style
+| ORLY_STATE_DATA_DIR        | string         | ~/.local/state/orly                                                                                                                       | storage location for state data affected by dynamic interactive interfaces
+| ORLY_DATA_DIR              | string         | ~/.local/cache/orly                                                                                                                       | storage location for the event store
+| ORLY_LISTEN                | string         | 0.0.0.0                                                                                                                                   | network listen address
+| ORLY_PORT                  | int            | 3334                                                                                                                                      | port to listen on
+| ORLY_LOG_LEVEL             | string         | info                                                                                                                                      | debug level: fatal error warn info debug trace
+| ORLY_DB_LOG_LEVEL          | string         | info                                                                                                                                      | debug level: fatal error warn info debug trace
+| ORLY_PPROF                 | string         | <empty>                                                                                                                                   | enable pprof on 127.0.0.1:6060
+| ORLY_AUTH_REQUIRED         | bool           | false                                                                                                                                     | require authentication for all requests
+| ORLY_PUBLIC_READABLE       | bool           | true                                                                                                                                      | allow public read access to regardless of whether the client is authed
+| ORLY_SPIDER_SEEDS          | []string       | wss://profiles.nostr1.com/,
+wss://relay.nostr.band/,
+wss://relay.damus.io/,
+wss://nostr.wine/,
+wss://nostr.land/,
+wss://theforest.nostr1.com/,
+wss://profiles.nostr1.com
+| seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)
+| ORLY_SPIDER_TYPE           | string         | directory                                                                                                                                 | whether to spider, and what degree of spidering: none, directory, follows (follows means to the second degree of the follow graph)
+| ORLY_SPIDER_FREQUENCY      | time.Duration  | 1h                                                                                                                                        | how often to run the spider, uses notation 0h0m0s
+| ORLY_SPIDER_SECOND_DEGREE  | bool           | true                                                                                                                                      | whether to enable spidering the second degree of follows for non-directory events if ORLY_SPIDER_TYPE is set to 'follows'
+| ORLY_OWNERS                | []string       | []                                                                                                                                        | list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)
+| ORLY_PRIVATE               | bool           | false                                                                                                                                     | do not spider for user metadata because the relay is private and this would leak relay memberships
+| ORLY_WHITELIST             | []string       | []                                                                                                                                        | only allow connections from this list of IP addresses
+| ORLY_SECRET_KEY            | string         | <empty>                                                                                                                                   | secret key for relay cluster replication authentication
+| ORLY_PEER_RELAYS           | []string       | []                                                                                                                                        | list of peer relays URLs that new events are pushed to in format <pubkey>\|<url>
+|===
+
 === Create Persistent Configuration
 
 This output can be directed to the profile location to make the settings editable without manually setting them on the
@@ -121,8 +161,6 @@ messages and it uses and parses relay lists, and all that other stuff.
 
 [#_simplified_nostr]
 === Simplified Nostr
-
-NOTE: this is not currently implemented. coming soon TM
 
 Rather than write a text that will likely fall out of date very quickly, simply run `orly` and visit its listener
 address (eg link:http://localhost:3334/api[http://localhost:3334/api]) to see the full documentation.
