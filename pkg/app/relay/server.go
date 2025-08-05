@@ -207,6 +207,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Start(
 	host string, port int, started ...chan bool,
 ) (err error) {
+	log.I.F("running spider every %v", s.C.SpiderTime)
 	if len(s.C.Owners) > 0 {
 		// start up spider
 		if err = s.Spider(s.C.Private); chk.E(err) {
@@ -216,7 +217,7 @@ func (s *Server) Start(
 		}
 	}
 	// start up a spider run to trigger every 30 minutes
-	ticker := time.NewTicker(time.Hour)
+	ticker := time.NewTicker(s.C.SpiderTime)
 	go func() {
 		for {
 			select {
