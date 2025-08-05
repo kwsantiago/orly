@@ -45,7 +45,7 @@ func main() {
 	// Parse connection URL and method
 	connectionURL := os.Args[1]
 	methodStr := os.Args[2]
-	method := nwc.Method(methodStr)
+	method := nwc.Capability(methodStr)
 
 	// Parse the wallet connect URL
 	opts, err := nwc.ParseWalletConnectURL(connectionURL)

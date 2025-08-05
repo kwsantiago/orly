@@ -158,8 +158,8 @@ func Decrypt(b64ciphertextWrapped, conversationKey []byte) (
 	return
 }
 
-// GenerateConversationKey performs an ECDH key generation hashed with the nip-44-v2 using hkdf.
-func GenerateConversationKey(pkh, skh string) (ck []byte, err error) {
+// GenerateConversationKeyFromHex performs an ECDH key generation hashed with the nip-44-v2 using hkdf.
+func GenerateConversationKeyFromHex(pkh, skh string) (ck []byte, err error) {
 	if skh >= "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141" ||
 		skh == "0000000000000000000000000000000000000000000000000000000000000000" {
 		err = errorf.E(
@@ -176,6 +176,17 @@ func GenerateConversationKey(pkh, skh string) (ck []byte, err error) {
 	if pk, err = p256k.HexToBin(pkh); chk.E(err) {
 		return
 	}
+	var shared []byte
+	if shared, err = sign.ECDH(pk); chk.E(err) {
+		return
+	}
+	ck = hkdf.Extract(sha256.New, shared, []byte("nip44-v2"))
+	return
+}
+
+func GenerateConversationKeyWithSigner(sign signer.I, pk []byte) (
+	ck []byte, err error,
+) {
 	var shared []byte
 	if shared, err = sign.ECDH(pk); chk.E(err) {
 		return

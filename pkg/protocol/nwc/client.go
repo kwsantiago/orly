@@ -1,15 +1,14 @@
 package nwc
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"orly.dev/pkg/crypto/encryption"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
-	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
@@ -19,596 +18,265 @@ import (
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
-	"orly.dev/pkg/utils/log"
-	"strings"
-	"sync"
+	"orly.dev/pkg/utils/values"
 	"time"
 )
 
-// Options represents options for a NWC client
-type Options struct {
-	RelayURL     string
-	Secret       signer.I
-	WalletPubkey []byte
-	Lud16        string
-}
-
-// Client represents a NWC client
 type Client struct {
-	options Options
-	relay   *ws.Client
-	mu      sync.Mutex
+	pool            *ws.Pool
+	relays          []string
+	clientSecretKey signer.I
+	walletPublicKey []byte
+	conversationKey []byte // nip44
 }
 
-// ParseWalletConnectURL parses a wallet connect URL
-func ParseWalletConnectURL(walletConnectURL string) (opts *Options, err error) {
-	if !strings.HasPrefix(walletConnectURL, "nostr+walletconnect://") {
-		return nil, fmt.Errorf("unexpected scheme. Should be nostr+walletconnect://")
-	}
-	// Parse URL
-	colonIndex := strings.Index(walletConnectURL, ":")
-	if colonIndex == -1 {
-		err = fmt.Errorf("invalid URL format")
+type Request struct {
+	Method string `json:"method"`
+	Params any    `json:"params"`
+}
+
+type ResponseError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+func (err *ResponseError) Error() string {
+	return fmt.Sprintf("%s %s", err.Code, err.Message)
+}
+
+type Response struct {
+	ResultType string         `json:"result_type"`
+	Error      *ResponseError `json:"error"`
+	Result     any            `json:"result"`
+}
+
+func NewClient(c context.T, connectionURI string) (cl *Client, err error) {
+	var parts *ConnectionParams
+	if parts, err = ParseConnectionURI(connectionURI); chk.E(err) {
 		return
 	}
-	walletConnectURL = walletConnectURL[colonIndex+1:]
-	if strings.HasPrefix(walletConnectURL, "//") {
-		walletConnectURL = walletConnectURL[2:]
-	}
-	walletConnectURL = "https://" + walletConnectURL
-	var u *url.URL
-	if u, err = url.Parse(walletConnectURL); chk.E(err) {
-		err = fmt.Errorf("failed to parse URL: %w", err)
+	clientKey := &p256k.Signer{}
+	if err = clientKey.InitSec(parts.clientSecretKey); chk.E(err) {
 		return
 	}
-	// Get wallet pubkey
-	walletPubkey := u.Host
-	if len(walletPubkey) != 64 {
-		err = fmt.Errorf("incorrect wallet pubkey found in auth string")
+	var ck []byte
+	if ck, err = encryption.GenerateConversationKeyWithSigner(
+		clientKey,
+		parts.walletPublicKey,
+	); chk.E(err) {
 		return
 	}
-	var pk []byte
-	if pk, err = hex.Dec(walletPubkey); chk.E(err) {
-		err = fmt.Errorf("failed to decode pubkey: %w", err)
-		return
-	}
-	// Get relay URL
-	relayURL := u.Query().Get("relay")
-	if relayURL == "" {
-		return nil, fmt.Errorf("no relay URL found in auth string")
-	}
-	// Get secret
-	secret := u.Query().Get("secret")
-	if secret == "" {
-		return nil, fmt.Errorf("no secret found in auth string")
-	}
-	var sk []byte
-	if sk, err = hex.Dec(secret); chk.E(err) {
-		return
-	}
-	sign := &p256k.Signer{}
-	if err = sign.InitSec(sk); chk.E(err) {
-		return
-	}
-	opts = &Options{
-		RelayURL:     relayURL,
-		Secret:       sign,
-		WalletPubkey: pk,
+	cl = &Client{
+		pool:            ws.NewPool(c),
+		relays:          parts.relays,
+		clientSecretKey: clientKey,
+		walletPublicKey: parts.walletPublicKey,
+		conversationKey: ck,
 	}
 	return
 }
 
-// NewNWCClient creates a new NWC client
-func NewNWCClient(options *Options) (cl *Client, err error) {
-	if options.RelayURL == "" {
-		err = fmt.Errorf("missing relay URL")
-		return
+type rpcOptions struct {
+	timeout *time.Duration
+}
+
+func (cl *Client) RPC(
+	c context.T, method Capability, params, result any, opts *rpcOptions,
+) (err error) {
+	timeout := time.Duration(10)
+	if opts == nil && opts.timeout == nil {
+		timeout = *opts.timeout
 	}
-	if options.Secret == nil {
-		err = fmt.Errorf("missing secret")
-		return
-	}
-	if options.WalletPubkey == nil {
-		err = fmt.Errorf("missing wallet pubkey")
-		return
-	}
-	return &Client{
-		options: Options{
-			RelayURL:     options.RelayURL,
-			Secret:       options.Secret,
-			WalletPubkey: options.WalletPubkey,
-			Lud16:        options.Lud16,
+	ctx, cancel := context.Timeout(c, timeout)
+	defer cancel()
+	var req []byte
+	if req, err = json.Marshal(
+		Request{
+			Method: string(method),
+			Params: params,
 		},
-	}, nil
-}
-
-// NostrWalletConnectURL returns the nostr wallet connect URL
-func (c *Client) NostrWalletConnectURL() string {
-	return c.GetNostrWalletConnectURL(true)
-}
-
-// GetNostrWalletConnectURL returns the nostr wallet connect URL
-func (c *Client) GetNostrWalletConnectURL(includeSecret bool) string {
-	params := url.Values{}
-	params.Add("relay", c.options.RelayURL)
-	if includeSecret {
-		params.Add("secret", hex.Enc(c.options.Secret.Sec()))
+	); chk.E(err) {
+		return
 	}
-	return fmt.Sprintf(
-		"nostr+walletconnect://%s?%s", c.options.WalletPubkey, params.Encode(),
+	var content []byte
+	if content, err = encryption.Encrypt(req, cl.conversationKey); chk.E(err) {
+		return
+	}
+	ev := &event.E{
+		Content:   content,
+		CreatedAt: timestamp.Now(),
+		Kind:      kind.WalletRequest,
+		Tags: tags.New(
+			tag.New([]byte("p"), cl.walletPublicKey),
+			tag.New("encryption", "nip44_v2"),
+		),
+	}
+	if err = ev.Sign(cl.clientSecretKey); chk.E(err) {
+		return
+	}
+	hasWorked := make(chan struct{})
+	evs := cl.pool.SubMany(
+		c, cl.relays, &filters.T{
+			F: []*filter.F{
+				{
+					Limit:   values.ToUintPointer(1),
+					Kinds:   kinds.New(kind.WalletRequest),
+					Authors: tag.New(cl.walletPublicKey),
+					Tags:    tags.New(tag.New([]byte("#e"), ev.ID)),
+				},
+			},
+		},
 	)
-}
-
-// Connected returns whether the client is connected to the relay
-func (c *Client) Connected() bool {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.relay != nil && c.relay.IsConnected()
-}
-
-// GetPublicKey returns the client's public key
-func (c *Client) GetPublicKey() (pubkey []byte, err error) {
-	pubkey = c.options.Secret.Pub()
-	return
-}
-
-// Close closes the relay connection
-func (c *Client) Close() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if c.relay != nil {
-		c.relay.Close()
-		c.relay = nil
-	}
-}
-
-// Encrypt encrypts content for a pubkey
-func (c *Client) encrypt(pubkey, content []byte) (
-	cipherText []byte, err error,
-) {
-	var sharedSecret []byte
-	if sharedSecret, err = c.options.Secret.ECDH(pubkey); chk.E(err) {
-		return
-	}
-	cipherText, err = encryption.EncryptNip4(content, sharedSecret)
-	return
-}
-
-// Decrypt decrypts content from a pubkey
-func (c *Client) decrypt(pubkey, content []byte) (plaintext []byte, err error) {
-	var sharedSecret []byte
-	if sharedSecret, err = c.options.Secret.ECDH(pubkey); chk.E(err) {
-		return
-	}
-	plaintext, err = encryption.DecryptNip4(content, sharedSecret)
-	return
-}
-
-// GetInfo gets wallet info
-func (c *Client) GetInfo() (response *GetInfoResponse, err error) {
-	var result []byte
-	if result, err = c.executeRequest(GetInfo, nil); chk.E(err) {
-		return
-	}
-	response = &GetInfoResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// GetBudget gets wallet budget
-func (c *Client) GetBudget() (response *GetBudgetResponse, err error) {
-	var result []byte
-	result, err = c.executeRequest(GetBudget, nil)
-	if err != nil {
-		return nil, err
-	}
-	response = &GetBudgetResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// GetBalance gets wallet balance
-func (c *Client) GetBalance() (response *GetBalanceResponse, err error) {
-	var result []byte
-	if result, err = c.executeRequest(GetBalance, nil); chk.E(err) {
-		return
-	}
-	response = &GetBalanceResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// PayInvoice pays an invoice
-func (c *Client) PayInvoice(request *PayInvoiceRequest) (
-	response *PayResponse, err error,
-) {
-	var result []byte
-	result, err = c.executeRequest(PayInvoice, request)
-	if err != nil {
-		return nil, err
-	}
-	response = &PayResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// PayKeysend sends a keysend payment
-func (c *Client) PayKeysend(request *PayKeysendRequest) (
-	response *PayResponse, err error,
-) {
-	var result []byte
-	if result, err = c.executeRequest(PayKeysend, request); chk.E(err) {
-		return
-	}
-	response = &PayResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// MakeInvoice creates an invoice
-func (c *Client) MakeInvoice(request *MakeInvoiceRequest) (
-	response *Transaction, err error,
-) {
-	var result []byte
-	if result, err = c.executeRequest(MakeInvoice, request); chk.E(err) {
-		return
-	}
-	response = &Transaction{}
-	if err = json.Unmarshal(result, response); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-	return
-}
-
-// LookupInvoice looks up an invoice
-func (c *Client) LookupInvoice(request *LookupInvoiceRequest) (
-	response *Transaction, err error,
-) {
-	var result []byte
-	if result, err = c.executeRequest(LookupInvoice, request); chk.E(err) {
-		return
-	}
-	response = &Transaction{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// ListTransactions lists transactions
-func (c *Client) ListTransactions(request *ListTransactionsRequest) (
-	response *ListTransactionsResponse, err error,
-) {
-	var result []byte
-	if result, err = c.executeRequest(ListTransactions, request); chk.E(err) {
-		return
-	}
-	response = &ListTransactionsResponse{}
-	if err = json.Unmarshal(result, response); chk.E(err) {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// SignMessage signs a message
-func (c *Client) SignMessage(request *SignMessageRequest) (
-	response *SignMessageResponse, err error,
-) {
-	var result []byte
-	if result, err = c.executeRequest(SignMessage, request); chk.E(err) {
-		return
-	}
-	response = &SignMessageResponse{}
-	if err = json.Unmarshal(result, response); err != nil {
-		err = fmt.Errorf("failed to unmarshal response: %w", err)
-		return
-	}
-	return
-}
-
-// NotificationHandler is a function that handles notifications
-type NotificationHandler func(*Notification)
-
-// SubscribeNotifications subscribes to notifications
-func (c *Client) SubscribeNotifications(
-	handler NotificationHandler,
-	notificationTypes []NotificationType,
-) (stop func(), err error) {
-	if handler == nil {
-		err = fmt.Errorf("missing notification handler")
-		return
-	}
-	ctx, cancel := context.Cancel(context.Bg())
-	doneCh := make(chan struct{})
-	stop = func() {
-		cancel()
-		<-doneCh
-	}
-	go func() {
-		defer close(doneCh)
-		for {
+	for _, u := range cl.relays {
+		go func(u string) {
+			var relay *ws.Client
+			if relay, err = cl.pool.EnsureRelay(u); chk.E(err) {
+				return
+			}
+			if err = relay.Publish(c, ev); chk.E(err) {
+				return
+			}
 			select {
+			case hasWorked <- struct{}{}:
 			case <-ctx.Done():
+				err = fmt.Errorf("context canceled waiting for request send")
 				return
 			default:
-				// Check connection
-				if err := c.checkConnected(); err != nil {
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				// Get client pubkey
-				var clientPubkey []byte
-				if clientPubkey, err = c.GetPublicKey(); chk.E(err) {
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				// Subscribe to events
-				f := &filter.F{
-					Kinds:   kinds.New(kind.WalletResponse),
-					Authors: tag.New(c.options.WalletPubkey),
-					Tags:    tags.New(tag.New([]byte("#p"), clientPubkey)),
-				}
-				var sub *ws.Subscription
-				if sub, err = c.relay.Subscribe(
-					context.Bg(), &filters.T{
-						F: []*filter.F{f},
-					},
-				); chk.E(err) {
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				// Handle events
-				for {
-					select {
-					case <-ctx.Done():
-						sub.Close()
-						return
-					case ev := <-sub.Events:
-						// Decrypt content
-						var decryptedContent []byte
-						if decryptedContent, err = c.decrypt(
-							c.options.WalletPubkey, ev.Content,
-						); chk.E(err) {
-							log.E.F(
-								"Failed to decrypt event content: %v\n", err,
-							)
-							continue
-						}
-						// Parse notification
-						notification := &Notification{}
-						if err = json.Unmarshal(
-							decryptedContent, notification,
-						); chk.E(err) {
-							log.E.F(
-								"Failed to parse notification: %v\n", err,
-							)
-							continue
-						}
-						// Check if notification type is requested
-						if len(notificationTypes) > 0 {
-							found := false
-							for _, t := range notificationTypes {
-								if notification.NotificationType == t {
-									found = true
-									break
-								}
-							}
-							if !found {
-								continue
-							}
-						}
-						// Handle notification
-						handler(notification)
-					case <-sub.EndOfStoredEvents:
-						// Ignore
-					}
-				}
 			}
+		}(u)
+	}
+	select {
+	case <-hasWorked:
+	// continue
+	case <-ctx.Done():
+		err = fmt.Errorf("timed out waiting for relays")
+		return
+	}
+	select {
+	case <-ctx.Done():
+		err = fmt.Errorf("context canceled waiting for response")
+	case e := <-evs:
+		var plain []byte
+		if plain, err = encryption.Decrypt(
+			e.Event.Content, cl.conversationKey,
+		); chk.E(err) {
+			return
 		}
-	}()
+		resp := &Response{
+			Result: &result,
+		}
+		if err = json.Unmarshal(plain, resp); chk.E(err) {
+			return
+		}
+		return
+	}
 	return
 }
 
-// executeRequest executes a NIP-47 request
-func (c *Client) executeRequest(
-	method Method,
-	params any,
-) (msg json.RawMessage, err error) {
-	// Default timeout values
-	replyTimeout := 3 * time.Second
-	publishTimeout := 3 * time.Second
-	// Create context with timeout
-	ctx, cancel := context.Timeout(context.Bg(), replyTimeout)
-	defer cancel()
-	// Create result channel
-	resultCh := make(chan json.RawMessage, 1)
-	errCh := make(chan error, 1)
-	// Check connection
-	if err = c.checkConnected(); err != nil {
-		return nil, err
-	}
-	// Create request
-	request := struct {
-		Method Method `json:"method"`
-		Params any    `json:"params,omitempty"`
-	}{
-		Method: method,
-		Params: params,
-	}
-	// Marshal request
-	requestJSON, err := json.Marshal(request)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
-	}
-	// Encrypt request
-	var encryptedContent []byte
-	if encryptedContent, err = c.encrypt(
-		c.options.WalletPubkey, requestJSON,
-	); chk.E(err) {
-		return nil, fmt.Errorf("failed to encrypt request: %w", err)
-	}
-	// Create request event
-	requestEvent := &event.E{
-		Kind:      kind.WalletRequest,
-		CreatedAt: timestamp.New(time.Now().Unix()),
-		Tags:      tags.New(tag.New("p", hex.Enc(c.options.WalletPubkey))),
-		Content:   encryptedContent,
-	}
-	// Sign request event
-	err = requestEvent.Sign(c.options.Secret)
-	if err != nil {
-		return nil, fmt.Errorf("failed to sign request event: %w", err)
-	}
-	// Subscribe to response events
-	f := &filter.F{
-		Kinds:   kinds.New(kind.WalletResponse),
-		Authors: tag.New(c.options.WalletPubkey),
-		Tags:    tags.New(tag.New([]byte("#p"), requestEvent.ID)),
-	}
-	log.I.F("%s", f.Marshal(nil))
-	var sub *ws.Subscription
-	if sub, err = c.relay.Subscribe(
-		ctx, &filters.T{
-			F: []*filter.F{f},
-		},
-	); chk.E(err) {
-		err = fmt.Errorf(
-			"failed to subscribe to response events: %w", err,
-		)
-		return
-	}
-	defer sub.Close()
-	// Set up reply timeout
-	replyTimer := time.AfterFunc(
-		replyTimeout, func() {
-			errCh <- NewReplyTimeoutError(
-				fmt.Sprintf("Timeout waiting for reply to %s", method),
-				"TIMEOUT",
-			)
+func (cl *Client) GetWalletServiceInfo(c context.T) (
+	wsi *WalletServiceInfo, err error,
+) {
+	lim := uint(1)
+	evc := cl.pool.SubMany(
+		c, cl.relays, &filters.T{
+			F: []*filter.F{
+				{
+					Limit:   &lim,
+					Kinds:   kinds.New(kind.WalletInfo),
+					Authors: tag.New(cl.walletPublicKey),
+				},
+			},
 		},
 	)
-	defer replyTimer.Stop()
-	// Handle response events
-	go func() {
-		var resErr error
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case ev := <-sub.Events:
-				// Decrypt content
-				var decryptedContent []byte
-				decryptedContent, resErr = c.decrypt(
-					c.options.WalletPubkey, ev.Content,
-				)
-				if chk.E(resErr) {
-					errCh <- fmt.Errorf(
-						"failed to decrypt response: %w",
-						resErr,
-					)
-					return
-				}
-				// Parse response
-				var response struct {
-					ResultType string          `json:"result_type"`
-					Result     json.RawMessage `json:"result"`
-					Error      *struct {
-						Code    string `json:"code"`
-						Message string `json:"message"`
-					} `json:"error"`
-				}
-				if resErr = json.Unmarshal(
-					decryptedContent, &response,
-				); chk.E(resErr) {
-					errCh <- fmt.Errorf("failed to parse response: %w", resErr)
-					return
-				}
-				// Check for error
-				if response.Error != nil {
-					errCh <- NewWalletError(
-						response.Error.Message,
-						response.Error.Code,
-					)
-					return
-				}
-				// Send result
-				resultCh <- response.Result
-				return
-			case <-sub.EndOfStoredEvents:
-				// Ignore
+	select {
+	case <-c.Done():
+		err = fmt.Errorf("GetWalletServiceInfo canceled")
+		return
+	case ev := <-evc:
+		var encryptionTypes []EncryptionType
+		var notificationTypes []NotificationType
+		encryptionTag := ev.Event.Tags.GetFirst(tag.New("encryption"))
+		notificationsTag := ev.Event.Tags.GetFirst(tag.New("notifications"))
+		if encryptionTag != nil {
+			et := encryptionTag.ToSliceOfBytes()
+			encType := bytes.Split(et[0], []byte(" "))
+			for _, e := range encType {
+				encryptionTypes = append(encryptionTypes, e)
 			}
 		}
-	}()
-	// Publish request event
-	publishCtx, publishCancel := context.Timeout(
-		context.Bg(), publishTimeout,
-	)
-	defer publishCancel()
-	if err = c.relay.Publish(publishCtx, requestEvent); chk.E(err) {
-		err = fmt.Errorf("failed to publish request event: %w", err)
-		return
+		if notificationsTag != nil {
+			nt := notificationsTag.ToSliceOfBytes()
+			notifs := bytes.Split(nt[0], []byte(" "))
+			for _, e := range notifs {
+				notificationTypes = append(notificationTypes, e)
+			}
+		}
+		cp := bytes.Split(ev.Event.Content, []byte(" "))
+		var capabilities []Capability
+		for _, capability := range cp {
+			capabilities = append(capabilities, capability)
+		}
+		wsi = &WalletServiceInfo{
+			EncryptionTypes:   encryptionTypes,
+			NotificationTypes: notificationTypes,
+			Capabilities:      capabilities,
+		}
 	}
-
-	// Wait for result or error
-	select {
-	case msg = <-resultCh:
-		return
-	case err = <-errCh:
-		return
-	case <-ctx.Done():
-		err = NewReplyTimeoutError(
-			fmt.Sprintf("Timeout waiting for reply to %s", method),
-			"TIMEOUT",
-		)
-		return
-	}
+	return
 }
 
-// checkConnected checks if the client is connected to the relay
-func (c *Client) checkConnected() (err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if c.options.RelayURL == "" {
-		return fmt.Errorf("missing relay URL")
+func (cl *Client) GetInfo(c context.T) (gi *GetInfoResult, err error) {
+	gi = &GetInfoResult{}
+	if err = cl.RPC(c, GetInfo, nil, gi, nil); chk.E(err) {
+		return
 	}
+	return
+}
 
-	if c.relay == nil {
-		if c.relay, err = ws.RelayConnect(
-			context.Bg(), c.options.RelayURL,
-		); chk.E(err) {
-			return NewNetworkError(
-				"Failed to connect to "+c.options.RelayURL,
-				"OTHER",
-			)
-		}
-	} else if !c.relay.IsConnected() {
-		c.relay.Close()
-		if c.relay, err = ws.RelayConnect(
-			context.Bg(), c.options.RelayURL,
-		); chk.E(err) {
-			return NewNetworkError(
-				"Failed to connect to "+c.options.RelayURL,
-				"OTHER",
-			)
-		}
+func (cl *Client) MakeInvoice(
+	c context.T, params *MakeInvoiceParams,
+) (mi *MakeInvoiceResult, err error) {
+	mi = &MakeInvoiceResult{}
+	if err = cl.RPC(c, MakeInvoice, params, &mi, nil); chk.E(err) {
+		return
 	}
-	return nil
+	return
+}
+
+func (cl *Client) PayInvoice(
+	c context.T, params *PayInvoiceParams,
+) (pi *PayInvoiceResult, err error) {
+	pi = &PayInvoiceResult{}
+	if err = cl.RPC(c, PayInvoice, params, &pi, nil); chk.E(err) {
+		return
+	}
+	return
+}
+
+func (cl *Client) LookupInvoice(
+	c context.T, params *LookupInvoiceParams,
+) (li *LookupInvoiceResult, err error) {
+	li = &LookupInvoiceResult{}
+	if err = cl.RPC(c, LookupInvoice, params, &li, nil); chk.E(err) {
+		return
+	}
+	return
+}
+
+func (cl *Client) ListTransactions(
+	c context.T, params *ListTransactionsParams,
+) (lt *ListTransactionsResult, err error) {
+	lt = &ListTransactionsResult{}
+	if err = cl.RPC(c, ListTransactions, params, &lt, nil); chk.E(err) {
+		return
+	}
+	return
+}
+
+func (cl *Client) GetBalance(c context.T) (gb *GetBalanceResult, err error) {
+	gb = &GetBalanceResult{}
+	if err = cl.RPC(c, GetBalance, nil, gb, nil); chk.E(err) {
+		return
+	}
+	return
 }

@@ -275,9 +275,9 @@ var (
 	WalletRequest    = &T{23194}
 	// NWCWalletResponse is an event type that...
 	NWCWalletResponse  = &T{23195}
-	WalletResponse     = NWCWalletResponse
+	WalletResponse     = &T{23195}
 	NWCNotification    = &T{23196}
-	WalletNotification = NWCNotification
+	WalletNotification = &T{23196}
 	// NostrConnect is an event type that...
 	NostrConnect = &T{24133}
 	HTTPAuth     = &T{27235}

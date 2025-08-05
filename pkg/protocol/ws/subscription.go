@@ -10,6 +10,7 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
+	"orly.dev/pkg/utils/log"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -178,7 +179,7 @@ func (sub *Subscription) Fire() (err error) {
 	} else {
 		b = countenvelope.NewRequest(id, sub.Filters).Marshal(b)
 	}
-	// log.T.F("{%s} sending %s", sub.Relay.URL, b)
+	log.T.F("{%s} sending %s", sub.Relay.URL, b)
 	sub.live.Store(true)
 	if err = <-sub.Relay.Write(b); chk.T(err) {
 		sub.cancel()

@@ -47,7 +47,9 @@ func assertCryptPriv(
 		return
 	}
 	expectedBytes = []byte(expected)
-	if ok = assert.Equalf(t, string(expectedBytes), string(actualBytes), "wrong encryption"); !ok {
+	if ok = assert.Equalf(
+		t, string(expectedBytes), string(actualBytes), "wrong encryption",
+	); !ok {
 		return
 	}
 	decrypted, err = Decrypt(expectedBytes, k1)
@@ -62,8 +64,8 @@ func assertDecryptFail(
 ) {
 	var (
 		k1, ciphertextBytes []byte
-		ok  bool
-		err error
+		ok                  bool
+		err                 error
 	)
 	k1, err = hex.Dec(conversationKey)
 	if ok = assert.NoErrorf(
@@ -79,7 +81,7 @@ func assertDecryptFail(
 func assertConversationKeyFail(
 	t *testing.T, priv string, pub string, msg string,
 ) {
-	_, err := GenerateConversationKey(pub, priv)
+	_, err := GenerateConversationKeyFromHex(pub, priv)
 	assert.ErrorContains(t, err, msg)
 }
 
@@ -98,7 +100,7 @@ func assertConversationKeyGeneration(
 	); !ok {
 		return false
 	}
-	actualConversationKey, err = GenerateConversationKey(pub, priv)
+	actualConversationKey, err = GenerateConversationKeyFromHex(pub, priv)
 	if ok = assert.NoErrorf(
 		t, err, "conversation key generation failed: %v", err,
 	); !ok {
@@ -1312,7 +1314,7 @@ func TestMaxLength(t *testing.T) {
 	pub2, _ := keys.GetPublicKeyHex(string(sk2))
 	salt := make([]byte, 32)
 	rand.Read(salt)
-	conversationKey, _ := GenerateConversationKey(pub2, string(sk1))
+	conversationKey, _ := GenerateConversationKeyFromHex(pub2, string(sk1))
 	plaintext := strings.Repeat("a", MaxPlaintextSize)
 	plaintextBytes := []byte(plaintext)
 	encrypted, err := Encrypt(
@@ -1366,7 +1368,9 @@ func assertCryptPub(
 		return
 	}
 	expectedBytes = []byte(expected)
-	if ok = assert.Equalf(t, string(expectedBytes), string(actualBytes), "wrong encryption"); !ok {
+	if ok = assert.Equalf(
+		t, string(expectedBytes), string(actualBytes), "wrong encryption",
+	); !ok {
 		return
 	}
 	decrypted, err = Decrypt(expectedBytes, k1)
