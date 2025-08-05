@@ -106,7 +106,12 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 						kind.DMRelaysList,
 					)
 				}
-				everyone := append(ownersFollowed, followedFollows...)
+				everyone := ownersFollowed
+				if s.C.SpiderSecondDegree &&
+					(s.C.SpiderType == "follows" ||
+						s.C.SpiderType == "directory") {
+					everyone = append(ownersFollowed, followedFollows...)
+				}
 				_, _ = s.SpiderFetch(
 					k, false, true, everyone...,
 				)
