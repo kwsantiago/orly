@@ -115,6 +115,20 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 				_, _ = s.SpiderFetch(
 					k, false, true, everyone...,
 				)
+				// get the directory events also for second degree if spider
+				// type is directory but second degree is disabled, so all
+				// directory data is available for all whitelisted users.
+				if !s.C.SpiderSecondDegree && s.C.SpiderType == "directory" {
+					k = kinds.New(
+						kind.ProfileMetadata, kind.RelayListMetadata,
+						kind.DMRelaysList, kind.MuteList,
+					)
+					everyone = append(ownersFollowed, followedFollows...)
+					_, _ = s.SpiderFetch(
+						k, false, true, everyone...,
+					)
+
+				}
 			}()
 		}
 	}()
