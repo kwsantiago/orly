@@ -51,29 +51,24 @@ func (s *Server) AcceptEvent(
 				}
 			}
 		}
-		accept = true
 		return
 	}
 	// if auth is required and the user is not authed, reject
-	if s.AuthRequired() && len(authedPubkey) == 0 {
+	if len(authedPubkey) == 0 {
 		notice = "client isn't authed"
 		return
+	}
+	for _, u := range s.OwnersMuted() {
+		if bytes.Equal(u, authedPubkey) {
+			notice = "event author is banned from this relay"
+			return
+		}
 	}
 	// check if the authed user is on the lists
 	list := append(s.OwnersFollowed(), s.FollowedFollows()...)
 	for _, u := range list {
 		if bytes.Equal(u, authedPubkey) {
 			accept = true
-			break
-		}
-	}
-	if !accept {
-		return
-	}
-	for _, u := range s.OwnersMuted() {
-		if bytes.Equal(u, authedPubkey) {
-			notice = "event author is banned from this relay"
-			accept = false
 			return
 		}
 	}

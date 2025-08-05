@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"orly.dev/pkg/protocol/openapi"
-	"orly.dev/pkg/protocol/socketapi"
 	"strconv"
 	"strings"
 	"time"
+
+	"orly.dev/pkg/protocol/openapi"
+	"orly.dev/pkg/protocol/socketapi"
 
 	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay/helpers"
@@ -109,6 +110,9 @@ func NewServer(
 	}
 	// Parse blacklist pubkeys
 	for _, v := range s.C.Blacklist {
+		if len(v) == 0 {
+			continue
+		}
 		var pk []byte
 		if pk, err = keys.DecodeNpubOrHex(v); chk.E(err) {
 			continue
