@@ -62,8 +62,8 @@ func assertDecryptFail(
 ) {
 	var (
 		k1, ciphertextBytes []byte
-		ok  bool
-		err error
+		ok                  bool
+		err                 error
 	)
 	k1, err = hex.Dec(conversationKey)
 	if ok = assert.NoErrorf(

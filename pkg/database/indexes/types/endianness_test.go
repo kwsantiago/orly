@@ -84,7 +84,7 @@ func testUint16Sorting(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint16 values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint16 values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -115,7 +115,7 @@ func testUint24Sorting(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint24 values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint24 values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -143,7 +143,7 @@ func testUint32Sorting(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint32 values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint32 values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -174,7 +174,7 @@ func testUint40Sorting(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint40 values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint40 values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -202,7 +202,7 @@ func testUint64Sorting(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint64 values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint64 values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -233,7 +233,7 @@ func testUint16EdgeCases(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint16 edge case values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint16 edge case values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -265,7 +265,7 @@ func testUint24EdgeCases(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint24 edge case values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint24 edge case values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -294,7 +294,7 @@ func testUint32EdgeCases(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint32 edge case values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint32 edge case values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -326,7 +326,7 @@ func testUint40EdgeCases(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint40 edge case values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint40 edge case values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -355,7 +355,7 @@ func testUint64EdgeCases(t *testing.T) {
 	// Check if they sort correctly with bytes.Compare
 	for i := 0; i < len(marshaledValues)-1; i++ {
 		if bytes.Compare(marshaledValues[i], marshaledValues[i+1]) >= 0 {
-			t.Errorf("Uint64 edge case values don't sort correctly: %v should be less than %v", 
+			t.Errorf("Uint64 edge case values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", marshaledValues[i], marshaledValues[i+1])
 		}
@@ -390,7 +390,7 @@ func TestEndianness(t *testing.T) {
 		result := bytes.Compare(bigEndianValues[i], bigEndianValues[i+1])
 		t.Logf("Compare %d with %d: result = %d", values[i], values[i+1], result)
 		if result >= 0 {
-			t.Errorf("BigEndian values don't sort correctly: %v should be less than %v", 
+			t.Errorf("BigEndian values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", bigEndianValues[i], bigEndianValues[i+1])
 		}
@@ -404,7 +404,7 @@ func TestEndianness(t *testing.T) {
 		t.Logf("Compare %d with %d: result = %d", values[i], values[i+1], result)
 		if result >= 0 {
 			correctOrder = false
-			t.Logf("LittleEndian values don't sort correctly: %v should be less than %v", 
+			t.Logf("LittleEndian values don't sort correctly: %v should be less than %v",
 				values[i], values[i+1])
 			t.Logf("Bytes representation: %v vs %v", littleEndianValues[i], littleEndianValues[i+1])
 		}

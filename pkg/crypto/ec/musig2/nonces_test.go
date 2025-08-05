@@ -87,9 +87,9 @@ type nonceAggValidCase struct {
 }
 
 type nonceAggInvalidCase struct {
-	Indices []int         `json:"pnonce_indices"`
-	Error   nonceAggError `json:"error"`
-	Comment string        `json:"comment"`
+	Indices     []int         `json:"pnonce_indices"`
+	Error       nonceAggError `json:"error"`
+	Comment     string        `json:"comment"`
 	ExpectedErr string        `json:"btcec_err"`
 }
 
