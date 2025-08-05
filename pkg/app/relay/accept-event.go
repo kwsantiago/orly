@@ -42,6 +42,15 @@ func (s *Server) AcceptEvent(
 	remote string,
 ) (accept bool, notice string, afterSave func()) {
 	if !s.AuthRequired() {
+		// Check blacklist for public relay mode
+		if len(s.blacklistPubkeys) > 0 {
+			for _, blockedPubkey := range s.blacklistPubkeys {
+				if bytes.Equal(blockedPubkey, ev.Pubkey) {
+					notice = "event author is blacklisted"
+					return
+				}
+			}
+		}
 		accept = true
 		return
 	}
@@ -64,6 +73,7 @@ func (s *Server) AcceptEvent(
 	for _, u := range s.OwnersMuted() {
 		if bytes.Equal(u, authedPubkey) {
 			notice = "event author is banned from this relay"
+			accept = false
 			return
 		}
 	}

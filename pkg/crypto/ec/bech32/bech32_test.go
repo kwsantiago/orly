@@ -52,7 +52,7 @@ func TestBech32(t *testing.T) {
 		{
 			"split1cheo2y9e2w",
 			ErrNonCharsetChar('o'),
-		},                                            // invalid character (o) in data part
+		}, // invalid character (o) in data part
 		{"split1a2y9w", ErrInvalidSeparatorIndex(5)}, // too short data part
 		{
 			"1checkupstagehandshakeupstreamerranterredcaperred2y9e3w",

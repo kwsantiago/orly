@@ -108,7 +108,7 @@ func TestBytesConcurrentAccess(t *testing.T) {
 				loaded := atom.Load()
 
 				// Verify the loaded data is valid (either our data or another goroutine's data)
-				require.LessOrEqual(t, len(loaded), parallelism, 
+				require.LessOrEqual(t, len(loaded), parallelism,
 					"Loaded data length should not exceed parallelism")
 
 				// If it's our data, verify it's correct

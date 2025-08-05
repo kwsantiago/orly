@@ -44,6 +44,7 @@ type C struct {
 	Owners             []string      `env:"ORLY_OWNERS" usage:"list of users whose follow lists designate whitelisted users who can publish events, and who can read if public readable is false (comma separated)"`
 	Private            bool          `env:"ORLY_PRIVATE" usage:"do not spider for user metadata because the relay is private and this would leak relay memberships" default:"false"`
 	Whitelist          []string      `env:"ORLY_WHITELIST" usage:"only allow connections from this list of IP addresses"`
+	Blacklist          []string      `env:"ORLY_BLACKLIST" usage:"list of pubkeys to block when auth is not required (comma separated)"`
 	RelaySecret        string        `env:"ORLY_SECRET_KEY" usage:"secret key for relay cluster replication authentication"`
 	PeerRelays         []string      `env:"ORLY_PEER_RELAYS" usage:"list of peer relays URLs that new events are pushed to in format <pubkey>|<url>"`
 }

@@ -57,18 +57,18 @@ type A struct {
 func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 	c := a.Config()
 	remote := helpers.GetRemoteFromReq(r)
-	
+
 	// Check if the IP is blocked due to too many failed auth attempts
 	if iptracker.Global.IsBlocked(remote) {
 		blockedUntil := iptracker.Global.GetBlockedUntil(remote)
-		log.I.F("rejecting websocket connection from banned IP %s (blocked until %s)", 
+		log.I.F("rejecting websocket connection from banned IP %s (blocked until %s)",
 			remote, blockedUntil.Format(time.RFC3339))
-		
-		// We can't send a notice to the client here because the websocket connection 
+
+		// We can't send a notice to the client here because the websocket connection
 		// hasn't been established yet, so we just reject the connection
 		return
 	}
-	
+
 	var whitelisted bool
 	if len(c.Whitelist) > 0 {
 		for _, addr := range c.Whitelist {

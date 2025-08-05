@@ -118,7 +118,7 @@ func (p *Publisher) Receive(msg typer.T) {
 					Receiver:  m.Receiver,
 					Pubkey:    m.Pubkey,
 				}
-				
+
 				// Add the filters if provided
 				if m.FilterMap != nil {
 					for id, f := range m.FilterMap {
@@ -126,7 +126,7 @@ func (p *Publisher) Receive(msg typer.T) {
 						log.T.F("added subscription %s for new listener %s", id, m.Id)
 					}
 				}
-				
+
 				// Add the listener to the map
 				p.ListenMap[m.Id] = listener
 				log.T.F("added new listener %s", m.Id)
@@ -254,7 +254,7 @@ func CheckListenerExists(clientId string, publishers ...publisher.I) bool {
 				return true
 			}
 		}
-		
+
 		// Check if the publisher has a Publishers field of type publisher.Publishers
 		// This handles the case where the publisher is a *publish.S
 		val := reflect.ValueOf(p)
@@ -290,7 +290,7 @@ func CheckSubscriptionExists(clientId string, subscriptionId string, publishers 
 				return true
 			}
 		}
-		
+
 		// Check if the publisher has a Publishers field of type publisher.Publishers
 		// This handles the case where the publisher is a *publish.S
 		val := reflect.ValueOf(p)
