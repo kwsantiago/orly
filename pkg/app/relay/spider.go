@@ -120,7 +120,6 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 				// directory data is available for all whitelisted users.
 				if !s.C.SpiderSecondDegree && s.C.SpiderType == "directory" {
 					k = kinds.New(
-						kind.FollowList,
 						kind.ProfileMetadata, kind.RelayListMetadata,
 						kind.DMRelaysList, kind.MuteList,
 					)

@@ -37,7 +37,7 @@ type C struct {
 	Pprof              string        `env:"ORLY_PPROF" usage:"enable pprof on 127.0.0.1:6060" enum:"cpu,memory,allocation"`
 	AuthRequired       bool          `env:"ORLY_AUTH_REQUIRED" default:"false" usage:"require authentication for all requests"`
 	PublicReadable     bool          `env:"ORLY_PUBLIC_READABLE" default:"true" usage:"allow public read access to regardless of whether the client is authed"`
-	SpiderSeeds        []string      `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://profiles.nostr1.com/,wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/"`
+	SpiderSeeds        []string      `env:"ORLY_SPIDER_SEEDS" usage:"seeds to use for the spider (relays that are looked up initially to find owner relay lists) (comma separated)" default:"wss://profiles.nostr1.com/,wss://relay.nostr.band/,wss://relay.damus.io/,wss://nostr.wine/,wss://nostr.land/,wss://theforest.nostr1.com/,wss://profiles.nostr1.com/"`
 	SpiderType         string        `env:"ORLY_SPIDER_TYPE" usage:"whether to spider, and what degree of spidering: none, directory, follows (follows means to the second degree of the follow graph)" default:"directory"`
 	SpiderTime         time.Duration `env:"ORLY_SPIDER_FREQUENCY" usage:"how often to run the spider, uses notation 0h0m0s" default:"1h"`
 	SpiderSecondDegree bool          `env:"ORLY_SPIDER_SECOND_DEGREE" default:"true" usage:"whether to enable spidering the second degree of follows for non-directory events if ORLY_SPIDER_TYPE is set to 'follows'"`
