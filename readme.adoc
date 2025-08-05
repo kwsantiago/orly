@@ -17,7 +17,7 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 * AVX/AVX2 optimized SHA256 and SIMD hex encoder
 * https://github.com/bitcoin/secp256k1[libsecp256k1]-enabled signature and signature verification (see link:p256k/README.md[here]).
 * efficient, mutable byte slice-based hash/pubkey/signature encoding in memory (zero allocation decode from wire of all but id/pubkey/signature, can tolerate whitespace, at a speed penalty)
-* custom badger-based event store with an optional garbage collector that uses fast binary encoder for storage of events.
+* custom badger-based event store that uses fast binary encoder for storage of events, and has a complete set of indexes so it doesn't need to decode events for any query until delivering them.
 * link:cmd/vainstr[vainstr] vanity npub generator that can mine a 5-letter suffix in around 15 minutes on a 6 core Ryzen 5 processor using the CGO bitcoin core signature library.
 * reverse proxy tool link:cmd/lerproxy[lerproxy] with support for Go vanity imports and https://github.com/nostr-protocol/nips/blob/master/05.md[nip-05] npub DNS verification and own TLS certificates
 * link:https://github.com/nostr-protocol/nips/blob/master/98.md[nip-98] implementation with new expiring variant for vanilla HTTP tools and browsers.
