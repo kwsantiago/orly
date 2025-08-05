@@ -103,7 +103,7 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 				if s.C.SpiderType == "directory" {
 					k = kinds.New(
 						kind.ProfileMetadata, kind.RelayListMetadata,
-						kind.DMRelaysList,
+						kind.DMRelaysList, kind.MuteList,
 					)
 				}
 				everyone := ownersFollowed
