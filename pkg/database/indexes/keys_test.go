@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"orly.dev/pkg/database/indexes/types"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )
@@ -49,7 +48,7 @@ func TestPrefixMethods(t *testing.T) {
 	}
 
 	// Test MarshalWrite method
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := prefix.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -209,7 +208,7 @@ func TestTStruct(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -272,7 +271,7 @@ func TestEventFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -318,7 +317,7 @@ func TestIdFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -391,7 +390,7 @@ func TestIdPubkeyFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -452,7 +451,7 @@ func TestCreatedAtFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -516,7 +515,7 @@ func TestPubkeyFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -588,7 +587,7 @@ func TestPubkeyTagFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -660,7 +659,7 @@ func TestTagFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -724,7 +723,7 @@ func TestKindFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -789,7 +788,7 @@ func TestKindTagFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -865,7 +864,7 @@ func TestKindPubkeyFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -941,7 +940,7 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 	}
 
 	// Test marshaling and unmarshaling
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = enc.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

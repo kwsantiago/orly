@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
+	"testing"
+
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event/examples"
 	"orly.dev/pkg/utils/chk"
-	"testing"
 )
 
 func TestTMarshal_Unmarshal(t *testing.T) {

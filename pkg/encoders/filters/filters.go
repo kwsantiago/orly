@@ -120,3 +120,12 @@ func GenFilters(n int) (ff *T, err error) {
 	}
 	return
 }
+
+func (f *T) MatchIgnoringTimestampConstraints(ev *event.E) bool {
+	for _, ff := range f.F {
+		if ff.MatchesIgnoringTimestampConstraints(ev) {
+			return true
+		}
+	}
+	return false
+}

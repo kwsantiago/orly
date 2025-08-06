@@ -3,16 +3,16 @@ package database
 import (
 	"bytes"
 	"math"
+	"testing"
+
 	"orly.dev/pkg/database/indexes"
 	types2 "orly.dev/pkg/database/indexes/types"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/utils/chk"
-	"testing"
 
 	"github.com/minio/sha256-simd"
 )
@@ -41,8 +41,7 @@ func verifyIndex(
 	}
 
 	// Marshal the expected start index
-	startBuf := codecbuf.Get()
-	defer codecbuf.Put(startBuf)
+	startBuf := new(bytes.Buffer)
 	err := expectedStartIdx.MarshalWrite(startBuf)
 	if chk.E(err) {
 		t.Fatalf("Failed to marshal expected start index: %v", err)
@@ -62,8 +61,7 @@ func verifyIndex(
 	}
 
 	// Marshal the expected end index
-	endBuf := codecbuf.Get()
-	defer codecbuf.Put(endBuf)
+	endBuf := new(bytes.Buffer)
 	err = endIdx.MarshalWrite(endBuf)
 	if chk.E(err) {
 		t.Fatalf("Failed to marshal expected End index: %v", err)

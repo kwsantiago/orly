@@ -3,11 +3,19 @@ package ws
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
+	"github.com/puzpuzpuz/xsync/v3"
 	"orly.dev/pkg/encoders/envelopes"
 	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/encoders/envelopes/closedenvelope"
-	"orly.dev/pkg/encoders/envelopes/countenvelope"
 	"orly.dev/pkg/encoders/envelopes/eoseenvelope"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
 	"orly.dev/pkg/encoders/envelopes/noticeenvelope"
@@ -16,53 +24,41 @@ import (
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/encoders/tag"
+	"orly.dev/pkg/encoders/tags"
+	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/interfaces/signer"
-	"orly.dev/pkg/protocol/auth"
-	"orly.dev/pkg/utils/atomic"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
-	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/normalize"
-	"sync"
-	"time"
-
-	"github.com/gobwas/ws"
-	"github.com/gobwas/ws/wsutil"
-	"github.com/puzpuzpuz/xsync/v3"
 )
 
-var subscriptionIDCounter atomic.Int32
+var subscriptionIDCounter atomic.Int64
 
-type Client struct {
+// Relay represents a connection to a Nostr relay.
+type Relay struct {
 	closeMutex sync.Mutex
 
-	URL string
+	URL           string
+	requestHeader http.Header // e.g. for origin header
 
-	RequestHeader http.Header // e.g. for origin header
+	Connection    *Connection
+	Subscriptions *xsync.MapOf[int64, *Subscription]
 
-	Connection *Connection
+	ConnectionError         error
+	connectionContext       context.T // will be canceled when the connection closes
+	connectionContextCancel context.C
 
-	Subscriptions *xsync.MapOf[string, *Subscription]
-
-	ConnectionError error
-
-	connectionContext context.T // will be canceled when the connection closes
-
-	connectionContextCancel context.F
-
-	challenge []byte // NIP-42 challenge, we only keep the last
-
-	notices chan []byte // NIP-01 NOTICEs
-
-	okCallbacks *xsync.MapOf[string, func(bool, string)]
-
-	writeQueue chan writeRequest
-
+	challenge                     []byte       // NIP-42 challenge, we only keep the last
+	noticeHandler                 func(string) // NIP-01 NOTICEs
+	customHandler                 func(string) // nonstandard unparseable messages
+	okCallbacks                   *xsync.MapOf[string, func(bool, string)]
+	writeQueue                    chan writeRequest
 	subscriptionChannelCloseQueue chan *Subscription
 
-	signatureChecker func(*event.E) bool
-
+	// custom things that aren't often used
+	//
 	AssumeValid bool // this will skip verifying signatures for events received from this relay
 }
 
@@ -71,21 +67,20 @@ type writeRequest struct {
 	answer chan error
 }
 
-// NewRelay returns a new relay. The relay connection will be closed when the
-// context is cancelled.
-func NewRelay(c context.T, url string, opts ...RelayOption) *Client {
-	ctx, cancel := context.Cancel(c)
-	r := &Client{
-		URL:                     string(normalize.URL([]byte(url))),
+// NewRelay returns a new relay. It takes a context that, when canceled, will close the relay connection.
+func NewRelay(ctx context.T, url string, opts ...RelayOption) *Relay {
+	ctx, cancel := context.Cause(ctx)
+	r := &Relay{
+		URL:                     string(normalize.URL(url)),
 		connectionContext:       ctx,
 		connectionContextCancel: cancel,
-		Subscriptions:           xsync.NewMapOf[string, *Subscription](),
+		Subscriptions:           xsync.NewMapOf[int64, *Subscription](),
 		okCallbacks: xsync.NewMapOf[string, func(
 			bool, string,
 		)](),
 		writeQueue:                    make(chan writeRequest),
 		subscriptionChannelCloseQueue: make(chan *Subscription),
-		signatureChecker:              func(e *event.E) bool { ok, _ := e.Verify(); return ok },
+		requestHeader:                 nil,
 	}
 
 	for _, opt := range opts {
@@ -95,301 +90,323 @@ func NewRelay(c context.T, url string, opts ...RelayOption) *Client {
 	return r
 }
 
-// RelayConnect returns a relay object connected to url. Once successfully
-// connected, cancelling ctx has no effect. To close the connection, call
-// r.Close().
+// RelayConnect returns a relay object connected to url.
+//
+// The given subscription is only used during the connection phase. Once successfully connected, cancelling ctx has no effect.
+//
+// The ongoing relay connection uses a background context. To close the connection, call r.Close().
+// If you need fine grained long-term connection contexts, use NewRelay() instead.
 func RelayConnect(ctx context.T, url string, opts ...RelayOption) (
-	*Client, error,
+	*Relay, error,
 ) {
 	r := NewRelay(context.Bg(), url, opts...)
 	err := r.Connect(ctx)
 	return r, err
 }
 
-// RelayOption is the type of the argument passed for that.
+// RelayOption is the type of the argument passed when instantiating relay connections.
 type RelayOption interface {
-	ApplyRelayOption(*Client)
+	ApplyRelayOption(*Relay)
 }
 
 var (
 	_ RelayOption = (WithNoticeHandler)(nil)
-	_ RelayOption = (WithSignatureChecker)(nil)
+	_ RelayOption = (WithCustomHandler)(nil)
+	_ RelayOption = (WithRequestHeader)(nil)
 )
 
-// WithNoticeHandler just takes notices and is expected to do something with
-// them. when not given, defaults to logging the notices.
-type WithNoticeHandler func(notice []byte)
+// WithNoticeHandler just takes notices and is expected to do something with them.
+// when not given, defaults to logging the notices.
+type WithNoticeHandler func(notice string)
 
-func (nh WithNoticeHandler) ApplyRelayOption(r *Client) {
-	r.notices = make(chan []byte)
-	go func() {
-		for notice := range r.notices {
-			nh(notice)
-		}
-	}()
+func (nh WithNoticeHandler) ApplyRelayOption(r *Relay) {
+	r.noticeHandler = nh
 }
 
-// WithSignatureChecker must be a function that checks the signature of an event
-// and returns true or false.
-type WithSignatureChecker func(*event.E) bool
+// WithCustomHandler must be a function that handles any relay message that couldn't be
+// parsed as a standard envelope.
+type WithCustomHandler func(data string)
 
-func (sc WithSignatureChecker) ApplyRelayOption(r *Client) {
-	r.signatureChecker = sc
+func (ch WithCustomHandler) ApplyRelayOption(r *Relay) {
+	r.customHandler = ch
+}
+
+// WithRequestHeader sets the HTTP request header of the websocket preflight request.
+type WithRequestHeader http.Header
+
+func (ch WithRequestHeader) ApplyRelayOption(r *Relay) {
+	r.requestHeader = http.Header(ch)
 }
 
 // String just returns the relay URL.
-func (r *Client) String() string {
+func (r *Relay) String() string {
 	return r.URL
 }
 
 // Context retrieves the context that is associated with this relay connection.
-func (r *Client) Context() context.T { return r.connectionContext }
+// It will be closed when the relay is disconnected.
+func (r *Relay) Context() context.T { return r.connectionContext }
 
 // IsConnected returns true if the connection to this relay seems to be active.
-func (r *Client) IsConnected() bool { return r.connectionContext.Err() == nil }
+func (r *Relay) IsConnected() bool { return r.connectionContext.Err() == nil }
 
-// Connect tries to establish a websocket connection to r.URL. If the context
-// expires before the connection is complete, an error is returned. Once
-// successfully connected, context expiration has no effect: call r.Close to
-// close the connection.
+// Connect tries to establish a websocket connection to r.URL.
+// If the context expires before the connection is complete, an error is returned.
+// Once successfully connected, context expiration has no effect: call r.Close
+// to close the connection.
 //
-// The underlying relay connection will use a background context. If you want to
-// pass a custom context to the underlying relay connection, use NewRelay() and
-// then Client.Connect().
-func (r *Client) Connect(c context.T) error { return r.ConnectWithTLS(c, nil) }
+// The given context here is only used during the connection phase. The long-living
+// relay connection will be based on the context given to NewRelay().
+func (r *Relay) Connect(ctx context.T) error {
+	return r.ConnectWithTLS(ctx, nil)
+}
 
-// ConnectWithTLS tries to establish a secured websocket connection to r.URL
-// using customized tls.Config (CA's, etc.).
-func (r *Client) ConnectWithTLS(ctx context.T, tlsConfig *tls.Config) error {
+func subIdToSerial(subId string) int64 {
+	n := strings.Index(subId, ":")
+	if n < 0 || n > len(subId) {
+		return -1
+	}
+	serialId, _ := strconv.ParseInt(subId[0:n], 10, 64)
+	return serialId
+}
+
+// ConnectWithTLS is like Connect(), but takes a special tls.Config if you need that.
+func (r *Relay) ConnectWithTLS(
+	ctx context.T, tlsConfig *tls.Config,
+) (err error) {
 	if r.connectionContext == nil || r.Subscriptions == nil {
-		return errorf.E("relay must be initialized with a call to NewRelay()")
+		return fmt.Errorf("relay must be initialized with a call to NewRelay()")
 	}
+
 	if r.URL == "" {
-		return errorf.E("invalid relay URL '%s'", r.URL)
+		return fmt.Errorf("invalid relay URL '%s'", r.URL)
 	}
+
 	if _, ok := ctx.Deadline(); !ok {
 		// if no timeout is set, force it to 7 seconds
 		var cancel context.F
-		ctx, cancel = context.Timeout(ctx, 7*time.Second)
+		ctx, cancel = context.TimeoutCause(
+			ctx, 7*time.Second, errors.New("connection took too long"),
+		)
 		defer cancel()
 	}
-	conn, err := NewConnection(ctx, r.URL, r.RequestHeader, tlsConfig)
-	if err != nil {
-		return errorf.E(
-			"error opening websocket to '%s': %s", r.URL, err.Error(),
-		)
+	var conn *Connection
+	if conn, err = NewConnection(
+		ctx, r.URL, r.requestHeader, tlsConfig,
+	); chk.E(err) {
+		err = fmt.Errorf("error opening websocket to '%s': %w", r.URL, err)
+		return
 	}
 	r.Connection = conn
-	// ping every 29 seconds (??)
+	// ping every 29 seconds
 	ticker := time.NewTicker(29 * time.Second)
-	// to be used when the connection is closed
-	go func() {
-		<-r.connectionContext.Done()
-		// close these things when the connection is closed
-		if r.notices != nil {
-			close(r.notices)
-		}
-		// stop the ticker
-		ticker.Stop()
-		// close all subscriptions
-		r.Subscriptions.Range(
-			func(_ string, sub *Subscription) bool {
-				go sub.Unsub()
-				return true
-			},
-		)
-	}()
 	// queue all write operations here so we don't do mutex spaghetti
 	go func() {
-		var err error
 		for {
 			select {
+			case <-r.connectionContext.Done():
+				ticker.Stop()
+				r.Connection = nil
+				for _, sub := range r.Subscriptions.Range {
+					sub.unsub(
+						fmt.Errorf(
+							"relay connection closed: %w / %w",
+							context.GetCause(r.connectionContext),
+							r.ConnectionError,
+						),
+					)
+				}
+				return
 			case <-ticker.C:
-				err = wsutil.WriteClientMessage(
-					r.Connection.conn, ws.OpPing, nil,
-				)
-				if err != nil {
-					log.D.F(
+				err := r.Connection.Ping(r.connectionContext)
+				if err != nil && !strings.Contains(
+					err.Error(), "failed to wait for pong",
+				) {
+					log.I.F(
 						"{%s} error writing ping: %v; closing websocket", r.URL,
 						err,
 					)
 					r.Close() // this should trigger a context cancelation
 					return
 				}
-			case writeReq := <-r.writeQueue:
+			case writeRequest := <-r.writeQueue:
 				// all write requests will go through this to prevent races
-				if err = r.Connection.WriteMessage(
-					r.connectionContext,
-					writeReq.msg,
-				); chk.T(err) {
-					writeReq.answer <- err
+				log.D.F("{%s} sending %v\n", r.URL, string(writeRequest.msg))
+				if err := r.Connection.WriteMessage(
+					r.connectionContext, writeRequest.msg,
+				); err != nil {
+					writeRequest.answer <- err
 				}
-				close(writeReq.answer)
-			case <-r.connectionContext.Done():
-				// stop here
-				return
+				close(writeRequest.answer)
 			}
 		}
 	}()
 	// general message reader loop
 	go func() {
-		var err error
+
 		for {
 			buf := new(bytes.Buffer)
-			if err = conn.ReadMessage(r.connectionContext, buf); err != nil {
+			if err := conn.ReadMessage(r.connectionContext, buf); err != nil {
 				r.ConnectionError = err
-				r.Close()
+				r.close(err)
 				break
 			}
-			message := buf.Bytes()
-			// log.D.F("{%s} %s\n", r.URL, message)
-
+			var err error
 			var t string
-			if t, message, err = envelopes.Identify(message); chk.E(err) {
+			var rem []byte
+			if t, rem, err = envelopes.Identify(buf.Bytes()); chk.E(err) {
 				continue
 			}
 			switch t {
 			case noticeenvelope.L:
-				env := noticeenvelope.New()
-				if env, message, err = noticeenvelope.Parse(message); chk.E(err) {
-					continue
-				}
+				env := noticeenvelope.NewFrom(rem)
 				// see WithNoticeHandler
-				if r.notices != nil {
-					r.notices <- env.Message
+				if r.noticeHandler != nil {
+					r.noticeHandler(string(env.Message))
 				} else {
-					log.E.F("NOTICE from %s: '%s'\n", r.URL, env.Message)
+					log.D.F(
+						"NOTICE from %s: '%s'\n", r.URL, string(env.Message),
+					)
 				}
 			case authenvelope.L:
-				env := authenvelope.NewChallenge()
-				if env, message, err = authenvelope.ParseChallenge(message); chk.E(err) {
-					continue
-				}
-				if len(env.Challenge) == 0 {
+				env := authenvelope.NewChallengeWith(rem)
+				if env.Challenge == nil {
 					continue
 				}
 				r.challenge = env.Challenge
 			case eventenvelope.L:
-				// log.I.F("message: %s", message)
-				env := eventenvelope.NewResult()
-				if env, message, err = eventenvelope.ParseResult(message); err != nil {
+				var env *eventenvelope.Result
+				var ev *event.E
+				if env, err = eventenvelope.NewResultWith(rem, ev); chk.E(err) {
 					continue
 				}
-				// log.I.F("%s", env.Event.Marshal(nil))
-				if len(env.Subscription.T) == 0 {
+				sub, ok := r.Subscriptions.Load(subIdToSerial(env.Subscription.String()))
+				if !ok {
+					log.W.F(
+						"unknown subscription with id '%s'\n",
+						env.Subscription.String(),
+					)
 					continue
 				}
-				if sub, ok := r.Subscriptions.Load(env.Subscription.String()); !ok {
-					// log.D.F(
-					// 	"{%s} no subscription with id '%s'\n", r.URL,
-					// 	env.Subscription,
-					// )
+				if !sub.Filters.Match(env.Event) {
+					log.I.F(
+						"{%s} filter does not match: %v ~ %v\n", r.URL,
+						sub.Filters, env.Event,
+					)
 					continue
-				} else {
-					// check if the event matches the desired filter, ignore
-					// otherwise
-					if !sub.Filters.Match(env.Event) {
-						log.D.F(
-							"{%s} filter does not match: %v ~ %v\n", r.URL,
-							sub.Filters, env.Event,
+				}
+				if !r.AssumeValid {
+					if ok, err = env.Event.Verify(); !ok || chk.E(err) {
+						log.I.F(
+							"{%s} bad signature on %s\n", r.URL,
+							env.Event.ID,
 						)
 						continue
 					}
-					// check signature, ignore invalid, except from trusted
-					// (AssumeValid) relays
-					if !r.AssumeValid {
-						if ok = r.signatureChecker(env.Event); !ok {
-							log.E.F(
-								"{%s} bad signature on %s\n", r.URL,
-								env.Event.ID,
-							)
-							continue
-						}
-					}
-					// dispatch this to the internal .events channel of the
-					// subscription
-					sub.dispatchEvent(env.Event)
 				}
+				sub.dispatchEvent(env.Event)
 			case eoseenvelope.L:
-				env := eoseenvelope.New()
-				if env, message, err = eoseenvelope.Parse(message); chk.E(err) {
+				var env *eoseenvelope.T
+				if env, rem, err = eoseenvelope.Parse(rem); chk.E(err) {
 					continue
 				}
-				if subscription, ok := r.Subscriptions.Load(env.Subscription.String()); ok {
-					subscription.dispatchEose()
+				if len(rem) != 0 {
+					log.W.F(
+						"{%s} unexpected data after EOSE: %s\n", r.URL,
+						string(rem),
+					)
 				}
+				sub, ok := r.Subscriptions.Load(subIdToSerial(env.Subscription.String()))
+				if !ok {
+					log.W.F(
+						"unknown subscription with id '%s'\n",
+						env.Subscription.String(),
+					)
+					continue
+				}
+				sub.dispatchEose()
 			case closedenvelope.L:
-				env := closedenvelope.New()
-				if env, message, err = closedenvelope.Parse(message); chk.E(err) {
+				var env *closedenvelope.T
+				if env, rem, err = closedenvelope.Parse(rem); chk.E(err) {
 					continue
 				}
-				if subscription, ok := r.Subscriptions.Load(env.Subscription.String()); ok {
-					subscription.dispatchClosed(env.ReasonString())
-				}
-			case countenvelope.L:
-				env := countenvelope.NewResponse()
-				if env, message, err = countenvelope.Parse(message); chk.E(err) {
+				sub, ok := r.Subscriptions.Load(subIdToSerial(env.Subscription.String()))
+				if !ok {
+					log.W.F(
+						"unknown subscription with id '%s'\n",
+						env.Subscription.String(),
+					)
 					continue
 				}
-				if subscription, ok := r.Subscriptions.Load(env.ID.String()); ok && subscription.countResult != nil {
-					subscription.countResult <- env.Count
-				}
+				sub.handleClosed(env.ReasonString())
 			case okenvelope.L:
-				env := okenvelope.New()
-				if env, message, err = okenvelope.Parse(message); chk.E(err) {
+				var env *okenvelope.T
+				if env, rem, err = okenvelope.Parse(rem); chk.E(err) {
 					continue
 				}
 				if okCallback, exist := r.okCallbacks.Load(env.EventID.String()); exist {
-					okCallback(env.OK, env.ReasonString())
+					okCallback(env.OK, string(env.Reason))
 				} else {
 					log.I.F(
 						"{%s} got an unexpected OK message for event %s", r.URL,
 						env.EventID,
 					)
 				}
+			default:
+				log.W.F("unknown envelope type %s\n%s", t, rem)
+				continue
 			}
 		}
 	}()
-	return nil
+	return
 }
 
-// Write queues a message to be sent to the relay.
-func (r *Client) Write(msg []byte) <-chan error {
+// Write queues an arbitrary message to be sent to the relay.
+func (r *Relay) Write(msg []byte) <-chan error {
 	ch := make(chan error)
 	select {
 	case r.writeQueue <- writeRequest{msg: msg, answer: ch}:
 	case <-r.connectionContext.Done():
-		go func() { ch <- errorf.E("connection closed") }()
+		go func() { ch <- fmt.Errorf("connection closed") }()
 	}
 	return ch
 }
 
 // Publish sends an "EVENT" command to the relay r as in NIP-01 and waits for an
 // OK response.
-func (r *Client) Publish(c context.T, ev *event.E) error {
-	return r.publish(
-		c, ev,
-	)
+func (r *Relay) Publish(ctx context.T, ev *event.E) error {
+	return r.publish(ctx, ev.ID, ev)
 }
 
 // Auth sends an "AUTH" command client->relay as in NIP-42 and waits for an OK
 // response.
-func (r *Client) Auth(c context.T, sign signer.I) error {
-	authEvent := auth.CreateUnsigned(sign.Pub(), r.challenge, r.URL)
-	if err := authEvent.Sign(sign); chk.T(err) {
-		return errorf.E("error signing auth event: %w", err)
+func (r *Relay) Auth(
+	ctx context.T, sign signer.I,
+) (err error) {
+	authEvent := &event.E{
+		CreatedAt: timestamp.Now(),
+		Kind:      kind.ClientAuthentication,
+		Tags: tags.New(
+			tag.New("relay", r.URL),
+			tag.New([]byte("challenge"), r.challenge),
+		),
 	}
-	return r.publish(c, authEvent)
+	if err = authEvent.Sign(sign); chk.E(err) {
+		err = fmt.Errorf("error signing auth event: %w", err)
+		return
+	}
+	return r.publish(ctx, authEvent.ID, authEvent)
 }
 
-// publish can be used both for EVENT and for AUTH
-func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
+func (r *Relay) publish(
+	ctx context.T, id []byte, env *event.E,
+) error {
+	var err error
 	var cancel context.F
 	if _, ok := ctx.Deadline(); !ok {
 		// if no timeout is set, force it to 7 seconds
 		ctx, cancel = context.TimeoutCause(
-			ctx, 7*time.Second,
-			errorf.E("given up waiting for an OK"),
+			ctx, 7*time.Second, fmt.Errorf("given up waiting for an OK"),
 		)
 		defer cancel()
 	} else {
@@ -398,32 +415,23 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 		ctx, cancel = context.Cancel(ctx)
 		defer cancel()
 	}
+
 	// listen for an OK callback
 	gotOk := false
-	id := ev.IdString()
+	ids := string(id)
 	r.okCallbacks.Store(
-		id, func(ok bool, reason string) {
+		ids, func(ok bool, reason string) {
 			gotOk = true
 			if !ok {
-				err = errorf.E("msg: %s", reason)
+				err = fmt.Errorf("msg: %s", reason)
 			}
 			cancel()
 		},
 	)
-	defer r.okCallbacks.Delete(id)
+	defer r.okCallbacks.Delete(ids)
 	// publish event
-	var b []byte
-	if ev.Kind.Equal(kind.ClientAuthentication) {
-		if b = authenvelope.NewResponseWith(ev).Marshal(b); chk.E(err) {
-			return
-		}
-	} else {
-		if b = eventenvelope.NewSubmissionWith(ev).Marshal(b); chk.E(err) {
-			return
-		}
-	}
-	log.T.F("{%s} sending %s\n", r.URL, b)
-	if err = <-r.Write(b); chk.T(err) {
+	envb := env.Marshal(nil)
+	if err = <-r.Write(envb); err != nil {
 		return err
 	}
 	for {
@@ -447,111 +455,168 @@ func (r *Client) publish(ctx context.T, ev *event.E) (err error) {
 // context ctx is cancelled ("CLOSE" in NIP-01).
 //
 // Remember to cancel subscriptions, either by calling `.Unsub()` on them or
-// ensuring their `context.Context` will be canceled at some point. Failure to
+// ensuring their `context.T` will be canceled at some point. Failure to
 // do that will result in a huge number of halted goroutines being created.
-func (r *Client) Subscribe(
-	c context.T, ff *filters.T,
-	opts ...SubscriptionOption,
+func (r *Relay) Subscribe(
+	ctx context.T, ff *filters.T, opts ...SubscriptionOption,
 ) (sub *Subscription, err error) {
-	sub = r.PrepareSubscription(c, ff, opts...)
+	sub = r.PrepareSubscription(ctx, ff, opts...)
 	if r.Connection == nil {
-		return nil, errorf.E("not connected to %s", r.URL)
+		return nil, fmt.Errorf("not connected to %s", r.URL)
 	}
-	if err = sub.Fire(); chk.T(err) {
-		return nil, errorf.E(
-			"couldn't subscribe to %v at %s: %w", ff, r.URL, err,
+	if err = sub.Fire(); err != nil {
+		err = fmt.Errorf(
+			"couldn't subscribe to %v at %s: %w", ff.Marshal(nil), r.URL, err,
 		)
+		return
 	}
 	return
 }
 
 // PrepareSubscription creates a subscription, but doesn't fire it.
 //
-// Remember to cancel subscriptions, either by calling `.Unsub()` on them or
-// ensuring their `context.Context` will be canceled at some point. Failure to
-// do that will result in a huge number of halted goroutines being created.
-func (r *Client) PrepareSubscription(
-	c context.T, ff *filters.T,
-	opts ...SubscriptionOption,
+// Remember to cancel subscriptions, either by calling `.Unsub()` on them or ensuring their `context.T` will be canceled at some point.
+// Failure to do that will result in a huge number of halted goroutines being created.
+func (r *Relay) PrepareSubscription(
+	ctx context.T, ff *filters.T, opts ...SubscriptionOption,
 ) *Subscription {
 	current := subscriptionIDCounter.Add(1)
-	c, cancel := context.Cancel(c)
+	ctx, cancel := context.Cause(ctx)
 	sub := &Subscription{
 		Relay:             r,
-		Context:           c,
+		Context:           ctx,
 		cancel:            cancel,
-		counter:           int(current),
+		counter:           current,
 		Events:            make(event.C),
 		EndOfStoredEvents: make(chan struct{}, 1),
 		ClosedReason:      make(chan string, 1),
 		Filters:           ff,
+		match:             ff.Match,
 	}
+	label := ""
 	for _, opt := range opts {
 		switch o := opt.(type) {
 		case WithLabel:
-			sub.label = string(o)
+			label = string(o)
+			// case WithCheckDuplicate:
+			// 	sub.checkDuplicate = o
+			// case WithCheckDuplicateReplaceable:
+			// 	sub.checkDuplicateReplaceable = o
 		}
 	}
-	id := sub.GetID()
-	r.Subscriptions.Store(id.String(), sub)
+	// subscription id computation
+	buf := subIdPool.Get().([]byte)[:0]
+	buf = strconv.AppendInt(buf, sub.counter, 10)
+	buf = append(buf, ':')
+	buf = append(buf, label...)
+	defer subIdPool.Put(buf)
+	sub.id = string(buf)
+	// we track subscriptions only by their counter, no need for the full id
+	r.Subscriptions.Store(int64(sub.counter), sub)
 	// start handling events, eose, unsub etc:
 	go sub.start()
 	return sub
 }
 
-// QuerySync is only used in tests. The relay query method is synchronous now
-// anyway (it ensures sort order is respected).
-func (r *Client) QuerySync(
-	ctx context.T, f *filter.F,
-	opts ...SubscriptionOption,
-) ([]*event.E, error) {
-	// log.T.F("QuerySync:\n%s", f.Marshal(nil))
-	sub, err := r.Subscribe(ctx, filters.New(f), opts...)
+// QueryEvents subscribes to events matching the given filter and returns a channel of events.
+//
+// In most cases it's better to use Pool instead of this method.
+func (r *Relay) QueryEvents(ctx context.T, f *filter.F) (
+	evc event.C, err error,
+) {
+	var sub *Subscription
+	if sub, err = r.Subscribe(ctx, filters.New(f)); chk.E(err) {
+		return
+	}
+	go func() {
+		for {
+			select {
+			case <-sub.ClosedReason:
+			case <-sub.EndOfStoredEvents:
+			case <-ctx.Done():
+			case <-r.Context().Done():
+			}
+			sub.unsub(errors.New("QueryEvents() ended"))
+			return
+		}
+	}()
+	return sub.Events, nil
+}
+
+// QuerySync subscribes to events matching the given filter and returns a slice
+// of events. This method blocks until all events are received or the context is
+// canceled.
+//
+// If the filter causes a subscription to open, it will stay open until the
+// limit is exceeded. So this method will return an error if the limit is nil.
+// If the query blocks, the caller needs to cancel the context to prevent the
+// thread stalling.
+func (r *Relay) QuerySync(ctx context.T, f *filter.F) (
+	evs event.S, err error,
+) {
+	if f.Limit == nil {
+		err = errors.New("limit must be set for a sync query to prevent blocking")
+		return
+	}
+	var sub *Subscription
+	if sub, err = r.Subscribe(ctx, filters.New(f)); chk.E(err) {
+		return
+	}
+	defer sub.unsub(errors.New("QuerySync() ended"))
+	evs = make(event.S, 0, *f.Limit)
+	if _, ok := ctx.Deadline(); !ok {
+		// if no timeout is set, force it to 7 seconds
+		var cancel context.F
+		ctx, cancel = context.TimeoutCause(
+			ctx, 7*time.Second, errors.New("QuerySync() took too long"),
+		)
+		defer cancel()
+	}
+	lim := 250
+	if f.Limit != nil {
+		lim = int(*f.Limit)
+	}
+	events := make(event.S, 0, max(lim, 250))
+	ch, err := r.QueryEvents(ctx, f)
 	if err != nil {
 		return nil, err
 	}
 
-	defer sub.Unsub()
-
-	if _, ok := ctx.Deadline(); !ok {
-		// if no timeout is set, force it to 7 seconds
-		var cancel context.F
-		ctx, cancel = context.Timeout(ctx, 7*time.Second)
-		defer cancel()
+	for evt := range ch {
+		events = append(events, evt)
 	}
 
-	var events []*event.E
-	for {
-		select {
-		case evt := <-sub.Events:
-			if evt == nil {
-				// channel is closed
-				return events, nil
-			}
-			events = append(events, evt)
-		case <-sub.EndOfStoredEvents:
-			return events, nil
-		case <-ctx.Done():
-			return events, nil
-		}
-	}
+	return events, nil
 }
 
-// TODO: count is a dumb idea anyway, and nothing is using this
-// func (r *Client) Count(c context.F, ff *filters.F, opts ...SubscriptionOption) (int, error) {
-// 	sub := r.PrepareSubscription(c, ff, opts...)
-// 	sub.countResult = make(chan int)
-//
-// 	if err := sub.Fire(); chk.F(err) {
-// 		return 0, err
+// // Count sends a "COUNT" command to the relay and returns the count of events matching the filters.
+// func (r *Relay) Count(
+// 	ctx context.T,
+// 	filters Filters,
+// 	opts ...SubscriptionOption,
+// ) (int64, []byte, error) {
+// 	v, err := r.countInternal(ctx, filters, opts...)
+// 	if err != nil {
+// 		return 0, nil, err
 // 	}
 //
-// 	defer sub.Unsub()
+// 	return *v.Count, v.HyperLogLog, nil
+// }
 //
-// 	if _, ok := c.Deadline(); !ok {
+// func (r *Relay) countInternal(ctx context.T, filters Filters, opts ...SubscriptionOption) (CountEnvelope, error) {
+// 	sub := r.PrepareSubscription(ctx, filters, opts...)
+// 	sub.countResult = make(chan CountEnvelope)
+//
+// 	if err := sub.Fire(); err != nil {
+// 		return CountEnvelope{}, err
+// 	}
+//
+// 	defer sub.unsub(errors.New("countInternal() ended"))
+//
+// 	if _, ok := ctx.Deadline(); !ok {
 // 		// if no timeout is set, force it to 7 seconds
-// 		var cancel context.F
-// 		c, cancel = context.Timeout(c, 7*time.Second)
+// 		var cancel context.CancelFunc
+// 		ctx, cancel = context.WithTimeoutCause(ctx, 7*time.Second, errors.New("countInternal took too long"))
 // 		defer cancel()
 // 	}
 //
@@ -559,28 +624,39 @@ func (r *Client) QuerySync(
 // 		select {
 // 		case count := <-sub.countResult:
 // 			return count, nil
-// 		case <-c.Done():
-// 			return 0, c.Err()
+// 		case <-ctx.Done():
+// 			return CountEnvelope{}, ctx.Err()
 // 		}
 // 	}
 // }
 
-// Close shuts down a websocket client connection.
-func (r *Client) Close() error {
+// Close closes the relay connection.
+func (r *Relay) Close() error {
+	return r.close(errors.New("relay connection closed"))
+}
+
+func (r *Relay) close(reason error) error {
 	r.closeMutex.Lock()
 	defer r.closeMutex.Unlock()
+
 	if r.connectionContextCancel == nil {
-		return errorf.E("relay already closed")
+		return fmt.Errorf("relay already closed")
 	}
-	r.connectionContextCancel()
+	r.connectionContextCancel(reason)
 	r.connectionContextCancel = nil
+
 	if r.Connection == nil {
-		return errorf.E("relay not connected")
+		return fmt.Errorf("relay not connected")
 	}
+
 	err := r.Connection.Close()
-	r.Connection = nil
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+var subIdPool = sync.Pool{
+	New: func() any { return make([]byte, 0, 15) },
 }

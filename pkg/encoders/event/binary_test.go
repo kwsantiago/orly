@@ -3,11 +3,11 @@ package event
 import (
 	"bufio"
 	"bytes"
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/encoders/event/examples"
-	"orly.dev/pkg/utils/chk"
 	"testing"
 	"time"
+
+	"orly.dev/pkg/encoders/event/examples"
+	"orly.dev/pkg/utils/chk"
 )
 
 func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
@@ -19,7 +19,7 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 	var counter int
 	for scanner.Scan() {
 		// Create new event objects and buffer for each iteration
-		buf := codecbuf.Get()
+		buf := new(bytes.Buffer)
 		ea, eb := New(), New()
 
 		chk.E(scanner.Err())
@@ -42,7 +42,6 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 		// Create a new buffer for unmarshaling
 		buf2 := bytes.NewBuffer(buf.Bytes())
 		if err = eb.UnmarshalBinary(buf2); chk.E(err) {
-			codecbuf.Put(buf)
 			t.Fatal(err)
 		}
 
@@ -56,9 +55,6 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 				b, unmarshaledJSON,
 			)
 		}
-
-		// Return buffer to pool
-		codecbuf.Put(buf)
 
 		counter++
 		out = out[:0]

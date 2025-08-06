@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/bech32encoding"
@@ -18,7 +20,6 @@ import (
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
 	realy_lol "orly.dev/pkg/version"
-	"os"
 )
 
 const secEnv = "NOSTR_SECRET_KEY"

@@ -2,9 +2,9 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/utils/chk"
 	"testing"
+
+	"orly.dev/pkg/utils/chk"
 
 	"github.com/minio/sha256-simd"
 )
@@ -45,7 +45,7 @@ func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Test MarshalWrite
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err = i1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

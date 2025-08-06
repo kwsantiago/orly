@@ -2,9 +2,9 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/utils/chk"
 	"testing"
+
+	"orly.dev/pkg/utils/chk"
 )
 
 func TestLetter_New(t *testing.T) {
@@ -53,7 +53,7 @@ func TestLetter_MarshalWriteUnmarshalRead(t *testing.T) {
 	l1 := new(Letter)
 	l1.Set('A')
 	// Test MarshalWrite
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := l1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

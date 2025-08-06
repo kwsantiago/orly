@@ -2,16 +2,16 @@ package database
 
 import (
 	"bytes"
+	"testing"
+
 	"orly.dev/pkg/database/indexes"
 	types2 "orly.dev/pkg/database/indexes/types"
-	"orly.dev/pkg/encoders/codecbuf"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/utils/chk"
-	"testing"
 
 	"github.com/minio/sha256-simd"
 )
@@ -26,8 +26,7 @@ func TestGetIndexesForEvent(t *testing.T) {
 // indexes
 func verifyIndexIncluded(t *testing.T, idxs [][]byte, expectedIdx *indexes.T) {
 	// Marshal the expected index
-	buf := codecbuf.Get()
-	defer codecbuf.Put(buf)
+	buf := new(bytes.Buffer)
 	err := expectedIdx.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("Failed to marshal expected index: %v", err)

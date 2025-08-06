@@ -11,7 +11,7 @@ import (
 type ConnectionParams struct {
 	clientSecretKey []byte
 	walletPublicKey []byte
-	relays          []string
+	relay           string
 }
 
 // GetWalletPublicKey returns the wallet public key from the ConnectionParams.
@@ -35,13 +35,15 @@ func ParseConnectionURI(nwcUri string) (parts *ConnectionParams, err error) {
 	}
 	query := p.Query()
 	var ok bool
-	if parts.relays, ok = query["relay"]; !ok {
+	var relay []string
+	if relay, ok = query["relay"]; !ok {
 		err = errors.New("missing relay parameter")
 		return
 	}
-	if len(parts.relays) == 0 {
+	if len(relay) == 0 {
 		return nil, errors.New("no relays")
 	}
+	parts.relay = relay[0]
 	var secret string
 	if secret = query.Get("secret"); secret == "" {
 		err = errors.New("missing secret parameter")

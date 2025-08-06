@@ -2,11 +2,12 @@ package event
 
 import (
 	"bytes"
+	"testing"
+
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/timestamp"
-	"testing"
 )
 
 // compareEvents compares two events and reports any differences

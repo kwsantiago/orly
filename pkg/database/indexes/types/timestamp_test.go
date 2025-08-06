@@ -2,10 +2,10 @@ package types
 
 import (
 	"bytes"
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/utils/chk"
 	"testing"
 	"time"
+
+	"orly.dev/pkg/utils/chk"
 )
 
 func TestTimestamp_FromInt(t *testing.T) {
@@ -89,7 +89,7 @@ func TestTimestamp_FromBytes(t *testing.T) {
 	v.Set(12345)
 
 	// Marshal it to bytes
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := v.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -163,7 +163,7 @@ func TestTimestamp_Bytes(t *testing.T) {
 func TestTimestamp_MarshalWriteUnmarshalRead(t *testing.T) {
 	// Test with a positive value
 	ts1 := &Timestamp{val: 12345}
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := ts1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -183,7 +183,7 @@ func TestTimestamp_MarshalWriteUnmarshalRead(t *testing.T) {
 
 	// Test with a negative value
 	ts1 = &Timestamp{val: -12345}
-	buf = codecbuf.Get()
+	buf = new(bytes.Buffer)
 	err = ts1.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
@@ -225,7 +225,7 @@ func TestTimestamp_WithCurrentTime(t *testing.T) {
 	}
 
 	// Test MarshalWrite and UnmarshalRead
-	buf := codecbuf.Get()
+	buf := new(bytes.Buffer)
 	err := ts.MarshalWrite(buf)
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)

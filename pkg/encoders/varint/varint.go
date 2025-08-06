@@ -5,8 +5,9 @@
 package varint
 
 import (
-	"golang.org/x/exp/constraints"
 	"io"
+
+	"golang.org/x/exp/constraints"
 	"orly.dev/pkg/utils/chk"
 )
 

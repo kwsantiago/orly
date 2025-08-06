@@ -1,10 +1,11 @@
 package types
 
 import (
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/utils/chk"
+	"bytes"
 	"reflect"
 	"testing"
+
+	"orly.dev/pkg/utils/chk"
 )
 
 func TestUint24(t *testing.T) {
@@ -45,7 +46,7 @@ func TestUint24(t *testing.T) {
 				}
 
 				// Test MarshalWrite and UnmarshalRead
-				buf := codecbuf.Get()
+				buf := new(bytes.Buffer)
 
 				// MarshalWrite directly to the buffer
 				if err := codec.MarshalWrite(buf); chk.E(err) {

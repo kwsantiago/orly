@@ -1,6 +1,9 @@
 package relay
 
 import (
+	"runtime/debug"
+	"time"
+
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
@@ -14,8 +17,6 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
-	"runtime/debug"
-	"time"
 )
 
 // IdPkTs is a map of event IDs to their id, pubkey, kind, and timestamp
@@ -139,16 +140,12 @@ func (s *Server) SpiderFetch(
 				default:
 				}
 				var evss event.S
-				var cli *ws.Client
+				var cli *ws.Relay
 				if cli, err = ws.RelayConnect(
-					context.Bg(), seed, ws.WithSignatureChecker(
-						func(e *event.E) bool {
-							return true
-						},
-					),
+					context.Bg(), seed,
 				); chk.E(err) {
 					err = nil
-					return
+					continue
 				}
 				if evss, err = cli.QuerySync(
 					context.Bg(), batchFilter,

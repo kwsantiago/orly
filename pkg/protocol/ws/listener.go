@@ -3,12 +3,13 @@ package ws
 
 import (
 	"net/http"
+	"strings"
+	"sync"
+
 	"orly.dev/pkg/app/relay/helpers"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/protocol/auth"
 	atomic2 "orly.dev/pkg/utils/atomic"
-	"strings"
-	"sync"
 
 	"github.com/fasthttp/websocket"
 )

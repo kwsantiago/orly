@@ -3,10 +3,10 @@ package types
 import (
 	"bytes"
 	"math"
-	"orly.dev/pkg/encoders/codecbuf"
-	"orly.dev/pkg/utils/chk"
 	"reflect"
 	"testing"
+
+	"orly.dev/pkg/utils/chk"
 
 	"lukechampine.com/frand"
 )
@@ -44,7 +44,7 @@ func TestUint16(t *testing.T) {
 		}
 
 		// Test encoding to []byte and decoding back
-		bufEnc := codecbuf.Get()
+		bufEnc := new(bytes.Buffer)
 
 		// MarshalWrite
 		err := encodedUint16.MarshalWrite(bufEnc)

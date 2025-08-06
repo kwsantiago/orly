@@ -7,6 +7,8 @@ package filter
 import (
 	"bytes"
 	"encoding/binary"
+	"sort"
+
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/crypto/sha256"
@@ -22,7 +24,6 @@ import (
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/pointers"
-	"sort"
 
 	"lukechampine.com/frand"
 )
@@ -440,8 +441,9 @@ invalid:
 	return
 }
 
-// Matches checks a filter against an event and determines if the event matches the filter.
-func (f *F) Matches(ev *event.E) bool {
+// MatchesIgnoringTimestampConstraints checks a filter against an event and
+// determines if the event matches the filter, ignoring timestamp constraints..
+func (f *F) MatchesIgnoringTimestampConstraints(ev *event.E) bool {
 	if ev == nil {
 		// log.F.ToSliceOfBytes("nil event")
 		return false
@@ -461,22 +463,30 @@ func (f *F) Matches(ev *event.E) bool {
 	if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {
 		return false
 	}
-	// if f.Tags.Len() > 0 {
-	//	for _, v := range f.Tags.ToSliceOfTags() {
-	//		tvs := v.ToSliceOfBytes()
-	//		if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
-	//			return false
-	//		}
-	//	}
-	//	return false
-	// }
+	if f.Tags.Len() > 0 {
+		for _, v := range f.Tags.ToSliceOfTags() {
+			tvs := v.ToSliceOfBytes()
+			if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
+				return false
+			}
+		}
+		return false
+	}
+	return true
+}
+
+// Matches checks a filter against an event and determines if the event matches the filter.
+func (f *F) Matches(ev *event.E) (match bool) {
+	if !f.MatchesIgnoringTimestampConstraints(ev) {
+		return
+	}
 	if f.Since.Int() != 0 && ev.CreatedAt.I64() < f.Since.I64() {
 		// log.F.ToSliceOfBytes("event is older than since\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
-		return false
+		return
 	}
 	if f.Until.Int() != 0 && ev.CreatedAt.I64() > f.Until.I64() {
 		// log.F.ToSliceOfBytes("event is newer than until\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
-		return false
+		return
 	}
 	return true
 }

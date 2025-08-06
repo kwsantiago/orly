@@ -5,6 +5,7 @@ package subscription
 
 import (
 	"crypto/rand"
+
 	"orly.dev/pkg/crypto/ec/bech32"
 	"orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/utils/chk"
@@ -24,7 +25,7 @@ func (si *Id) IsValid() bool { return len(si.T) <= 64 && len(si.T) > 0 }
 
 // NewId inspects a string and converts to Id if it is
 // valid. Invalid means length == 0 or length > 64.
-func NewId[V string | []byte](s V) (*Id, error) {
+func NewId[V ~string | ~[]byte](s V) (*Id, error) {
 	si := &Id{T: []byte(s)}
 	if si.IsValid() {
 		return si, nil
@@ -40,7 +41,7 @@ func NewId[V string | []byte](s V) (*Id, error) {
 // MustNew is the same as NewId except it doesn't check if you feed it rubbish.
 //
 // DO NOT USE WITHOUT CHECKING THE Id IS NOT NIL AND > 0 AND <= 64
-func MustNew[V string | []byte](s V) *Id {
+func MustNew[V ~string | ~[]byte](s V) *Id {
 	return &Id{T: []byte(s)}
 }
 

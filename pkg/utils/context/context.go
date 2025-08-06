@@ -28,8 +28,10 @@ var (
 	TODO = context.TODO
 	// Value - context.WithValue
 	Value = context.WithValue
-	// CancelCause - context.WithCancelCause
-	CancelCause = context.WithCancelCause
+	// Cause - context.WithCancelCause
+	Cause = context.WithCancelCause
+
+	GetCause = context.Cause
 	// Canceled - context.Canceled
 	Canceled = context.Canceled
 )

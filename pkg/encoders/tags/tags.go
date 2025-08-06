@@ -7,12 +7,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"sort"
+
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
-	"os"
-	"sort"
 )
 
 // T is a list of tag.T - which are lists of string elements with ordering and no uniqueness
@@ -159,6 +160,15 @@ func (t *T) GetFirst(tagPrefix *tag.T) *tag.T {
 		}
 	}
 	return nil
+}
+
+func (t *T) GetD() (d string) {
+	for _, v := range t.element {
+		if bytes.Equal(v.Key(), []byte("d")) {
+			return string(v.Value())
+		}
+	}
+	return
 }
 
 // GetLast gets the last tag in tags that matches the prefix, see [T.StartsWith]

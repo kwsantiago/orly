@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
 	"orly.dev/pkg/protocol/nwc"
+	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 )
 
@@ -45,21 +45,19 @@ func main() {
 		printUsage()
 		os.Exit(1)
 	}
-
 	connectionURL := os.Args[1]
 	method := os.Args[2]
 	args := os.Args[3:]
-
 	// Create context
+	// ctx, cancel := context.Cancel(context.Bg())
 	ctx := context.Bg()
-
+	// defer cancel()
 	// Create NWC client
 	client, err := nwc.NewClient(ctx, connectionURL)
 	if err != nil {
 		fmt.Printf("Error creating client: %v\n", err)
 		os.Exit(1)
 	}
-
 	// Execute the requested method
 	switch method {
 	case "get_wallet_service_info":
@@ -98,43 +96,27 @@ func main() {
 }
 
 func handleGetWalletServiceInfo(ctx context.T, client *nwc.Client) {
-	raw, err := client.GetWalletServiceInfoRaw(ctx)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if _, raw, err := client.GetWalletServiceInfo(ctx, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleGetInfo(ctx context.T, client *nwc.Client) {
-	raw, err := client.GetInfoRaw(ctx)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if _, raw, err := client.GetInfo(ctx, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleGetBalance(ctx context.T, client *nwc.Client) {
-	raw, err := client.GetBalanceRaw(ctx)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if _, raw, err := client.GetBalance(ctx, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleGetBudget(ctx context.T, client *nwc.Client) {
-	raw, err := client.GetBudgetRaw(ctx)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if _, raw, err := client.GetBudget(ctx, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleMakeInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -143,25 +125,20 @@ func handleMakeInvoice(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> make_invoice <amount> [<description>] [<description_hash>] [<expiry>]")
 		return
 	}
-
 	amount, err := strconv.ParseUint(args[0], 10, 64)
 	if err != nil {
 		fmt.Printf("Error parsing amount: %v\n", err)
 		return
 	}
-
 	params := &nwc.MakeInvoiceParams{
 		Amount: amount,
 	}
-
 	if len(args) > 1 {
 		params.Description = args[1]
 	}
-
 	if len(args) > 2 {
 		params.DescriptionHash = args[2]
 	}
-
 	if len(args) > 3 {
 		expiry, err := strconv.ParseInt(args[3], 10, 64)
 		if err != nil {
@@ -170,14 +147,10 @@ func handleMakeInvoice(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.Expiry = &expiry
 	}
-
-	raw, err := client.MakeInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	if _, raw, err = client.MakeInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handlePayInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -186,11 +159,9 @@ func handlePayInvoice(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> pay_invoice <invoice> [<amount>] [<comment>]")
 		return
 	}
-
 	params := &nwc.PayInvoiceParams{
 		Invoice: args[0],
 	}
-
 	if len(args) > 1 {
 		amount, err := strconv.ParseUint(args[1], 10, 64)
 		if err != nil {
@@ -199,21 +170,15 @@ func handlePayInvoice(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.Amount = &amount
 	}
-
 	if len(args) > 2 {
 		comment := args[2]
 		params.Metadata = &nwc.PayInvoiceMetadata{
 			Comment: &comment,
 		}
 	}
-
-	raw, err := client.PayInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if _, raw, err := client.PayInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleLookupInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -222,9 +187,7 @@ func handleLookupInvoice(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> lookup_invoice <payment_hash or invoice>")
 		return
 	}
-
 	params := &nwc.LookupInvoiceParams{}
-
 	// Determine if the argument is a payment hash or an invoice
 	if strings.HasPrefix(args[0], "ln") {
 		invoice := args[0]
@@ -233,19 +196,15 @@ func handleLookupInvoice(ctx context.T, client *nwc.Client, args []string) {
 		paymentHash := args[0]
 		params.PaymentHash = &paymentHash
 	}
-
-	raw, err := client.LookupInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var err error
+	var raw []byte
+	if _, raw, err = client.LookupInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 	params := &nwc.ListTransactionsParams{}
-
 	if len(args) > 0 {
 		limit, err := strconv.ParseUint(args[0], 10, 16)
 		if err != nil {
@@ -255,7 +214,6 @@ func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 		limitUint16 := uint16(limit)
 		params.Limit = &limitUint16
 	}
-
 	if len(args) > 1 {
 		offset, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
@@ -265,7 +223,6 @@ func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 		offsetUint32 := uint32(offset)
 		params.Offset = &offsetUint32
 	}
-
 	if len(args) > 2 {
 		from, err := strconv.ParseInt(args[2], 10, 64)
 		if err != nil {
@@ -274,7 +231,6 @@ func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.From = &from
 	}
-
 	if len(args) > 3 {
 		until, err := strconv.ParseInt(args[3], 10, 64)
 		if err != nil {
@@ -283,14 +239,11 @@ func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.Until = &until
 	}
-
-	raw, err := client.ListTransactionsRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	var err error
+	if _, raw, err = client.ListTransactions(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleMakeHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -299,26 +252,21 @@ func handleMakeHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> make_hold_invoice <amount> <payment_hash> [<description>] [<description_hash>] [<expiry>]")
 		return
 	}
-
 	amount, err := strconv.ParseUint(args[0], 10, 64)
 	if err != nil {
 		fmt.Printf("Error parsing amount: %v\n", err)
 		return
 	}
-
 	params := &nwc.MakeHoldInvoiceParams{
 		Amount:      amount,
 		PaymentHash: args[1],
 	}
-
 	if len(args) > 2 {
 		params.Description = args[2]
 	}
-
 	if len(args) > 3 {
 		params.DescriptionHash = args[3]
 	}
-
 	if len(args) > 4 {
 		expiry, err := strconv.ParseInt(args[4], 10, 64)
 		if err != nil {
@@ -327,14 +275,10 @@ func handleMakeHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.Expiry = &expiry
 	}
-
-	raw, err := client.MakeHoldInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	if _, raw, err = client.MakeHoldInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleSettleHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -343,18 +287,14 @@ func handleSettleHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> settle_hold_invoice <preimage>")
 		return
 	}
-
 	params := &nwc.SettleHoldInvoiceParams{
 		Preimage: args[0],
 	}
-
-	raw, err := client.SettleHoldInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	var err error
+	if raw, err = client.SettleHoldInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleCancelHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
@@ -367,14 +307,11 @@ func handleCancelHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 	params := &nwc.CancelHoldInvoiceParams{
 		PaymentHash: args[0],
 	}
-
-	raw, err := client.CancelHoldInvoiceRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var err error
+	var raw []byte
+	if raw, err = client.CancelHoldInvoice(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleSignMessage(ctx context.T, client *nwc.Client, args []string) {
@@ -387,14 +324,11 @@ func handleSignMessage(ctx context.T, client *nwc.Client, args []string) {
 	params := &nwc.SignMessageParams{
 		Message: args[0],
 	}
-
-	raw, err := client.SignMessageRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	var err error
+	if _, raw, err = client.SignMessage(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
@@ -403,26 +337,21 @@ func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> pay_keysend <pubkey> <amount> [<preimage>] [<tlv_type> <tlv_value>...]")
 		return
 	}
-
 	pubkey := args[0]
-
 	amount, err := strconv.ParseUint(args[1], 10, 64)
 	if err != nil {
 		fmt.Printf("Error parsing amount: %v\n", err)
 		return
 	}
-
 	params := &nwc.PayKeysendParams{
 		Pubkey: pubkey,
 		Amount: amount,
 	}
-
 	// Optional preimage
 	if len(args) > 2 {
 		preimage := args[2]
 		params.Preimage = &preimage
 	}
-
 	// Optional TLV records (must come in pairs)
 	if len(args) > 3 {
 		// Start from index 3 and process pairs of arguments
@@ -432,9 +361,7 @@ func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
 				fmt.Printf("Error parsing TLV type: %v\n", err)
 				return
 			}
-
 			tlvValue := args[i+1]
-
 			params.TLVRecords = append(
 				params.TLVRecords, nwc.PayKeysendTLVRecord{
 					Type:  uint32(tlvType),
@@ -443,14 +370,10 @@ func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
 			)
 		}
 	}
-
-	raw, err := client.PayKeysendRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	if _, raw, err = client.PayKeysend(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
 }
 
 func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
@@ -459,17 +382,14 @@ func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
 		fmt.Println("Usage: walletcli <NWC connection URL> create_connection <pubkey> <name> <methods> [<notification_types>] [<max_amount>] [<budget_renewal>] [<expires_at>]")
 		return
 	}
-
 	params := &nwc.CreateConnectionParams{
 		Pubkey:         args[0],
 		Name:           args[1],
 		RequestMethods: strings.Split(args[2], ","),
 	}
-
 	if len(args) > 3 {
 		params.NotificationTypes = strings.Split(args[3], ",")
 	}
-
 	if len(args) > 4 {
 		maxAmount, err := strconv.ParseUint(args[4], 10, 64)
 		if err != nil {
@@ -478,11 +398,9 @@ func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.MaxAmount = &maxAmount
 	}
-
 	if len(args) > 5 {
 		params.BudgetRenewal = &args[5]
 	}
-
 	if len(args) > 6 {
 		expiresAt, err := strconv.ParseInt(args[6], 10, 64)
 		if err != nil {
@@ -491,21 +409,9 @@ func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
 		}
 		params.ExpiresAt = &expiresAt
 	}
-
-	raw, err := client.CreateConnectionRaw(ctx, params)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	var raw []byte
+	var err error
+	if raw, err = client.CreateConnection(ctx, params, true); !chk.E(err) {
+		fmt.Println(string(raw))
 	}
-
-	fmt.Println(string(raw))
-}
-
-func printJSON(v interface{}) {
-	data, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		fmt.Printf("Error marshaling JSON: %v\n", err)
-		return
-	}
-	fmt.Println(string(data))
 }

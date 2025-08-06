@@ -2,12 +2,13 @@ package event
 
 import (
 	"bytes"
+	"testing"
+
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	text2 "orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/encoders/timestamp"
-	"testing"
 )
 
 // compareTags compares two tags and reports any differences
@@ -96,7 +97,8 @@ func TestUnmarshalEscapedJSONInTags(t *testing.T) {
 			unmarshaledTag := unmarshaledEvent.Tags.GetTagElement(0)
 			if unmarshaledTag.Len() != 2 {
 				t.Fatalf(
-					"Expected tag with 2 elements, got %d", unmarshaledTag.Len(),
+					"Expected tag with 2 elements, got %d",
+					unmarshaledTag.Len(),
 				)
 			}
 

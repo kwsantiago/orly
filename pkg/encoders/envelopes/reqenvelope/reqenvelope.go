@@ -4,6 +4,7 @@ package reqenvelope
 
 import (
 	"io"
+
 	"orly.dev/pkg/encoders/envelopes"
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/encoders/subscription"
@@ -37,10 +38,21 @@ func New() *T {
 
 // NewFrom creates a new reqenvelope.T with a provided subscription.Id and
 // filters.T.
-func NewFrom(id *subscription.Id, filters *filters.T) *T {
+func NewFrom(id *subscription.Id, ff *filters.T) *T {
 	return &T{
 		Subscription: id,
-		Filters:      filters,
+		Filters:      ff,
+	}
+}
+
+func NewWithIdString(id string, ff *filters.T) (sub *T) {
+	sid, err := subscription.NewId(id)
+	if err != nil {
+		return
+	}
+	return &T{
+		Subscription: sid,
+		Filters:      ff,
 	}
 }
 
