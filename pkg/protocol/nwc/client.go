@@ -84,7 +84,7 @@ func (cl *Client) RPC(
 	c context.T, method Capability, params, result any, opts *rpcOptions,
 ) (err error) {
 	timeout := time.Duration(10)
-	if opts == nil && opts.timeout == nil {
+	if opts != nil && opts.timeout != nil {
 		timeout = *opts.timeout
 	}
 	ctx, cancel := context.Timeout(c, timeout)
@@ -166,6 +166,93 @@ func (cl *Client) RPC(
 			Result: &result,
 		}
 		if err = json.Unmarshal(plain, resp); chk.E(err) {
+			return
+		}
+		return
+	}
+	return
+}
+
+// RPCRaw performs an RPC call and returns the raw JSON response
+func (cl *Client) RPCRaw(
+	c context.T, method Capability, params any, opts *rpcOptions,
+) (rawResponse []byte, err error) {
+	timeout := time.Duration(10)
+	if opts != nil && opts.timeout != nil {
+		timeout = *opts.timeout
+	}
+	ctx, cancel := context.Timeout(c, timeout)
+	defer cancel()
+	var req []byte
+	if req, err = json.Marshal(
+		Request{
+			Method: string(method),
+			Params: params,
+		},
+	); chk.E(err) {
+		return
+	}
+	var content []byte
+	if content, err = encryption.Encrypt(req, cl.conversationKey); chk.E(err) {
+		return
+	}
+	ev := &event.E{
+		Content:   content,
+		CreatedAt: timestamp.Now(),
+		Kind:      kind.WalletRequest,
+		Tags: tags.New(
+			tag.New([]byte("p"), cl.walletPublicKey),
+			tag.New(EncryptionTag, Nip44V2),
+		),
+	}
+	if err = ev.Sign(cl.clientSecretKey); chk.E(err) {
+		return
+	}
+	hasWorked := make(chan struct{})
+	evs := cl.pool.SubMany(
+		c, cl.relays, &filters.T{
+			F: []*filter.F{
+				{
+					Limit:   values.ToUintPointer(1),
+					Kinds:   kinds.New(kind.WalletRequest),
+					Authors: tag.New(cl.walletPublicKey),
+					Tags:    tags.New(tag.New([]byte("#e"), ev.ID)),
+				},
+			},
+		},
+	)
+	for _, u := range cl.relays {
+		go func(u string) {
+			var relay *ws.Client
+			if relay, err = cl.pool.EnsureRelay(u); chk.E(err) {
+				return
+			}
+			if err = relay.Publish(c, ev); chk.E(err) {
+				return
+			}
+			select {
+			case hasWorked <- struct{}{}:
+			case <-ctx.Done():
+				err = fmt.Errorf("context canceled waiting for request send")
+				return
+			default:
+			}
+		}(u)
+	}
+	select {
+	case <-hasWorked:
+	// continue
+	case <-ctx.Done():
+		err = fmt.Errorf("timed out waiting for relays")
+		return
+	}
+	select {
+	case <-ctx.Done():
+		err = fmt.Errorf("context canceled waiting for response")
+	case e := <-evs:
+		if rawResponse, err = encryption.Decrypt(
+			e.Event.Content, cl.conversationKey,
+		); chk.E(err) {
 			return
 		}
 		return

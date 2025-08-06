@@ -3,6 +3,7 @@ package nwc
 import (
 	"errors"
 	"net/url"
+
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/utils/chk"
 )
@@ -11,6 +12,11 @@ type ConnectionParams struct {
 	clientSecretKey []byte
 	walletPublicKey []byte
 	relays          []string
+}
+
+// GetWalletPublicKey returns the wallet public key from the ConnectionParams.
+func (c *ConnectionParams) GetWalletPublicKey() []byte {
+	return c.walletPublicKey
 }
 
 func ParseConnectionURI(nwcUri string) (parts *ConnectionParams, err error) {

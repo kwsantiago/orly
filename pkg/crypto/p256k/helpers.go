@@ -33,7 +33,7 @@ func NewPubFromHex[V []byte | string](pkh V) (sign signer.I, err error) {
 }
 
 func HexToBin(hexStr string) (b []byte, err error) {
-	if _, err = hex.DecBytes(b, []byte(hexStr)); chk.E(err) {
+	if b, err = hex.DecAppend(b, []byte(hexStr)); chk.E(err) {
 		return
 	}
 	return

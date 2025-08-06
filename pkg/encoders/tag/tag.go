@@ -5,6 +5,7 @@ package tag
 
 import (
 	"bytes"
+
 	text2 "orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
@@ -26,7 +27,7 @@ const (
 )
 
 // BS is an abstract data type that can process strings and byte slices as byte slices.
-type BS[Z []byte | string] []byte
+type BS[Z ~[]byte | ~string] []byte
 
 // T is a list of strings with a literal ordering.
 //
@@ -36,7 +37,7 @@ type T struct {
 }
 
 // New creates a new tag.T from a variadic parameter that can be either string or byte slice.
-func New[V string | []byte](fields ...V) (t *T) {
+func New[V ~string | ~[]byte](fields ...V) (t *T) {
 	t = &T{field: make([]BS[[]byte], len(fields))}
 	for i, field := range fields {
 		t.field[i] = []byte(field)

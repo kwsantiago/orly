@@ -4,6 +4,7 @@ package hex
 
 import (
 	"encoding/hex"
+
 	"github.com/templexxx/xhex"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
