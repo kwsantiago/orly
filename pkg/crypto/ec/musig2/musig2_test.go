@@ -5,11 +5,12 @@ package musig2
 import (
 	"errors"
 	"fmt"
+	"sync"
+	"testing"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/hex"
-	"sync"
-	"testing"
 )
 
 const (
@@ -26,14 +27,14 @@ func mustParseHex(str string) []byte {
 
 type signer struct {
 	privKey    *btcec.SecretKey
-	pubKey     *btcec.btcec
+	pubKey     *btcec.PublicKey
 	nonces     *Nonces
 	partialSig *PartialSignature
 }
 
 type signerSet []signer
 
-func (s signerSet) keys() []*btcec.btcec {
+func (s signerSet) keys() []*btcec.PublicKey {
 	keys := make([]*btcec.PublicKey, len(s))
 	for i := 0; i < len(s); i++ {
 		keys[i] = s[i].pubKey

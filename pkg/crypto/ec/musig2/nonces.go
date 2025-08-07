@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/chainhash"
 	"orly.dev/pkg/crypto/ec/schnorr"
@@ -59,8 +60,8 @@ func secNonceToPubNonce(secNonce [SecNonceSize]byte) [PubNonceSize]byte {
 	var k1Mod, k2Mod btcec.ModNScalar
 	k1Mod.SetByteSlice(secNonce[:btcec.SecKeyBytesLen])
 	k2Mod.SetByteSlice(secNonce[btcec.SecKeyBytesLen:])
-	var r1, r2 btcec.btcec
-	btcec.btcec.ScalarBaseMultNonConst(&k1Mod, &r1)
+	var r1, r2 btcec.JacobianPoint
+	btcec.ScalarBaseMultNonConst(&k1Mod, &r1)
 	btcec.ScalarBaseMultNonConst(&k2Mod, &r2)
 	// Next, we'll convert the key in jacobian format to a normal public
 	// key expressed in affine coordinates.

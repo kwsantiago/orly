@@ -6,13 +6,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"orly.dev/pkg/crypto/ec"
-	"orly.dev/pkg/crypto/ec/secp256k1"
-	"orly.dev/pkg/encoders/hex"
 	"os"
 	"path"
 	"strings"
 	"testing"
+
+	"orly.dev/pkg/crypto/ec"
+	"orly.dev/pkg/crypto/ec/secp256k1"
+	"orly.dev/pkg/encoders/hex"
 
 	"github.com/stretchr/testify/require"
 )
@@ -80,7 +81,7 @@ func TestMusig2SignVerify(t *testing.T) {
 	require.NoError(t, err)
 	var testCases signVerifyTestVectors
 	require.NoError(t, json.Unmarshal(testVectorBytes, &testCases))
-	privKey, _ := btcec.btcec.SecKeyFromBytes(mustParseHex(testCases.SecKey))
+	privKey, _ := btcec.SecKeyFromBytes(mustParseHex(testCases.SecKey))
 	for i, testCase := range testCases.ValidCases {
 		testCase := testCase
 		testName := fmt.Sprintf("valid_case_%v", i)
@@ -312,7 +313,7 @@ func TestMusig2SignCombine(t *testing.T) {
 					combinedNonce, combinedKey.FinalKey, msg,
 				)
 				finalNonceJ.ToAffine()
-				finalNonce := btcec.btcec.NewPublicKey(
+				finalNonce := btcec.NewPublicKey(
 					&finalNonceJ.X, &finalNonceJ.Y,
 				)
 				combinedSig := CombineSigs(

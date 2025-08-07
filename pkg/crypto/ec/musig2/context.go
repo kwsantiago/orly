@@ -4,6 +4,7 @@ package musig2
 
 import (
 	"fmt"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/utils/chk"
@@ -63,7 +64,7 @@ type Context struct {
 	// signingKey is the key we'll use for signing.
 	signingKey *btcec.SecretKey
 	// pubKey is our even-y coordinate public  key.
-	pubKey *btcec.btcec
+	pubKey *btcec.PublicKey
 	// combinedKey is the aggregated public key.
 	combinedKey *AggregateKey
 	// uniqueKeyIndex is the index of the second unique key in the keySet.
@@ -103,7 +104,7 @@ type contextOptions struct {
 	// h_tapTweak(internalKey) as there is no true script root.
 	bip86Tweak bool
 	// keySet is the complete set of signers for this context.
-	keySet []*btcec.btcec
+	keySet []*btcec.PublicKey
 	// numSigners is the total number of signers that will eventually be a
 	// part of the context.
 	numSigners int

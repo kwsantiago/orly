@@ -48,7 +48,7 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 // if there is an error. This is only provided for the hard-coded constants, so
 // errors in the source code can be detected. It will only (and must only) be
 // called with hard-coded values.
-func hexToFieldVal(s string) *btcec.btcec {
+func hexToFieldVal(s string) *btcec.PublicKey {
 	b, err := hex.Dec(s)
 	if err != nil {
 		panic("invalid hex in source file: " + s)

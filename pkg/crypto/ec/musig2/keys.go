@@ -5,11 +5,12 @@ package musig2
 import (
 	"bytes"
 	"fmt"
+	"sort"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/chainhash"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
-	"sort"
 )
 
 var (
@@ -224,7 +225,7 @@ func defaultKeyAggOptions() *keyAggOption { return &keyAggOption{} }
 // point has an even y coordinate.
 //
 // TODO(roasbeef): double check, can just check the y coord even not jacobian?
-func hasEvenY(pJ btcec.btcec) bool {
+func hasEvenY(pJ btcec.JacobianPoint) bool {
 	pJ.ToAffine()
 	p := btcec.NewPublicKey(&pJ.X, &pJ.Y)
 	keyBytes := p.SerializeCompressed()
@@ -237,7 +238,7 @@ func hasEvenY(pJ btcec.btcec) bool {
 // by the parity factor. The xOnly bool specifies if this is to be an x-only
 // tweak or not.
 func tweakKey(
-	keyJ btcec.btcec, parityAcc btcec.ModNScalar,
+	keyJ btcec.JacobianPoint, parityAcc btcec.ModNScalar,
 	tweak [32]byte,
 	tweakAcc btcec.ModNScalar,
 	xOnly bool,

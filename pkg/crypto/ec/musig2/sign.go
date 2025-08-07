@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/chainhash"
 	"orly.dev/pkg/crypto/ec/schnorr"
@@ -53,7 +54,7 @@ var (
 )
 
 // infinityPoint is the jacobian representation of the point at infinity.
-var infinityPoint btcec.btcec
+var infinityPoint btcec.JacobianPoint
 
 // PartialSignature reprints a partial (s-only) musig2 multi-signature. This
 // isn't a valid schnorr signature by itself, as it needs to be aggregated
@@ -205,7 +206,7 @@ func computeSigningNonce(
 	combinedNonce [PubNonceSize]byte,
 	combinedKey *btcec.PublicKey, msg [32]byte,
 ) (
-	*btcec.btcec, *btcec.ModNScalar, error,
+	*btcec.JacobianPoint, *btcec.ModNScalar, error,
 ) {
 
 	// Next we'll compute the value b, that blinds our second public

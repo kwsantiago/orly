@@ -5,14 +5,15 @@ package musig2
 import (
 	"encoding/json"
 	"fmt"
-	"orly.dev/pkg/crypto/ec"
-	"orly.dev/pkg/crypto/ec/schnorr"
-	"orly.dev/pkg/crypto/ec/secp256k1"
-	"orly.dev/pkg/encoders/hex"
 	"os"
 	"path"
 	"strings"
 	"testing"
+
+	"orly.dev/pkg/crypto/ec"
+	"orly.dev/pkg/crypto/ec/schnorr"
+	"orly.dev/pkg/crypto/ec/secp256k1"
+	"orly.dev/pkg/encoders/hex"
 
 	"github.com/stretchr/testify/require"
 )
@@ -39,9 +40,9 @@ func TestMusig2KeySort(t *testing.T) {
 	require.NoError(t, err)
 	var testCase keySortTestVector
 	require.NoError(t, json.Unmarshal(testVectorBytes, &testCase))
-	keys := make([]*btcec.btcec, len(testCase.PubKeys))
+	keys := make([]*btcec.PublicKey, len(testCase.PubKeys))
 	for i, keyStr := range testCase.PubKeys {
-		pubKey, err := btcec.btcec.ParsePubKey(mustParseHex(keyStr))
+		pubKey, err := btcec.ParsePubKey(mustParseHex(keyStr))
 		require.NoError(t, err)
 		keys[i] = pubKey
 	}

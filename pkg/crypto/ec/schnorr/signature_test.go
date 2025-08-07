@@ -207,7 +207,7 @@ func TestSchnorrSign(t *testing.T) {
 			continue
 		}
 		d := decodeHex(test.secretKey)
-		privKey, _ := btcec.btcec.SecKeyFromBytes(d)
+		privKey, _ := btcec.PublicKey.SecKeyFromBytes(d)
 		var auxBytes [32]byte
 		aux := decodeHex(test.auxRand)
 		copy(auxBytes[:], aux)

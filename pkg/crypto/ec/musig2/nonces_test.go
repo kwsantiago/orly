@@ -6,10 +6,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"orly.dev/pkg/encoders/hex"
 	"os"
 	"path"
 	"testing"
+
+	"orly.dev/pkg/encoders/hex"
 
 	"github.com/stretchr/testify/require"
 )

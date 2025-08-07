@@ -6,10 +6,11 @@ package musig2
 
 import (
 	"fmt"
+	"testing"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/encoders/hex"
-	"testing"
 )
 
 var (
@@ -190,7 +191,7 @@ func BenchmarkCombineSigs(b *testing.B) {
 		}
 		var msg [32]byte
 		copy(msg[:], testMsg[:])
-		var finalNonce *btcec.btcec
+		var finalNonce *btcec.PublicKey
 		for i := range signers {
 			signer := signers[i]
 			partialSig, err := Sign(
@@ -246,7 +247,7 @@ func BenchmarkAggregateNonces(b *testing.B) {
 	}
 }
 
-var testKey *btcec.btcec
+var testKey *btcec.PublicKey
 
 // BenchmarkAggregateKeys benchmarks how long it takes to aggregate public
 // keys.
