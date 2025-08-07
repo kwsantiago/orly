@@ -20,7 +20,7 @@ type Subscription struct {
 	counter int64
 	id      string
 
-	Relay   *Relay
+	Relay   *Client
 	Filters *filters.T
 
 	// // for this to be treated as a COUNT and not a REQ this must be set

@@ -23,6 +23,7 @@ import (
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
+	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
@@ -37,7 +38,7 @@ import (
 var subscriptionIDCounter atomic.Int64
 
 // Relay represents a connection to a Nostr relay.
-type Relay struct {
+type Client struct {
 	closeMutex sync.Mutex
 
 	URL           string
@@ -68,9 +69,9 @@ type writeRequest struct {
 }
 
 // NewRelay returns a new relay. It takes a context that, when canceled, will close the relay connection.
-func NewRelay(ctx context.T, url string, opts ...RelayOption) *Relay {
+func NewRelay(ctx context.T, url string, opts ...RelayOption) *Client {
 	ctx, cancel := context.Cause(ctx)
-	r := &Relay{
+	r := &Client{
 		URL:                     string(normalize.URL(url)),
 		connectionContext:       ctx,
 		connectionContextCancel: cancel,
@@ -97,7 +98,7 @@ func NewRelay(ctx context.T, url string, opts ...RelayOption) *Relay {
 // The ongoing relay connection uses a background context. To close the connection, call r.Close().
 // If you need fine grained long-term connection contexts, use NewRelay() instead.
 func RelayConnect(ctx context.T, url string, opts ...RelayOption) (
-	*Relay, error,
+	*Client, error,
 ) {
 	r := NewRelay(context.Bg(), url, opts...)
 	err := r.Connect(ctx)
@@ -106,7 +107,7 @@ func RelayConnect(ctx context.T, url string, opts ...RelayOption) (
 
 // RelayOption is the type of the argument passed when instantiating relay connections.
 type RelayOption interface {
-	ApplyRelayOption(*Relay)
+	ApplyRelayOption(*Client)
 }
 
 var (
@@ -119,7 +120,7 @@ var (
 // when not given, defaults to logging the notices.
 type WithNoticeHandler func(notice string)
 
-func (nh WithNoticeHandler) ApplyRelayOption(r *Relay) {
+func (nh WithNoticeHandler) ApplyRelayOption(r *Client) {
 	r.noticeHandler = nh
 }
 
@@ -127,28 +128,28 @@ func (nh WithNoticeHandler) ApplyRelayOption(r *Relay) {
 // parsed as a standard envelope.
 type WithCustomHandler func(data string)
 
-func (ch WithCustomHandler) ApplyRelayOption(r *Relay) {
+func (ch WithCustomHandler) ApplyRelayOption(r *Client) {
 	r.customHandler = ch
 }
 
 // WithRequestHeader sets the HTTP request header of the websocket preflight request.
 type WithRequestHeader http.Header
 
-func (ch WithRequestHeader) ApplyRelayOption(r *Relay) {
+func (ch WithRequestHeader) ApplyRelayOption(r *Client) {
 	r.requestHeader = http.Header(ch)
 }
 
 // String just returns the relay URL.
-func (r *Relay) String() string {
+func (r *Client) String() string {
 	return r.URL
 }
 
 // Context retrieves the context that is associated with this relay connection.
 // It will be closed when the relay is disconnected.
-func (r *Relay) Context() context.T { return r.connectionContext }
+func (r *Client) Context() context.T { return r.connectionContext }
 
 // IsConnected returns true if the connection to this relay seems to be active.
-func (r *Relay) IsConnected() bool { return r.connectionContext.Err() == nil }
+func (r *Client) IsConnected() bool { return r.connectionContext.Err() == nil }
 
 // Connect tries to establish a websocket connection to r.URL.
 // If the context expires before the connection is complete, an error is returned.
@@ -157,7 +158,7 @@ func (r *Relay) IsConnected() bool { return r.connectionContext.Err() == nil }
 //
 // The given context here is only used during the connection phase. The long-living
 // relay connection will be based on the context given to NewRelay().
-func (r *Relay) Connect(ctx context.T) error {
+func (r *Client) Connect(ctx context.T) error {
 	return r.ConnectWithTLS(ctx, nil)
 }
 
@@ -171,7 +172,7 @@ func subIdToSerial(subId string) int64 {
 }
 
 // ConnectWithTLS is like Connect(), but takes a special tls.Config if you need that.
-func (r *Relay) ConnectWithTLS(
+func (r *Client) ConnectWithTLS(
 	ctx context.T, tlsConfig *tls.Config,
 ) (err error) {
 	if r.connectionContext == nil || r.Subscriptions == nil {
@@ -276,8 +277,8 @@ func (r *Relay) ConnectWithTLS(
 				r.challenge = env.Challenge
 			case eventenvelope.L:
 				var env *eventenvelope.Result
-				var ev *event.E
-				if env, err = eventenvelope.NewResultWith(rem, ev); chk.E(err) {
+				env = eventenvelope.NewResult()
+				if _, err = env.Unmarshal(rem); chk.E(err) {
 					continue
 				}
 				sub, ok := r.Subscriptions.Load(subIdToSerial(env.Subscription.String()))
@@ -290,8 +291,8 @@ func (r *Relay) ConnectWithTLS(
 				}
 				if !sub.Filters.Match(env.Event) {
 					log.I.F(
-						"{%s} filter does not match: %v ~ %v\n", r.URL,
-						sub.Filters, env.Event,
+						"{%s} filter does not match: %v ~ %s\n", r.URL,
+						sub.Filters, env.Event.Marshal(nil),
 					)
 					continue
 				}
@@ -362,7 +363,7 @@ func (r *Relay) ConnectWithTLS(
 }
 
 // Write queues an arbitrary message to be sent to the relay.
-func (r *Relay) Write(msg []byte) <-chan error {
+func (r *Client) Write(msg []byte) <-chan error {
 	ch := make(chan error)
 	select {
 	case r.writeQueue <- writeRequest{msg: msg, answer: ch}:
@@ -374,13 +375,13 @@ func (r *Relay) Write(msg []byte) <-chan error {
 
 // Publish sends an "EVENT" command to the relay r as in NIP-01 and waits for an
 // OK response.
-func (r *Relay) Publish(ctx context.T, ev *event.E) error {
+func (r *Client) Publish(ctx context.T, ev *event.E) error {
 	return r.publish(ctx, ev.ID, ev)
 }
 
 // Auth sends an "AUTH" command client->relay as in NIP-42 and waits for an OK
 // response.
-func (r *Relay) Auth(
+func (r *Client) Auth(
 	ctx context.T, sign signer.I,
 ) (err error) {
 	authEvent := &event.E{
@@ -398,8 +399,8 @@ func (r *Relay) Auth(
 	return r.publish(ctx, authEvent.ID, authEvent)
 }
 
-func (r *Relay) publish(
-	ctx context.T, id []byte, env *event.E,
+func (r *Client) publish(
+	ctx context.T, id []byte, ev *event.E,
 ) error {
 	var err error
 	var cancel context.F
@@ -418,7 +419,7 @@ func (r *Relay) publish(
 
 	// listen for an OK callback
 	gotOk := false
-	ids := string(id)
+	ids := hex.Enc(id)
 	r.okCallbacks.Store(
 		ids, func(ok bool, reason string) {
 			gotOk = true
@@ -430,7 +431,8 @@ func (r *Relay) publish(
 	)
 	defer r.okCallbacks.Delete(ids)
 	// publish event
-	envb := env.Marshal(nil)
+	envb := eventenvelope.NewSubmissionWith(ev).Marshal(nil)
+	// envb := ev.Marshal(nil)
 	if err = <-r.Write(envb); err != nil {
 		return err
 	}
@@ -457,7 +459,7 @@ func (r *Relay) publish(
 // Remember to cancel subscriptions, either by calling `.Unsub()` on them or
 // ensuring their `context.T` will be canceled at some point. Failure to
 // do that will result in a huge number of halted goroutines being created.
-func (r *Relay) Subscribe(
+func (r *Client) Subscribe(
 	ctx context.T, ff *filters.T, opts ...SubscriptionOption,
 ) (sub *Subscription, err error) {
 	sub = r.PrepareSubscription(ctx, ff, opts...)
@@ -477,7 +479,7 @@ func (r *Relay) Subscribe(
 //
 // Remember to cancel subscriptions, either by calling `.Unsub()` on them or ensuring their `context.T` will be canceled at some point.
 // Failure to do that will result in a huge number of halted goroutines being created.
-func (r *Relay) PrepareSubscription(
+func (r *Client) PrepareSubscription(
 	ctx context.T, ff *filters.T, opts ...SubscriptionOption,
 ) *Subscription {
 	current := subscriptionIDCounter.Add(1)
@@ -521,7 +523,7 @@ func (r *Relay) PrepareSubscription(
 // QueryEvents subscribes to events matching the given filter and returns a channel of events.
 //
 // In most cases it's better to use Pool instead of this method.
-func (r *Relay) QueryEvents(ctx context.T, f *filter.F) (
+func (r *Client) QueryEvents(ctx context.T, f *filter.F) (
 	evc event.C, err error,
 ) {
 	var sub *Subscription
@@ -551,7 +553,7 @@ func (r *Relay) QueryEvents(ctx context.T, f *filter.F) (
 // limit is exceeded. So this method will return an error if the limit is nil.
 // If the query blocks, the caller needs to cancel the context to prevent the
 // thread stalling.
-func (r *Relay) QuerySync(ctx context.T, f *filter.F) (
+func (r *Client) QuerySync(ctx context.T, f *filter.F) (
 	evs event.S, err error,
 ) {
 	if f.Limit == nil {
@@ -631,11 +633,11 @@ func (r *Relay) QuerySync(ctx context.T, f *filter.F) (
 // }
 
 // Close closes the relay connection.
-func (r *Relay) Close() error {
+func (r *Client) Close() error {
 	return r.close(errors.New("relay connection closed"))
 }
 
-func (r *Relay) close(reason error) error {
+func (r *Client) close(reason error) error {
 	r.closeMutex.Lock()
 	defer r.closeMutex.Unlock()
 

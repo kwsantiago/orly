@@ -275,7 +275,7 @@ var anyOriginHandshake = func(
 	return nil
 }
 
-func mustRelayConnect(url string) (client *Relay) {
+func mustRelayConnect(url string) (client *Client) {
 	rl, err := RelayConnect(context.Background(), url)
 	if err != nil {
 		panic(err.Error())

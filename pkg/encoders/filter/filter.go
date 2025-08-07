@@ -23,6 +23,7 @@ import (
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
+	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/pointers"
 
 	"lukechampine.com/frand"
@@ -182,12 +183,12 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 			dst = append(dst, '[')
 			for i, value := range values {
 				dst = append(dst, '"')
-				if tKey[1] == 'e' || tKey[1] == 'p' {
-					// event and pubkey tags are binary 32 bytes
-					dst = hex.EncAppend(dst, value)
-				} else {
-					dst = append(dst, value...)
-				}
+				// if tKey[1] == 'e' || tKey[1] == 'p' {
+				// 	// event and pubkey tags are binary 32 bytes
+				// 	dst = hex.EncAppend(dst, value)
+				// } else {
+				dst = append(dst, value...)
+				// }
 				dst = append(dst, '"')
 				if i < len(values)-1 {
 					dst = append(dst, ',')
@@ -301,29 +302,29 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 				}
 				k := make([]byte, len(key))
 				copy(k, key)
-				switch key[1] {
-				case 'e', 'p':
-					// the tags must all be 64 character hexadecimal
-					var ff [][]byte
-					if ff, r, err = text2.UnmarshalHexArray(
-						r,
-						sha256.Size,
-					); chk.E(err) {
-						return
-					}
-					ff = append([][]byte{k}, ff...)
-					f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
-					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
-				default:
-					// other types of tags can be anything
-					var ff [][]byte
-					if ff, r, err = text2.UnmarshalStringArray(r); chk.E(err) {
-						return
-					}
-					ff = append([][]byte{k}, ff...)
-					f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
-					// f.Tags.F = append(f.Tags.F, tag.New(ff...))
+				// switch key[1] {
+				// case 'e', 'p':
+				// 	// the tags must all be 64 character hexadecimal
+				// 	var ff [][]byte
+				// 	if ff, r, err = text2.UnmarshalHexArray(
+				// 		r,
+				// 		sha256.Size,
+				// 	); chk.E(err) {
+				// 		return
+				// 	}
+				// 	ff = append([][]byte{k}, ff...)
+				// 	f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
+				// 	// f.Tags.F = append(f.Tags.F, tag.New(ff...))
+				// default:
+				// other types of tags can be anything
+				var ff [][]byte
+				if ff, r, err = text2.UnmarshalStringArray(r); chk.E(err) {
+					return
 				}
+				ff = append([][]byte{k}, ff...)
+				f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(ff...))
+				// f.Tags.F = append(f.Tags.F, tag.New(ff...))
+				// }
 				state = betweenKV
 			case IDs[0]:
 				if len(key) < len(IDs) {
@@ -445,32 +446,35 @@ invalid:
 // determines if the event matches the filter, ignoring timestamp constraints..
 func (f *F) MatchesIgnoringTimestampConstraints(ev *event.E) bool {
 	if ev == nil {
-		// log.F.ToSliceOfBytes("nil event")
+		log.I.F("nil event")
 		return false
 	}
 	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.ID) {
-		// log.F.ToSliceOfBytes("no ids in filter match event\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
+		log.I.F("no ids in filter match event")
 		return false
 	}
 	if f.Kinds.Len() > 0 && !f.Kinds.Contains(ev.Kind) {
-		// log.F.ToSliceOfBytes("no matching kinds in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
+		log.I.F(
+			"no matching kinds in filter",
+		)
 		return false
 	}
 	if f.Authors.Len() > 0 && !f.Authors.Contains(ev.Pubkey) {
-		// log.F.ToSliceOfBytes("no matching authors in filter\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
+		log.I.F("no matching authors in filter")
 		return false
 	}
-	if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {
-		return false
-	}
+	// if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {
+	// 	return false
+	// }
 	if f.Tags.Len() > 0 {
 		for _, v := range f.Tags.ToSliceOfTags() {
 			tvs := v.ToSliceOfBytes()
 			if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
+				log.I.F("no matching tags in filter")
 				return false
 			}
 		}
-		return false
+		// return false
 	}
 	return true
 }
@@ -481,11 +485,11 @@ func (f *F) Matches(ev *event.E) (match bool) {
 		return
 	}
 	if f.Since.Int() != 0 && ev.CreatedAt.I64() < f.Since.I64() {
-		// log.F.ToSliceOfBytes("event is older than since\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
+		log.I.F("event is older than since")
 		return
 	}
 	if f.Until.Int() != 0 && ev.CreatedAt.I64() > f.Until.I64() {
-		// log.F.ToSliceOfBytes("event is newer than until\nEVENT %s\nFILTER %s", ev.ToObject().String(), f.ToObject().String())
+		log.I.F("event is newer than until")
 		return
 	}
 	return true

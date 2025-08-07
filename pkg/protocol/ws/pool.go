@@ -30,7 +30,7 @@ const (
 
 // Pool manages connections to multiple relays, ensures they are reopened when necessary and not duplicated.
 type Pool struct {
-	Relays  *xsync.MapOf[string, *Relay]
+	Relays  *xsync.MapOf[string, *Client]
 	Context context.T
 
 	authHandler func() signer.I
@@ -55,7 +55,7 @@ type DirectedFilter struct {
 // RelayEvent represents an event received from a specific relay.
 type RelayEvent struct {
 	*event.E
-	Relay *Relay
+	Relay *Client
 }
 
 func (ie RelayEvent) String() string {
@@ -73,7 +73,7 @@ type PoolOption interface {
 func NewPool(c context.T, opts ...PoolOption) (pool *Pool) {
 	ctx, cancel := context.Cause(c)
 	pool = &Pool{
-		Relays:  xsync.NewMapOf[string, *Relay](),
+		Relays:  xsync.NewMapOf[string, *Client](),
 		Context: ctx,
 		cancel:  cancel,
 	}
@@ -189,7 +189,7 @@ func namedLock[V ~[]byte | ~string](name V) (unlock func()) {
 
 // EnsureRelay ensures that a relay connection exists and is active.
 // If the relay is not connected, it attempts to connect.
-func (p *Pool) EnsureRelay(url string) (*Relay, error) {
+func (p *Pool) EnsureRelay(url string) (*Client, error) {
 	nm := string(normalize.URL(url))
 	defer namedLock(nm)()
 	relay, ok := p.Relays.Load(nm)
@@ -236,7 +236,7 @@ func (p *Pool) EnsureRelay(url string) (*Relay, error) {
 type PublishResult struct {
 	Error    error
 	RelayURL string
-	Relay    *Relay
+	Relay    *Client
 }
 
 // todo: this didn't used to be in this package... probably don't want to add it

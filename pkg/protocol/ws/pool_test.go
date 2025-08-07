@@ -111,7 +111,7 @@ func TestRelayEventString(t *testing.T) {
 		CreatedAt: timestamp.Now(),
 	}
 
-	client := &Relay{URL: "wss://test.relay"}
+	client := &Client{URL: "wss://test.relay"}
 	ie := RelayEvent{E: testEvent, Relay: client}
 
 	str := ie.String()

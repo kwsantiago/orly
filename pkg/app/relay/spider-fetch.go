@@ -140,7 +140,7 @@ func (s *Server) SpiderFetch(
 				default:
 				}
 				var evss event.S
-				var cli *ws.Relay
+				var cli *ws.Client
 				if cli, err = ws.RelayConnect(
 					context.Bg(), seed,
 				); chk.E(err) {

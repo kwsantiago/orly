@@ -20,7 +20,6 @@ import (
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
-	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/values"
 )
 
@@ -115,10 +114,6 @@ func (cl *Client) RPC(
 	if err = ev.Sign(cl.clientSecretKey); chk.E(err) {
 		return
 	}
-	var ok bool
-	if ok, err = ev.Verify(); chk.E(err) {
-	}
-	log.I.F("verify: %v", ok)
 	var rc *ws.Client
 	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
 		return
@@ -129,9 +124,9 @@ func (cl *Client) RPC(
 		c, filters.New(
 			&filter.F{
 				Limit:   values.ToUintPointer(1),
-				Kinds:   kinds.New(kind.WalletRequest),
-				Authors: tag.New(cl.clientSecretKey.Pub()),
-				Tags:    tags.New(tag.New([]byte("#e"), ev.ID)),
+				Kinds:   kinds.New(kind.WalletResponse),
+				Authors: tag.New(cl.walletPublicKey),
+				Tags:    tags.New(tag.New("#e", hex.Enc(ev.ID))),
 			},
 		),
 	); chk.E(err) {
@@ -141,7 +136,6 @@ func (cl *Client) RPC(
 	if err = rc.Publish(context.Bg(), ev); chk.E(err) {
 		return
 	}
-	log.I.F("published event %s", ev.Marshal(nil))
 	select {
 	case <-c.Done():
 		err = fmt.Errorf("context canceled waiting for response")

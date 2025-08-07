@@ -309,7 +309,7 @@ func (t *T) ContainsAny(tagName []byte, values *tag.T) bool {
 			continue
 		}
 		for _, candidate := range values.ToSliceOfBytes() {
-			if bytes.Equal(v.Value(), candidate) {
+			if bytes.HasPrefix(v.Value(), candidate) {
 				return true
 			}
 		}
