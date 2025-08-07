@@ -263,9 +263,9 @@ var (
 	FileStorageServerList = &T{10096}
 	// JWTBinding is an event kind that creates a link between a JWT certificate and a pubkey
 	JWTBinding = &T{13004}
-	// NWCWalletInfo is an event type that...
-	NWCWalletInfo = &T{13194}
-	WalletInfo    = NWCWalletInfo
+	// NWCWalletServiceInfo is an event type that...
+	NWCWalletServiceInfo = &T{13194}
+	WalletServiceInfo    = &T{13194}
 	// ReplaceableEnd is an event type that...
 	ReplaceableEnd = &T{19999}
 	// EphemeralStart is an event type that...
@@ -384,7 +384,7 @@ var Map = map[uint16]string{
 	UserEmojiList.K:               "UserEmojiList",
 	DMRelaysList.K:                "DMRelaysList",
 	FileStorageServerList.K:       "FileStorageServerList",
-	NWCWalletInfo.K:               "NWCWalletInfo",
+	NWCWalletServiceInfo.K:        "NWCWalletServiceInfo",
 	LightningPubRPC.K:             "LightningPubRPC",
 	ClientAuthentication.K:        "ClientAuthentication",
 	WalletRequest.K:               "WalletRequest",

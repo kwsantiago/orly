@@ -33,8 +33,10 @@ var (
 type NotificationType []byte
 
 var (
-	PaymentReceived = NotificationType("payment_received")
-	PaymentSent     = NotificationType("payment_sent")
+	NotificationTag     = []byte("notification")
+	PaymentReceived     = NotificationType("payment_received")
+	PaymentSent         = NotificationType("payment_sent")
+	HoldInvoiceAccepted = NotificationType("hold_invoice_accepted")
 )
 
 type WalletServiceInfo struct {

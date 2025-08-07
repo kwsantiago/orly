@@ -19,14 +19,10 @@ import (
 func (cl *Client) GetWalletServiceInfo(c context.T, noUnmarshal bool) (
 	wsi *WalletServiceInfo, raw []byte, err error,
 ) {
-	timeout := 10 * time.Second
-	ctx, cancel := context.Timeout(c, timeout)
+	ctx, cancel := context.Timeout(c, 10*time.Second)
 	defer cancel()
 	var rc *ws.Client
 	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
-		return
-	}
-	if err = rc.Connect(c); chk.E(err) {
 		return
 	}
 	var sub *ws.Subscription
@@ -34,7 +30,7 @@ func (cl *Client) GetWalletServiceInfo(c context.T, noUnmarshal bool) (
 		ctx, filters.New(
 			&filter.F{
 				Limit:   values.ToUintPointer(1),
-				Kinds:   kinds.New(kind.WalletRequest),
+				Kinds:   kinds.New(kind.WalletServiceInfo),
 				Authors: tag.New(cl.walletPublicKey),
 			},
 		),
@@ -43,37 +39,32 @@ func (cl *Client) GetWalletServiceInfo(c context.T, noUnmarshal bool) (
 	}
 	defer sub.Unsub()
 	select {
-	case <-c.Done():
-		err = fmt.Errorf("GetWalletServiceInfo canceled")
+	case <-ctx.Done():
+		err = fmt.Errorf("context canceled")
 		return
-	case ev := <-sub.Events:
-		var encryptionTypes []EncryptionType
-		var notificationTypes []NotificationType
-		encryptionTag := ev.Tags.GetFirst(tag.New("encryption"))
-		notificationsTag := ev.Tags.GetFirst(tag.New("notifications"))
-		if encryptionTag != nil {
-			et := encryptionTag.ToSliceOfBytes()
-			encType := bytes.Split(et[0], []byte(" "))
-			for _, e := range encType {
-				encryptionTypes = append(encryptionTypes, e)
+	case e := <-sub.Events:
+		raw = e.Marshal(nil)
+		if noUnmarshal {
+			return
+		}
+		wsi = &WalletServiceInfo{}
+		encTag := e.Tags.GetFirst(tag.New(EncryptionTag))
+		notTag := e.Tags.GetFirst(tag.New(NotificationTag))
+		if encTag != nil {
+			et := bytes.Split(encTag.Value(), []byte(" "))
+			for _, v := range et {
+				wsi.EncryptionTypes = append(wsi.EncryptionTypes, v)
 			}
 		}
-		if notificationsTag != nil {
-			nt := notificationsTag.ToSliceOfBytes()
-			notifs := bytes.Split(nt[0], []byte(" "))
-			for _, e := range notifs {
-				notificationTypes = append(notificationTypes, e)
+		if notTag != nil {
+			nt := bytes.Split(notTag.Value(), []byte(" "))
+			for _, v := range nt {
+				wsi.NotificationTypes = append(wsi.NotificationTypes, v)
 			}
 		}
-		cp := bytes.Split(ev.Content, []byte(" "))
-		var capabilities []Capability
-		for _, capability := range cp {
-			capabilities = append(capabilities, capability)
-		}
-		wsi = &WalletServiceInfo{
-			EncryptionTypes:   encryptionTypes,
-			NotificationTypes: notificationTypes,
-			Capabilities:      capabilities,
+		caps := bytes.Split(e.Content, []byte(" "))
+		for _, v := range caps {
+			wsi.Capabilities = append(wsi.Capabilities, v)
 		}
 	}
 	return
