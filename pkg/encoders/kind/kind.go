@@ -4,9 +4,10 @@
 package kind
 
 import (
+	"sync"
+
 	"orly.dev/pkg/encoders/ints"
 	"orly.dev/pkg/utils/chk"
-	"sync"
 
 	"golang.org/x/exp/constraints"
 )
@@ -71,6 +72,8 @@ var Privileged = []*T{
 	GiftWrapWithKind4,
 	JWTBinding,
 	ApplicationSpecificData,
+	Seal,
+	PrivateDirectMessage,
 }
 
 // IsPrivileged returns true if the type is the kind of message nobody else than the pubkeys in
@@ -264,7 +267,7 @@ var (
 	NWCWalletInfo = &T{13194}
 	WalletInfo    = NWCWalletInfo
 	// ReplaceableEnd is an event type that...
-	ReplaceableEnd = &T{20000}
+	ReplaceableEnd = &T{19999}
 	// EphemeralStart is an event type that...
 	EphemeralStart  = &T{20000}
 	LightningPubRPC = &T{21000}
@@ -274,15 +277,16 @@ var (
 	NWCWalletRequest = &T{23194}
 	WalletRequest    = &T{23194}
 	// NWCWalletResponse is an event type that...
-	NWCWalletResponse  = &T{23195}
-	WalletResponse     = &T{23195}
-	NWCNotification    = &T{23196}
-	WalletNotification = &T{23196}
+	NWCWalletResponse      = &T{23195}
+	WalletResponse         = &T{23195}
+	NWCNotification        = &T{23196}
+	WalletNotificationNip4 = &T{23196}
+	WalletNotification     = &T{23197}
 	// NostrConnect is an event type that...
 	NostrConnect = &T{24133}
 	HTTPAuth     = &T{27235}
 	// EphemeralEnd is an event type that...
-	EphemeralEnd = &T{30000}
+	EphemeralEnd = &T{29999}
 	// ParameterizedReplaceableStart is an event type that...
 	ParameterizedReplaceableStart = &T{30000}
 	// CategorizedPeopleList is an event type that...
@@ -329,7 +333,7 @@ var (
 	CommunityDefinition = &T{34550}
 	ACLEvent            = &T{39998}
 	// ParameterizedReplaceableEnd is an event type that...
-	ParameterizedReplaceableEnd = &T{40000}
+	ParameterizedReplaceableEnd = &T{39999}
 )
 
 var MapMx sync.Mutex
@@ -385,6 +389,7 @@ var Map = map[uint16]string{
 	ClientAuthentication.K:        "ClientAuthentication",
 	WalletRequest.K:               "WalletRequest",
 	WalletResponse.K:              "WalletResponse",
+	WalletNotificationNip4.K:      "WalletNotificationNip4",
 	WalletNotification.K:          "WalletNotification",
 	NostrConnect.K:                "NostrConnect",
 	HTTPAuth.K:                    "HTTPAuth",
