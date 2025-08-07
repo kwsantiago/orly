@@ -12,7 +12,7 @@ import (
 )
 
 func printUsage() {
-	fmt.Println("Usage: walletcli '<NWC connection URL>' <method> [<args...>]")
+	fmt.Println("Usage: walletcli \"<NWC connection URL>\" <method> [<args...>]")
 	fmt.Println("\nAvailable methods:")
 	fmt.Println("  get_wallet_service_info - Get wallet service information")
 	fmt.Println("  get_info                - Get wallet information")
