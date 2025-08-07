@@ -51,6 +51,7 @@ func (s *Server) AcceptEvent(
 				}
 			}
 		}
+		accept = true
 		return
 	}
 	// if auth is required and the user is not authed, reject

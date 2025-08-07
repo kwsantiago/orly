@@ -9,7 +9,7 @@ import (
 )
 
 func NewSecFromHex[V []byte | string](skh V) (sign signer.I, err error) {
-	var sk []byte
+	sk := make([]byte, len(skh)/2)
 	if _, err = hex.DecBytes(sk, []byte(skh)); chk.E(err) {
 		return
 	}
@@ -21,18 +21,19 @@ func NewSecFromHex[V []byte | string](skh V) (sign signer.I, err error) {
 }
 
 func NewPubFromHex[V []byte | string](pkh V) (sign signer.I, err error) {
-	var sk []byte
-	if _, err = hex.DecBytes(sk, []byte(pkh)); chk.E(err) {
+	pk := make([]byte, len(pkh)/2)
+	if _, err = hex.DecBytes(pk, []byte(pkh)); chk.E(err) {
 		return
 	}
 	sign = &Signer{}
-	if err = sign.InitPub(sk); chk.E(err) {
+	if err = sign.InitPub(pk); chk.E(err) {
 		return
 	}
 	return
 }
 
 func HexToBin(hexStr string) (b []byte, err error) {
+	b = make([]byte, len(hexStr)/2)
 	if _, err = hex.DecBytes(b, []byte(hexStr)); chk.E(err) {
 		return
 	}

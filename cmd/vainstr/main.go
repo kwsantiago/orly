@@ -6,6 +6,12 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"os"
+	"runtime"
+	"strings"
+	"sync"
+	"time"
+
 	"orly.dev/pkg/crypto/ec/bech32"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/crypto/p256k"
@@ -16,11 +22,6 @@ import (
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
 	"orly.dev/pkg/utils/qu"
-	"os"
-	"runtime"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/alexflint/go-arg"
 )
@@ -217,7 +218,11 @@ out:
 }
 
 func Gen() (skb, pkb []byte, err error) {
-	skb, pkb, _, _, err = p256k.Generate()
+	sign := p256k.Signer{}
+	if err = sign.Generate(); chk.E(err) {
+		return
+	}
+	skb, pkb = sign.Sec(), sign.Pub()
 	return
 }
 

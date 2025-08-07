@@ -7,13 +7,14 @@ package schnorr
 
 import (
 	"errors"
+	"strings"
+	"testing"
+	"testing/quick"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/utils/chk"
-	"strings"
-	"testing"
-	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -207,7 +208,7 @@ func TestSchnorrSign(t *testing.T) {
 			continue
 		}
 		d := decodeHex(test.secretKey)
-		privKey, _ := btcec.PublicKey.SecKeyFromBytes(d)
+		privKey, _ := btcec.SecKeyFromBytes(d)
 		var auxBytes [32]byte
 		aux := decodeHex(test.auxRand)
 		copy(auxBytes[:], aux)

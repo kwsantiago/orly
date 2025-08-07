@@ -2,11 +2,12 @@ package dns
 
 import (
 	"bytes"
-	"context"
+	"testing"
+
 	"orly.dev/pkg/crypto/keys"
 	"orly.dev/pkg/encoders/bech32encoding/pointers"
 	"orly.dev/pkg/utils/chk"
-	"testing"
+	"orly.dev/pkg/utils/context"
 )
 
 func TestParse(t *testing.T) {

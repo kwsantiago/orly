@@ -3,6 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"lukechampine.com/frand"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
@@ -17,10 +22,6 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
-	"os"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 type BenchmarkResults struct {
@@ -38,15 +39,21 @@ type BenchmarkResults struct {
 
 func main() {
 	var (
-		relayURL      = flag.String("relay", "ws://localhost:7447", "Relay URL to benchmark")
-		eventCount    = flag.Int("events", 10000, "Number of events to publish")
-		eventSize     = flag.Int("size", 1024, "Average size of event content in bytes")
-		concurrency   = flag.Int("concurrency", 10, "Number of concurrent publishers")
-		queryCount    = flag.Int("queries", 100, "Number of queries to execute")
-		queryLimit    = flag.Int("query-limit", 100, "Limit for each query")
-		skipPublish   = flag.Bool("skip-publish", false, "Skip publishing phase")
-		skipQuery     = flag.Bool("skip-query", false, "Skip query phase")
-		verbose       = flag.Bool("v", false, "Verbose output")
+		relayURL = flag.String(
+			"relay", "ws://localhost:7447", "Relay URL to benchmark",
+		)
+		eventCount = flag.Int("events", 10000, "Number of events to publish")
+		eventSize  = flag.Int(
+			"size", 1024, "Average size of event content in bytes",
+		)
+		concurrency = flag.Int(
+			"concurrency", 10, "Number of concurrent publishers",
+		)
+		queryCount  = flag.Int("queries", 100, "Number of queries to execute")
+		queryLimit  = flag.Int("query-limit", 100, "Limit for each query")
+		skipPublish = flag.Bool("skip-publish", false, "Skip publishing phase")
+		skipQuery   = flag.Bool("skip-query", false, "Skip query phase")
+		verbose     = flag.Bool("v", false, "Verbose output")
 	)
 	flag.Parse()
 
@@ -60,7 +67,9 @@ func main() {
 	// Phase 1: Publish events
 	if !*skipPublish {
 		fmt.Printf("Publishing %d events to %s...\n", *eventCount, *relayURL)
-		if err := benchmarkPublish(c, *relayURL, *eventCount, *eventSize, *concurrency, results); chk.E(err) {
+		if err := benchmarkPublish(
+			c, *relayURL, *eventCount, *eventSize, *concurrency, results,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Error during publish benchmark: %v\n", err)
 			os.Exit(1)
 		}
@@ -69,7 +78,9 @@ func main() {
 	// Phase 2: Query events
 	if !*skipQuery {
 		fmt.Printf("\nQuerying events from %s...\n", *relayURL)
-		if err := benchmarkQuery(c, *relayURL, *queryCount, *queryLimit, results); chk.E(err) {
+		if err := benchmarkQuery(
+			c, *relayURL, *queryCount, *queryLimit, results,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Error during query benchmark: %v\n", err)
 			os.Exit(1)
 		}
@@ -79,7 +90,10 @@ func main() {
 	printResults(results)
 }
 
-func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concurrency int, results *BenchmarkResults) error {
+func benchmarkPublish(
+	c context.T, relayURL string, eventCount, eventSize, concurrency int,
+	results *BenchmarkResults,
+) error {
 	// Generate signers for each concurrent publisher
 	signers := make([]*testSigner, concurrency)
 	for i := range signers {
@@ -123,9 +137,12 @@ func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concu
 			// Publish events
 			for j := 0; j < eventsToPublish; j++ {
 				ev := generateEvent(signer, eventSize)
-				
+
 				if err := relay.Publish(c, ev); err != nil {
-					log.E.F("Publisher %d failed to publish event: %v", publisherID, err)
+					log.E.F(
+						"Publisher %d failed to publish event: %v", publisherID,
+						err,
+					)
 					errors.Add(1)
 					continue
 				}
@@ -135,7 +152,9 @@ func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concu
 				publishedBytes.Add(int64(len(evBytes)))
 
 				if publishedEvents.Load()%1000 == 0 {
-					fmt.Printf("  Published %d events...\n", publishedEvents.Load())
+					fmt.Printf(
+						"  Published %d events...\n", publishedEvents.Load(),
+					)
 				}
 			}
 		}(i)
@@ -151,13 +170,18 @@ func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concu
 	results.PublishBandwidth = float64(results.EventsPublishedBytes) / duration.Seconds() / 1024 / 1024 // MB/s
 
 	if errors.Load() > 0 {
-		fmt.Printf("  Warning: %d errors occurred during publishing\n", errors.Load())
+		fmt.Printf(
+			"  Warning: %d errors occurred during publishing\n", errors.Load(),
+		)
 	}
 
 	return nil
 }
 
-func benchmarkQuery(c context.T, relayURL string, queryCount, queryLimit int, results *BenchmarkResults) error {
+func benchmarkQuery(
+	c context.T, relayURL string, queryCount, queryLimit int,
+	results *BenchmarkResults,
+) error {
 	relay, err := ws.RelayConnect(c, relayURL)
 	if err != nil {
 		return fmt.Errorf("failed to connect to relay: %w", err)
@@ -194,7 +218,7 @@ func benchmarkQuery(c context.T, relayURL string, queryCount, queryLimit int, re
 			// Query by tag
 			limit := uint(queryLimit)
 			f = &filter.F{
-				Tags: tags.New(tag.New([]byte("p"), generateRandomPubkey())),
+				Tags:  tags.New(tag.New([]byte("p"), generateRandomPubkey())),
 				Limit: &limit,
 			}
 		case 3:
@@ -202,7 +226,7 @@ func benchmarkQuery(c context.T, relayURL string, queryCount, queryLimit int, re
 			limit := uint(queryLimit)
 			f = &filter.F{
 				Authors: tag.New(generateRandomPubkey()),
-				Limit: &limit,
+				Limit:   &limit,
 			}
 		case 4:
 			// Complex query with multiple conditions
@@ -218,7 +242,7 @@ func benchmarkQuery(c context.T, relayURL string, queryCount, queryLimit int, re
 		}
 
 		// Execute query
-		events, err := relay.QuerySync(c, f, ws.WithLabel("benchmark"))
+		events, err := relay.QuerySync(c, f)
 		if err != nil {
 			log.E.F("Query %d failed: %v", i, err)
 			continue
@@ -268,7 +292,7 @@ func generateEvent(signer *testSigner, contentSize int) *event.E {
 
 func generateRandomTags() *tags.T {
 	t := tags.New()
-	
+
 	// Add some random tags
 	numTags := frand.Intn(5)
 	for i := 0; i < numTags; i++ {
@@ -281,7 +305,12 @@ func generateRandomTags() *tags.T {
 			t.AppendUnique(tag.New([]byte("e"), generateRandomEventID()))
 		case 2:
 			// t tag
-			t.AppendUnique(tag.New([]byte("t"), []byte(fmt.Sprintf("topic%d", frand.Intn(100)))))
+			t.AppendUnique(
+				tag.New(
+					[]byte("t"),
+					[]byte(fmt.Sprintf("topic%d", frand.Intn(100))),
+				),
+			)
 		}
 	}
 
@@ -298,11 +327,14 @@ func generateRandomEventID() []byte {
 
 func printResults(results *BenchmarkResults) {
 	fmt.Println("\n=== Benchmark Results ===")
-	
+
 	if results.EventsPublished > 0 {
 		fmt.Println("\nPublish Performance:")
 		fmt.Printf("  Events Published: %d\n", results.EventsPublished)
-		fmt.Printf("  Total Data: %.2f MB\n", float64(results.EventsPublishedBytes)/1024/1024)
+		fmt.Printf(
+			"  Total Data: %.2f MB\n",
+			float64(results.EventsPublishedBytes)/1024/1024,
+		)
 		fmt.Printf("  Duration: %s\n", results.PublishDuration)
 		fmt.Printf("  Rate: %.2f events/second\n", results.PublishRate)
 		fmt.Printf("  Bandwidth: %.2f MB/second\n", results.PublishBandwidth)

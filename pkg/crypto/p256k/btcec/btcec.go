@@ -38,6 +38,7 @@ func (s *Signer) InitSec(sec []byte) (err error) {
 		err = errorf.E("sec key must be %d bytes", secp256k1.SecKeyBytesLen)
 		return
 	}
+	s.skb = sec
 	s.SecretKey = secp256k1.SecKeyFromBytes(sec)
 	s.PublicKey = s.SecretKey.PubKey()
 	s.pkb = schnorr.SerializePubKey(s.PublicKey)
@@ -90,15 +91,39 @@ func (s *Signer) Verify(msg, sig []byte) (valid bool, err error) {
 		err = errorf.E("btcec: Pubkey not initialized")
 		return
 	}
+	
+	// First try to verify using the schnorr package
 	var si *schnorr.Signature
-	if si, err = schnorr.ParseSignature(sig); chk.D(err) {
-		err = errorf.E(
-			"failed to parse signature:\n%d %s\n%v", len(sig),
-			sig, err,
-		)
+	if si, err = schnorr.ParseSignature(sig); err == nil {
+		valid = si.Verify(msg, s.PublicKey)
 		return
 	}
-	valid = si.Verify(msg, s.PublicKey)
+	
+	// If parsing the signature failed, log it at debug level
+	chk.D(err)
+	
+	// If the signature is exactly 64 bytes, try to verify it directly
+	// This is to handle signatures created by p256k.Signer which uses libsecp256k1
+	if len(sig) == schnorr.SignatureSize {
+		// Create a new signature with the raw bytes
+		var r secp256k1.FieldVal
+		var sScalar secp256k1.ModNScalar
+		
+		// Split the signature into r and s components
+		if overflow := r.SetByteSlice(sig[0:32]); !overflow {
+			sScalar.SetByteSlice(sig[32:64])
+			
+			// Create a new signature and verify it
+			newSig := schnorr.NewSignature(&r, &sScalar)
+			valid = newSig.Verify(msg, s.PublicKey)
+			return
+		}
+	}
+	
+	// If all verification methods failed, return an error
+	err = errorf.E(
+		"failed to verify signature:\n%d %s", len(sig), sig,
+	)
 	return
 }
 

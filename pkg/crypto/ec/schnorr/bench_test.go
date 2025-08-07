@@ -7,11 +7,12 @@ package schnorr
 
 import (
 	"math/big"
+	"testing"
+
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/hex"
-	"testing"
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there
@@ -48,7 +49,7 @@ func hexToModNScalar(s string) *btcec.ModNScalar {
 // if there is an error. This is only provided for the hard-coded constants, so
 // errors in the source code can be detected. It will only (and must only) be
 // called with hard-coded values.
-func hexToFieldVal(s string) *btcec.PublicKey {
+func hexToFieldVal(s string) *btcec.FieldVal {
 	b, err := hex.Dec(s)
 	if err != nil {
 		panic("invalid hex in source file: " + s)

@@ -4,6 +4,7 @@ package p256k
 
 import (
 	"orly.dev/pkg/crypto/p256k/btcec"
+	"orly.dev/pkg/utils/log"
 )
 
 func init() {
@@ -19,6 +20,6 @@ type Keygen = btcec.Keygen
 
 func NewKeygen() (k *Keygen) { return new(Keygen) }
 
-var NewSecFromHex = btcec.NewSecFromHex
-var NewPubFromHex = btcec.NewPubFromHex
+var NewSecFromHex = btcec.NewSecFromHex[string]
+var NewPubFromHex = btcec.NewPubFromHex[string]
 var HexToBin = btcec.HexToBin

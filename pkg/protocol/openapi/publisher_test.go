@@ -2,9 +2,10 @@ package openapi
 
 import (
 	"net/http"
-	"orly.dev/pkg/app/config"
 	"testing"
 	"time"
+
+	"orly.dev/pkg/app/config"
 
 	"orly.dev/pkg/app/relay/publish"
 	"orly.dev/pkg/encoders/event"
@@ -13,6 +14,7 @@ import (
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tags"
+	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/interfaces/store"
 	ctx "orly.dev/pkg/utils/context"
@@ -54,7 +56,7 @@ func (m *mockServer) AcceptReq(
 
 func (m *mockServer) AddEvent(
 	c ctx.T, rl relay.I, ev *event.E, hr *http.Request, origin string,
-	pubkey []byte,
+	pubkeys [][]byte,
 ) (accepted bool, message []byte) {
 	return true, nil
 }
@@ -68,7 +70,7 @@ func (m *mockServer) AdminAuth(
 func (m *mockServer) UserAuth(
 	r *http.Request, remote string, tolerance ...time.Duration,
 ) (authed bool, pubkey []byte, super bool) {
-	return false, nil, super
+	return false, nil, false
 }
 
 func (m *mockServer) Publish(c ctx.T, evt *event.E) (err error) {
@@ -120,13 +122,14 @@ func TestPublisherFunctionality(t *testing.T) {
 	t.Run(
 		"RegisterListener", func(t *testing.T) {
 			// Create a receiver channel
-			receiver := make(event.C, 32)
+			receiver := make(DeliverChan, 32)
 
 			// Create a listener
 			listener := &H{
 				Id:        "test-listener",
 				Receiver:  receiver,
 				FilterMap: make(map[string]*filter.F),
+				New:       true,
 			}
 
 			// Register the listener
@@ -174,7 +177,8 @@ func TestPublisherFunctionality(t *testing.T) {
 		"DeliverEvent", func(t *testing.T) {
 			// Create an event that matches the filter
 			ev := &event.E{
-				Kind: kind.TextNote,
+				Kind:      kind.TextNote,
+				CreatedAt: timestamp.Now(),
 			}
 
 			// Deliver the event
@@ -190,7 +194,7 @@ func TestPublisherFunctionality(t *testing.T) {
 			// Verify the event was received
 			select {
 			case receivedEv := <-listener.Receiver:
-				if receivedEv != ev {
+				if receivedEv.Event != ev {
 					t.Errorf("Received event does not match delivered event")
 				}
 			case <-time.After(100 * time.Millisecond):
@@ -203,11 +207,12 @@ func TestPublisherFunctionality(t *testing.T) {
 	t.Run(
 		"Unsubscribe", func(t *testing.T) {
 			// Create a new listener first since the previous one was removed
-			receiver := make(event.C, 32)
+			receiver := make(DeliverChan, 32)
 			listener := &H{
 				Id:        "test-listener",
 				Receiver:  receiver,
 				FilterMap: make(map[string]*filter.F),
+				New:       true,
 			}
 			publisher.Receive(listener)
 
@@ -232,9 +237,14 @@ func TestPublisherFunctionality(t *testing.T) {
 			// Unsubscribe
 			publisher.Receive(unsubscribe)
 
-			// Verify the listener was removed (since it had no more subscriptions)
-			if _, ok := publisher.ListenMap["test-listener"]; ok {
-				t.Errorf("Listener was not removed, but should be removed when all subscriptions are gone")
+			// Verify the subscription was removed
+			listener, ok := publisher.ListenMap["test-listener"]
+			if !ok {
+				t.Errorf("Listener was removed, but should still exist")
+				return
+			}
+			if _, ok := listener.FilterMap["test-subscription"]; ok {
+				t.Errorf("Subscription was not removed")
 			}
 		},
 	)
@@ -262,11 +272,12 @@ func TestPublisherFunctionality(t *testing.T) {
 	t.Run(
 		"UnsubscribeNonExistentSubscription", func(t *testing.T) {
 			// Create a new listener first
-			receiver := make(event.C, 32)
+			receiver := make(DeliverChan, 32)
 			listener := &H{
 				Id:        "test-listener-2",
 				Receiver:  receiver,
 				FilterMap: make(map[string]*filter.F),
+				New:       true,
 			}
 			publisher.Receive(listener)
 
@@ -315,12 +326,13 @@ func TestPublisherFunctionality(t *testing.T) {
 			mockServer.authRequired = true
 
 			// Create a new listener with pubkey
-			receiver := make(event.C, 32)
+			receiver := make(DeliverChan, 32)
 			listener := &H{
 				Id:        "test-listener-3",
 				Receiver:  receiver,
 				FilterMap: make(map[string]*filter.F),
 				Pubkey:    []byte("test-pubkey"),
+				New:       true,
 			}
 			publisher.Receive(listener)
 
@@ -335,9 +347,10 @@ func TestPublisherFunctionality(t *testing.T) {
 
 			// Create an event with a different pubkey and a privileged kind
 			ev := &event.E{
-				Kind:   kind.EncryptedDirectMessage,
-				Pubkey: []byte("different-pubkey"),
-				Tags:   tags.New(), // Initialize empty tags
+				Kind:      kind.EncryptedDirectMessage,
+				Pubkey:    []byte("different-pubkey"),
+				Tags:      tags.New(), // Initialize empty tags
+				CreatedAt: timestamp.Now(),
 			}
 
 			// Deliver the event
@@ -360,19 +373,21 @@ func TestPublisherFunctionality(t *testing.T) {
 	t.Run(
 		"FilterMatching", func(t *testing.T) {
 			// Create two listeners with different filters
-			receiver1 := make(event.C, 32)
+			receiver1 := make(DeliverChan, 32)
 			listener1 := &H{
 				Id:        "test-listener-filter-1",
 				Receiver:  receiver1,
 				FilterMap: make(map[string]*filter.F),
+				New:       true,
 			}
 			publisher.Receive(listener1)
 
-			receiver2 := make(event.C, 32)
+			receiver2 := make(DeliverChan, 32)
 			listener2 := &H{
 				Id:        "test-listener-filter-2",
 				Receiver:  receiver2,
 				FilterMap: make(map[string]*filter.F),
+				New:       true,
 			}
 			publisher.Receive(listener2)
 
@@ -403,8 +418,9 @@ func TestPublisherFunctionality(t *testing.T) {
 
 			// Create an event that matches only the first filter
 			ev := &event.E{
-				Kind: kind.TextNote,
-				Tags: tags.New(),
+				Kind:      kind.TextNote,
+				Tags:      tags.New(),
+				CreatedAt: timestamp.Now(),
 			}
 
 			// Deliver the event
@@ -413,7 +429,7 @@ func TestPublisherFunctionality(t *testing.T) {
 			// Verify the event was received by the first listener
 			select {
 			case receivedEv := <-receiver1:
-				if receivedEv != ev {
+				if receivedEv.Event != ev {
 					t.Errorf("Received event does not match delivered event")
 				}
 			case <-time.After(100 * time.Millisecond):
