@@ -3,12 +3,13 @@ package relay
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
+
 	"orly.dev/pkg/interfaces/relay"
 	"orly.dev/pkg/protocol/relayinfo"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/version"
-	"sort"
 )
 
 // HandleRelayInfo generates and returns a relay information document in JSON
@@ -44,7 +45,7 @@ func (s *Server) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 			// relayinfo.CommandResults,
 			relayinfo.ParameterizedReplaceableEvents,
 			// relayinfo.ExpirationTimestamp,
-			// relayinfo.ProtectedEvents,
+			relayinfo.ProtectedEvents,
 			// relayinfo.RelayListMetadata,
 		)
 		sort.Sort(supportedNIPs)

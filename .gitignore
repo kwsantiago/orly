@@ -105,3 +105,4 @@ pkg/database/testrealy
 /.idea/orly.iml
 /.idea/go.imports.xml
 /.idea/inspectionProfiles/Project_Default.xml
+/.idea/.name

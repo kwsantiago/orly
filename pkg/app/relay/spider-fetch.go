@@ -17,6 +17,7 @@ import (
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
+	"orly.dev/pkg/utils/values"
 )
 
 // IdPkTs is a map of event IDs to their id, pubkey, kind, and timestamp
@@ -125,7 +126,7 @@ func (s *Server) SpiderFetch(
 			if k == nil {
 				since = timestamp.FromTime(time.Now().Add(-1 * s.C.SpiderTime * 3 / 2))
 			} else {
-				l = nil
+				l = values.ToUintPointer(512)
 			}
 			batchFilter := &filter.F{
 				Kinds:   k,
