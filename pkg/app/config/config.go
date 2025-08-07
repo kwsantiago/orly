@@ -5,18 +5,19 @@ package config
 import (
 	"fmt"
 	"io"
-	"orly.dev/pkg/utils/apputil"
-	"orly.dev/pkg/utils/chk"
-	env2 "orly.dev/pkg/utils/env"
-	"orly.dev/pkg/utils/log"
-	"orly.dev/pkg/utils/lol"
-	"orly.dev/pkg/version"
 	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	"orly.dev/pkg/utils/apputil"
+	"orly.dev/pkg/utils/chk"
+	env2 "orly.dev/pkg/utils/env"
+	"orly.dev/pkg/utils/log"
+	"orly.dev/pkg/utils/lol"
+	"orly.dev/pkg/version"
 
 	"github.com/adrg/xdg"
 	"go-simpler.org/env"
@@ -26,7 +27,7 @@ import (
 // and default values. It defines parameters for app behaviour, storage
 // locations, logging, and network settings used across the relay service.
 type C struct {
-	AppName            string        `env:"ORLY_APP_NAME" default:"orly"`
+	AppName            string        `env:"ORLY_APP_NAME" default:"ORLY"`
 	Config             string        `env:"ORLY_CONFIG_DIR" usage:"location for configuration file, which has the name '.env' to make it harder to delete, and is a standard environment KEY=value<newline>... style" default:"~/.config/orly"`
 	State              string        `env:"ORLY_STATE_DATA_DIR" usage:"storage location for state data affected by dynamic interactive interfaces" default:"~/.local/state/orly"`
 	DataDir            string        `env:"ORLY_DATA_DIR" usage:"storage location for the event store" default:"~/.local/cache/orly"`
