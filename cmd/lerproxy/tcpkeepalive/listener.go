@@ -1,17 +1,20 @@
-package app
+// Package tcpkeepalive implements a net.TCPListener with a singleton set period
+// for a default 3 minute keep-aline.
+package tcpkeepalive
 
 import (
 	"net"
+	"orly.dev/cmd/lerproxy/timeout"
 	"orly.dev/pkg/utils/chk"
 	"time"
 )
 
-// Period can be changed before opening a Listener to alter its
+// Period can be changed prior to opening a Listener to alter its'
 // KeepAlivePeriod.
 var Period = 3 * time.Minute
 
 // Listener sets TCP keep-alive timeouts on accepted connections.
-// It is used by ListenAndServe and ListenAndServeTLS so dead TCP connections
+// It's used by ListenAndServe and ListenAndServeTLS so dead TCP connections
 // (e.g. closing laptop mid-download) eventually go away.
 type Listener struct {
 	time.Duration
@@ -30,7 +33,7 @@ func (ln Listener) Accept() (conn net.Conn, e error) {
 		return
 	}
 	if ln.Duration != 0 {
-		return Conn{Duration: ln.Duration, TCPConn: tc}, nil
+		return timeout.Conn{Duration: ln.Duration, TCPConn: tc}, nil
 	}
 	return tc, nil
 }
