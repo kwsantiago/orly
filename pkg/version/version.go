@@ -7,6 +7,6 @@ import (
 //go:embed version
 var V string
 
-var Description = "relay powered by the orly framework"
+var Description = "relay powered by the orly framework https://orly.dev"
 
 var URL = "https://orly.dev"

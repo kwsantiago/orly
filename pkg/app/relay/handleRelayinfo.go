@@ -53,8 +53,9 @@ func (s *Server) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 		info = &relayinfo.T{
 			Name:        s.relay.Name(),
 			Description: version.Description,
-			Nips:        supportedNIPs, Software: version.URL,
-			Version: version.V,
+			Nips:        supportedNIPs,
+			Software:    version.URL,
+			Version:     version.V,
 			Limitation: relayinfo.Limits{
 				AuthRequired:     s.C.AuthRequired,
 				RestrictedWrites: s.C.AuthRequired,
