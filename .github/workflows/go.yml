@@ -1,11 +1,23 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+#
+# Release Process:
+# 1. Update the version in pkg/version/version file (e.g., v1.2.3)
+# 2. Create and push a tag matching the version:
+#    git tag v1.2.3
+#    git push origin v1.2.3
+# 3. The workflow will automatically:
+#    - Build binaries for multiple platforms (Linux, macOS, Windows)
+#    - Create a GitHub release with the binaries
+#    - Generate release notes
 
 name: Go
 
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches: [ "main" ]
 
@@ -38,4 +50,45 @@ jobs:
 
       - name: Test
         run:  go test -v ./...
+
+      - name: Build Release Binaries
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # Extract version from tag (e.g., v1.2.3 -> 1.2.3)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Building release binaries for version $VERSION"
+          
+          # Create directory for binaries
+          mkdir -p release-binaries
+          
+          # Build for different platforms
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build --ldflags '-extldflags "-static"'  -o release-binaries/orly-${VERSION}-linux-amd64 .
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build --ldflags '-extldflags "-static"'  -o release-binaries/orly-${VERSION}-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o release-binaries/orly-${VERSION}-darwin-amd64 .
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o release-binaries/orly-${VERSION}-darwin-arm64 .
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o release-binaries/orly-${VERSION}-windows-amd64.exe .
+          
+          # Build cmd executables
+          for cmd in lerproxy nauth nurl vainstr walletcli; do
+            echo "Building $cmd"
+            GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o --ldflags '-extldflags "-static"'  release-binaries/${cmd}-${VERSION}-linux-amd64 ./cmd/${cmd}
+            GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o --ldflags '-extldflags "-static"'  release-binaries/${cmd}-${VERSION}-linux-arm64 ./cmd/${cmd}
+            GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o release-binaries/${cmd}-${VERSION}-darwin-amd64 ./cmd/${cmd}
+            GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o release-binaries/${cmd}-${VERSION}-darwin-arm64 ./cmd/${cmd}
+            GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o release-binaries/${cmd}-${VERSION}-windows-amd64.exe ./cmd/${cmd}
+          done
+          
+          # Create checksums
+          cd release-binaries
+          sha256sum * > SHA256SUMS.txt
+          cd ..
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-binaries/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
 
