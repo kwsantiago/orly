@@ -80,6 +80,7 @@ node_modules/**
 !*.nix
 !license
 !readme
+!*.ico
 !.idea/*
 !*.xml
 !.name

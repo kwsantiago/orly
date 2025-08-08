@@ -5,8 +5,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/pkg/profile"
+	"net/http"
 	_ "net/http/pprof"
+	"os"
+
+	"github.com/pkg/profile"
 	app2 "orly.dev/pkg/app"
 	"orly.dev/pkg/app/config"
 	"orly.dev/pkg/app/relay"
@@ -20,7 +23,6 @@ import (
 	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/lol"
 	"orly.dev/pkg/version"
-	"os"
 )
 
 func main() {
@@ -76,6 +78,14 @@ func main() {
 	}
 	var opts []options.O
 	serveMux := servemux.NewServeMux()
+
+	// Add favicon handler
+	serveMux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/x-icon")
+		w.Header().Set("Cache-Control", "public, max-age=86400") // Cache for 24 hours
+		http.ServeFile(w, r, "static/favicon.ico")
+	})
+
 	if server, err = relay.NewServer(
 		serverParams, serveMux, opts...,
 	); chk.E(err) {
