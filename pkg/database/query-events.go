@@ -61,6 +61,8 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 		// Map to track deletion events by kind, pubkey, and d-tag (for
 		// parameterized replaceable events)
 		deletionsByKindPubkeyDTag := make(map[string]map[string]bool)
+		// Map to track specific event IDs that have been deleted
+		deletedEventIds := make(map[string]bool)
 
 		// Query for deletion events separately if we have authors in the filter
 		if f.Authors != nil && f.Authors.Len() > 0 {
@@ -190,9 +192,13 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 						continue
 					}
 
-					// If the event is replaceable, mark it as deleted
+					// Mark the specific event ID as deleted
+					deletedEventIds[hex.Enc(targetEv.ID)] = true
+					
+					// If the event is replaceable, mark it as deleted, but only for events older than this one
 					if targetEv.Kind.IsReplaceable() {
 						key := hex.Enc(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
+						// We'll still use deletionsByKindPubkey, but we'll check timestamps in the second pass
 						deletionsByKindPubkey[key] = true
 					} else if targetEv.Kind.IsParameterizedReplaceable() {
 						// For parameterized replaceable events, we need to consider the 'd' tag
@@ -247,20 +253,38 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 				}
 			}
 
+			// Check if this specific event has been deleted
+			eventIdHex := hex.Enc(ev.ID)
+			if deletedEventIds[eventIdHex] && !isIdInFilter {
+				// Skip this event if it has been specifically deleted and is not in the filter
+				continue
+			}
+
 			if ev.Kind.IsReplaceable() {
 				// For replaceable events, we only keep the latest version for
 				// each pubkey and kind, and only if it hasn't been deleted
 				key := hex.Enc(ev.Pubkey) + ":" + strconv.Itoa(int(ev.Kind.K))
 
-				// Skip this event if it has been deleted and its ID is not in
-				// the filter
+				// For replaceable events, we need to be more careful with deletion
+				// Only skip this event if it has been deleted by kind/pubkey and is not in the filter
+				// AND there isn't a newer event with the same kind/pubkey
 				if deletionsByKindPubkey[key] && !isIdInFilter {
-					continue
-				}
-
-				existing, exists := replaceableEvents[key]
-				if !exists || ev.CreatedAt.I64() > existing.CreatedAt.I64() {
-					replaceableEvents[key] = ev
+					// Check if there's a newer event with the same kind/pubkey
+					// that hasn't been specifically deleted
+					existing, exists := replaceableEvents[key]
+					if !exists || ev.CreatedAt.I64() > existing.CreatedAt.I64() {
+						// This is the newest event so far, keep it
+						replaceableEvents[key] = ev
+					} else {
+						// There's a newer event, skip this one
+						continue
+					}
+				} else {
+					// Normal replaceable event handling
+					existing, exists := replaceableEvents[key]
+					if !exists || ev.CreatedAt.I64() > existing.CreatedAt.I64() {
+						replaceableEvents[key] = ev
+					}
 				}
 			} else if ev.Kind.IsParameterizedReplaceable() {
 				// For parameterized replaceable events, we need to consider the

@@ -115,7 +115,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 
 	// Set the end of range (Until or default to math.MaxInt64)
 	if f.Until != nil && f.Until.V != 0 {
-		caEnd.Set(uint64(f.Until.V + 1))
+		caEnd.Set(uint64(f.Until.V))
 	} else {
 		caEnd.Set(uint64(math.MaxInt64))
 	}
