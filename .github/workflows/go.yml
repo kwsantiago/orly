@@ -14,18 +14,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.24'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
 
-    - name: Set env
-      run: echo "CGO_ENABLED=0" >> $GITHUB_ENV
+      - name: Install libsecp256k1
+        run:  ./scripts/ubuntu_install_libsecp256k1.sh
 
-    - name: Build
-      run: go build -v ./...
+      - name: Build with cgo
+        run:  go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
+      - name: Test with cgo
+        run:  go test -v ./...
+
+      - name: Set CGO off
+        run:  echo "CGO_ENABLED=0" >> $GITHUB_ENV
+
+      - name: Build
+        run:  go build -v ./...
+
+      - name: Test
+        run:  go test -v ./...
+
