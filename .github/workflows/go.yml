@@ -52,6 +52,7 @@ jobs:
         run:  go test -v ./...
 
   release:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
