@@ -94,6 +94,8 @@ See [RELAY_COMPARISON_RESULTS.md](RELAY_COMPARISON_RESULTS.md) for detailed anal
 - `--relay-bin`: Path to relay binary
 - `--install`: Install relay dependencies and binaries
 - `--install-secp`: Install only secp256k1 library
+- `--work-dir`: Working directory for builds (default: /tmp/relay-build)
+- `--install-dir`: Installation directory for binaries (default: /usr/local/bin)
 
 ### Profiling Options
 - `--profile`: Run query performance profiling
