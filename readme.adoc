@@ -22,6 +22,10 @@ and https://github.com/fiatjaf/relayer[fiatjaf/relayer] aimed at maximum perform
 * reverse proxy tool link:cmd/lerproxy[lerproxy] with support for Go vanity imports and https://github.com/nostr-protocol/nips/blob/master/05.md[nip-05] npub DNS verification and own TLS certificates
 * link:https://github.com/nostr-protocol/nips/blob/master/98.md[nip-98] implementation with new expiring variant for vanilla HTTP tools and browsers.
 
+== Releases
+
+see link:https://github.com/mleku/orly/releases[Releases] for pre-built binaries built on latest stable Go 1.24. Linux binaries are built static and have no dependencies on `*.so` files on the host (so they can run on bare metal and in containers with nothing added).
+
 == Building
 
 If you just want to make it run from source, you should check out a tagged version.
