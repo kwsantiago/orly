@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/encoders/kind"
@@ -170,5 +171,38 @@ func (cl *Client) SignMessage(
 ) (res *SignMessageResult, raw []byte, err error) {
 	res = &SignMessageResult{}
 	raw, err = cl.RPC(c, SignMessage, sm, &res, noUnmarshal, nil)
+	return
+}
+
+func (cl *Client) Subscribe(c context.T) (evc event.C, err error) {
+	var rc *ws.Client
+	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
+		return
+	}
+	defer rc.Close()
+	var sub *ws.Subscription
+	if sub, err = rc.Subscribe(
+		c, filters.New(
+			&filter.F{
+				Kinds: kinds.New(
+					kind.WalletNotification, kind.WalletNotificationNip4,
+				),
+				Authors: tag.New(cl.walletPublicKey),
+			},
+		),
+	); chk.E(err) {
+		return
+	}
+	defer sub.Unsub()
+	go func() {
+		for {
+			select {
+			case <-c.Done():
+				return
+			case ev := <-sub.Events:
+				evc <- ev
+			}
+		}
+	}()
 	return
 }
