@@ -4,13 +4,14 @@ package p256k
 
 import (
 	"crypto/rand"
+	"unsafe"
+
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
-	"unsafe"
 )
 
 /*

@@ -2,10 +2,11 @@ package text
 
 import (
 	"bytes"
+	"testing"
+
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/utils/chk"
-	"testing"
 
 	"lukechampine.com/frand"
 )
@@ -31,7 +32,7 @@ func TestUnmarshalHexArray(t *testing.T) {
 	var ha2 [][]byte
 	var rem []byte
 	var err error
-	if ha2, rem, err = UnmarshalHexArray(dst, 32); chk.E(err) {
+	if ha2, rem, err = UnmarshalHexArray(dst, sha256.Size); chk.E(err) {
 		t.Fatal(err)
 	}
 	if len(ha2) != len(ha) {

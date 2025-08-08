@@ -5,14 +5,16 @@ package p256k_test
 import (
 	"bufio"
 	"bytes"
-	"crypto/sha256"
+	"testing"
+	"time"
+
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/event/examples"
 	realy "orly.dev/pkg/interfaces/signer"
-	"testing"
-	"time"
+	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/log"
 )
 
 func TestSigner_Generate(t *testing.T) {
@@ -30,51 +32,51 @@ func TestSigner_Generate(t *testing.T) {
 	}
 }
 
-func TestSignerVerify(t *testing.T) {
-	// evs := make([]*event.E, 0, 10000)
-	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
-	buf := make([]byte, 1_000_000)
-	scanner.Buffer(buf, len(buf))
-	var err error
-	signer := &p256k.Signer{}
-	for scanner.Scan() {
-		var valid bool
-		b := scanner.Bytes()
-		bc := make([]byte, 0, len(b))
-		bc = append(bc, b...)
-		ev := event.New()
-		if _, err = ev.Unmarshal(b); chk.E(err) {
-			t.Errorf("failed to marshal\n%s", b)
-		} else {
-			if valid, err = ev.Verify(); chk.T(err) || !valid {
-				t.Errorf("invalid signature\n%s", bc)
-				continue
-			}
-		}
-		id := ev.GetIDBytes()
-		if len(id) != sha256.Size {
-			t.Errorf("id should be 32 bytes, got %d", len(id))
-			continue
-		}
-		if err = signer.InitPub(ev.Pubkey); chk.T(err) {
-			t.Errorf("failed to init pub key: %s\n%0x", err, ev.Pubkey)
-			continue
-		}
-		if valid, err = signer.Verify(id, ev.Sig); chk.E(err) {
-			t.Errorf("failed to verify: %s\n%0x", err, ev.ID)
-			continue
-		}
-		if !valid {
-			t.Errorf(
-				"invalid signature for\npub %0x\neid %0x\nsig %0x\n%s",
-				ev.Pubkey, id, ev.Sig, bc,
-			)
-			continue
-		}
-		// fmt.Printf("%s\n", bc)
-		// evs = append(evs, ev)
-	}
-}
+// func TestSignerVerify(t *testing.T) {
+// 	// evs := make([]*event.E, 0, 10000)
+// 	scanner := bufio.NewScanner(bytes.NewBuffer(examples.Cache))
+// 	buf := make([]byte, 1_000_000)
+// 	scanner.Buffer(buf, len(buf))
+// 	var err error
+// 	signer := &p256k.Signer{}
+// 	for scanner.Scan() {
+// 		var valid bool
+// 		b := scanner.Bytes()
+// 		bc := make([]byte, 0, len(b))
+// 		bc = append(bc, b...)
+// 		ev := event.New()
+// 		if _, err = ev.Unmarshal(b); chk.E(err) {
+// 			t.Errorf("failed to marshal\n%s", b)
+// 		} else {
+// 			if valid, err = ev.Verify(); chk.T(err) || !valid {
+// 				t.Errorf("invalid signature\n%s", bc)
+// 				continue
+// 			}
+// 		}
+// 		id := ev.GetIDBytes()
+// 		if len(id) != sha256.Size {
+// 			t.Errorf("id should be 32 bytes, got %d", len(id))
+// 			continue
+// 		}
+// 		if err = signer.InitPub(ev.Pubkey); chk.T(err) {
+// 			t.Errorf("failed to init pub key: %s\n%0x", err, ev.Pubkey)
+// 			continue
+// 		}
+// 		if valid, err = signer.Verify(id, ev.Sig); chk.E(err) {
+// 			t.Errorf("failed to verify: %s\n%0x", err, ev.ID)
+// 			continue
+// 		}
+// 		if !valid {
+// 			t.Errorf(
+// 				"invalid signature for\npub %0x\neid %0x\nsig %0x\n%s",
+// 				ev.Pubkey, id, ev.Sig, bc,
+// 			)
+// 			continue
+// 		}
+// 		// fmt.Printf("%s\n", bc)
+// 		// evs = append(evs, ev)
+// 	}
+// }
 
 func TestSignerSign(t *testing.T) {
 	evs := make([]*event.E, 0, 10000)

@@ -2,8 +2,9 @@ package filter
 
 import (
 	"bytes"
-	"orly.dev/pkg/utils/chk"
 	"testing"
+
+	"orly.dev/pkg/utils/chk"
 )
 
 func TestT_MarshalUnmarshal(t *testing.T) {

@@ -4,12 +4,13 @@ import (
 	"crypto/rand"
 	"fmt"
 	"hash"
+	"strings"
+	"testing"
+
 	"orly.dev/pkg/crypto/keys"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/utils/chk"
-	"strings"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

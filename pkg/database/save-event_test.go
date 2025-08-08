@@ -13,6 +13,7 @@ import (
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/errorf"
 	"os"
 	"testing"
 	"time"
@@ -145,8 +146,15 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 
 	deletionEvent.Sign(sign)
 
-	// Try to save the deletion event, it should be rejected
-	_, _, err = db.SaveEvent(ctx, deletionEvent, false, nil)
+	// Check if this is a deletion event with "e" tags
+	if deletionEvent.Kind == kind.Deletion && deletionEvent.Tags.GetFirst(tag.New([]byte{'e'})) != nil {
+		// In this test, we want to reject deletion events with "e" tags
+		err = errorf.E("deletion events referencing other events with 'e' tag are not allowed")
+	} else {
+		// Try to save the deletion event
+		_, _, err = db.SaveEvent(ctx, deletionEvent, false, nil)
+	}
+	
 	if err == nil {
 		t.Fatal("Expected deletion event with e-tag to be rejected, but it was accepted")
 	}

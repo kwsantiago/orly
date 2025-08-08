@@ -6,10 +6,11 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/binary"
-	"golang.org/x/crypto/chacha20"
-	"golang.org/x/crypto/hkdf"
 	"io"
 	"math"
+
+	"golang.org/x/crypto/chacha20"
+	"golang.org/x/crypto/hkdf"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/interfaces/signer"

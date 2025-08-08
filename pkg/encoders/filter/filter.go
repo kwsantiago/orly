@@ -591,29 +591,17 @@ func GenFilter() (f *F, err error) {
 	}
 	for b := 'a'; b <= 'z'; b++ {
 		l := frand.Intn(6)
-		if b == 'e' || b == 'p' {
-			var idb [][]byte
-			for range l {
-				id := make([]byte, sha256.Size)
-				frand.Read(id)
-				idb = append(idb, id)
-			}
-			idb = append([][]byte{{'#', byte(b)}}, idb...)
-			f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(idb...))
-			// f.Tags.F = append(f.Tags.F, tag.FromBytesSlice(idb...))
-		} else {
-			var idb [][]byte
-			for range l {
-				bb := make([]byte, frand.Intn(31)+1)
-				frand.Read(bb)
-				id := make([]byte, 0, len(bb)*2)
-				id = hex.EncAppend(id, bb)
-				idb = append(idb, id)
-			}
-			idb = append([][]byte{{'#', byte(b)}}, idb...)
-			f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(idb...))
-			// f.Tags.F = append(f.Tags.F, tag.FromBytesSlice(idb...))
+		var idb [][]byte
+		for range l {
+			bb := make([]byte, frand.Intn(31)+1)
+			frand.Read(bb)
+			id := make([]byte, 0, len(bb)*2)
+			id = hex.EncAppend(id, bb)
+			idb = append(idb, id)
 		}
+		idb = append([][]byte{{'#', byte(b)}}, idb...)
+		f.Tags = f.Tags.AppendTags(tag.FromBytesSlice(idb...))
+		// f.Tags.F = append(f.Tags.F, tag.FromBytesSlice(idb...))
 	}
 	tn := int(timestamp.Now().I64())
 	f.Since = &timestamp.T{int64(tn - frand.Intn(10000))}

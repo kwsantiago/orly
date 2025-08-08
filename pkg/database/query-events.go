@@ -2,12 +2,14 @@ package database
 
 import (
 	"bytes"
+	"fmt"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/store"
 	"orly.dev/pkg/utils/chk"
@@ -60,7 +62,25 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 		// parameterized replaceable events)
 		deletionsByKindPubkeyDTag := make(map[string]map[string]bool)
 
+		// Query for deletion events separately if we have authors in the filter
+		if f.Authors != nil && f.Authors.Len() > 0 {
+			// Create a filter for deletion events with the same authors
+			deletionFilter := &filter.F{
+				Kinds:   kinds.New(kind.New(5)), // Kind 5 is deletion
+				Authors: f.Authors,
+			}
+			
+			var deletionIdPkTs []store.IdPkTs
+			if deletionIdPkTs, err = d.QueryForIds(c, deletionFilter); chk.E(err) {
+				return
+			}
+			
+			// Add deletion events to the list of events to process
+			idPkTs = append(idPkTs, deletionIdPkTs...)
+		}
+
 		// First pass: collect all deletion events
+		fmt.Printf("Debug: Starting first pass - processing %d events\n", len(idPkTs))
 		for _, idpk := range idPkTs {
 			var ev *event.E
 			ser := new(types.Uint40)
@@ -73,6 +93,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 			// Process deletion events to build our deletion maps
 			if ev.Kind.Equal(kind.Deletion) {
+				fmt.Printf("Debug: Found deletion event with ID: %s\n", hex.Enc(ev.ID))
 				// Check for 'e' tags that directly reference event IDs
 				eTags := ev.Tags.GetAll(tag.New([]byte{'e'}))
 				for _, eTag := range eTags.ToSliceOfTags() {
@@ -85,7 +106,9 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 				// Check for 'a' tags that reference parameterized replaceable
 				// events
+				fmt.Printf("Debug: Processing deletion event with ID: %s\n", hex.Enc(ev.ID))
 				aTags := ev.Tags.GetAll(tag.New([]byte{'a'}))
+				fmt.Printf("Debug: Found %d a-tags\n", aTags.Len())
 				for _, aTag := range aTags.ToSliceOfTags() {
 					if aTag.Len() < 2 {
 						continue
@@ -121,8 +144,8 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 						continue
 					}
 
-					// Create the key for the deletion map
-					key := string(pk) + ":" + strconv.Itoa(int(kk.K))
+					// Create the key for the deletion map using hex representation of pubkey
+					key := hex.Enc(pk) + ":" + strconv.Itoa(int(kk.K))
 
 					// Initialize the inner map if it doesn't exist
 					if _, exists := deletionsByKindPubkeyDTag[key]; !exists {
@@ -132,6 +155,10 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					// Mark this d-tag as deleted
 					dValue := string(split[2])
 					deletionsByKindPubkeyDTag[key][dValue] = true
+					
+					// Debug logging
+					fmt.Printf("Debug: Processing a-tag: %s\n", string(aTag.Value()))
+					fmt.Printf("Debug: Adding to deletion map - key: %s, d-tag: %s\n", key, dValue)
 				}
 
 				// For replaceable events, we need to check if there are any
@@ -165,11 +192,11 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 					// If the event is replaceable, mark it as deleted
 					if targetEv.Kind.IsReplaceable() {
-						key := string(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
+						key := hex.Enc(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
 						deletionsByKindPubkey[key] = true
 					} else if targetEv.Kind.IsParameterizedReplaceable() {
 						// For parameterized replaceable events, we need to consider the 'd' tag
-						key := string(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
+						key := hex.Enc(targetEv.Pubkey) + ":" + strconv.Itoa(int(targetEv.Kind.K))
 
 						// Get the 'd' tag value
 						dTag := targetEv.Tags.GetFirst(tag.New([]byte{'d'}))
@@ -223,7 +250,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			if ev.Kind.IsReplaceable() {
 				// For replaceable events, we only keep the latest version for
 				// each pubkey and kind, and only if it hasn't been deleted
-				key := string(ev.Pubkey) + ":" + strconv.Itoa(int(ev.Kind.K))
+				key := hex.Enc(ev.Pubkey) + ":" + strconv.Itoa(int(ev.Kind.K))
 
 				// Skip this event if it has been deleted and its ID is not in
 				// the filter
@@ -238,7 +265,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			} else if ev.Kind.IsParameterizedReplaceable() {
 				// For parameterized replaceable events, we need to consider the
 				// 'd' tag
-				key := string(ev.Pubkey) + ":" + strconv.Itoa(int(ev.Kind.K))
+				key := hex.Enc(ev.Pubkey) + ":" + strconv.Itoa(int(ev.Kind.K))
 
 				// Get the 'd' tag value
 				dTag := ev.Tags.GetFirst(tag.New([]byte{'d'}))
@@ -252,9 +279,14 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 				// Check if this event has been deleted via an a-tag
 				if deletionMap, exists := deletionsByKindPubkeyDTag[key]; exists {
+					// Debug logging
+					fmt.Printf("Debug: Checking deletion map - key: %s, d-tag: %s\n", key, dValue)
+					fmt.Printf("Debug: Deletion map contains key: %v, d-tag in map: %v\n", exists, deletionMap[dValue])
+					
 					// If the d-tag value is in the deletion map and this event is not
 					// specifically requested by ID, skip it
 					if deletionMap[dValue] && !isIdInFilter {
+						fmt.Printf("Debug: Event deleted - skipping\n")
 						continue
 					}
 				}

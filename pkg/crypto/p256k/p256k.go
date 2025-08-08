@@ -127,7 +127,8 @@ func (s *Signer) ECDH(pubkeyBytes []byte) (secret []byte, err error) {
 	var pub *secp256k1.PublicKey
 	if pub, err = secp256k1.ParsePubKey(
 		append(
-			[]byte{0x02}, pubkeyBytes...,
+			[]byte{0x02},
+			pubkeyBytes...,
 		),
 	); chk.E(err) {
 		return
