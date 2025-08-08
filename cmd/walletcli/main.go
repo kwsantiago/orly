@@ -6,9 +6,11 @@ import (
 	"strconv"
 	"strings"
 
+	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/protocol/nwc"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/interrupt"
 )
 
 func printUsage() {
@@ -38,6 +40,7 @@ func printUsage() {
 	fmt.Println("                            Args: <message>")
 	fmt.Println("  create_connection       - Create a connection")
 	fmt.Println("                            Args: <pubkey> <name> <methods> [<notification_types>] [<max_amount>] [<budget_renewal>] [<expires_at>]")
+	fmt.Println("  subscribe               - Subscribe to payment_received, payment_sent and hold_invoice_accepted notifications visible in the scope of the connection")
 }
 
 func main() {
@@ -49,11 +52,11 @@ func main() {
 	method := os.Args[2]
 	args := os.Args[3:]
 	// Create context
-	// ctx, cancel := context.Cancel(context.Bg())
-	ctx := context.Bg()
+	// c, cancel := context.Cancel(context.Bg())
+	c := context.Bg()
 	// defer cancel()
 	// Create NWC client
-	client, err := nwc.NewClient(ctx, connectionURL)
+	cl, err := nwc.NewClient(c, connectionURL)
 	if err != nil {
 		fmt.Printf("Error creating client: %v\n", err)
 		os.Exit(1)
@@ -61,33 +64,35 @@ func main() {
 	// Execute the requested method
 	switch method {
 	case "get_wallet_service_info":
-		handleGetWalletServiceInfo(ctx, client)
+		handleGetWalletServiceInfo(c, cl)
 	case "get_info":
-		handleGetInfo(ctx, client)
+		handleGetInfo(c, cl)
 	case "get_balance":
-		handleGetBalance(ctx, client)
+		handleGetBalance(c, cl)
 	case "get_budget":
-		handleGetBudget(ctx, client)
+		handleGetBudget(c, cl)
 	case "make_invoice":
-		handleMakeInvoice(ctx, client, args)
+		handleMakeInvoice(c, cl, args)
 	case "pay_invoice":
-		handlePayInvoice(ctx, client, args)
+		handlePayInvoice(c, cl, args)
 	case "pay_keysend":
-		handlePayKeysend(ctx, client, args)
+		handlePayKeysend(c, cl, args)
 	case "lookup_invoice":
-		handleLookupInvoice(ctx, client, args)
+		handleLookupInvoice(c, cl, args)
 	case "list_transactions":
-		handleListTransactions(ctx, client, args)
+		handleListTransactions(c, cl, args)
 	case "make_hold_invoice":
-		handleMakeHoldInvoice(ctx, client, args)
+		handleMakeHoldInvoice(c, cl, args)
 	case "settle_hold_invoice":
-		handleSettleHoldInvoice(ctx, client, args)
+		handleSettleHoldInvoice(c, cl, args)
 	case "cancel_hold_invoice":
-		handleCancelHoldInvoice(ctx, client, args)
+		handleCancelHoldInvoice(c, cl, args)
 	case "sign_message":
-		handleSignMessage(ctx, client, args)
+		handleSignMessage(c, cl, args)
 	case "create_connection":
-		handleCreateConnection(ctx, client, args)
+		handleCreateConnection(c, cl, args)
+	case "subscribe":
+		handleSubscribe(c, cl)
 	default:
 		fmt.Printf("Unknown method: %s\n", method)
 		printUsage()
@@ -95,31 +100,31 @@ func main() {
 	}
 }
 
-func handleGetWalletServiceInfo(ctx context.T, client *nwc.Client) {
-	if _, raw, err := client.GetWalletServiceInfo(ctx, true); !chk.E(err) {
+func handleGetWalletServiceInfo(c context.T, cl *nwc.Client) {
+	if _, raw, err := cl.GetWalletServiceInfo(c, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleGetInfo(ctx context.T, client *nwc.Client) {
-	if _, raw, err := client.GetInfo(ctx, true); !chk.E(err) {
+func handleGetInfo(c context.T, cl *nwc.Client) {
+	if _, raw, err := cl.GetInfo(c, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleGetBalance(ctx context.T, client *nwc.Client) {
-	if _, raw, err := client.GetBalance(ctx, true); !chk.E(err) {
+func handleGetBalance(c context.T, cl *nwc.Client) {
+	if _, raw, err := cl.GetBalance(c, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleGetBudget(ctx context.T, client *nwc.Client) {
-	if _, raw, err := client.GetBudget(ctx, true); !chk.E(err) {
+func handleGetBudget(c context.T, cl *nwc.Client) {
+	if _, raw, err := cl.GetBudget(c, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleMakeInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handleMakeInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> make_invoice <amount> [<description>] [<description_hash>] [<expiry>]")
@@ -148,12 +153,12 @@ func handleMakeInvoice(ctx context.T, client *nwc.Client, args []string) {
 		params.Expiry = &expiry
 	}
 	var raw []byte
-	if _, raw, err = client.MakeInvoice(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.MakeInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handlePayInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handlePayInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> pay_invoice <invoice> [<amount>] [<comment>]")
@@ -176,12 +181,12 @@ func handlePayInvoice(ctx context.T, client *nwc.Client, args []string) {
 			Comment: &comment,
 		}
 	}
-	if _, raw, err := client.PayInvoice(ctx, params, true); !chk.E(err) {
+	if _, raw, err := cl.PayInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleLookupInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handleLookupInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> lookup_invoice <payment_hash or invoice>")
@@ -198,12 +203,12 @@ func handleLookupInvoice(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var err error
 	var raw []byte
-	if _, raw, err = client.LookupInvoice(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.LookupInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
+func handleListTransactions(c context.T, cl *nwc.Client, args []string) {
 	params := &nwc.ListTransactionsParams{}
 	if len(args) > 0 {
 		limit, err := strconv.ParseUint(args[0], 10, 16)
@@ -241,12 +246,12 @@ func handleListTransactions(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var raw []byte
 	var err error
-	if _, raw, err = client.ListTransactions(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.ListTransactions(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleMakeHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handleMakeHoldInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 2 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> make_hold_invoice <amount> <payment_hash> [<description>] [<description_hash>] [<expiry>]")
@@ -276,12 +281,12 @@ func handleMakeHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 		params.Expiry = &expiry
 	}
 	var raw []byte
-	if _, raw, err = client.MakeHoldInvoice(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.MakeHoldInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleSettleHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handleSettleHoldInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> settle_hold_invoice <preimage>")
@@ -292,12 +297,12 @@ func handleSettleHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var raw []byte
 	var err error
-	if raw, err = client.SettleHoldInvoice(ctx, params, true); !chk.E(err) {
+	if raw, err = cl.SettleHoldInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleCancelHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
+func handleCancelHoldInvoice(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> cancel_hold_invoice <payment_hash>")
@@ -309,12 +314,12 @@ func handleCancelHoldInvoice(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var err error
 	var raw []byte
-	if raw, err = client.CancelHoldInvoice(ctx, params, true); !chk.E(err) {
+	if raw, err = cl.CancelHoldInvoice(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleSignMessage(ctx context.T, client *nwc.Client, args []string) {
+func handleSignMessage(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 1 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> sign_message <message>")
@@ -326,12 +331,12 @@ func handleSignMessage(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var raw []byte
 	var err error
-	if _, raw, err = client.SignMessage(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.SignMessage(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
+func handlePayKeysend(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 2 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> pay_keysend <pubkey> <amount> [<preimage>] [<tlv_type> <tlv_value>...]")
@@ -371,12 +376,12 @@ func handlePayKeysend(ctx context.T, client *nwc.Client, args []string) {
 		}
 	}
 	var raw []byte
-	if _, raw, err = client.PayKeysend(ctx, params, true); !chk.E(err) {
+	if _, raw, err = cl.PayKeysend(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
 	}
 }
 
-func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
+func handleCreateConnection(c context.T, cl *nwc.Client, args []string) {
 	if len(args) < 3 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("Usage: walletcli <NWC connection URL> create_connection <pubkey> <name> <methods> [<notification_types>] [<max_amount>] [<budget_renewal>] [<expires_at>]")
@@ -411,7 +416,38 @@ func handleCreateConnection(ctx context.T, client *nwc.Client, args []string) {
 	}
 	var raw []byte
 	var err error
-	if raw, err = client.CreateConnection(ctx, params, true); !chk.E(err) {
+	if raw, err = cl.CreateConnection(c, params, true); !chk.E(err) {
 		fmt.Println(string(raw))
+	}
+}
+
+func handleSubscribe(c context.T, cl *nwc.Client) {
+	// Create a context with a cancel
+	c, cancel := context.Cancel(c)
+	interrupt.AddHandler(cancel)
+
+	// Get wallet service info to check if notifications are supported
+	wsi, _, err := cl.GetWalletServiceInfo(c, false)
+	if err != nil {
+		fmt.Printf("Error getting wallet service info: %v\n", err)
+		return
+	}
+
+	// Check if the wallet supports notifications
+	if len(wsi.NotificationTypes) == 0 {
+		fmt.Println("Wallet does not support notifications")
+		return
+	}
+	var evc event.C
+	if evc, err = cl.Subscribe(c); chk.E(err) {
+		return
+	}
+	for {
+		select {
+		case <-c.Done():
+			return
+		case ev := <-evc:
+			fmt.Println(ev.Marshal(nil))
+		}
 	}
 }

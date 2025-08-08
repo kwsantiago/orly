@@ -276,16 +276,18 @@ func (r *Client) ConnectWithTLS(
 				}
 				r.challenge = env.Challenge
 			case eventenvelope.L:
+				log.I.F("%s", rem)
 				var env *eventenvelope.Result
 				env = eventenvelope.NewResult()
 				if _, err = env.Unmarshal(rem); chk.E(err) {
 					continue
 				}
-				sub, ok := r.Subscriptions.Load(subIdToSerial(env.Subscription.String()))
+				subid := env.Subscription.String()
+				sub, ok := r.Subscriptions.Load(subIdToSerial(subid))
 				if !ok {
 					log.W.F(
 						"unknown subscription with id '%s'\n",
-						env.Subscription.String(),
+						subid,
 					)
 					continue
 				}

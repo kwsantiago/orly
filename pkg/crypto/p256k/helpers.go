@@ -6,7 +6,6 @@ import (
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/utils/chk"
-	"orly.dev/pkg/utils/log"
 )
 
 func NewSecFromHex[V []byte | string](skh V) (sign signer.I, err error) {
@@ -34,10 +33,8 @@ func NewPubFromHex[V []byte | string](pkh V) (sign signer.I, err error) {
 }
 
 func HexToBin(hexStr string) (b []byte, err error) {
-	// b = make([]byte, 0, len(hexStr)/2)
 	if b, err = hex.DecAppend(b, []byte(hexStr)); chk.E(err) {
 		return
 	}
-	log.I.F("hex to bin: %s -> %s", hexStr, hex.Enc(b))
 	return
 }
