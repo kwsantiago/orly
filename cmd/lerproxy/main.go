@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,6 +35,9 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 )
+
+//go:embed favicon.ico
+var defaultFavicon []byte
 
 type runArgs struct {
 	Addr  string        `arg:"-l,--listen" default:":https" help:"address to listen at"`
@@ -320,6 +324,19 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 							"max-age=0; includeSubDomains",
 						)
 						fmt.Fprint(writer, nostrJSON)
+					},
+				)
+				fin := hn + "/favicon.ico"
+				var fi []byte
+				if fi, err = os.ReadFile(fin); !chk.E(err) {
+					fi = defaultFavicon
+				}
+				mux.HandleFunc(
+					hn+"/favicon.ico",
+					func(writer http.ResponseWriter, request *http.Request) {
+						if _, err = writer.Write(fi); chk.E(err) {
+							return
+						}
 					},
 				)
 				continue

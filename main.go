@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 
@@ -78,14 +77,6 @@ func main() {
 	}
 	var opts []options.O
 	serveMux := servemux.NewServeMux()
-
-	// Add favicon handler
-	serveMux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "image/x-icon")
-		w.Header().Set("Cache-Control", "public, max-age=86400") // Cache for 24 hours
-		http.ServeFile(w, r, "static/favicon.ico")
-	})
-
 	if server, err = relay.NewServer(
 		serverParams, serveMux, opts...,
 	); chk.E(err) {
