@@ -328,7 +328,7 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				)
 				fin := hn + "/favicon.ico"
 				var fi []byte
-				if fi, err = os.ReadFile(fin); !chk.E(err) {
+				if fi, err = os.ReadFile(fin); chk.E(err) {
 					fi = defaultFavicon
 				}
 				log.I.S(fi)
