@@ -375,7 +375,7 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				)
 				// req.Header.Set("Access-Control-Allow-Credentials", "true")
 				req.Header.Set("Access-Control-Allow-Origin", "*")
-				log.D.Ln(req.URL, req.RemoteAddr)
+				log.I.Ln(req.URL, req.RemoteAddr)
 			},
 			Transport: &http.Transport{
 				DialContext: func(c context.T, n, addr string) (
