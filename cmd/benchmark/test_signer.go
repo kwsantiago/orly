@@ -1,63 +1,21 @@
 package main
 
 import (
-	"lukechampine.com/frand"
+	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/interfaces/signer"
+	"orly.dev/pkg/utils/chk"
 )
 
-// testSigner is a simple signer implementation for benchmarking
 type testSigner struct {
-	pub []byte
-	sec []byte
+	*p256k.Signer
 }
 
 func newTestSigner() *testSigner {
-	return &testSigner{
-		pub: frand.Bytes(32),
-		sec: frand.Bytes(32),
+	s := &p256k.Signer{}
+	if err := s.Generate(); chk.E(err) {
+		panic(err)
 	}
-}
-
-func (s *testSigner) Pub() []byte {
-	return s.pub
-}
-
-func (s *testSigner) Sec() []byte {
-	return s.sec
-}
-
-func (s *testSigner) Sign(msg []byte) ([]byte, error) {
-	return frand.Bytes(64), nil
-}
-
-func (s *testSigner) Verify(msg, sig []byte) (bool, error) {
-	return true, nil
-}
-
-func (s *testSigner) InitSec(sec []byte) error {
-	s.sec = sec
-	s.pub = frand.Bytes(32)
-	return nil
-}
-
-func (s *testSigner) InitPub(pub []byte) error {
-	s.pub = pub
-	return nil
-}
-
-func (s *testSigner) Zero() {
-	for i := range s.sec {
-		s.sec[i] = 0
-	}
-}
-
-
-func (s *testSigner) ECDH(pubkey []byte) ([]byte, error) {
-	return frand.Bytes(32), nil
-}
-
-func (s *testSigner) Generate() error {
-	return nil
+	return &testSigner{Signer: s}
 }
 
 var _ signer.I = (*testSigner)(nil)
