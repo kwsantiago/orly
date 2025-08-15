@@ -1,6 +1,7 @@
 package socketapi
 
 import (
+	"fmt"
 	"orly.dev/pkg/encoders/envelopes/eventenvelope"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filters"
@@ -90,9 +91,13 @@ func (p *S) Receive(msg typer.T) {
 				log.T.F("removed listener %s", m.Listener.RealRemote())
 			} else {
 				p.removeSubscriberId(m.Listener, m.Id)
-				log.T.F(
-					"removed subscription %s for %s", m.Id,
-					m.Listener.RealRemote(),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"removed subscription %s for %s", m.Id,
+							m.Listener.RealRemote(),
+						)
+					},
 				)
 			}
 			return
@@ -103,14 +108,24 @@ func (p *S) Receive(msg typer.T) {
 			subs = make(map[string]*filters.T)
 			subs[m.Id] = m.Filters
 			p.Map[m.Listener] = subs
-			log.T.F(
-				"created new subscription for %s, %s", m.Listener.RealRemote(),
-				m.Filters.Marshal(nil),
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"created new subscription for %s, %s",
+						m.Listener.RealRemote(),
+						m.Filters.Marshal(nil),
+					)
+				},
 			)
 		} else {
 			subs[m.Id] = m.Filters
-			log.T.F(
-				"added subscription %s for %s", m.Id, m.Listener.RealRemote(),
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"added subscription %s for %s", m.Id,
+						m.Listener.RealRemote(),
+					)
+				},
 			)
 		}
 	}
@@ -131,20 +146,35 @@ func (p *S) Deliver(ev *event.E) {
 	var err error
 	p.Mx.Lock()
 	defer p.Mx.Unlock()
-	log.T.F(
-		"delivering event %0x to websocket subscribers %d", ev.ID, len(p.Map),
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"delivering event %0x to websocket subscribers %d", ev.ID,
+				len(p.Map),
+			)
+		},
 	)
 	for w, subs := range p.Map {
-		log.I.F("%v %s", subs, w.RealRemote())
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"%v %s", subs, w.RealRemote(),
+				)
+			},
+		)
 		for id, subscriber := range subs {
 			log.T.F(
 				"subscriber %s\n%s", w.RealRemote(),
 				subscriber.Marshal(nil),
 			)
 			if !subscriber.Match(ev) {
-				log.I.F(
-					"subscriber %s filter %s not match", id,
-					subscriber.Marshal(nil),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"subscriber %s filter %s not match", id,
+							subscriber.Marshal(nil),
+						)
+					},
 				)
 				continue
 			}
@@ -165,7 +195,14 @@ func (p *S) Deliver(ev *event.E) {
 				if err = res.Write(w); chk.E(err) {
 					continue
 				}
-				log.T.F("dispatched event %0x to subscription %s", ev.ID, id)
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"dispatched event %0x to subscription %s", ev.ID,
+							id,
+						)
+					},
+				)
 			}
 		}
 	}

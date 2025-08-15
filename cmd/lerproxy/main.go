@@ -334,7 +334,7 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				mux.HandleFunc(
 					hn+"/favicon.ico",
 					func(writer http.ResponseWriter, request *http.Request) {
-						log.I.F("serving favicon to %s", hn)
+						log.T.F("serving favicon to %s", hn)
 						if _, err = writer.Write(fi); chk.E(err) {
 							return
 						}

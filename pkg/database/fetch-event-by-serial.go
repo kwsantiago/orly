@@ -17,7 +17,7 @@ func (d *D) FetchEventBySerial(ser *types.Uint40) (ev *event.E, err error) {
 				return
 			}
 			var item *badger.Item
-			if item, err = txn.Get(buf.Bytes()); chk.E(err) {
+			if item, err = txn.Get(buf.Bytes()); err != nil {
 				return
 			}
 			var v []byte

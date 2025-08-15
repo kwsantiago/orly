@@ -1,6 +1,7 @@
 package socketapi
 
 import (
+	"fmt"
 	"net/http"
 	"orly.dev/pkg/app/relay/helpers"
 	"orly.dev/pkg/encoders/envelopes/authenvelope"
@@ -61,8 +62,14 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 	// Check if the IP is blocked due to too many failed auth attempts
 	if iptracker.Global.IsBlocked(remote) {
 		blockedUntil := iptracker.Global.GetBlockedUntil(remote)
-		log.I.F("rejecting websocket connection from banned IP %s (blocked until %s)",
-			remote, blockedUntil.Format(time.RFC3339))
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"rejecting websocket connection from banned IP %s (blocked until %s)",
+					remote, blockedUntil.Format(time.RFC3339),
+				)
+			},
+		)
 
 		// We can't send a notice to the client here because the websocket connection
 		// hasn't been established yet, so we just reject the connection
@@ -114,7 +121,14 @@ func (a *A) Serve(w http.ResponseWriter, r *http.Request, s server.I) {
 		},
 	)
 	if a.I.AuthRequired() {
-		log.I.F("requesting auth from client from %s", a.Listener.RealRemote())
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"requesting auth from client from %s",
+					a.Listener.RealRemote(),
+				)
+			},
+		)
 		a.Listener.RequestAuth()
 		if err = authenvelope.NewChallengeWith(a.Listener.Challenge()).
 			Write(a.Listener); chk.E(err) {

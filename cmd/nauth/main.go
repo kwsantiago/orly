@@ -62,7 +62,13 @@ for generating extended expiration NIP-98 tokens:
 	if err = ev.Sign(sign); err != nil {
 		fail(err.Error())
 	}
-	log.T.F("nip-98 http auth event:\n%s\n", ev.SerializeIndented())
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"nip-98 http auth event:\n%s\n", ev.SerializeIndented(),
+			)
+		},
+	)
 	b64 := base64.URLEncoding.EncodeToString(ev.Serialize())
 	fmt.Println("Nostr " + b64)
 }

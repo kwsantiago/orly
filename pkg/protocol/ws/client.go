@@ -223,16 +223,28 @@ func (r *Client) ConnectWithTLS(
 				if err != nil && !strings.Contains(
 					err.Error(), "failed to wait for pong",
 				) {
-					log.I.F(
-						"{%s} error writing ping: %v; closing websocket", r.URL,
-						err,
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"{%s} error writing ping: %v; closing websocket",
+								r.URL,
+								err,
+							)
+						},
 					)
 					r.Close() // this should trigger a context cancelation
 					return
 				}
 			case writeRequest := <-r.writeQueue:
 				// all write requests will go through this to prevent races
-				log.D.F("{%s} sending %v\n", r.URL, string(writeRequest.msg))
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"{%s} sending %v\n", r.URL,
+							string(writeRequest.msg),
+						)
+					},
+				)
 				if err := r.Connection.WriteMessage(
 					r.connectionContext, writeRequest.msg,
 				); err != nil {
@@ -276,10 +288,10 @@ func (r *Client) ConnectWithTLS(
 				}
 				r.challenge = env.Challenge
 			case eventenvelope.L:
-				log.I.F("%s", rem)
+				// log.I.F("%s", rem)
 				var env *eventenvelope.Result
 				env = eventenvelope.NewResult()
-				if _, err = env.Unmarshal(rem); chk.E(err) {
+				if _, err = env.Unmarshal(rem); err != nil {
 					continue
 				}
 				subid := env.Subscription.String()
@@ -292,17 +304,25 @@ func (r *Client) ConnectWithTLS(
 					continue
 				}
 				if !sub.Filters.Match(env.Event) {
-					log.I.F(
-						"{%s} filter does not match: %v ~ %s\n", r.URL,
-						sub.Filters, env.Event.Marshal(nil),
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"{%s} filter does not match: %v ~ %s\n", r.URL,
+								sub.Filters, env.Event.Marshal(nil),
+							)
+						},
 					)
 					continue
 				}
 				if !r.AssumeValid {
 					if ok, err = env.Event.Verify(); !ok || chk.E(err) {
-						log.I.F(
-							"{%s} bad signature on %s\n", r.URL,
-							env.Event.ID,
+						log.T.C(
+							func() string {
+								return fmt.Sprintf(
+									"{%s} bad signature on %s\n", r.URL,
+									env.Event.ID,
+								)
+							},
 						)
 						continue
 					}
@@ -350,9 +370,14 @@ func (r *Client) ConnectWithTLS(
 				if okCallback, exist := r.okCallbacks.Load(env.EventID.String()); exist {
 					okCallback(env.OK, string(env.Reason))
 				} else {
-					log.I.F(
-						"{%s} got an unexpected OK message for event %s", r.URL,
-						env.EventID,
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"{%s} got an unexpected OK message for event %s",
+								r.URL,
+								env.EventID,
+							)
+						},
 					)
 				}
 			default:

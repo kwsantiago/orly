@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 	"orly.dev/pkg/app/relay/helpers"
@@ -46,9 +47,13 @@ Returns the events as line structured JSON (JSONL) in the order that they were r
 				err = huma.Error401Unauthorized("Not Authorized")
 				return
 			}
-			log.I.F(
-				"%s export of event data requested on admin port pubkey %0x",
-				remote, pubkey,
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"%s export of event data requested on admin port pubkey %0x",
+						remote, pubkey,
+					)
+				},
 			)
 			sto := x.Storage()
 			resp = &huma.StreamResponse{

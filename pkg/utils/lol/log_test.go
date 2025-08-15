@@ -341,7 +341,7 @@ func TestNew(t *testing.T) {
 	log.D.Ln("test message")
 	if !strings.Contains(buf.String(), "test message") {
 		t.Errorf(
-			"log.D.Ln() output %q does not contain 'test message'",
+			"log.D.Ln() output %q doesn't contain 'test message'",
 			buf.String(),
 		)
 	}

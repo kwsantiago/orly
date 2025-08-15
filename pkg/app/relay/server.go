@@ -181,9 +181,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	log.I.F(
-		"http request: %s from %s",
-		r.URL.String(), helpers.GetRemoteFromReq(r),
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"http request: %s from %s",
+				r.URL.String(), helpers.GetRemoteFromReq(r),
+			)
+		},
 	)
 	s.mux.ServeHTTP(w, r)
 }

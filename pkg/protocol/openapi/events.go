@@ -3,6 +3,7 @@ package openapi
 import (
 	"errors"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/badger/v4"
 	"math"
 	"net/http"
@@ -623,7 +624,7 @@ Returns events as a JSON array of event objects.`
 			}
 			f := filter.New()
 			var rem []byte
-			log.I.S(input)
+			log.T.C(func() string { return spew.Sdump(input) })
 			if len(rem) > 0 {
 				log.I.F("extra '%s'", rem)
 			}

@@ -93,7 +93,9 @@ func (ti *TimingInstrumentation) Connect(c context.T, relayURL string) error {
 	return nil
 }
 
-func (ti *TimingInstrumentation) TrackEventLifecycle(c context.T, ev *event.E) (*EventLifecycle, error) {
+func (ti *TimingInstrumentation) TrackEventLifecycle(
+	c context.T, ev *event.E,
+) (*EventLifecycle, error) {
 	evID := ev.ID
 	lifecycle := &EventLifecycle{
 		EventID:      string(evID),
@@ -122,7 +124,7 @@ func (ti *TimingInstrumentation) TrackEventLifecycle(c context.T, ev *event.E) (
 		Ids: tag.New(ev.ID),
 	}
 
-	events, err := ti.relay.QuerySync(c, f)
+	events, err := ti.relay.QuerySync(c, f) // , ws.WithLabel("timing"))
 	queryEnd := time.Now()
 
 	if err != nil {
@@ -169,7 +171,9 @@ func (ti *TimingInstrumentation) MeasureWriteAmplification(inputEvent *event.E) 
 	return amp
 }
 
-func (ti *TimingInstrumentation) TrackWebSocketFrame(frameType string, payload []byte) *FrameTiming {
+func (ti *TimingInstrumentation) TrackWebSocketFrame(
+	frameType string, payload []byte,
+) *FrameTiming {
 	frame := &FrameTiming{
 		FrameType:   frameType,
 		SendTime:    time.Now(),
@@ -253,7 +257,9 @@ func (ti *TimingInstrumentation) IdentifyBottlenecks() map[string]*PipelineBottl
 	return ti.bottlenecks
 }
 
-func (ti *TimingInstrumentation) RunFullInstrumentation(c context.T, eventCount int, eventSize int) error {
+func (ti *TimingInstrumentation) RunFullInstrumentation(
+	c context.T, eventCount int, eventSize int,
+) error {
 	fmt.Printf("Starting end-to-end timing instrumentation...\n")
 
 	signer := newTestSigner()
@@ -282,8 +288,10 @@ func (ti *TimingInstrumentation) RunFullInstrumentation(c context.T, eventCount 
 		totalEndToEnd += lifecycle.TotalDuration
 
 		if (i+1)%100 == 0 {
-			fmt.Printf("  Processed %d/%d events (%.1f%% success)\n",
-				i+1, eventCount, float64(successCount)*100/float64(i+1))
+			fmt.Printf(
+				"  Processed %d/%d events (%.1f%% success)\n",
+				i+1, eventCount, float64(successCount)*100/float64(i+1),
+			)
 		}
 	}
 
@@ -292,9 +300,18 @@ func (ti *TimingInstrumentation) RunFullInstrumentation(c context.T, eventCount 
 	fmt.Printf("\n=== Timing Instrumentation Results ===\n")
 	fmt.Printf("Events Tracked: %d/%d\n", successCount, eventCount)
 	if successCount > 0 {
-		fmt.Printf("Average Publish Latency: %v\n", totalPublishLatency/time.Duration(successCount))
-		fmt.Printf("Average Query Latency: %v\n", totalQueryLatency/time.Duration(successCount))
-		fmt.Printf("Average End-to-End: %v\n", totalEndToEnd/time.Duration(successCount))
+		fmt.Printf(
+			"Average Publish Latency: %v\n",
+			totalPublishLatency/time.Duration(successCount),
+		)
+		fmt.Printf(
+			"Average Query Latency: %v\n",
+			totalQueryLatency/time.Duration(successCount),
+		)
+		fmt.Printf(
+			"Average End-to-End: %v\n",
+			totalEndToEnd/time.Duration(successCount),
+		)
 	} else {
 		fmt.Printf("No events successfully tracked\n")
 	}
@@ -333,7 +350,9 @@ func (ti *TimingInstrumentation) printWriteAmplificationStats() {
 	count := float64(len(ti.amplifications))
 	fmt.Printf("\n=== Write Amplification ===\n")
 	fmt.Printf("Average Amplification: %.2fx\n", totalAmp/count)
-	fmt.Printf("Average Index Overhead: %.2f%%\n", (totalIndexOverhead/count)*100)
+	fmt.Printf(
+		"Average Index Overhead: %.2f%%\n", (totalIndexOverhead/count)*100,
+	)
 	fmt.Printf("Total I/O Operations: %d\n", totalIOOps)
 }
 
@@ -356,14 +375,18 @@ func (ti *TimingInstrumentation) printFrameTimingStats() {
 	fmt.Printf("\n=== WebSocket Frame Timings ===\n")
 	fmt.Printf("Total Frames: %d\n", count)
 	fmt.Printf("Average Frame Latency: %v\n", totalLatency/time.Duration(count))
-	fmt.Printf("Average Compression: %.1f%%\n", (totalCompression/float64(count))*100)
+	fmt.Printf(
+		"Average Compression: %.1f%%\n", (totalCompression/float64(count))*100,
+	)
 
 	for frameType, cnt := range frameTypes {
 		fmt.Printf("  %s frames: %d\n", frameType, cnt)
 	}
 }
 
-func (ti *TimingInstrumentation) TestSubscriptionTiming(c context.T, duration time.Duration) error {
+func (ti *TimingInstrumentation) TestSubscriptionTiming(
+	c context.T, duration time.Duration,
+) error {
 	fmt.Printf("Testing subscription timing for %v...\n", duration)
 
 	f := &filter.F{}
@@ -385,8 +408,10 @@ func (ti *TimingInstrumentation) TestSubscriptionTiming(c context.T, duration ti
 				eventCount++
 
 				if eventCount%100 == 0 {
-					fmt.Printf("  Received %d events, avg latency: %v\n",
-						eventCount, totalLatency/time.Duration(eventCount))
+					fmt.Printf(
+						"  Received %d events, avg latency: %v\n",
+						eventCount, totalLatency/time.Duration(eventCount),
+					)
 				}
 			case <-c.Done():
 				return
@@ -400,8 +425,12 @@ func (ti *TimingInstrumentation) TestSubscriptionTiming(c context.T, duration ti
 	fmt.Printf("\nSubscription Timing Results:\n")
 	fmt.Printf("  Total Events: %d\n", eventCount)
 	if eventCount > 0 {
-		fmt.Printf("  Average Latency: %v\n", totalLatency/time.Duration(eventCount))
-		fmt.Printf("  Events/Second: %.2f\n", float64(eventCount)/duration.Seconds())
+		fmt.Printf(
+			"  Average Latency: %v\n", totalLatency/time.Duration(eventCount),
+		)
+		fmt.Printf(
+			"  Events/Second: %.2f\n", float64(eventCount)/duration.Seconds(),
+		)
 	}
 
 	return nil

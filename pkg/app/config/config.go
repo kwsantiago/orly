@@ -96,7 +96,7 @@ func New() (cfg *C, err error) {
 			return
 		}
 		lol.SetLogLevel(cfg.LogLevel)
-		log.I.F("loaded configuration from %s", envPath)
+		log.T.F("loaded configuration from %s", envPath)
 	}
 	// if spider seeds has no elements, there still is a single entry with an
 	// empty string; and also if any of the fields are empty strings, they need
