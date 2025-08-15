@@ -75,6 +75,7 @@ func (d *D) RunMigrations() {
 		// the first migration is expiration tags
 		d.UpdateExpirationTags()
 	}
+	log.I.F("migrations complete")
 }
 
 func (d *D) UpdateExpirationTags() {
@@ -98,7 +99,7 @@ func (d *D) UpdateExpirationTags() {
 				}
 				// decode the event
 				ev := new(event.E)
-				if err = ev.UnmarshalRead(bytes.NewBuffer(val)); chk.E(err) {
+				if err = ev.UnmarshalBinary(bytes.NewBuffer(val)); chk.E(err) {
 					continue
 				}
 				expTag := ev.Tags.GetFirst(tag.New("expiration"))
