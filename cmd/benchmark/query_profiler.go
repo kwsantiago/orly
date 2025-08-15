@@ -117,7 +117,7 @@ func (qp *QueryProfiler) ExecuteProfile(c context.T, iterations int, concurrency
 				f := qp.generateFilter(filterType)
 
 				startTime := time.Now()
-				events, err := relay.QuerySync(c, f, ws.WithLabel(fmt.Sprintf("profiler-%d-%d", workerID, j)))
+				events, err := relay.QuerySync(c, f)
 				latency := time.Since(startTime)
 
 				if err != nil {

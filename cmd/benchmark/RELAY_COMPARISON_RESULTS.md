@@ -1,15 +1,16 @@
 # Nostr Relay Performance Comparison
 
-Benchmark results for Khatru, Strfry, Relayer, and Orly relay implementations.
+Benchmark results for Orly, Khatru, Strfry, and Relayer relay implementations.
 
 ## Test Configuration
 
-- **Events Published**: 1000 per relay
-- **Event Size**: 512 bytes content
-- **Queries Executed**: 50 per relay  
-- **Concurrency**: 5 simultaneous publishers
-- **Platform**: Linux 5.15.0-151-generic
-- **Date**: 2025-08-08
+- **Events Published**: 10,000 per relay
+- **Event Size**: ~1.3KB content
+- **Queries Executed**: 100 per relay
+- **Concurrency**: 10 simultaneous publishers
+- **Platform**: Linux 6.8.0-71-generic
+- **Date**: August 15, 2025
+- **Orly Version**: v0.6.2-8-gacd2c41
 
 ## Performance Results
 
@@ -17,57 +18,83 @@ Benchmark results for Khatru, Strfry, Relayer, and Orly relay implementations.
 
 | Relay | Events Published | Data Size | Duration | Events/sec | Bandwidth |
 |-------|-----------------|-----------|----------|------------|-----------|
-| **Khatru** | 1,000 | 0.81 MB | 104.49ms | **9,569.94** | **7.79 MB/s** |
-| **Strfry** | 1,000 | 0.81 MB | 747.41ms | 1,337.95 | 1.09 MB/s |
-| **Relayer** | 1,000 | 0.81 MB | 890.91ms | 1,122.45 | 0.91 MB/s |
-| **Orly** | 1,000 | 0.81 MB | 1.497s | 667.91 | 0.54 MB/s |
+| **Orly** | 10,000 | 13.03 MB | 1.29s | **7,730.99** | **10.07 MB/s** |
+| **Khatru** | 10,000 | 13.03 MB | 1.34s | 7,475.31 | 9.73 MB/s |
+| **Strfry** | 10,000 | 13.03 MB | 5.45s | 1,836.17 | 2.39 MB/s |
+| **Relayer** | 10,000 | 13.03 MB | 9.02s | 1,109.25 | 1.45 MB/s |
 
 
 ### Query Performance
 
 | Relay | Queries | Events Retrieved | Duration | Queries/sec | Avg Events/Query |
 |-------|---------|-----------------|----------|-------------|------------------|
-| **Relayer** | 50 | 800 | 80.21ms | **623.36** | 16.00 |
-| **Strfry** | 50 | 2,000 | 187.86ms | 266.16 | 40.00 |
-| **Orly** | 50 | 800 | 10.164s | 4.92 | 16.00 |
-| **Khatru** | 50 | 2,000 | 10.487s | 4.77 | 40.00 |
+| **Relayer** | 100 | 4,000 | 1.02s | **97.60** | 40.00 |
+| **Strfry** | 100 | 4,000 | 1.48s | 67.67 | 40.00 |
+| **Orly** | 100 | 4,000 | 3.57s | 28.02 | 40.00 |
+| **Khatru** | 100 | 4,000 | 21.41s | 4.67 | 40.00 |
 
 
 ## Implementation Details
+
+### Orly
+- Language: Go
+- Backend: Badger (embedded)
+- Dependencies: Go 1.24+, libsecp256k1
+- Publishing: 7,731 events/sec, 1.29s duration
+- Querying: 28 queries/sec, 3.57s duration
+- **Note**: Performance drastically improved with logging disabled
 
 ### Khatru
 - Language: Go
 - Backend: SQLite (embedded)
 - Dependencies: Go 1.20+, SQLite3
-- Publishing: 9,570 events/sec, 104ms duration
-- Querying: 4.77 queries/sec, 10.5s duration
+- Publishing: 7,475 events/sec, 1.34s duration
+- Querying: 4.67 queries/sec, 21.4s duration
 
 ### Strfry
 - Language: C++
 - Backend: LMDB (embedded)
 - Dependencies: flatbuffers, lmdb, zstd, secp256k1, cmake, g++
-- Publishing: 1,338 events/sec, 747ms duration
-- Querying: 266 queries/sec, 188ms duration
+- Publishing: 1,836 events/sec, 5.45s duration
+- Querying: 67.67 queries/sec, 1.48s duration
 
 ### Relayer
 - Language: Go
 - Backend: PostgreSQL (external)
 - Dependencies: Go 1.20+, PostgreSQL 12+
-- Publishing: 1,122 events/sec, 891ms duration
-- Querying: 623 queries/sec, 80ms duration
-
-### Orly
-- Language: Go
-- Backend: Badger (embedded)
-- Dependencies: Go 1.20+, libsecp256k1
-- Publishing: 668 events/sec, 1.5s duration
-- Querying: 4.92 queries/sec, 10.2s duration
+- Publishing: 1,109 events/sec, 9.02s duration
+- Querying: 97.60 queries/sec, 1.02s duration
 
 ## Test Environment
 
-- Platform: Linux 5.15.0-151-generic
-- Concurrency: 5 publishers
-- Event size: 512 bytes
+- Platform: Linux 6.8.0-71-generic
+- Concurrency: 10 publishers
+- Event size: ~1.3KB
 - Signature verification: secp256k1
 - Content validation: UTF-8
 
+## Docker Setup
+
+All benchmarks can be run using the provided Docker setup:
+
+```bash
+# Clone and navigate to benchmark directory
+git clone https://github.com/mleku/orly.git
+cd orly/cmd/benchmark
+
+# Start all relays
+docker compose up -d
+
+# Run benchmarks
+docker compose run benchmark -relay ws://orly:7447 -events 10000 -queries 100
+docker compose run benchmark -relay ws://khatru:7447 -events 10000 -queries 100
+docker compose run benchmark -relay ws://strfry:7777 -events 10000 -queries 100
+docker compose run benchmark -relay ws://relayer:7447 -events 10000 -queries 100
+```
+
+## Configuration Notes
+
+To achieve optimal Orly performance, ensure logging is minimized:
+- Use `--log-level error` flag when starting Orly
+- Build with minimal logging tags if compiling from source
+- Set environment variable `LOG_LEVEL=error`

@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  benchmark:
+    build:
+      context: ../..
+      dockerfile: cmd/benchmark/Dockerfile
+    container_name: orly-benchmark
+    network_mode: host
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    environment:
+      - LOG_LEVEL=error
+    command: ["-relay", "ws://localhost:7447", "-events", "10000", "-queries", "100"]
+
+  orly:
+    build:
+      context: ../..
+      dockerfile: cmd/benchmark/Dockerfile
+    container_name: orly-relay
+    command: ["/app/bin/orly-relay", "--log-level", "error"]
+    ports:
+      - "7447:7447"
+    volumes:
+      - orly-data:/app/data
+      - ./orly-config.yaml:/app/orly-config.yaml
+    environment:
+      - LOG_LEVEL=error
+      - ORLY_LOG_LEVEL=error
+      - DEBUG=false
+
+  khatru:
+    build:
+      context: ../..
+      dockerfile: cmd/benchmark/Dockerfile
+    container_name: khatru-relay
+    command: ["/app/bin/khatru-relay"]
+    ports:
+      - "7448:7447"
+    volumes:
+      - khatru-data:/app/data
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: relayer-postgres
+    environment:
+      - POSTGRES_USER=relayer
+      - POSTGRES_PASSWORD=relayer
+      - POSTGRES_DB=relayer
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  relayer:
+    build:
+      context: ../..
+      dockerfile: cmd/benchmark/Dockerfile
+    container_name: relayer-relay
+    command: ["/app/bin/relayer-bin"]
+    ports:
+      - "7449:7447"
+    volumes:
+      - relayer-data:/app/data
+    environment:
+      - DATABASE_URL=postgres://relayer:relayer@postgres:5432/relayer
+    depends_on:
+      - postgres
+
+  strfry:
+    build:
+      context: ../..
+      dockerfile: cmd/benchmark/Dockerfile
+    container_name: strfry-relay
+    command: ["/app/bin/strfry", "relay"]
+    ports:
+      - "7450:7777"
+    volumes:
+      - strfry-data:/app/data
+      - ./strfry.conf:/app/strfry.conf
+
+volumes:
+  orly-data:
+  khatru-data:
+  relayer-data:
+  strfry-data:
+  postgres-data:

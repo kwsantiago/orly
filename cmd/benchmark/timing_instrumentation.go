@@ -122,7 +122,7 @@ func (ti *TimingInstrumentation) TrackEventLifecycle(c context.T, ev *event.E) (
 		Ids: tag.New(ev.ID),
 	}
 
-	events, err := ti.relay.QuerySync(c, f, ws.WithLabel("timing"))
+	events, err := ti.relay.QuerySync(c, f)
 	queryEnd := time.Now()
 
 	if err != nil {
