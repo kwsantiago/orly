@@ -2,6 +2,7 @@ package socketapi
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/pkg/encoders/bech32encoding"
 	"orly.dev/pkg/encoders/envelopes/authenvelope"
@@ -49,11 +50,15 @@ import (
 // generates and sends a closure envelope.
 func (a *A) HandleReq(c context.T, req []byte, srv server.I) (r []byte) {
 	var err error
-	log.I.F(
-		"auth required %v client authed %v %0x", a.I.AuthRequired(),
-		a.Listener.IsAuthed(), a.Listener.AuthedPubkey(),
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"auth required %v client authed %v %0x", a.I.AuthRequired(),
+				a.Listener.IsAuthed(), a.Listener.AuthedPubkey(),
+			)
+		},
 	)
-	log.I.F("REQ:\n%s", req)
+	log.T.C(func() string { return fmt.Sprintf("REQ:\n%s", req) })
 	sto := srv.Storage()
 	var rem []byte
 	env := reqenvelope.New()

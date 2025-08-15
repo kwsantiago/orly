@@ -27,7 +27,13 @@ import (
 // logs the notice, and writes it back to the listener if required.
 func (a *A) HandleMessage(msg, authedPubkey []byte) {
 	remote := a.Listener.RealRemote()
-	log.T.F("%s received message:\n%s", remote, string(msg))
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"%s received message:\n%s", remote, string(msg),
+			)
+		},
+	)
 	var notice []byte
 	var err error
 	var t string
@@ -48,7 +54,13 @@ func (a *A) HandleMessage(msg, authedPubkey []byte) {
 		notice = []byte(fmt.Sprintf("unknown envelope type %s\n%s", t, rem))
 	}
 	if len(notice) > 0 {
-		log.D.F("notice->%s %s", a.RealRemote(), notice)
+		log.D.C(
+			func() string {
+				return fmt.Sprintf(
+					"notice->%s %s", a.RealRemote(), notice,
+				)
+			},
+		)
 		if err = noticeenvelope.NewFrom(notice).Write(a.Listener); chk.E(err) {
 			return
 		}

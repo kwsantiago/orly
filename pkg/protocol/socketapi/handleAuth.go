@@ -1,6 +1,7 @@
 package socketapi
 
 import (
+	"fmt"
 	"orly.dev/pkg/encoders/envelopes/authenvelope"
 	"orly.dev/pkg/encoders/envelopes/okenvelope"
 	"orly.dev/pkg/encoders/reason"
@@ -36,7 +37,7 @@ import (
 // validation.
 func (a *A) HandleAuth(b []byte, srv server.I) (msg []byte) {
 	if a.I.AuthRequired() {
-		log.I.F("AUTH:\n%s", b)
+		log.T.C(func() string { return fmt.Sprintf("AUTH:\n%s", b) })
 		var err error
 		var rem []byte
 		env := authenvelope.NewResponse()

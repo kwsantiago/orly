@@ -109,7 +109,12 @@ func (x *Operations) RegisterEvent(api huma.API) {
 				// Check if the IP is blocked due to too many failed auth attempts
 				if iptracker.Global.IsBlocked(remote) {
 					blockedUntil := iptracker.Global.GetBlockedUntil(remote)
-					err = huma.Error403Forbidden(fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", blockedUntil.Format(time.RFC3339)))
+					err = huma.Error403Forbidden(
+						fmt.Sprintf(
+							"Too many failed authentication attempts. Blocked until %s",
+							blockedUntil.Format(time.RFC3339),
+						),
+					)
 					return
 				}
 
@@ -119,7 +124,12 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					blocked := iptracker.Global.RecordFailedAttempt(remote)
 					if blocked {
 						blockedUntil := iptracker.Global.GetBlockedUntil(remote)
-						err = huma.Error403Forbidden(fmt.Sprintf("Too many failed authentication attempts. Blocked until %s", blockedUntil.Format(time.RFC3339)))
+						err = huma.Error403Forbidden(
+							fmt.Sprintf(
+								"Too many failed authentication attempts. Blocked until %s",
+								blockedUntil.Format(time.RFC3339),
+							),
+						)
 					} else {
 						err = huma.Error401Unauthorized("Not Authorized")
 					}
@@ -216,7 +226,13 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			// check and process delete
 			sto := x.I.Storage()
 			if ev.Kind.K == kind.Deletion.K {
-				log.I.F("delete event\n%s", ev.Serialize())
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"delete event\n%s", ev.Serialize(),
+						)
+					},
+				)
 				for _, t := range ev.Tags.ToSliceOfTags() {
 					var res []*event.E
 					if t.Len() >= 2 {
@@ -276,7 +292,6 @@ func (x *Operations) RegisterEvent(api huma.API) {
 									}
 									return
 								}
-
 								// Use DeleteEvent to actually delete the
 								// referenced event
 								if err = sto.DeleteEvent(c, eid); chk.E(err) {
@@ -288,9 +303,13 @@ func (x *Operations) RegisterEvent(api huma.API) {
 									}
 									return
 								}
-
-								log.I.F(
-									"successfully deleted event %x", eventId,
+								log.T.C(
+									func() string {
+										return fmt.Sprintf(
+											"successfully deleted event %x",
+											eventId,
+										)
+									},
 								)
 							}
 						case bytes.Equal(t.Key(), []byte("a")):
@@ -389,10 +408,6 @@ func (x *Operations) RegisterEvent(api huma.API) {
 							}
 						}
 						if target.CreatedAt.Int() > ev.CreatedAt.Int() {
-							log.I.F(
-								"not deleting\n%d%\nbecause delete event is older\n%d",
-								target.CreatedAt.Int(), ev.CreatedAt.Int(),
-							)
 							continue
 						}
 						if !bytes.Equal(target.Pubkey, env.Pubkey) {
@@ -426,9 +441,13 @@ func (x *Operations) RegisterEvent(api huma.API) {
 							return
 						}
 
-						log.I.F(
-							"successfully deleted event %x",
-							target.EventId().Bytes(),
+						log.T.C(
+							func() string {
+								return fmt.Sprintf(
+									"successfully deleted event %x",
+									target.EventId().Bytes(),
+								)
+							},
 						)
 					}
 					res = nil
@@ -464,7 +483,13 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			ok, reason = x.I.AddEvent(
 				c, x.Relay(), ev, r, remote, pubkeys,
 			)
-			log.I.F("http API event %0x added %v %s", ev.ID, ok, reason)
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"http API event %0x added %v %s", ev.ID, ok, reason,
+					)
+				},
+			)
 			if !ok && err != nil {
 				if err = Ok.Error(
 					a, env, err.Error(),

@@ -41,7 +41,7 @@ func CheckAuth(r *http.Request, tolerance ...time.Duration) (
 		tolerance[0] = time.Minute
 	}
 	tolerate := int64(tolerance[0] / time.Second)
-	log.I.F("validating auth '%s'", val)
+	log.T.C(func() string { return fmt.Sprintf("validating auth '%s'", val) })
 	switch {
 	case strings.HasPrefix(val, NIP98Prefix):
 		split := strings.Split(val, " ")

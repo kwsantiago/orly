@@ -405,7 +405,13 @@ func (p *Pool) FetchManyReplaceable(
 
 			relay, err := p.EnsureRelay(nm)
 			if err != nil {
-				log.D.F("error connecting to %s with %v: %s", nm, f, err)
+				log.D.C(
+					func() string {
+						return fmt.Sprintf(
+							"error connecting to %s with %v: %s", nm, f, err,
+						)
+					},
+				)
 				return
 			}
 
@@ -414,8 +420,13 @@ func (p *Pool) FetchManyReplaceable(
 		subscribe:
 			sub, err := relay.Subscribe(ctx, filters.New(f), opts...)
 			if err != nil {
-				log.D.F(
-					"error subscribing to %s with %v: %s", relay, f, err,
+				log.D.C(
+					func() string {
+						return fmt.Sprintf(
+							"error subscribing to %s with %v: %s", relay, f,
+							err,
+						)
+					},
 				)
 				return
 			}
@@ -546,7 +557,7 @@ func (p *Pool) subMany(
 					}
 
 					// otherwise (if we were connected and got disconnected) keep trying to reconnect
-					log.D.F("%s reconnecting because connection failed\n", nm)
+					log.D.F("%s reconnecting because connection failed", nm)
 					goto reconnect
 				}
 				firstConnection = false
@@ -569,7 +580,7 @@ func (p *Pool) subMany(
 				// )...,
 				)
 				if err != nil {
-					log.D.F("%s reconnecting because subscription died\n", nm)
+					log.D.F("%s reconnecting because subscription died", nm)
 					goto reconnect
 				}
 
@@ -597,7 +608,7 @@ func (p *Pool) subMany(
 								ff.F[i].Since = now
 							}
 							log.D.F(
-								"%s reconnecting because sub.Events is broken\n",
+								"%s reconnecting because sub.Events is broken",
 								nm,
 							)
 							goto reconnect
@@ -719,8 +730,13 @@ func (p *Pool) subManyEoseNonOverwriteCheckDuplicate(
 
 			relay, err := p.EnsureRelay(nm)
 			if err != nil {
-				log.D.F(
-					"error connecting to %s with %v: %s", nm, filters, err,
+				log.D.C(
+					func() string {
+						return fmt.Sprintf(
+							"error connecting to %s with %v: %s", nm, filters,
+							err,
+						)
+					},
 				)
 				return
 			}
@@ -730,8 +746,14 @@ func (p *Pool) subManyEoseNonOverwriteCheckDuplicate(
 		subscribe:
 			sub, err := relay.Subscribe(ctx, filters, opts...)
 			if err != nil {
-				log.D.F(
-					"error subscribing to %s with %v: %s", relay, filters, err,
+				log.D.C(
+					func() string {
+						return fmt.Sprintf(
+							"error subscribing to %s with %v: %s", relay,
+							filters,
+							err,
+						)
+					},
 				)
 				return
 			}

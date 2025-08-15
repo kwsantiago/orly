@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/interfaces/publisher"
@@ -123,7 +124,10 @@ func (p *Publisher) Receive(msg typer.T) {
 				if m.FilterMap != nil {
 					for id, f := range m.FilterMap {
 						listener.FilterMap[id] = f
-						log.T.F("added subscription %s for new listener %s", id, m.Id)
+						log.T.F(
+							"added subscription %s for new listener %s", id,
+							m.Id,
+						)
 					}
 				}
 
@@ -166,20 +170,28 @@ func (p *Publisher) Deliver(ev *event.E) {
 	for listenerId, listener := range p.ListenMap {
 		for subId, filter := range listener.FilterMap {
 			if !filter.Matches(ev) {
-				log.I.F(
-					"listener %s, subscription id %s event\n%s\ndoes not match filter\n%s",
-					listenerId, subId, ev.Marshal(nil),
-					filter.Marshal(nil),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"listener %s, subscription id %s event\n%s\ndoes not match filter\n%s",
+							listenerId, subId, ev.Marshal(nil),
+							filter.Marshal(nil),
+						)
+					},
 				)
 				continue
 			}
 			if p.Server.AuthRequired() {
 				if !auth.CheckPrivilege(listener.Pubkey, ev) {
-					log.W.F(
-						"not privileged %0x ev pubkey %0x listener pubkey %0x kind %s privileged: %v",
-						listener.Pubkey, ev.Pubkey,
-						listener.Pubkey, ev.Kind.Name(),
-						ev.Kind.IsPrivileged(),
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"not privileged %0x ev pubkey %0x listener pubkey %0x kind %s privileged: %v",
+								listener.Pubkey, ev.Pubkey,
+								listener.Pubkey, ev.Kind.Name(),
+								ev.Kind.IsPrivileged(),
+							)
+						},
 					)
 					continue
 				}
@@ -233,7 +245,9 @@ func (p *Publisher) ListenerExists(id string) bool {
 }
 
 // SubscriptionExists checks if a subscription with the given ID exists for a specific listener.
-func (p *Publisher) SubscriptionExists(listenerId string, subscriptionId string) bool {
+func (p *Publisher) SubscriptionExists(
+	listenerId string, subscriptionId string,
+) bool {
 	p.Lock()
 	defer p.Unlock()
 	listener, exists := p.ListenMap[listenerId]
@@ -282,7 +296,9 @@ func CheckListenerExists(clientId string, publishers ...publisher.I) bool {
 
 // CheckSubscriptionExists is a package-level function that checks if a subscription exists for a specific listener.
 // This function is used by the Unsubscribe API to check if a subscription ID exists before attempting to unsubscribe.
-func CheckSubscriptionExists(clientId string, subscriptionId string, publishers ...publisher.I) bool {
+func CheckSubscriptionExists(
+	clientId string, subscriptionId string, publishers ...publisher.I,
+) bool {
 	for _, p := range publishers {
 		// Check if the publisher is of type *Publisher
 		if pub, ok := p.(*Publisher); ok {
@@ -304,7 +320,9 @@ func CheckSubscriptionExists(clientId string, subscriptionId string, publishers 
 						pub := field.Index(i).Interface().(publisher.I)
 						// Check if this publisher is of type *Publisher
 						if openPub, ok := pub.(*Publisher); ok {
-							if openPub.SubscriptionExists(clientId, subscriptionId) {
+							if openPub.SubscriptionExists(
+								clientId, subscriptionId,
+							) {
 								return true
 							}
 						}

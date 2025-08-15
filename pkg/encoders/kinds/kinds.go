@@ -7,7 +7,6 @@ import (
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
-	"orly.dev/pkg/utils/log"
 )
 
 // T is an array of kind.T, used in filter.T and filter.S for searches.
@@ -132,7 +131,6 @@ func (k *T) Unmarshal(b []byte) (r []byte, err error) {
 		}
 	}
 	if !openedBracket {
-		log.I.F("\n%v\n%s", k, r)
 		return nil, errorf.E(
 			"kinds: failed to unmarshal\n%s\n%s\n%s", k,
 			b, r,

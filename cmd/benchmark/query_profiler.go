@@ -63,14 +63,20 @@ type QueryProfiler struct {
 
 func NewQueryProfiler(relayURL string) *QueryProfiler {
 	return &QueryProfiler{
-		relay:          relayURL,
-		subscriptions:  make(map[string]*ws.Subscription),
-		metrics:        &QueryMetrics{Latencies: make([]time.Duration, 0, 10000)},
+		relay:         relayURL,
+		subscriptions: make(map[string]*ws.Subscription),
+		metrics: &QueryMetrics{
+			Latencies: make(
+				[]time.Duration, 0, 10000,
+			),
+		},
 		stopMemMonitor: make(chan struct{}),
 	}
 }
 
-func (qp *QueryProfiler) ExecuteProfile(c context.T, iterations int, concurrency int) error {
+func (qp *QueryProfiler) ExecuteProfile(
+	c context.T, iterations int, concurrency int,
+) error {
 	qp.startMemoryMonitor()
 	defer qp.stopMemoryMonitor()
 
@@ -102,7 +108,9 @@ func (qp *QueryProfiler) ExecuteProfile(c context.T, iterations int, concurrency
 
 			relay, err := ws.RelayConnect(c, qp.relay)
 			if chk.E(err) {
-				errorChan <- fmt.Errorf("worker %d connection failed: %w", workerID, err)
+				errorChan <- fmt.Errorf(
+					"worker %d connection failed: %w", workerID, err,
+				)
 				return
 			}
 			defer relay.Close()
@@ -117,7 +125,9 @@ func (qp *QueryProfiler) ExecuteProfile(c context.T, iterations int, concurrency
 				f := qp.generateFilter(filterType)
 
 				startTime := time.Now()
-				events, err := relay.QuerySync(c, f, ws.WithLabel(fmt.Sprintf("profiler-%d-%d", workerID, j)))
+				events, err := relay.QuerySync(
+					c, f,
+				) // , ws.WithLabel(fmt.Sprintf("profiler-%d-%d", workerID, j)))
 				latency := time.Since(startTime)
 
 				if err != nil {
@@ -125,7 +135,9 @@ func (qp *QueryProfiler) ExecuteProfile(c context.T, iterations int, concurrency
 					atomic.AddInt64(&qp.metrics.FailedQueries, 1)
 				} else {
 					latencyChan <- latency
-					atomic.AddInt64(&qp.metrics.EventsReturned, int64(len(events)))
+					atomic.AddInt64(
+						&qp.metrics.EventsReturned, int64(len(events)),
+					)
 					atomic.AddInt64(&qp.metrics.TotalQueries, 1)
 				}
 			}
@@ -271,7 +283,9 @@ func (qp *QueryProfiler) generateFilter(filterType FilterType) *filter.F {
 	}
 }
 
-func (qp *QueryProfiler) TestSubscriptionPerformance(c context.T, duration time.Duration, subscriptionCount int) error {
+func (qp *QueryProfiler) TestSubscriptionPerformance(
+	c context.T, duration time.Duration, subscriptionCount int,
+) error {
 	qp.startMemoryMonitor()
 	defer qp.stopMemoryMonitor()
 
@@ -293,7 +307,9 @@ func (qp *QueryProfiler) TestSubscriptionPerformance(c context.T, duration time.
 			label := fmt.Sprintf("sub-perf-%d", subID)
 
 			eventChan := make(chan *event.E, 100)
-			sub, err := relay.Subscribe(c, &filters.T{F: []*filter.F{f}}, ws.WithLabel(label))
+			sub, err := relay.Subscribe(
+				c, &filters.T{F: []*filter.F{f}}, ws.WithLabel(label),
+			)
 			if chk.E(err) {
 				return
 			}
@@ -359,9 +375,11 @@ func (qp *QueryProfiler) calculatePercentiles() {
 		return
 	}
 
-	sort.Slice(qp.metrics.Latencies, func(i, j int) bool {
-		return qp.metrics.Latencies[i] < qp.metrics.Latencies[j]
-	})
+	sort.Slice(
+		qp.metrics.Latencies, func(i, j int) bool {
+			return qp.metrics.Latencies[i] < qp.metrics.Latencies[j]
+		},
+	)
 
 	qp.metrics.Min = qp.metrics.Latencies[0]
 	qp.metrics.Max = qp.metrics.Latencies[len(qp.metrics.Latencies)-1]
@@ -415,5 +433,8 @@ func (qp *QueryProfiler) PrintReport() {
 	fmt.Printf("  Before: %.2f MB\n", float64(metrics.MemoryBefore)/1024/1024)
 	fmt.Printf("  After: %.2f MB\n", float64(metrics.MemoryAfter)/1024/1024)
 	fmt.Printf("  Peak: %.2f MB\n", float64(metrics.MemoryPeak)/1024/1024)
-	fmt.Printf("  Delta: %.2f MB\n", float64(int64(metrics.MemoryAfter)-int64(metrics.MemoryBefore))/1024/1024)
+	fmt.Printf(
+		"  Delta: %.2f MB\n",
+		float64(int64(metrics.MemoryAfter)-int64(metrics.MemoryBefore))/1024/1024,
+	)
 }

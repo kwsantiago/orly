@@ -196,7 +196,6 @@ out:
 			break out
 		}
 		fmt.Printf("\rgenerating key: %s", r.npub)
-		// log.I.F("%s", r.npub)
 		switch where {
 		case PositionBeginning:
 			if bytes.HasPrefix(r.npub, append(prefix, []byte(str)...)) {

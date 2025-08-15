@@ -127,9 +127,13 @@ func (s *Server) AddEvent(
 			// us here matches the index of this address, we can skip it.
 			for _, pk := range pubkeys {
 				if bytes.Equal(s.Peers.Pubkeys[i], pk) {
-					log.I.F(
-						"not sending back to replica that just sent us this event %0x %s",
-						ev.ID, a,
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"not sending back to replica that just sent us this event %0x %s",
+								ev.ID, a,
+							)
+						},
 					)
 					continue replica
 				}
@@ -175,9 +179,13 @@ func (s *Server) AddEvent(
 			if _, err = client.Do(r); chk.E(err) {
 				continue
 			}
-			log.I.F(
-				"event pushed to replica %s\n%s",
-				ur.String(), evb,
+			log.T.C(
+				func() string {
+					return fmt.Sprintf(
+						"event pushed to replica %s\n%s",
+						ur.String(), evb,
+					)
+				},
 			)
 			break
 		}

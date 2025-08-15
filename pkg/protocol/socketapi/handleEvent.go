@@ -55,9 +55,13 @@ func (a *A) HandleEvent(
 ) (msg []byte) {
 
 	var err error
-	log.T.F(
-		"handleEvent %s %s authed: %0x", a.RealRemote(), req,
-		a.Listener.AuthedPubkey(),
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"handleEvent %s %s authed: %0x", a.RealRemote(), req,
+				a.Listener.AuthedPubkey(),
+			)
+		},
 	)
 	var rem []byte
 	sto := srv.Storage()
@@ -213,7 +217,13 @@ func (a *A) HandleEvent(
 	}
 	// check and process delete
 	if env.E.Kind.K == kind.Deletion.K {
-		log.I.F("delete event\n%s", env.E.Serialize())
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"delete event\n%s", env.E.Serialize(),
+				)
+			},
+		)
 		var ownerDelete bool
 		for _, pk := range a.OwnersPubkeys() {
 			if bytes.Equal(pk, env.Pubkey) {
@@ -288,7 +298,13 @@ func (a *A) HandleEvent(
 							return
 						}
 
-						log.I.F("successfully deleted event %x", eventId)
+						log.T.C(
+							func() string {
+								return fmt.Sprintf(
+									"successfully deleted event %x", eventId,
+								)
+							},
+						)
 					}
 				case bytes.Equal(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
@@ -380,9 +396,13 @@ func (a *A) HandleEvent(
 					}
 				}
 				if target.CreatedAt.Int() > env.E.CreatedAt.Int() {
-					log.I.F(
-						"not deleting\n%d%\nbecause delete event is older\n%d",
-						target.CreatedAt.Int(), env.E.CreatedAt.Int(),
+					log.T.C(
+						func() string {
+							return fmt.Sprintf(
+								"not deleting %d because delete event is older %d",
+								target.CreatedAt.Int(), env.E.CreatedAt.Int(),
+							)
+						},
 					)
 					continue
 				}
@@ -417,42 +437,56 @@ func (a *A) HandleEvent(
 					return
 				}
 
-				log.I.F(
-					"successfully deleted event %x", target.EventId().Bytes(),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"successfully deleted event %x",
+							target.EventId().Bytes(),
+						)
+					},
 				)
+				res = nil
 			}
-			res = nil
-		}
-		// Send a success response after processing all deletions
-		if err = Ok.Ok(a, env, ""); chk.E(err) {
-			return
-		}
-		// Check if this event has been deleted before
-		if env.E.Kind.K != kind.Deletion.K {
-			// Create a filter to check for deletion events that reference this
-			// event ID
-			f := filter.New()
-			f.Kinds.K = []*kind.T{kind.Deletion}
-			f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.ID))
-
-			// Query for deletion events
-			var deletionEvents []*event.E
-			deletionEvents, err = sto.QueryEvents(c, f)
-			if err == nil && len(deletionEvents) > 0 {
-				// Found deletion events for this ID, don't save it
-				if err = Ok.Blocked(
-					a, env, "the event was deleted, not storing it again",
-				); chk.E(err) {
-					return
-				}
+			// Send a success response after processing all deletions
+			if err = Ok.Ok(a, env, ""); chk.E(err) {
 				return
 			}
+			// Check if this event has been deleted before
+			if env.E.Kind.K != kind.Deletion.K {
+				// Create a filter to check for deletion events that reference this
+				// event ID
+				f := filter.New()
+				f.Kinds.K = []*kind.T{kind.Deletion}
+				f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.ID))
+
+				// Query for deletion events
+				var deletionEvents []*event.E
+				deletionEvents, err = sto.QueryEvents(c, f)
+				if err == nil && len(deletionEvents) > 0 {
+					// Found deletion events for this ID, don't save it
+					if err = Ok.Blocked(
+						a, env, "the event was deleted, not storing it again",
+					); chk.E(err) {
+						return
+					}
+					return
+				}
+			}
 		}
-	}
-	var reason []byte
-	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote(), nil)
-	log.I.F("event %0x added %v %s", env.E.ID, ok, reason)
-	if err = okenvelope.NewFrom(env.E.ID, ok).Write(a.Listener); chk.E(err) {
+		var reason []byte
+		ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote(), nil)
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"event %0x added %v %s", env.E.ID, ok, reason,
+				)
+			},
+		)
+		if err = okenvelope.NewFrom(
+			env.E.ID, ok,
+		).Write(a.Listener); chk.E(err) {
+			return
+		}
 		return
 	}
 	return

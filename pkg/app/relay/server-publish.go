@@ -71,8 +71,13 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 						),
 					)
 				}
-				log.I.F(
-					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"maybe replace %s with %s", ev.Serialize(),
+							evt.Serialize(),
+						)
+					},
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
 					return errorf.W(
@@ -164,7 +169,13 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			}
 		}
 	} else if evt.Kind.IsParameterizedReplaceable() {
-		log.I.F("parameterized replaceable %s", evt.Serialize())
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"parameterized replaceable %s", evt.Serialize(),
+				)
+			},
+		)
 		// parameterized replaceable event, delete before storing
 		var evs []*event.E
 		f := filter.New()
@@ -177,21 +188,30 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 				tag.New([]byte{'d'}, dTag.Value()),
 			)
 		}
-		log.I.F(
-			"filter for parameterized replaceable %v %s",
-			f.Tags.ToStringsSlice(),
-			f.Serialize(),
+		log.T.C(
+			func() string {
+				return fmt.Sprintf(
+					"filter for parameterized replaceable %v %s",
+					f.Tags.ToStringsSlice(),
+					f.Serialize(),
+				)
+			},
 		)
 		if evs, err = sto.QueryEvents(c, f); err != nil {
-			return errorf.E("failed to query before replacing: %w", err)
+			return errorf.E("failed to query before replacing: %v", err)
 		}
 		// log.I.S(evs)
 		if len(evs) > 0 {
 			for _, ev := range evs {
 				del := true
 				err = nil
-				log.I.F(
-					"maybe replace %s with %s", ev.Serialize(), evt.Serialize(),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"maybe replace %s with %s", ev.Serialize(),
+							evt.Serialize(),
+						)
+					},
 				)
 				if ev.CreatedAt.Int() > evt.CreatedAt.Int() {
 					return errorf.D(string(normalize.Error.F("not replacing newer parameterized replaceable event")))
@@ -204,9 +224,13 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 				}
 				evdt := ev.Tags.GetFirst(tag.New("d"))
 				evtdt := evt.Tags.GetFirst(tag.New("d"))
-				log.I.F(
-					"%s != %s %v", evdt.Value(), evtdt.Value(),
-					!bytes.Equal(evdt.Value(), evtdt.Value()),
+				log.T.C(
+					func() string {
+						return fmt.Sprintf(
+							"%s != %s %v", evdt.Value(), evtdt.Value(),
+							!bytes.Equal(evdt.Value(), evtdt.Value()),
+						)
+					},
 				)
 				if !bytes.Equal(evdt.Value(), evtdt.Value()) {
 					continue
