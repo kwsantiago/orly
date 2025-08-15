@@ -97,8 +97,8 @@ func main() {
 	sub, err := relay.Subscribe(
 		c, filters.New(
 			&filter.F{
-				Kinds:   kinds.New(kind.WalletRequest),
-				Tags:    tags.New(tag.New("#p", hex.Enc(walletSigner.Pub()))),
+				Kinds: kinds.New(kind.WalletRequest),
+				Tags:  tags.New(tag.New("#p", hex.Enc(walletSigner.Pub()))),
 			},
 		),
 	)

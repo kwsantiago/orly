@@ -154,7 +154,7 @@ func TestDeletionEventWithETagRejection(t *testing.T) {
 		// Try to save the deletion event
 		_, _, err = db.SaveEvent(ctx, deletionEvent, false, nil)
 	}
-	
+
 	if err == nil {
 		t.Fatal("Expected deletion event with e-tag to be rejected, but it was accepted")
 	}
