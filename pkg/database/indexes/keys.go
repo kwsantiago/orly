@@ -67,6 +67,9 @@ const (
 	TagKindPrefix       = I("tkc") // tag, kind, created at
 	TagPubkeyPrefix     = I("tpc") // tag, pubkey, created at
 	TagKindPubkeyPrefix = I("tkp") // tag, kind, pubkey, created at
+
+	ExpirationPrefix = I("exp") // timestamp of expiration
+	VersionPrefix    = I("ver") // database version number, for triggering reindexes when new keys are added (policy is add-only).
 )
 
 // Prefix returns the three byte human-readable prefixes that go in front of
@@ -97,6 +100,11 @@ func Prefix(prf int) (i I) {
 		return TagPubkeyPrefix
 	case TagKindPubkey:
 		return TagKindPubkeyPrefix
+
+	case Expiration:
+		return ExpirationPrefix
+	case Version:
+		return VersionPrefix
 	}
 	return
 }
@@ -135,6 +143,9 @@ func Identify(r io.Reader) (i int, err error) {
 		i = TagPubkey
 	case TagKindPubkeyPrefix:
 		i = TagKindPubkey
+
+	case ExpirationPrefix:
+		i = Expiration
 	}
 	return
 }
@@ -146,7 +157,7 @@ type Encs []codec.I
 type T struct{ Encs }
 
 // New creates a new indexes.T. The helper functions below have an encode and
-// decode variant, the decode variant does not add the prefix encoder because it
+// decode variant, the decode variant doesn't add the prefix encoder because it
 // has been read by Identify or just is being read, and found because it was
 // written for the prefix in the iteration.
 func New(encoders ...codec.I) (i *T) { return &T{encoders} }
@@ -359,7 +370,7 @@ func TagPubkeyDec(
 
 // TagKindPubkey
 //
-//	3 prefix|1 key letter|8 value hash|2 kind|8 pubkey hash|8 bytes timestamp|5 byte serial
+//	3 prefix|1 key letter|8 value hash|2 kind|8 pubkey hash|8 bytes timestamp|5 serial
 var TagKindPubkey = next()
 
 func TagKindPubkeyVars() (
@@ -382,4 +393,46 @@ func TagKindPubkeyDec(
 	ser *types.Uint40,
 ) (enc *T) {
 	return New(NewPrefix(), ki, p, k, v, ca, ser)
+}
+
+// Expiration
+//
+// 3 prefix|8 timestamp|5 serial
+var Expiration = next()
+
+func ExpirationVars() (
+	exp *types.Uint64, ser *types.Uint40,
+) {
+	return new(types.Uint64), new(types.Uint40)
+}
+func ExpirationEnc(
+	exp *types.Uint64, ser *types.Uint40,
+) (enc *T) {
+	return New(NewPrefix(Expiration), exp, ser)
+}
+func ExpirationDec(
+	exp *types.Uint64, ser *types.Uint40,
+) (enc *T) {
+	return New(NewPrefix(), exp, ser)
+}
+
+// Version
+//
+// 3 prefix|4 version
+var Version = next()
+
+func VersionVars() (
+	ver *types.Uint32,
+) {
+	return new(types.Uint32)
+}
+func VersionEnc(
+	ver *types.Uint32,
+) (enc *T) {
+	return New(NewPrefix(Version), ver)
+}
+func VersionDec(
+	ver *types.Uint32,
+) (enc *T) {
+	return New(NewPrefix(), ver)
 }

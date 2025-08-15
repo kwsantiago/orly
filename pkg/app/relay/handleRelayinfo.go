@@ -44,7 +44,7 @@ func (s *Server) HandleRelayInfo(w http.ResponseWriter, r *http.Request) {
 			relayinfo.EventTreatment,
 			// relayinfo.CommandResults,
 			relayinfo.ParameterizedReplaceableEvents,
-			// relayinfo.ExpirationTimestamp,
+			relayinfo.ExpirationTimestamp,
 			relayinfo.ProtectedEvents,
 			// relayinfo.RelayListMetadata,
 		)

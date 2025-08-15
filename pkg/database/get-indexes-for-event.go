@@ -16,10 +16,8 @@ func appendIndexBytes(idxs *[][]byte, idx *indexes.T) (err error) {
 		return
 	}
 	// Copy the buffer's bytes to a new byte slice
-	bytes := make([]byte, buf.Len())
-	copy(bytes, buf.Bytes())
 	// Append the byte slice to the idxs slice
-	*idxs = append(*idxs, bytes)
+	*idxs = append(*idxs, buf.Bytes())
 	return
 }
 

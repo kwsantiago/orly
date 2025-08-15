@@ -33,9 +33,18 @@ func (d *D) DeleteEvent(c context.T, eid *eventid.T) (err error) {
 		return
 	}
 	if ev == nil {
-		// Event wasn't found, nothing to delete
+		// Event wasn't found, nothing to delete. this shouldn't happen.
 		return
 	}
+	if err = d.DeleteEventBySerial(c, ser, ev); chk.E(err) {
+		return
+	}
+	return
+}
+
+func (d *D) DeleteEventBySerial(
+	c context.T, ser *types.Uint40, ev *event.E,
+) (err error) {
 	// Get all indexes for the event
 	var idxs [][]byte
 	idxs, err = GetIndexesForEvent(ev, ser.Get())

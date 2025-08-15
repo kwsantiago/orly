@@ -79,8 +79,10 @@ func (a *A) HandleEvent(
 		// Check if the IP is blocked due to too many failed auth attempts
 		if iptracker.Global.IsBlocked(remoteIP) {
 			blockedUntil := iptracker.Global.GetBlockedUntil(remoteIP)
-			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s",
-				blockedUntil.Format(time.RFC3339))
+			blockMsg := fmt.Sprintf(
+				"Too many failed authentication attempts. Blocked until %s",
+				blockedUntil.Format(time.RFC3339),
+			)
 
 			// Send a notice to the client explaining why they're blocked
 			if err = noticeenvelope.NewFrom(blockMsg).Write(a.Listener); chk.E(err) {
@@ -88,7 +90,10 @@ func (a *A) HandleEvent(
 			}
 
 			// Close the connection
-			log.I.F("closing connection from %s due to too many failed auth attempts", remoteIP)
+			log.I.F(
+				"closing connection from %s due to too many failed auth attempts",
+				remoteIP,
+			)
 			a.Listener.Close()
 			return
 		}
@@ -98,8 +103,10 @@ func (a *A) HandleEvent(
 		if blocked {
 			// If this attempt caused the IP to be blocked, close the connection
 			blockedUntil := iptracker.Global.GetBlockedUntil(remoteIP)
-			blockMsg := fmt.Sprintf("Too many failed authentication attempts. Blocked until %s",
-				blockedUntil.Format(time.RFC3339))
+			blockMsg := fmt.Sprintf(
+				"Too many failed authentication attempts. Blocked until %s",
+				blockedUntil.Format(time.RFC3339),
+			)
 
 			// Send a notice to the client explaining why they're blocked
 			if err = noticeenvelope.NewFrom(blockMsg).Write(a.Listener); chk.E(err) {
@@ -107,7 +114,10 @@ func (a *A) HandleEvent(
 			}
 
 			// Close the connection
-			log.I.F("closing connection from %s due to too many failed auth attempts", remoteIP)
+			log.I.F(
+				"closing connection from %s due to too many failed auth attempts",
+				remoteIP,
+			)
 			a.Listener.Close()
 			return
 		}
@@ -170,7 +180,7 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
-	log.I.F("checking if policy allows this event")
+	log.T.F("checking if policy allows this event")
 	// check that relay policy allows this event
 	accept, notice, _ := srv.AcceptEvent(
 		c, env.E, a.Listener.Request, a.Listener.AuthedPubkey(),
@@ -187,7 +197,7 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
-	log.I.F("checking for protected tag")
+	log.T.F("checking for protected tag")
 	// check for protected tag (NIP-70)
 	protectedTag := env.E.Tags.GetFirst(tag.New("-"))
 	if protectedTag != nil && a.AuthRequired() {

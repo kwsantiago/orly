@@ -196,8 +196,3 @@ func (ev *E) MarshalWriteWithWhitespace(w io.Writer, on bool) (err error) {
 	}
 	return
 }
-
-func (ev *E) UnmarshalRead(r io.Reader) (err error) {
-	// TODO implement me
-	panic("implement me")
-}

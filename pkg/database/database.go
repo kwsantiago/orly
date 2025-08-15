@@ -11,6 +11,7 @@ import (
 	"orly.dev/pkg/utils/units"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type D struct {
@@ -57,8 +58,19 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 	if d.seq, err = d.DB.GetSequence([]byte("EVENTS"), 1000); chk.E(err) {
 		return
 	}
+	// run code that updates indexes when new indexes have been added and bumps
+	// the version so they aren't run again.
+	d.RunMigrations()
+	// start up the expiration tag processing and shut down and clean up the
+	// database after the context is canceled.
 	go func() {
-		<-d.ctx.Done()
+		expirationTicker := time.NewTicker(time.Minute * 10)
+		select {
+		case <-expirationTicker.C:
+			d.DeleteExpired()
+			return
+		case <-d.ctx.Done():
+		}
 		d.cancel()
 		d.seq.Release()
 		d.DB.Close()
