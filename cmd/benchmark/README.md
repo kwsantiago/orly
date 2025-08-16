@@ -13,67 +13,96 @@ A comprehensive performance benchmarking suite for Nostr relay implementations, 
 - **Production-grade event generation** - Proper secp256k1 signatures and UTF-8 content  
 - **Comparative reporting** - Markdown, JSON, and CSV format reports
 
+## Prerequisites
+
+- Docker 20.10 or later
+- Docker Compose v2.0 or later
+- Git
+
+To install Docker and Docker Compose:
+- **Ubuntu/Debian**: `sudo apt-get install docker.io docker-compose-v2`
+- **macOS**: Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- **Windows**: Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
 ## Quick Start
 
 ```bash
-# Build the benchmark tool
-cd cmd/benchmark
-CGO_LDFLAGS="-L/usr/local/lib" PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" go build -o benchmark .
+# Clone the repository
+git clone https://github.com/mleku/orly.git
+cd orly/cmd/benchmark
 
-# Run simple benchmark
-./benchmark --relay ws://localhost:7447 --events 1000 --queries 50
+# Start all relays
+docker compose up -d
 
-# Run full comparison benchmark  
-./setup_relays.sh  # Setup all relay implementations
-./run_all_benchmarks.sh  # Run benchmarks on all relays
+# Run benchmarks
+docker compose run benchmark -relay ws://orly:7447 -events 10000 -queries 100
+docker compose run benchmark -relay ws://khatru:7447 -events 10000 -queries 100
+docker compose run benchmark -relay ws://strfry:7777 -events 10000 -queries 100
+docker compose run benchmark -relay ws://relayer:7447 -events 10000 -queries 100
 ```
 
 ## Latest Benchmark Results
 
+**Date:** August 15, 2025  
+**Orly Version:** v0.6.2-8-gacd2c41
+
 | Relay | Publishing (events/sec) | Querying (queries/sec) | Backend |
 |-------|------------------------|------------------------|---------|
-| **Khatru** | 9,570 | 4.77 | SQLite |
-| **Strfry** | 1,338 | 266.16 | LMDB |
-| **Relayer** | 1,122 | 623.36 | PostgreSQL |
-| **Orly** | 668 | 4.92 | Badger |
+| **Orly** | 7,731 | 28.02 | Badger |
+| **Khatru** | 7,475 | 4.67 | SQLite |
+| **Strfry** | 1,836 | 67.67 | LMDB |
+| **Relayer** | 1,109 | 97.60 | PostgreSQL |
+
+*Note: Orly requires `--log-level error` flag for optimal performance.*
 
 See [RELAY_COMPARISON_RESULTS.md](RELAY_COMPARISON_RESULTS.md) for detailed analysis.
 
-## Core Benchmarking
+## Docker Services
 
-### Basic Usage
+The docker-compose setup includes:
+
+- `orly`: Orly relay on port 7447
+- `khatru`: Khatru relay on port 7448  
+- `strfry`: Strfry relay on port 7450
+- `relayer`: Relayer on port 7449 (with PostgreSQL)
+- `postgres`: PostgreSQL database for Relayer
+- `benchmark`: Benchmark tool
+
+## Usage Examples
+
+### Basic Benchmarking
 
 ```bash
-# Run a full benchmark (publish and query)
-./benchmark --relay ws://localhost:7447 --events 10000 --queries 100
+# Full benchmark (publish and query)
+docker compose run benchmark -relay ws://orly:7447 -events 10000 -queries 100
 
-# Benchmark only publishing
-./benchmark --relay ws://localhost:7447 --events 50000 --concurrency 20 --skip-query
+# Publishing only
+docker compose run benchmark -relay ws://orly:7447 -events 50000 -concurrency 20 -skip-query
 
-# Benchmark only querying
-./benchmark --relay ws://localhost:7447 --queries 500 --skip-publish
+# Querying only
+docker compose run benchmark -relay ws://orly:7447 -queries 500 -skip-publish
 
-# Use custom event sizes
-./benchmark --relay ws://localhost:7447 --events 10000 --size 2048
+# Custom event sizes
+docker compose run benchmark -relay ws://orly:7447 -events 10000 -size 2048
 ```
 
 ### Advanced Features
 
 ```bash
 # Query profiling with subscription testing
-./benchmark --profile --profile-subs --sub-count 100 --sub-duration 30s
+docker compose run benchmark -profile -profile-subs -sub-count 100 -sub-duration 30s
 
 # Load pattern simulation
-./benchmark --load --load-pattern spike --load-duration 60s --load-base 50 --load-peak 200
+docker compose run benchmark -load -load-pattern spike -load-duration 60s -load-base 50 -load-peak 200
 
 # Full load test suite
-./benchmark --load-suite --load-constraints
+docker compose run benchmark -load-suite -load-constraints
 
 # Timing instrumentation
-./benchmark --timing --timing-events 100 --timing-subs --timing-duration 10s
+docker compose run benchmark -timing -timing-events 100 -timing-subs -timing-duration 10s
 
 # Generate comparative reports
-./benchmark --report --report-format markdown --report-title "Production Benchmark"
+docker compose run benchmark -report -report-format markdown -report-title "Production Benchmark"
 ```
 
 ## Command Line Options
@@ -88,14 +117,6 @@ See [RELAY_COMPARISON_RESULTS.md](RELAY_COMPARISON_RESULTS.md) for detailed anal
 - `--skip-publish`: Skip the publishing phase
 - `--skip-query`: Skip the query phase
 - `-v`: Enable verbose output
-
-### Multi-Relay Options
-- `--multi-relay`: Use multi-relay harness
-- `--relay-bin`: Path to relay binary
-- `--install`: Install relay dependencies and binaries
-- `--install-secp`: Install only secp256k1 library
-- `--work-dir`: Working directory for builds (default: /tmp/relay-build)
-- `--install-dir`: Installation directory for binaries (default: /usr/local/bin)
 
 ### Profiling Options
 - `--profile`: Run query performance profiling
@@ -134,9 +155,7 @@ The benchmark tests various query patterns:
 4. Query by author
 5. Complex queries with multiple conditions
 
-## Output
-
-The tool provides detailed metrics including:
+## Output Metrics
 
 **Publish Performance:**
 - Total events published
@@ -153,8 +172,9 @@ The tool provides detailed metrics including:
 ## Example Output
 
 ```
-Publishing 1000 events to ws://localhost:7447...
+Publishing 10000 events to ws://localhost:7447...
   Published 1000 events...
+  Published 2000 events...
 
 Querying events from ws://localhost:7447...
   Executed 20 queries...
@@ -163,53 +183,34 @@ Querying events from ws://localhost:7447...
 === Benchmark Results ===
 
 Publish Performance:
-  Events Published: 1000
-  Total Data: 0.81 MB
-  Duration: 890.91ms
-  Rate: 1122.45 events/second
-  Bandwidth: 0.91 MB/second
+  Events Published: 10000
+  Total Data: 13.03 MB
+  Duration: 1.29s
+  Rate: 7730.99 events/second
+  Bandwidth: 10.07 MB/second
 
 Query Performance:
-  Queries Executed: 50
-  Events Returned: 800
-  Duration: 80.21ms
-  Rate: 623.36 queries/second
-  Avg Events/Query: 16.00
+  Queries Executed: 100
+  Events Returned: 4000
+  Duration: 3.57s
+  Rate: 28.02 queries/second
+  Avg Events/Query: 40.00
 ```
 
-## Relay Setup
+## Configuration Notes
 
-First run `./setup_relays.sh` to build all relay binaries, then start individual relays:
+### Orly Optimization
+For optimal Orly performance, ensure logging is minimized:
+- Start with `--log-level error` flag
+- Set environment variable `LOG_LEVEL=error`
+- Build with minimal logging tags if compiling from source
 
-### Khatru (SQLite)
-```bash
-cd /tmp/relay-benchmark/khatru/examples/basic-sqlite3
-./khatru-relay
-```
-
-### Strfry (LMDB)
-```bash
-cd /tmp/relay-benchmark/strfry
-./strfry --config strfry.conf relay
-```
-
-### Relayer (PostgreSQL)
-```bash
-# Start PostgreSQL
-docker run -d --name relay-postgres -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=nostr -p 5433:5432 postgres:15-alpine
-
-# Run relayer
-cd /tmp/relay-benchmark/relayer/examples/basic
-POSTGRESQL_DATABASE="postgres://postgres:postgres@localhost:5433/nostr?sslmode=disable" \
-  ./relayer-bin
-```
-
-### Orly (Badger)
-```bash
-cd /tmp/relay-benchmark
-ORLY_PORT=7448 ORLY_DATA_DIR=/tmp/orly-benchmark ORLY_SPIDER_TYPE=none ./orly-relay
-```
+### Docker Configuration
+All relays are pre-configured with:
+- Proper dependencies (flatbuffers, libsecp256k1, lmdb, etc.)
+- Optimized build flags
+- Minimal logging configurations
+- Correct port mappings
 
 ## Development
 
@@ -224,9 +225,11 @@ The benchmark suite consists of several components:
 - `report_generator.go` - Comparative report generation
 - `relay_harness.go` - Multi-relay management
 
+
 ## Notes
 
 - All benchmarks use event generation with proper secp256k1 signatures
 - Events are generated with valid UTF-8 content to ensure compatibility
 - Connection pooling is used for realistic concurrent load testing
 - Query patterns test real-world filter combinations
+- Docker setup includes all necessary dependencies and configurations
