@@ -4,13 +4,13 @@ A comprehensive performance benchmarking suite for Nostr relay implementations, 
 
 ## Features
 
-- **Multi-relay comparison benchmarks** - Compare Khatru, Strfry, Relayer, and Orly  
-- **Publishing performance testing** - Measure event ingestion rates and bandwidth  
-- **Query profiling** - Test various filter patterns and query speeds  
-- **Load pattern simulation** - Constant, spike, burst, sine, and ramp patterns  
-- **Timing instrumentation** - Track full event lifecycle and identify bottlenecks  
-- **Concurrent stress testing** - Multiple publishers with connection pooling  
-- **Production-grade event generation** - Proper secp256k1 signatures and UTF-8 content  
+- **Multi-relay comparison benchmarks** - Compare Khatru, Strfry, Relayer, and Orly
+- **Publishing performance testing** - Measure event ingestion rates and bandwidth
+- **Query profiling** - Test various filter patterns and query speeds
+- **Load pattern simulation** - Constant, spike, burst, sine, and ramp patterns
+- **Timing instrumentation** - Track full event lifecycle and identify bottlenecks
+- **Concurrent stress testing** - Multiple publishers with connection pooling
+- **Production-grade event generation** - Proper secp256k1 signatures and UTF-8 content
 - **Comparative reporting** - Markdown, JSON, and CSV format reports
 
 ## Prerequisites
@@ -62,7 +62,7 @@ See [RELAY_COMPARISON_RESULTS.md](RELAY_COMPARISON_RESULTS.md) for detailed anal
 The docker-compose setup includes:
 
 - `orly`: Orly relay on port 7447
-- `khatru`: Khatru relay on port 7448  
+- `khatru`: Khatru relay on port 7448
 - `strfry`: Strfry relay on port 7450
 - `relayer`: Relayer on port 7449 (with PostgreSQL)
 - `postgres`: PostgreSQL database for Relayer

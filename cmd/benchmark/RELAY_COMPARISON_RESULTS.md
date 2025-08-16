@@ -1,6 +1,6 @@
 # Nostr Relay Performance Comparison
 
-Benchmark results for Orly, Khatru, Strfry, and Relayer relay implementations.
+Benchmark results for Khatru, Strfry, Relayer, and Orly relay implementations.
 
 ## Test Configuration
 
@@ -35,14 +35,6 @@ Benchmark results for Orly, Khatru, Strfry, and Relayer relay implementations.
 
 
 ## Implementation Details
-
-### Orly
-- Language: Go
-- Backend: Badger (embedded)
-- Dependencies: Go 1.24+, libsecp256k1
-- Publishing: 7,731 events/sec, 1.29s duration
-- Querying: 28 queries/sec, 3.57s duration
-- **Note**: Performance drastically improved with logging disabled
 
 ### Khatru
 - Language: Go

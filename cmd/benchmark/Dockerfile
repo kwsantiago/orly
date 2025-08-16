@@ -30,23 +30,21 @@ RUN GOTOOLCHAIN=auto CGO_ENABLED=1 go build -tags minimal_log -o orly-relay .
 
 WORKDIR /relays
 
-RUN git clone https://github.com/fiatjaf/khatru.git && \
-    cd khatru/examples/basic-sqlite3 && \
-    GOTOOLCHAIN=auto go build -o /relays/khatru-relay
-
-RUN git clone https://github.com/fiatjaf/relayer.git && \
-    cd relayer && \
-    git checkout 125f2a8 && \
-    cd examples/basic && \
-    GOTOOLCHAIN=auto go build -o /relays/relayer-bin
-
-RUN apt-get update && apt-get install -y libflatbuffers-dev libzstd-dev && \
+RUN apt-get update && apt-get install -y libflatbuffers-dev libzstd-dev zlib1g-dev && \
     git clone https://github.com/hoytech/strfry.git && \
     cd strfry && \
     git submodule update --init && \
     make setup-golpe && \
-    make -j$(nproc) && \
-    cp strfry /relays/strfry
+    make -j$(nproc)
+
+RUN git clone https://github.com/fiatjaf/khatru.git && \
+    cd khatru/examples/basic-sqlite3 && \
+    GOTOOLCHAIN=auto go build -o /relays/khatru-relay
+
+RUN git clone https://github.com/mleku/relayer.git && \
+    cd relayer && \
+    cd examples/basic && \
+    GOTOOLCHAIN=auto go build -o /relays/relayer-bin
 
 FROM debian:bookworm-slim
 
