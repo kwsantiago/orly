@@ -51,6 +51,7 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 	opts.BlockSize = units.Gb
 	opts.CompactL0OnClose = true
 	opts.LmaxCompaction = true
+	opts.Logger = d.Logger
 	if d.DB, err = badger.Open(opts); chk.E(err) {
 		return
 	}
