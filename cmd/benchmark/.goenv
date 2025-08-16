@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+export GOBIN=$HOME/.local/bin
+export GOPATH=$HOME
+export GOROOT=$HOME/go
+export PATH=$GOBIN:$GOROOT/bin:$PATH
