@@ -14,11 +14,6 @@ import (
 	"sync/atomic"
 )
 
-type ReplaceableKey struct {
-	PubKey string
-	D      string
-}
-
 // Subscription represents a subscription to a relay.
 type Subscription struct {
 	counter int64
@@ -88,10 +83,8 @@ var (
 
 func (sub *Subscription) start() {
 	<-sub.Context.Done()
-
 	// the subscription ends once the context is canceled (if not already)
 	sub.unsub(errors.New("context done on start()")) // this will set sub.live to false
-
 	// do this so we don't have the possibility of closing the Events channel and then trying to send to it
 	sub.mu.Lock()
 	close(sub.Events)
@@ -107,7 +100,6 @@ func (sub *Subscription) dispatchEvent(evt *event.E) {
 		sub.storedwg.Add(1)
 		added = true
 	}
-
 	go func() {
 		sub.mu.Lock()
 		defer sub.mu.Unlock()
@@ -118,7 +110,6 @@ func (sub *Subscription) dispatchEvent(evt *event.E) {
 			case <-sub.Context.Done():
 			}
 		}
-
 		if added {
 			sub.storedwg.Done()
 		}
@@ -154,12 +145,10 @@ func (sub *Subscription) Unsub() {
 func (sub *Subscription) unsub(err error) {
 	// cancel the context (if it's not canceled already)
 	sub.cancel(err)
-
 	// mark subscription as closed and send a CLOSE to the relay (naïve sync.Once implementation)
 	if sub.live.CompareAndSwap(true, false) {
 		sub.Close()
 	}
-
 	// remove subscription from our map
 	sub.Client.Subscriptions.Delete(sub.id.String())
 }
@@ -190,6 +179,5 @@ func (sub *Subscription) Fire() (err error) {
 		sub.cancel(err)
 		return
 	}
-
 	return
 }
