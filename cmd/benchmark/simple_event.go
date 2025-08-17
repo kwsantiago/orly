@@ -13,7 +13,7 @@ import (
 
 func generateSimpleEvent(signer *testSigner, contentSize int) *event.E {
 	content := generateContent(contentSize)
-	
+
 	ev := &event.E{
 		Kind:      kind.TextNote,
 		Tags:      tags.New(),
@@ -21,11 +21,11 @@ func generateSimpleEvent(signer *testSigner, contentSize int) *event.E {
 		CreatedAt: timestamp.Now(),
 		Pubkey:    signer.Pub(),
 	}
-	
+
 	if err := ev.Sign(signer); chk.E(err) {
 		panic(fmt.Sprintf("failed to sign event: %v", err))
 	}
-	
+
 	return ev
 }
 
@@ -42,7 +42,7 @@ func generateContent(size int) string {
 		"back", "after", "use", "two", "how", "our", "work", "first", "well", "way",
 		"even", "new", "want", "because", "any", "these", "give", "day", "most", "us",
 	}
-	
+
 	result := ""
 	for len(result) < size {
 		if len(result) > 0 {
@@ -50,10 +50,10 @@ func generateContent(size int) string {
 		}
 		result += words[frand.Intn(len(words))]
 	}
-	
+
 	if len(result) > size {
 		result = result[:size]
 	}
-	
+
 	return result
 }

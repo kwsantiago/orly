@@ -1,7 +1,0 @@
-log_level: error
-disable_trace: true
-disable_debug: true
-disable_info: true
-disable_warn: true
-port: 7447
-db_path: /app/data/orly
