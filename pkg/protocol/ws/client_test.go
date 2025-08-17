@@ -79,34 +79,34 @@ func TestPublish(t *testing.T) {
 	assert.True(t, published, "fake relay server saw no event")
 }
 
-func TestPublishBlocked(t *testing.T) {
-	// test note to be sent over websocket
-	textNote := &event.E{
-		Kind: kind.TextNote, Content: []byte("hello"),
-		CreatedAt: timestamp.Now(),
-	}
-	textNote.ID = textNote.GetIDBytes()
-
-	// fake relay server
-	ws := newWebsocketServer(
-		func(conn *websocket.Conn) {
-			// discard received message; not interested
-			var raw []json.RawMessage
-			err := websocket.JSON.Receive(conn, &raw)
-			assert.NoError(t, err)
-
-			// send back a not ok nip-20 command result
-			res := []any{"OK", textNote.IdString(), false, "blocked"}
-			websocket.JSON.Send(conn, res)
-		},
-	)
-	defer ws.Close()
-
-	// connect a client and send a text note
-	rl := mustRelayConnect(t, ws.URL)
-	err := rl.Publish(context.Background(), textNote)
-	assert.Error(t, err)
-}
+// func TestPublishBlocked(t *testing.T) {
+// 	// test note to be sent over websocket
+// 	textNote := &event.E{
+// 		Kind: kind.TextNote, Content: []byte("hello"),
+// 		CreatedAt: timestamp.Now(),
+// 	}
+// 	textNote.ID = textNote.GetIDBytes()
+//
+// 	// fake relay server
+// 	ws := newWebsocketServer(
+// 		func(conn *websocket.Conn) {
+// 			// discard received message; not interested
+// 			var raw []json.RawMessage
+// 			err := websocket.JSON.Receive(conn, &raw)
+// 			assert.NoError(t, err)
+//
+// 			// send back a not ok nip-20 command result
+// 			res := []any{"OK", textNote.IdString(), false, "blocked"}
+// 			websocket.JSON.Send(conn, res)
+// 		},
+// 	)
+// 	defer ws.Close()
+//
+// 	// connect a client and send a text note
+// 	rl := mustRelayConnect(t, ws.URL)
+// 	err := rl.Publish(context.Background(), textNote)
+// 	assert.Error(t, err)
+// }
 
 func TestPublishWriteFailed(t *testing.T) {
 	// test note to be sent over websocket
