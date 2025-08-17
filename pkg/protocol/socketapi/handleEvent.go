@@ -53,7 +53,6 @@ import (
 func (a *A) HandleEvent(
 	c context.T, req []byte, srv server.I,
 ) (msg []byte) {
-
 	var err error
 	log.T.C(
 		func() string {
@@ -165,8 +164,7 @@ func (a *A) HandleEvent(
 		}
 		return
 	}
-	var ok bool
-	if ok, err = env.Verify(); chk.T(err) {
+	if ok, err := env.Verify(); chk.T(err) {
 		if err = Ok.Error(
 			a, env, fmt.Sprintf(
 				"failed to verify signature: %s",
@@ -447,46 +445,47 @@ func (a *A) HandleEvent(
 				)
 				res = nil
 			}
-			// Send a success response after processing all deletions
-			if err = Ok.Ok(a, env, ""); chk.E(err) {
-				return
-			}
-			// Check if this event has been deleted before
-			if env.E.Kind.K != kind.Deletion.K {
-				// Create a filter to check for deletion events that reference this
-				// event ID
-				f := filter.New()
-				f.Kinds.K = []*kind.T{kind.Deletion}
-				f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.ID))
-
-				// Query for deletion events
-				var deletionEvents []*event.E
-				deletionEvents, err = sto.QueryEvents(c, f)
-				if err == nil && len(deletionEvents) > 0 {
-					// Found deletion events for this ID, don't save it
-					if err = Ok.Blocked(
-						a, env, "the event was deleted, not storing it again",
-					); chk.E(err) {
-						return
-					}
-					return
-				}
-			}
 		}
-		var reason []byte
-		ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote(), nil)
-		log.T.C(
-			func() string {
-				return fmt.Sprintf(
-					"event %0x added %v %s", env.E.ID, ok, reason,
-				)
-			},
-		)
-		if err = okenvelope.NewFrom(
-			env.E.ID, ok,
-		).Write(a.Listener); chk.E(err) {
+		// Send a success response after processing all deletions
+		if err = Ok.Ok(a, env, ""); chk.E(err) {
 			return
 		}
+		return
+	}
+	// Check if this event has been deleted before
+	if env.E.Kind.K != kind.Deletion.K {
+		// Create a filter to check for deletion events that reference this
+		// event ID
+		f := filter.New()
+		f.Kinds.K = []*kind.T{kind.Deletion}
+		f.Tags.AppendTags(tag.New([]byte{'e'}, env.E.ID))
+
+		// Query for deletion events
+		var deletionEvents []*event.E
+		deletionEvents, err = sto.QueryEvents(c, f)
+		if err == nil && len(deletionEvents) > 0 {
+			// Found deletion events for this ID, don't save it
+			if err = Ok.Blocked(
+				a, env, "the event was deleted, not storing it again",
+			); chk.E(err) {
+				return
+			}
+			return
+		}
+	}
+	var ok bool
+	var reason []byte
+	ok, reason = srv.AddEvent(c, rl, env.E, a.Req(), a.RealRemote(), nil)
+	log.T.C(
+		func() string {
+			return fmt.Sprintf(
+				"event %0x added %v %s", env.E.ID, ok, reason,
+			)
+		},
+	)
+	if err = okenvelope.NewFrom(
+		env.E.ID, ok,
+	).Write(a.Listener); chk.E(err) {
 		return
 	}
 	return
