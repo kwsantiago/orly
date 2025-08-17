@@ -318,10 +318,10 @@ func (r *Client) ConnectWithTLS(
 					} else {
 						// check if the event matches the desired filter, ignore otherwise
 						if !sub.Filters.Match(env.Event) {
-							log.D.F(
-								"{%s} filter does not match: %v ~ %v\n", r.URL,
-								sub.Filters, env.Event,
-							)
+							// log.D.F(
+							// 	"{%s} filter does not match: %v ~ %v\n", r.URL,
+							// 	sub.Filters, env.Event,
+							// )
 							continue
 						}
 						// check signature, ignore invalid, except from trusted (AssumeValid) relays

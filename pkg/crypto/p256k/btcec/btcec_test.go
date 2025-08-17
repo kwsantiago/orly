@@ -5,6 +5,7 @@ package btcec_test
 import (
 	"bufio"
 	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 	"time"
 
