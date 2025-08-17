@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"orly.dev/pkg/crypto/ec/bech32"
 	"orly.dev/pkg/crypto/ec/chaincfg"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 )
 

@@ -5,6 +5,7 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/utils/chk"
+	"sort"
 )
 
 func (d *D) GetSerialsByRange(idx Range) (
@@ -40,6 +41,10 @@ func (d *D) GetSerialsByRange(idx Range) (
 	); chk.E(err) {
 		return
 	}
-
+	sort.Slice(
+		sers, func(i, j int) bool {
+			return sers[i].Get() < sers[j].Get()
+		},
+	)
 	return
 }

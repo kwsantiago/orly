@@ -7,6 +7,7 @@ import (
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 )
 

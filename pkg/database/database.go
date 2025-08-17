@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/dgraph-io/badger/v4"
+	"github.com/dgraph-io/badger/v4/options"
 	"orly.dev/pkg/encoders/eventidserial"
 	"orly.dev/pkg/utils/apputil"
 	"orly.dev/pkg/utils/chk"
@@ -51,6 +52,7 @@ func New(ctx context.T, cancel context.F, dataDir, logLevel string) (
 	opts.BlockSize = units.Gb
 	opts.CompactL0OnClose = true
 	opts.LmaxCompaction = true
+	opts.Compression = options.None
 	opts.Logger = d.Logger
 	if d.DB, err = badger.Open(opts); chk.E(err) {
 		return

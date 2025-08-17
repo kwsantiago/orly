@@ -5,9 +5,9 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"orly.dev/pkg/encoders/event"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/interrupt"
 	"orly.dev/pkg/utils/log"

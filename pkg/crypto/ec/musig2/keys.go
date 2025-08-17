@@ -5,6 +5,7 @@ package musig2
 import (
 	"bytes"
 	"fmt"
+	"orly.dev/pkg/utils"
 	"sort"
 
 	"orly.dev/pkg/crypto/ec"

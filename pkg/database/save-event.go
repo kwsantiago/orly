@@ -67,16 +67,21 @@ func (d *D) SaveEvent(
 			// to get the timestamp and ensure that the event post-dates it.
 			// otherwise, it should be rejected.
 			var idPkTss []*store.IdPkTs
-			for _, ser := range sers {
-				var fidpk *store.IdPkTs
-				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-					return
-				}
-				if fidpk == nil {
-					continue
-				}
-				idPkTss = append(idPkTss, fidpk)
+			var tmp []*store.IdPkTs
+			if tmp, err = d.GetFullIdPubkeyBySerials(sers); chk.E(err) {
+				return
 			}
+			idPkTss = append(idPkTss, tmp...)
+			// for _, ser := range sers {
+			// 	var fidpk *store.IdPkTs
+			// 	if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
+			// 		return
+			// 	}
+			// 	if fidpk == nil {
+			// 		continue
+			// 	}
+			// 	idPkTss = append(idPkTss, fidpk)
+			// }
 			// sort by timestamp, so the first is the newest
 			sort.Slice(
 				idPkTss, func(i, j int) bool {

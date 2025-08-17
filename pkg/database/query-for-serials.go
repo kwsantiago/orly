@@ -6,7 +6,6 @@ import (
 	"orly.dev/pkg/interfaces/store"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
-	"sort"
 )
 
 // QueryForSerials takes a filter and returns the serials of events that match,
@@ -14,7 +13,7 @@ import (
 func (d *D) QueryForSerials(c context.T, f *filter.F) (
 	sers types.Uint40s, err error,
 ) {
-	var founds types.Uint40s
+	var founds []*types.Uint40
 	var idPkTs []*store.IdPkTs
 	if f.Ids != nil && f.Ids.Len() > 0 {
 		for _, id := range f.Ids.ToSliceOfBytes() {
@@ -24,24 +23,30 @@ func (d *D) QueryForSerials(c context.T, f *filter.F) (
 			}
 			founds = append(founds, ser)
 		}
-		// fetch the events full id indexes so we can sort them
-		for _, ser := range founds {
-			// scan for the IdPkTs
-			var fidpk *store.IdPkTs
-			if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-				return
-			}
-			if fidpk == nil {
-				continue
-			}
-			idPkTs = append(idPkTs, fidpk)
-			// sort by timestamp
-			sort.Slice(
-				idPkTs, func(i, j int) bool {
-					return idPkTs[i].Ts > idPkTs[j].Ts
-				},
-			)
+		var tmp []*store.IdPkTs
+		if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
+			return
 		}
+		idPkTs = append(idPkTs, tmp...)
+
+		// // fetch the events full id indexes so we can sort them
+		// for _, ser := range founds {
+		// 	// scan for the IdPkTs
+		// 	var fidpk *store.IdPkTs
+		// 	if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
+		// 		return
+		// 	}
+		// 	if fidpk == nil {
+		// 		continue
+		// 	}
+		// 	idPkTs = append(idPkTs, fidpk)
+		// 	// sort by timestamp
+		// 	sort.Slice(
+		// 		idPkTs, func(i, j int) bool {
+		// 			return idPkTs[i].Ts > idPkTs[j].Ts
+		// 		},
+		// 	)
+		// }
 	} else {
 		if idPkTs, err = d.QueryForIds(c, f); chk.E(err) {
 			return

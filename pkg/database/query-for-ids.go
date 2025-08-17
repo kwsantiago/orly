@@ -26,88 +26,37 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 	if idxs, err = GetIndexesFromFilter(f); chk.E(err) {
 		return
 	}
-	var idOnly bool
-	var tagIdPkTs []*store.IdPkTs
+	var results []*store.IdPkTs
+	var founds []*types.Uint40
 	for _, idx := range idxs {
 		if f.Tags != nil && f.Tags.Len() > 1 {
-			if len(tagIdPkTs) == 0 {
-				// first
-				var founds types.Uint40s
-				if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
-					return
-				}
-				// fetch the events full id indexes
-				for _, ser := range founds {
-					// scan for the IdPkTs
-					var fidpk *store.IdPkTs
-					if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-						return
-					}
-					if fidpk == nil {
-						continue
-					}
-					tagIdPkTs = append(tagIdPkTs, fidpk)
-				}
-			} else {
-				// second and subsequent
-				var founds types.Uint40s
-				var temp []*store.IdPkTs
-				if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
-					return
-				}
-				// fetch the events full id indexes
-				for _, ser := range founds {
-					// scan for the IdPkTs
-					var fidpk *store.IdPkTs
-					if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-						return
-					}
-					if fidpk == nil {
-						continue
-					}
-					temp = append(temp, fidpk)
-				}
-				var intersecting []*store.IdPkTs
-				for _, idpk := range temp {
-					for _, tagIdPk := range tagIdPkTs {
-						if tagIdPk.Ser == idpk.Ser {
-							intersecting = append(intersecting, idpk)
-						}
-					}
-				}
-				tagIdPkTs = intersecting
-			}
-			// deduplicate in case this somehow happened (such as two or more
-			// from one tag matched, only need it once)
-			seen := make(map[uint64]struct{})
-			for _, idpk := range tagIdPkTs {
-				if _, ok := seen[idpk.Ser]; !ok {
-					seen[idpk.Ser] = struct{}{}
-					idPkTs = append(idPkTs, idpk)
-				}
-			}
-			idPkTs = tagIdPkTs
-		} else {
-			var founds types.Uint40s
 			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
 				return
 			}
-			// fetch the events full id indexes
-			for _, ser := range founds {
-				// scan for the IdPkTs
-				var fidpk *store.IdPkTs
-				if fidpk, err = d.GetFullIdPubkeyBySerial(ser); chk.E(err) {
-					return
-				}
-				if fidpk == nil {
-					continue
-				}
-				idPkTs = append(idPkTs, fidpk)
+			var tmp []*store.IdPkTs
+			if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
+				return
 			}
+			results = append(results, tmp...)
+		} else {
+			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
+				return
+			}
+			var tmp []*store.IdPkTs
+			if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
+				return
+			}
+			results = append(results, tmp...)
 		}
 	}
-	if idOnly {
-		return
+	// deduplicate in case this somehow happened (such as two or more
+	// from one tag matched, only need it once)
+	seen := make(map[uint64]struct{})
+	for _, idpk := range results {
+		if _, ok := seen[idpk.Ser]; !ok {
+			seen[idpk.Ser] = struct{}{}
+			idPkTs = append(idPkTs, idpk)
+		}
 	}
 	// sort results by timestamp in reverse chronological order
 	sort.Slice(

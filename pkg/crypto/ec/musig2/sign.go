@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"orly.dev/pkg/utils"
 
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/chainhash"

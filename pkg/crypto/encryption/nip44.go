@@ -1,13 +1,13 @@
 package encryption
 
 import (
-	"bytes"
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/binary"
 	"io"
 	"math"
+	"orly.dev/pkg/utils"
 
 	"golang.org/x/crypto/chacha20"
 	"golang.org/x/crypto/hkdf"
