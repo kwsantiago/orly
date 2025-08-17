@@ -367,7 +367,8 @@ func (r *Client) ConnectWithTLS(
 				if env, rem, err = okenvelope.Parse(rem); chk.E(err) {
 					continue
 				}
-				if okCallback, exist := r.okCallbacks.Load(env.EventID.String()); exist {
+				eventIDStr := env.EventID.String()
+				if okCallback, exist := r.okCallbacks.Load(eventIDStr); exist {
 					okCallback(env.OK, string(env.Reason))
 				} else {
 					log.T.C(
@@ -375,7 +376,7 @@ func (r *Client) ConnectWithTLS(
 							return fmt.Sprintf(
 								"{%s} got an unexpected OK message for event %s",
 								r.URL,
-								env.EventID,
+								eventIDStr,
 							)
 						},
 					)
