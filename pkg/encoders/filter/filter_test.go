@@ -27,7 +27,7 @@ func TestT_MarshalUnmarshal(t *testing.T) {
 			t.Fatalf("unmarshal error: %v\n%s\n%s", err, dst, rem)
 		}
 		dst2 = fa.Marshal(nil)
-		if !bytes.Equal(dst1, dst2) {
+		if !utils.FastEqual(dst1, dst2) {
 			t.Fatalf("marshal error: %v\n%s\n%s", err, dst1, dst2)
 		}
 		dst, dst1, dst2 = dst[:0], dst1[:0], dst2[:0]

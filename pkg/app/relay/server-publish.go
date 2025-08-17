@@ -1,7 +1,6 @@
 package relay
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"orly.dev/pkg/encoders/event"
@@ -11,6 +10,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/errorf"
@@ -62,7 +62,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 			log.T.F("found %d possible duplicate events", len(evs))
 			for _, ev := range evs {
 				del := true
-				if bytes.Equal(ev.ID, evt.ID) {
+				if utils.FastEqual(ev.ID, evt.ID) {
 					return errorf.W(
 						string(
 							normalize.Duplicate.F(
@@ -101,7 +101,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					var isFollowed bool
 					ownersFollowed := s.OwnersFollowed()
 					for _, pk := range ownersFollowed {
-						if bytes.Equal(evt.Pubkey, pk) {
+						if utils.FastEqual(evt.Pubkey, pk) {
 							isFollowed = true
 						}
 					}
@@ -127,7 +127,7 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					// should be applied immediately.
 					owners := s.OwnersPubkeys()
 					for _, pk := range owners {
-						if bytes.Equal(evt.Pubkey, pk) {
+						if utils.FastEqual(evt.Pubkey, pk) {
 							if _, _, err = sto.SaveEvent(
 								c, evt, false, nil,
 							); err != nil && !errors.Is(
@@ -228,11 +228,11 @@ func (s *Server) Publish(c context.T, evt *event.E) (err error) {
 					func() string {
 						return fmt.Sprintf(
 							"%s != %s %v", evdt.Value(), evtdt.Value(),
-							!bytes.Equal(evdt.Value(), evtdt.Value()),
+							!utils.FastEqual(evdt.Value(), evtdt.Value()),
 						)
 					},
 				)
-				if !bytes.Equal(evdt.Value(), evtdt.Value()) {
+				if !utils.FastEqual(evdt.Value(), evtdt.Value()) {
 					continue
 				}
 				if del {

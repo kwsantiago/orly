@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"orly.dev/pkg/utils"
 	"os"
 	"sort"
 
@@ -164,7 +165,7 @@ func (t *T) GetFirst(tagPrefix *tag.T) *tag.T {
 
 func (t *T) GetD() (d string) {
 	for _, v := range t.element {
-		if bytes.Equal(v.Key(), []byte("d")) {
+		if utils.FastEqual(v.Key(), []byte("d")) {
 			return string(v.Value())
 		}
 	}
@@ -270,11 +271,11 @@ func (t *T) Intersects(f *T) (has bool) {
 	matches := len(f.element)
 	for _, v := range f.element {
 		for _, w := range t.element {
-			if bytes.Equal(v.FilterKey(), w.Key()) {
+			if utils.FastEqual(v.FilterKey(), w.Key()) {
 				// we have a matching tag key, and both have a first field, check if tag has any
 				// of the subsequent values in the filter tag.
 				for _, val := range v.ToSliceOfBytes()[1:] {
-					if bytes.Equal(val, w.Value()) {
+					if utils.FastEqual(val, w.Value()) {
 						matches--
 					}
 				}
@@ -288,7 +289,7 @@ func (t *T) Intersects(f *T) (has bool) {
 // authed with the same pubkey as in the event. This is for implementing relayinfo.NIP70.
 func (t *T) ContainsProtectedMarker() (does bool) {
 	for _, v := range t.element {
-		if bytes.Equal(v.Key(), []byte("-")) {
+		if utils.FastEqual(v.Key(), []byte("-")) {
 			return true
 		}
 	}
@@ -305,7 +306,7 @@ func (t *T) ContainsAny(tagName []byte, values *tag.T) bool {
 		if v.Len() < 2 {
 			continue
 		}
-		if !bytes.Equal(v.Key(), tagName) {
+		if !utils.FastEqual(v.Key(), tagName) {
 			continue
 		}
 		for _, candidate := range values.ToSliceOfBytes() {

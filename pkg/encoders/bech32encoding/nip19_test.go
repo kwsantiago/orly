@@ -17,7 +17,7 @@ func TestEncodeNpub(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		npub,
 		[]byte("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
 	) {
@@ -30,7 +30,7 @@ func TestEncodeNsec(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		nsec,
 		[]byte("nsec180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsgyumg0"),
 	) {
@@ -43,10 +43,10 @@ func TestDecodeNpub(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(prefix, []byte("npub")) {
+	if !utils.FastEqual(prefix, []byte("npub")) {
 		t.Error("returned invalid prefix")
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		pubkey.([]byte),
 		[]byte("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"),
 	) {
@@ -69,7 +69,7 @@ func TestDecodeNprofile(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to decode nprofile: %s", err.Error())
 	}
-	if !bytes.Equal(prefix, []byte("nprofile")) {
+	if !utils.FastEqual(prefix, []byte("nprofile")) {
 		t.Error("what")
 	}
 	pp, ok := data.(pointers.Profile)
@@ -77,7 +77,7 @@ func TestDecodeNprofile(t *testing.T) {
 		t.Error("value returned of wrong type")
 	}
 
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		pp.PublicKey,
 		[]byte("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"),
 	) {
@@ -87,8 +87,8 @@ func TestDecodeNprofile(t *testing.T) {
 	if len(pp.Relays) != 2 {
 		t.Error("decoded wrong number of relays")
 	}
-	if !bytes.Equal(pp.Relays[0], []byte("wss://r.x.com")) ||
-		!bytes.Equal(pp.Relays[1], []byte("wss://djbas.sadkb.com")) {
+	if !utils.FastEqual(pp.Relays[0], []byte("wss://r.x.com")) ||
+		!utils.FastEqual(pp.Relays[1], []byte("wss://djbas.sadkb.com")) {
 		t.Error("decoded relay URLs wrongly")
 	}
 }
@@ -98,7 +98,7 @@ func TestDecodeOtherNprofile(t *testing.T) {
 	if err != nil {
 		t.Error("failed to decode nprofile")
 	}
-	if !bytes.Equal(prefix, []byte("nprofile")) {
+	if !utils.FastEqual(prefix, []byte("nprofile")) {
 		t.Error("what")
 	}
 	pp, ok := data.(pointers.Profile)
@@ -106,7 +106,7 @@ func TestDecodeOtherNprofile(t *testing.T) {
 		t.Error("value returned of wrong type")
 	}
 
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		pp.PublicKey,
 		[]byte("e8b487c079b0f67c695ae6c4c2552a47f38adfa2533cc5926bd2c102942fdcb7"),
 	) {
@@ -116,8 +116,10 @@ func TestDecodeOtherNprofile(t *testing.T) {
 	if len(pp.Relays) != 3 {
 		t.Error("decoded wrong number of relays")
 	}
-	if !bytes.Equal(pp.Relays[0], []byte("wss://nostr-pub.wellorder.net")) ||
-		!bytes.Equal(pp.Relays[1], []byte("wss://nostr-relay.untethr.me")) {
+	if !utils.FastEqual(
+		pp.Relays[0], []byte("wss://nostr-pub.wellorder.net"),
+	) ||
+		!utils.FastEqual(pp.Relays[1], []byte("wss://nostr-relay.untethr.me")) {
 
 		t.Error("decoded relay URLs wrongly")
 	}
@@ -134,7 +136,7 @@ func TestEncodeNprofile(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		nprofile,
 		[]byte("nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"),
 	) {
@@ -157,7 +159,7 @@ func TestEncodeDecodeNaddr(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		naddr,
 		[]byte("naddr1qqrxyctwv9hxzqfwwaehxw309aex2mrp0yhxummnw3ezuetcv9khqmr99ekhjer0d4skjm3wv4uxzmtsd3jjucm0d5q3vamnwvaz7tmwdaehgu3wvfskuctwvyhxxmmdqgsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8grqsqqqa28a3lkds"),
 	) {
@@ -170,14 +172,14 @@ func TestEncodeDecodeNaddr(t *testing.T) {
 	if chk.D(err) {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(prefix, NentityHRP) {
+	if !utils.FastEqual(prefix, NentityHRP) {
 		t.Error("returned invalid prefix")
 	}
 	ep, ok := data.(pointers.Entity)
 	if !ok {
 		t.Fatalf("did not decode an entity type, got %v", reflect.TypeOf(data))
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		ep.PublicKey,
 		[]byte("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"),
 	) {
@@ -186,14 +188,14 @@ func TestEncodeDecodeNaddr(t *testing.T) {
 	if ep.Kind.ToU16() != kind.Article.ToU16() {
 		t.Error("returned wrong kind")
 	}
-	if !bytes.Equal(ep.Identifier, []byte("banana")) {
+	if !utils.FastEqual(ep.Identifier, []byte("banana")) {
 		t.Error("returned wrong identifier")
 	}
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		ep.Relays[0],
 		[]byte("wss://relay.nostr.example.mydomain.example.com"),
 	) ||
-		!bytes.Equal(ep.Relays[1], []byte("wss://nostr.banana.com")) {
+		!utils.FastEqual(ep.Relays[1], []byte("wss://nostr.banana.com")) {
 		t.Error("returned wrong relays")
 	}
 }
@@ -203,11 +205,11 @@ func TestDecodeNaddrWithoutRelays(t *testing.T) {
 	if err != nil {
 		t.Errorf("shouldn't error: %s", err)
 	}
-	if !bytes.Equal(prefix, []byte("naddr")) {
+	if !utils.FastEqual(prefix, []byte("naddr")) {
 		t.Error("returned invalid prefix")
 	}
 	ep := data.(pointers.Entity)
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		ep.PublicKey,
 		[]byte("7fa56f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194"),
 	) {
@@ -216,7 +218,7 @@ func TestDecodeNaddrWithoutRelays(t *testing.T) {
 	if ep.Kind.ToU16() != kind.Article.ToU16() {
 		t.Error("returned wrong kind")
 	}
-	if !bytes.Equal(ep.Identifier, []byte("references")) {
+	if !utils.FastEqual(ep.Identifier, []byte("references")) {
 		t.Error("returned wrong identifier")
 	}
 	if len(ep.Relays) != 0 {
@@ -240,7 +242,7 @@ func TestEncodeDecodeNEventTestEncodeDecodeNEvent(t *testing.T) {
 		t.Errorf("shouldn't error: %s", err)
 	}
 
-	if !bytes.Equal(prefix, []byte("nevent")) {
+	if !utils.FastEqual(prefix, []byte("nevent")) {
 		t.Errorf("should have 'nevent' prefix, not '%s'", prefix)
 	}
 	ep, ok := res.(pointers.Event)
@@ -248,7 +250,7 @@ func TestEncodeDecodeNEventTestEncodeDecodeNEvent(t *testing.T) {
 		t.Errorf("'%s' should be an nevent, not %v", nevent, res)
 	}
 
-	if !bytes.Equal(ep.Author, aut) {
+	if !utils.FastEqual(ep.Author, aut) {
 		t.Errorf("wrong author got\n%s, expect\n%s", ep.Author, aut)
 	}
 	id := MustDecode("45326f5d6962ab1e3cd424e758c3002b8665f7b0d8dcee9fe9e288d7751ac194")
@@ -258,7 +260,7 @@ func TestEncodeDecodeNEventTestEncodeDecodeNEvent(t *testing.T) {
 	}
 
 	if len(ep.Relays) != 1 ||
-		!bytes.Equal(ep.Relays[0], []byte("wss://banana.com")) {
+		!utils.FastEqual(ep.Relays[0], []byte("wss://banana.com")) {
 		t.Error("wrong relay")
 	}
 }

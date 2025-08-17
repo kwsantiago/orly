@@ -15,7 +15,7 @@ import (
 // Results are sorted by timestamp in reverse chronological order.
 // Returns an error if the filter contains Ids or if any operation fails.
 func (d *D) QueryForIds(c context.T, f *filter.F) (
-	idPkTs []store.IdPkTs, err error,
+	idPkTs []*store.IdPkTs, err error,
 ) {
 	if f.Ids != nil && f.Ids.Len() > 0 {
 		// if there is Ids in the query, this is an error for this query
@@ -27,7 +27,7 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 		return
 	}
 	var idOnly bool
-	var tagIdPkTs []store.IdPkTs
+	var tagIdPkTs []*store.IdPkTs
 	for _, idx := range idxs {
 		if f.Tags != nil && f.Tags.Len() > 1 {
 			if len(tagIdPkTs) == 0 {
@@ -46,12 +46,12 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					if fidpk == nil {
 						continue
 					}
-					tagIdPkTs = append(tagIdPkTs, *fidpk)
+					tagIdPkTs = append(tagIdPkTs, fidpk)
 				}
 			} else {
 				// second and subsequent
 				var founds types.Uint40s
-				var temp []store.IdPkTs
+				var temp []*store.IdPkTs
 				if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
 					return
 				}
@@ -65,9 +65,9 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 					if fidpk == nil {
 						continue
 					}
-					temp = append(temp, *fidpk)
+					temp = append(temp, fidpk)
 				}
-				var intersecting []store.IdPkTs
+				var intersecting []*store.IdPkTs
 				for _, idpk := range temp {
 					for _, tagIdPk := range tagIdPkTs {
 						if tagIdPk.Ser == idpk.Ser {
@@ -102,7 +102,7 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 				if fidpk == nil {
 					continue
 				}
-				idPkTs = append(idPkTs, *fidpk)
+				idPkTs = append(idPkTs, fidpk)
 			}
 		}
 	}

@@ -272,7 +272,7 @@ func Sign(
 	}
 
 	// Check that our signing key belongs to the secNonce
-	if !bytes.Equal(
+	if !utils.FastEqual(
 		secNonce[btcec.SecKeyBytesLen*2:],
 		privKey.PubKey().SerializeCompressed(),
 	) {

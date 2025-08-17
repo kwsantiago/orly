@@ -33,7 +33,7 @@ func TestFromIdHash(t *testing.T) {
 	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(i.Bytes(), expected) {
+	if !utils.FastEqual(i.Bytes(), expected) {
 		t.Errorf(
 			"FromId did not set the hash correctly: got %v, want %v", i.Bytes(),
 			expected,
@@ -70,7 +70,7 @@ func TestFromIdBase64(t *testing.T) {
 	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(i.Bytes(), expected) {
+	if !utils.FastEqual(i.Bytes(), expected) {
 		t.Errorf(
 			"FromIdBase64 did not set the hash correctly: got %v, want %v",
 			i.Bytes(), expected,
@@ -107,7 +107,7 @@ func TestFromIdHex(t *testing.T) {
 	expected := idh[:IdHashLen]
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(i.Bytes(), expected) {
+	if !utils.FastEqual(i.Bytes(), expected) {
 		t.Errorf(
 			"FromIdHex did not set the hash correctly: got %v, want %v",
 			i.Bytes(), expected,
@@ -149,7 +149,7 @@ func TestIdHashMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the written bytes
-	if !bytes.Equal(buf.Bytes(), i1.Bytes()) {
+	if !utils.FastEqual(buf.Bytes(), i1.Bytes()) {
 		t.Errorf("MarshalWrite wrote %v, want %v", buf.Bytes(), i1.Bytes())
 	}
 
@@ -161,7 +161,7 @@ func TestIdHashMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the read value
-	if !bytes.Equal(i2.Bytes(), i1.Bytes()) {
+	if !utils.FastEqual(i2.Bytes(), i1.Bytes()) {
 		t.Errorf("UnmarshalRead read %v, want %v", i2.Bytes(), i1.Bytes())
 	}
 }
@@ -180,7 +180,7 @@ func TestUnmarshalReadWithEmptyVal(t *testing.T) {
 	}
 
 	// Verify the read value
-	if !bytes.Equal(i.Bytes(), testData) {
+	if !utils.FastEqual(i.Bytes(), testData) {
 		t.Errorf("UnmarshalRead read %v, want %v", i.Bytes(), testData)
 	}
 }

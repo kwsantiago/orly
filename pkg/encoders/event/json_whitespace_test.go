@@ -12,13 +12,13 @@ import (
 
 // compareEvents compares two events and reports any differences
 func compareEvents(t *testing.T, expected, actual *E, context string) {
-	if !bytes.Equal(expected.ID, actual.ID) {
+	if !utils.FastEqual(expected.ID, actual.ID) {
 		t.Errorf(
 			"%s: ID mismatch: expected %s, got %s", context,
 			hex.Enc(expected.ID), hex.Enc(actual.ID),
 		)
 	}
-	if !bytes.Equal(expected.Pubkey, actual.Pubkey) {
+	if !utils.FastEqual(expected.Pubkey, actual.Pubkey) {
 		t.Errorf(
 			"%s: Pubkey mismatch: expected %s, got %s", context,
 			hex.Enc(expected.Pubkey), hex.Enc(actual.Pubkey),
@@ -36,13 +36,13 @@ func compareEvents(t *testing.T, expected, actual *E, context string) {
 			actual.Kind.K,
 		)
 	}
-	if !bytes.Equal(expected.Content, actual.Content) {
+	if !utils.FastEqual(expected.Content, actual.Content) {
 		t.Errorf(
 			"%s: Content mismatch: expected %s, got %s", context,
 			expected.Content, actual.Content,
 		)
 	}
-	if !bytes.Equal(expected.Sig, actual.Sig) {
+	if !utils.FastEqual(expected.Sig, actual.Sig) {
 		t.Errorf(
 			"%s: Sig mismatch: expected %s, got %s", context,
 			hex.Enc(expected.Sig), hex.Enc(actual.Sig),

@@ -49,7 +49,7 @@ func TestTMarshalBinary_UnmarshalBinary(t *testing.T) {
 		unmarshaledJSON := eb.Serialize()
 
 		// Compare the two JSON representations
-		if !bytes.Equal(b, unmarshaledJSON) {
+		if !utils.FastEqual(b, unmarshaledJSON) {
 			t.Fatalf(
 				"JSON representations don't match after binary marshaling/unmarshaling:\nOriginal: %s\nUnmarshaled: %s",
 				b, unmarshaledJSON,

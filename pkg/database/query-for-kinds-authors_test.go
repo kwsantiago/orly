@@ -102,7 +102,7 @@ func TestQueryForKindsAuthors(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.ID) {
+			if utils.FastEqual(result.Id, ev.ID) {
 				found = true
 				if ev.Kind.K != testKind.K {
 					t.Fatalf(
@@ -110,7 +110,7 @@ func TestQueryForKindsAuthors(t *testing.T) {
 						i, ev.Kind.K, testKind.K,
 					)
 				}
-				if !bytes.Equal(ev.Pubkey, events[1].Pubkey) {
+				if !utils.FastEqual(ev.Pubkey, events[1].Pubkey) {
 					t.Fatalf(
 						"result %d has incorrect author, got %x, expected %x",
 						i, ev.Pubkey, events[1].Pubkey,

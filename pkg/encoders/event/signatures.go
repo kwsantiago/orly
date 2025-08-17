@@ -1,9 +1,9 @@
 package event
 
 import (
-	"bytes"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/interfaces/signer"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
@@ -33,7 +33,7 @@ func (ev *E) Verify() (valid bool, err error) {
 	if valid, err = keys.Verify(ev.ID, ev.Sig); chk.T(err) {
 		// check that this isn't because of a bogus ID
 		id := ev.GetIDBytes()
-		if !bytes.Equal(id, ev.ID) {
+		if !utils.FastEqual(id, ev.ID) {
 			log.E.Ln("event ID incorrect")
 			ev.ID = id
 			err = nil

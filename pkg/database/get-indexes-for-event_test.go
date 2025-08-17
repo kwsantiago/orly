@@ -36,7 +36,7 @@ func verifyIndexIncluded(t *testing.T, idxs [][]byte, expectedIdx *indexes.T) {
 	found := false
 
 	for _, idx := range idxs {
-		if bytes.Equal(idx, expectedBytes) {
+		if utils.FastEqual(idx, expectedBytes) {
 			found = true
 			break
 		}

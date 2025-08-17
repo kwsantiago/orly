@@ -1,12 +1,12 @@
 package bech32encoding
 
 import (
-	"bytes"
 	"orly.dev/pkg/crypto/ec"
 	"orly.dev/pkg/crypto/ec/bech32"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 )
@@ -80,7 +80,7 @@ func NsecToBytes(encoded []byte) (sk []byte, err error) {
 	if hrp, b5, err = bech32.Decode(encoded); chk.E(err) {
 		return
 	}
-	if !bytes.Equal(hrp, SecHRP) {
+	if !utils.FastEqual(hrp, SecHRP) {
 		err = log.E.Err(
 			"wrong human readable part, got '%s' want '%s'",
 			hrp, SecHRP,
@@ -100,7 +100,7 @@ func NpubToBytes(encoded []byte) (pk []byte, err error) {
 	if hrp, b5, err = bech32.Decode(encoded); chk.E(err) {
 		return
 	}
-	if !bytes.Equal(hrp, PubHRP) {
+	if !utils.FastEqual(hrp, PubHRP) {
 		err = log.E.Err(
 			"wrong human readable part, got '%s' want '%s'",
 			hrp, SecHRP,
@@ -122,7 +122,7 @@ func NpubToPublicKey(encoded []byte) (pk *secp256k1.PublicKey, err error) {
 		err = log.E.Err("ERROR: '%s'", err)
 		return
 	}
-	if !bytes.Equal(hrp, PubHRP) {
+	if !utils.FastEqual(hrp, PubHRP) {
 		err = log.E.Err(
 			"wrong human readable part, got '%s' want '%s'",
 			hrp, PubHRP,

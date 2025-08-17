@@ -26,7 +26,7 @@ func TestT(t *testing.T) {
 		ft.FromWord(tt.word)
 
 		// Ensure Bytes() returns the correct raw word
-		if got := ft.Bytes(); !bytes.Equal(tt.expectedBytes, got) {
+		if got := ft.Bytes(); !utils.FastEqual(tt.expectedBytes, got) {
 			t.Errorf(
 				"FromWord/Bytes failed: expected %q, got %q", tt.expectedBytes,
 				got,
@@ -40,7 +40,7 @@ func TestT(t *testing.T) {
 		}
 
 		// Ensure the serialized output matches expectedEncoded
-		if got := buf.Bytes(); !bytes.Equal(tt.expectedEncoded, got) {
+		if got := buf.Bytes(); !utils.FastEqual(tt.expectedEncoded, got) {
 			t.Errorf(
 				"MarshalWrite failed: expected %q, got %q", tt.expectedEncoded,
 				got,
@@ -56,7 +56,7 @@ func TestT(t *testing.T) {
 		}
 
 		// Ensure the word after decoding matches the original word
-		if got := newFt.Bytes(); !bytes.Equal(tt.expectedBytes, got) {
+		if got := newFt.Bytes(); !utils.FastEqual(tt.expectedBytes, got) {
 			t.Errorf(
 				"UnmarshalRead failed: expected %q, got %q", tt.expectedBytes,
 				got,

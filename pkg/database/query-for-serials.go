@@ -15,7 +15,7 @@ func (d *D) QueryForSerials(c context.T, f *filter.F) (
 	sers types.Uint40s, err error,
 ) {
 	var founds types.Uint40s
-	var idPkTs []store.IdPkTs
+	var idPkTs []*store.IdPkTs
 	if f.Ids != nil && f.Ids.Len() > 0 {
 		for _, id := range f.Ids.ToSliceOfBytes() {
 			var ser *types.Uint40
@@ -34,7 +34,7 @@ func (d *D) QueryForSerials(c context.T, f *filter.F) (
 			if fidpk == nil {
 				continue
 			}
-			idPkTs = append(idPkTs, *fidpk)
+			idPkTs = append(idPkTs, fidpk)
 			// sort by timestamp
 			sort.Slice(
 				idPkTs, func(i, j int) bool {

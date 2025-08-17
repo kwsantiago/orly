@@ -48,7 +48,7 @@ func TestSubmission(t *testing.T) {
 			)
 		}
 		out = ea.Marshal(out)
-		if !bytes.Equal(out, c) {
+		if !utils.FastEqual(out, c) {
 			t.Fatalf("mismatched output\n%s\n\n%s\n", c, out)
 		}
 		c, out = c[:0], out[:0]
@@ -96,7 +96,7 @@ func TestResult(t *testing.T) {
 			)
 		}
 		out = ea.Marshal(out)
-		if !bytes.Equal(out, c) {
+		if !utils.FastEqual(out, c) {
 			t.Fatalf("mismatched output\n%s\n\n%s\n", c, out)
 		}
 		rem, c, out = rem[:0], c[:0], out[:0]

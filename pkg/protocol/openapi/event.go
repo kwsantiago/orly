@@ -14,6 +14,7 @@ import (
 	"orly.dev/pkg/encoders/ints"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tag"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/iptracker"
@@ -168,7 +169,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			env := ev
 			c := x.Context()
 			calculatedId := ev.GetIDBytes()
-			if !bytes.Equal(calculatedId, ev.ID) {
+			if !utils.FastEqual(calculatedId, ev.ID) {
 				err = huma.Error422UnprocessableEntity(
 					Ok.Invalid(
 						a, env, "event id is computed incorrectly, "+
@@ -213,7 +214,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 			// cluster replicas must replicate this event (and all events).
 			if protectedTag != nil && a.AuthRequired() && !super {
 				// check that the pubkey of the event matches the authed pubkey
-				if !bytes.Equal(pubkey, ev.Pubkey) {
+				if !utils.FastEqual(pubkey, ev.Pubkey) {
 					if err = Ok.Blocked(
 						a, env,
 						"protected tag may only be published by user authed to the same pubkey",
@@ -237,7 +238,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 					var res []*event.E
 					if t.Len() >= 2 {
 						switch {
-						case bytes.Equal(t.Key(), []byte("e")):
+						case utils.FastEqual(t.Key(), []byte("e")):
 							// Process 'e' tag (event reference)
 							eventId := make([]byte, sha256.Size)
 							if _, err = hex.DecBytes(
@@ -270,7 +271,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 
 								// Check if the author of the deletion event
 								// matches the author of the referenced event
-								if !bytes.Equal(
+								if !utils.FastEqual(
 									referencedEvent.Pubkey, env.Pubkey,
 								) {
 									if err = Ok.Blocked(
@@ -312,7 +313,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 									},
 								)
 							}
-						case bytes.Equal(t.Key(), []byte("a")):
+						case utils.FastEqual(t.Key(), []byte("a")):
 							split := bytes.Split(t.Value(), []byte{':'})
 							if len(split) != 3 {
 								continue
@@ -361,7 +362,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 								}
 								return
 							}
-							if !bytes.Equal(pk, ev.Pubkey) {
+							if !utils.FastEqual(pk, ev.Pubkey) {
 								if err = Ok.Blocked(
 									a, env,
 									"can't delete other users' events (delete by a tag)",
@@ -410,7 +411,7 @@ func (x *Operations) RegisterEvent(api huma.API) {
 						if target.CreatedAt.Int() > ev.CreatedAt.Int() {
 							continue
 						}
-						if !bytes.Equal(target.Pubkey, env.Pubkey) {
+						if !utils.FastEqual(target.Pubkey, env.Pubkey) {
 							if err = Ok.Error(
 								a, env, "only author can delete event",
 							); chk.E(err) {

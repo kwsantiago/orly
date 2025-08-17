@@ -145,7 +145,7 @@ func TestECDH(t *testing.T) {
 			if secret2, err = s2.ECDH(s1.Pub()); chk.E(err) {
 				t.Fatal(err)
 			}
-			if !bytes.Equal(secret1, secret2) {
+			if !utils.FastEqual(secret1, secret2) {
 				counter++
 				t.Errorf(
 					"ECDH generation failed to work in both directions, %x %x",

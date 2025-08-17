@@ -26,7 +26,7 @@ func (d *D) GetSerialById(id []byte) (ser *types.Uint40, err error) {
 			it.Seek(idxs[0].Start)
 			if it.ValidForPrefix(idxs[0].Start) {
 				item := it.Item()
-				key = item.KeyCopy(nil)
+				key = item.Key()
 				ser = new(types.Uint40)
 				buf := bytes.NewBuffer(key[len(key)-5:])
 				if err = ser.UnmarshalRead(buf); chk.E(err) {

@@ -29,7 +29,7 @@ func (d *D) DeleteExpired() {
 			defer it.Close()
 			for it.Rewind(); it.Valid(); it.Next() {
 				item := it.Item()
-				key := item.KeyCopy(nil)
+				key := item.Key()
 				buf := bytes.NewBuffer(key)
 				if err = indexes.ExpirationDec(
 					exp, ser,

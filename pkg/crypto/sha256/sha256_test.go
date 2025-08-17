@@ -2788,7 +2788,7 @@ func TestGoldenMarshal(t *testing.T) {
 					io.WriteString(h, g.in[len(g.in)/2:])
 					io.WriteString(h2, g.in[len(g.in)/2:])
 
-					if actual, actual2 := h.Sum(nil), h2.Sum(nil); !bytes.Equal(
+					if actual, actual2 := h.Sum(nil), h2.Sum(nil); !utils.FastEqual(
 						actual, actual2,
 					) {
 						t.Errorf(

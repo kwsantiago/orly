@@ -46,7 +46,7 @@ func TestRequest(t *testing.T) {
 			)
 		}
 		rb2 = req2.Marshal(rb2)
-		if !bytes.Equal(rb1, rb2) {
+		if !utils.FastEqual(rb1, rb2) {
 			if len(rb1) != len(rb2) {
 				t.Fatalf(
 					"unmarshal failed, different lengths\n%d %s\n%d %s\n",

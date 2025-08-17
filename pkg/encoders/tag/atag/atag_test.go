@@ -39,7 +39,7 @@ func TestT_Marshal_Unmarshal(t *testing.T) {
 		t.Fatalf("remainder")
 	}
 	b2 := t2.Marshal(nil)
-	if !bytes.Equal(b1, b2) {
+	if !utils.FastEqual(b1, b2) {
 		t.Fatalf("failed to re-marshal back original")
 	}
 }

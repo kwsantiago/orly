@@ -1,9 +1,9 @@
 package relay
 
 import (
-	"bytes"
 	"net/http"
 	"orly.dev/pkg/protocol/httpauth"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"time"
@@ -29,7 +29,7 @@ func (s *Server) UserAuth(
 		return
 	}
 	for _, pk := range append(s.ownersFollowed, s.followedFollows...) {
-		if bytes.Equal(pk, pubkey) {
+		if utils.FastEqual(pk, pubkey) {
 			authed = true
 			return
 		}
@@ -38,7 +38,7 @@ func (s *Server) UserAuth(
 	// flag to indicate that privilege checks can be bypassed.
 	if len(s.Peers.Pubkeys) > 0 {
 		for _, pk := range s.Peers.Pubkeys {
-			if bytes.Equal(pk, pubkey) {
+			if utils.FastEqual(pk, pubkey) {
 				authed = true
 				super = true
 				pubkey = pk

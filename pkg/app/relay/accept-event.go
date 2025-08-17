@@ -1,8 +1,8 @@
 package relay
 
 import (
-	"bytes"
 	"net/http"
+	"orly.dev/pkg/utils"
 
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/utils/context"
@@ -45,7 +45,7 @@ func (s *Server) AcceptEvent(
 		// Check blacklist for public relay mode
 		if len(s.blacklistPubkeys) > 0 {
 			for _, blockedPubkey := range s.blacklistPubkeys {
-				if bytes.Equal(blockedPubkey, ev.Pubkey) {
+				if utils.FastEqual(blockedPubkey, ev.Pubkey) {
 					notice = "event author is blacklisted"
 					return
 				}
@@ -60,7 +60,7 @@ func (s *Server) AcceptEvent(
 		return
 	}
 	for _, u := range s.OwnersMuted() {
-		if bytes.Equal(u, authedPubkey) {
+		if utils.FastEqual(u, authedPubkey) {
 			notice = "event author is banned from this relay"
 			return
 		}
@@ -68,7 +68,7 @@ func (s *Server) AcceptEvent(
 	// check if the authed user is on the lists
 	list := append(s.OwnersFollowed(), s.FollowedFollows()...)
 	for _, u := range list {
-		if bytes.Equal(u, authedPubkey) {
+		if utils.FastEqual(u, authedPubkey) {
 			accept = true
 			return
 		}

@@ -1,8 +1,8 @@
 package json
 
 import (
-	"bytes"
 	"io"
+	"orly.dev/pkg/utils"
 )
 
 // Bool can be either `true` or `false` and only lower case. Initialize these
@@ -41,7 +41,7 @@ func (b2 *Bool) Unmarshal(dst []byte) (rem []byte, err error) {
 			err = io.EOF
 			return
 		}
-		if bytes.Equal(Bools[true], rem[:len(T)]) {
+		if utils.FastEqual(Bools[true], rem[:len(T)]) {
 			b2.V = true
 			rem = rem[len(T):]
 			return
@@ -52,7 +52,7 @@ func (b2 *Bool) Unmarshal(dst []byte) (rem []byte, err error) {
 			err = io.EOF
 			return
 		}
-		if bytes.Equal(Bools[false], rem[:len(F)]) {
+		if utils.FastEqual(Bools[false], rem[:len(F)]) {
 			b2.V = false
 			rem = rem[len(F):]
 			return

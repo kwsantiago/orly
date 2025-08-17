@@ -5,8 +5,8 @@
 package filter
 
 import (
-	"bytes"
 	"encoding/binary"
+	"orly.dev/pkg/utils"
 	"sort"
 
 	"orly.dev/pkg/crypto/ec/schnorr"
@@ -540,7 +540,7 @@ func (f *F) Equal(b *F) bool {
 		f.Tags.Len() != b.Tags.Len() ||
 		!arePointerValuesEqual(f.Since, b.Since) ||
 		!arePointerValuesEqual(f.Until, b.Until) ||
-		!bytes.Equal(f.Search, b.Search) ||
+		!utils.FastEqual(f.Search, b.Search) ||
 		!f.Tags.Equal(b.Tags) {
 		return false
 	}

@@ -1,10 +1,10 @@
 package text
 
 import (
-	"bytes"
 	"github.com/templexxx/xhex"
 	"io"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 )
@@ -219,7 +219,7 @@ func UnmarshalBool(src []byte) (rem []byte, truth bool, err error) {
 				err = io.EOF
 				return
 			}
-			if bytes.Equal(t, rem[i:i+len(t)]) {
+			if utils.FastEqual(t, rem[i:i+len(t)]) {
 				truth = true
 				rem = rem[i+len(t):]
 				return
@@ -230,7 +230,7 @@ func UnmarshalBool(src []byte) (rem []byte, truth bool, err error) {
 				err = io.EOF
 				return
 			}
-			if bytes.Equal(f, rem[i:i+len(f)]) {
+			if utils.FastEqual(f, rem[i:i+len(f)]) {
 				rem = rem[i+len(f):]
 				return
 			}

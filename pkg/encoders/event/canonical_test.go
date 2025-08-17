@@ -28,7 +28,7 @@ package event
 // 			t.Fatalf("some of input remaining after FromCanonical: '%s'", rem)
 // 		}
 // 		mrsh2 := eb.Marshal(nil)
-// 		if !bytes.Equal(mrsh, mrsh2) {
+// 		if !utils.FastEqual(mrsh, mrsh2) {
 // 			t.Fatalf("canonical mismatch:\n\n%s\n%s", mrsh, mrsh2)
 // 		}
 // 		out, can, rem = out[:0], can[:0], rem[:0]

@@ -48,7 +48,7 @@ func TestHash(t *testing.T) {
 		)
 	}
 	// Ensure contents match.
-	if !bytes.Equal(hash[:], buf) {
+	if !utils.FastEqual(hash[:], buf) {
 		t.Errorf(
 			"NewHash: hash contents mismatch - got: %v, want: %v",
 			hash[:], buf,

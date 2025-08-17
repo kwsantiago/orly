@@ -5,6 +5,7 @@ package tag
 
 import (
 	"bytes"
+	"orly.dev/pkg/utils"
 
 	text2 "orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/utils/errorf"
@@ -171,7 +172,7 @@ func (t *T) StartsWith(prefix *T) bool {
 	}
 	// check initial elements for equality
 	for i := 0; i < prefixLen-1; i++ {
-		if !bytes.Equal(prefix.field[i], t.field[i]) {
+		if !utils.FastEqual(prefix.field[i], t.field[i]) {
 			return false
 		}
 	}
@@ -219,8 +220,8 @@ func (t *T) Relay() (s []byte) {
 	if t == nil {
 		return nil
 	}
-	if (bytes.Equal(t.Key(), etag) ||
-		bytes.Equal(t.Key(), ptag)) &&
+	if (utils.FastEqual(t.Key(), etag) ||
+		utils.FastEqual(t.Key(), ptag)) &&
 		len(t.field) >= Relay {
 
 		return normalize.URL([]byte(t.field[Relay]))
@@ -286,7 +287,7 @@ func (t *T) Unmarshal(b []byte) (r []byte, err error) {
 // Contains returns true if the provided element is found in the tag slice.
 func (t *T) Contains(s []byte) (b bool) {
 	for i := range t.field {
-		if bytes.Equal(t.field[i], s) {
+		if utils.FastEqual(t.field[i], s) {
 			return true
 		}
 	}
@@ -299,7 +300,7 @@ func (t *T) Equal(ta *T) bool {
 		return false
 	}
 	for i := range t.field {
-		if !bytes.Equal(t.field[i], ta.field[i]) {
+		if !utils.FastEqual(t.field[i], ta.field[i]) {
 			return false
 		}
 	}

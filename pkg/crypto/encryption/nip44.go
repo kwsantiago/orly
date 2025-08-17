@@ -136,7 +136,7 @@ func Decrypt(b64ciphertextWrapped, conversationKey []byte) (
 	if expectedMac, err = sha256Hmac(auth, ciphertext, nonce); chk.E(err) {
 		return
 	}
-	if !bytes.Equal(givenMac, expectedMac) {
+	if !utils.FastEqual(givenMac, expectedMac) {
 		err = errorf.E("invalid hmac")
 		return
 	}

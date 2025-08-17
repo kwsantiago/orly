@@ -48,7 +48,7 @@ func verifyIndex(
 	}
 
 	// Compare the generated start index with the expected start index
-	if !bytes.Equal(idxs[0].Start, startBuf.Bytes()) {
+	if !utils.FastEqual(idxs[0].Start, startBuf.Bytes()) {
 		t.Errorf("Generated start index does not match expected start index")
 		t.Errorf("Generated: %v", idxs[0].Start)
 		t.Errorf("Expected: %v", startBuf.Bytes())
@@ -68,7 +68,7 @@ func verifyIndex(
 	}
 
 	// Compare the generated end index with the expected end index
-	if !bytes.Equal(idxs[0].End, endBuf.Bytes()) {
+	if !utils.FastEqual(idxs[0].End, endBuf.Bytes()) {
 		t.Errorf("Generated End index does not match expected End index")
 		t.Errorf("Generated: %v", idxs[0].End)
 		t.Errorf("Expected: %v", endBuf.Bytes())
@@ -518,7 +518,7 @@ func testMultipleKindPubkeyFilter(t *testing.T) {
 	foundCombinations := 0
 	for _, idx := range idxs {
 		for i := 0; i < len(expectedIdxs); i += 2 {
-			if bytes.Equal(idx.Start, expectedIdxs[i]) && bytes.Equal(
+			if utils.FastEqual(idx.Start, expectedIdxs[i]) && utils.FastEqual(
 				idx.End, expectedIdxs[i+1],
 			) {
 				foundCombinations++

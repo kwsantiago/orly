@@ -149,7 +149,7 @@ func encodeSegWitAddress(
 	if chk.E(err) {
 		return nil, fmt.Errorf("invalid segwit address: %v", err)
 	}
-	if version != witnessVersion || !bytes.Equal(program, witnessProgram) {
+	if version != witnessVersion || !utils.FastEqual(program, witnessProgram) {
 		return nil, fmt.Errorf("invalid segwit address")
 	}
 	return bech, nil

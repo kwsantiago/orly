@@ -81,7 +81,7 @@ func keyHashFingerprint(keys []*btcec.PublicKey, sort bool) []byte {
 // keyBytesEqual returns true if two keys are the same based on the compressed
 // serialization of each key.
 func keyBytesEqual(a, b *btcec.PublicKey) bool {
-	return bytes.Equal(a.SerializeCompressed(), b.SerializeCompressed())
+	return utils.FastEqual(a.SerializeCompressed(), b.SerializeCompressed())
 }
 
 // aggregationCoefficient computes the key aggregation coefficient for the

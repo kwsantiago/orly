@@ -155,7 +155,7 @@ func TestNonceRFC6979(t *testing.T) {
 			test.iterations,
 		)
 		gotNonceBytes := gotNonce.Bytes()
-		if !bytes.Equal(gotNonceBytes[:], wantNonce) {
+		if !utils.FastEqual(gotNonceBytes[:], wantNonce) {
 			t.Errorf(
 				"%s: unexpected nonce -- got %x, want %x", test.name,
 				gotNonceBytes, wantNonce,
@@ -212,7 +212,7 @@ func TestRFC6979Compat(t *testing.T) {
 		gotNonce := NonceRFC6979(secKey, hash[:], nil, nil, 0)
 		wantNonce := hexToBytes(test.nonce)
 		gotNonceBytes := gotNonce.Bytes()
-		if !bytes.Equal(gotNonceBytes[:], wantNonce) {
+		if !utils.FastEqual(gotNonceBytes[:], wantNonce) {
 			t.Errorf(
 				"NonceRFC6979 #%d (%s): Nonce is incorrect: "+
 					"%x (expected %x)", i, test.msg, gotNonce,

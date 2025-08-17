@@ -221,7 +221,7 @@ func TestGetSerialsByRange(t *testing.T) {
 			t.Fatalf("Failed to fetch event for serial %d: %v", i, err)
 		}
 
-		if !bytes.Equal(ev.Pubkey, events[1].Pubkey) {
+		if !utils.FastEqual(ev.Pubkey, events[1].Pubkey) {
 			t.Fatalf(
 				"Event %d has incorrect author. Got %x, expected %x",
 				i, ev.Pubkey, events[1].Pubkey,

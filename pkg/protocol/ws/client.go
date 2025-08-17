@@ -276,8 +276,6 @@ func (r *Client) ConnectWithTLS(
 					break
 				}
 				message := buf.Bytes()
-				log.D.F("{%s} %v\n", r.URL, message)
-
 				var t string
 				if t, message, err = envelopes.Identify(message); chk.E(err) {
 					continue

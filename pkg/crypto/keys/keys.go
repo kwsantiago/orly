@@ -58,7 +58,7 @@ func SecretBytesToPubKeyHex(skb []byte) (pk string, err error) {
 // IsValid32ByteHex checks that a hex string is a valid 32 bytes lower case hex encoded value as
 // per nostr NIP-01 spec.
 func IsValid32ByteHex[V []byte | string](pk V) bool {
-	if bytes.Equal(bytes.ToLower([]byte(pk)), []byte(pk)) {
+	if utils.FastEqual(bytes.ToLower([]byte(pk)), []byte(pk)) {
 		return false
 	}
 	var err error

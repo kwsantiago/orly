@@ -62,7 +62,7 @@ func TestSecretKeyToNsec(t *testing.T) {
 				err,
 			)
 		}
-		if !bytes.Equal(reNsec, nsec) {
+		if !utils.FastEqual(reNsec, nsec) {
 			t.Fatalf(
 				"recovered secret key did not regenerate nsec of original: %s mangled: %s",
 				reNsec, nsec,
@@ -103,7 +103,7 @@ func TestPublicKeyToNpub(t *testing.T) {
 				"error recovered secret key from converted to nsec: %s", err,
 			)
 		}
-		if !bytes.Equal(reNpub, npub) {
+		if !utils.FastEqual(reNpub, npub) {
 			t.Fatalf(
 				"recovered public key did not regenerate npub of original: %s mangled: %s",
 				reNpub, npub,

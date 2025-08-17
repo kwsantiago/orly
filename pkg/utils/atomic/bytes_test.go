@@ -37,20 +37,30 @@ func TestBytesNoInitialValue(t *testing.T) {
 
 func TestBytes(t *testing.T) {
 	atom := NewBytes([]byte{})
-	require.Equal(t, []byte{}, atom.Load(), "Expected Load to return initialized empty value")
+	require.Equal(
+		t, []byte{}, atom.Load(),
+		"Expected Load to return initialized empty value",
+	)
 
 	emptyBytes := []byte{}
 	atom = NewBytes(emptyBytes)
-	require.Equal(t, emptyBytes, atom.Load(), "Expected Load to return initialized empty value")
+	require.Equal(
+		t, emptyBytes, atom.Load(),
+		"Expected Load to return initialized empty value",
+	)
 
 	testBytes := []byte("test data")
 	atom = NewBytes(testBytes)
 	loadedBytes := atom.Load()
-	require.Equal(t, testBytes, loadedBytes, "Expected Load to return initialized value")
+	require.Equal(
+		t, testBytes, loadedBytes, "Expected Load to return initialized value",
+	)
 
 	// Verify that the returned value is a copy
 	loadedBytes[0] = 'X'
-	require.NotEqual(t, loadedBytes, atom.Load(), "Load should return a copy of the data")
+	require.NotEqual(
+		t, loadedBytes, atom.Load(), "Load should return a copy of the data",
+	)
 
 	// Store and verify
 	newBytes := []byte("new data")
@@ -61,24 +71,38 @@ func TestBytes(t *testing.T) {
 	newBytes[0] = 'X'
 	require.NotEqual(t, newBytes, atom.Load(), "Store should copy the data")
 
-	t.Run("JSON/Marshal", func(t *testing.T) {
-		jsonBytes := []byte("json data")
-		atom.Store(jsonBytes)
-		bytes, err := json.Marshal(atom)
-		require.NoError(t, err, "json.Marshal errored unexpectedly.")
-		require.Equal(t, []byte(`"anNvbiBkYXRh"`), bytes, "json.Marshal should encode as base64")
-	})
+	t.Run(
+		"JSON/Marshal", func(t *testing.T) {
+			jsonBytes := []byte("json data")
+			atom.Store(jsonBytes)
+			bytes, err := json.Marshal(atom)
+			require.NoError(t, err, "json.Marshal errored unexpectedly.")
+			require.Equal(
+				t, []byte(`"anNvbiBkYXRh"`), bytes,
+				"json.Marshal should encode as base64",
+			)
+		},
+	)
 
-	t.Run("JSON/Unmarshal", func(t *testing.T) {
-		err := json.Unmarshal([]byte(`"dGVzdCBkYXRh"`), &atom) // "test data" in base64
-		require.NoError(t, err, "json.Unmarshal errored unexpectedly.")
-		require.Equal(t, []byte("test data"), atom.Load(), "json.Unmarshal didn't set the correct value.")
-	})
+	t.Run(
+		"JSON/Unmarshal", func(t *testing.T) {
+			err := json.Unmarshal(
+				[]byte(`"dGVzdCBkYXRh"`), &atom,
+			) // "test data" in base64
+			require.NoError(t, err, "json.Unmarshal errored unexpectedly.")
+			require.Equal(
+				t, []byte("test data"), atom.Load(),
+				"json.Unmarshal didn't set the correct value.",
+			)
+		},
+	)
 
-	t.Run("JSON/Unmarshal/Error", func(t *testing.T) {
-		err := json.Unmarshal([]byte("42"), &atom)
-		require.Error(t, err, "json.Unmarshal didn't error as expected.")
-	})
+	t.Run(
+		"JSON/Unmarshal/Error", func(t *testing.T) {
+			err := json.Unmarshal([]byte("42"), &atom)
+			require.Error(t, err, "json.Unmarshal didn't error as expected.")
+		},
+	)
 }
 
 func TestBytesConcurrentAccess(t *testing.T) {
@@ -108,8 +132,10 @@ func TestBytesConcurrentAccess(t *testing.T) {
 				loaded := atom.Load()
 
 				// Verify the loaded data is valid (either our data or another goroutine's data)
-				require.LessOrEqual(t, len(loaded), parallelism,
-					"Loaded data length should not exceed parallelism")
+				require.LessOrEqual(
+					t, len(loaded), parallelism,
+					"Loaded data length should not exceed parallelism",
+				)
 
 				// If it's our data, verify it's correct
 				if len(loaded) == 1 && loaded[0] == byte(id) {
@@ -154,7 +180,7 @@ func TestBytesDataIntegrity(t *testing.T) {
 
 				// Verify the loaded data is one of our test data sets
 				for k := 0; k < parallelism; k++ {
-					if bytes.Equal(loaded, testData[k]) {
+					if utils.FastEqual(loaded, testData[k]) {
 						// Found a match, data is intact
 						break
 					}
@@ -212,13 +238,15 @@ func TestBytesStress(t *testing.T) {
 func BenchmarkBytesParallel(b *testing.B) {
 	atom := NewBytes([]byte("benchmark"))
 
-	b.RunParallel(func(pb *testing.PB) {
-		// Each goroutine gets its own data to prevent false sharing
-		myData := []byte("goroutine data")
+	b.RunParallel(
+		func(pb *testing.PB) {
+			// Each goroutine gets its own data to prevent false sharing
+			myData := []byte("goroutine data")
 
-		for pb.Next() {
-			atom.Store(myData)
-			_ = atom.Load()
-		}
-	})
+			for pb.Next() {
+				atom.Store(myData)
+				_ = atom.Load()
+			}
+		},
+	)
 }

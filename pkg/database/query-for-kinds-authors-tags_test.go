@@ -136,7 +136,7 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.ID) {
+			if utils.FastEqual(result.Id, ev.ID) {
 				found = true
 				if ev.Kind.K != testKind.K {
 					t.Fatalf(
@@ -145,7 +145,7 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 					)
 				}
 
-				if !bytes.Equal(ev.Pubkey, testEvent.Pubkey) {
+				if !utils.FastEqual(ev.Pubkey, testEvent.Pubkey) {
 					t.Fatalf(
 						"result %d has incorrect author, got %x, expected %x",
 						i, ev.Pubkey, testEvent.Pubkey,
@@ -156,9 +156,9 @@ func TestQueryForKindsAuthorsTags(t *testing.T) {
 				var hasTag bool
 				for _, tag := range ev.Tags.ToSliceOfTags() {
 					if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-						if bytes.Equal(
+						if utils.FastEqual(
 							tag.B(0), testTag.B(0),
-						) && bytes.Equal(tag.B(1), testTag.B(1)) {
+						) && utils.FastEqual(tag.B(1), testTag.B(1)) {
 							hasTag = true
 							break
 						}

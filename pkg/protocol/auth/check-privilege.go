@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/tag"
+	"orly.dev/pkg/utils"
 )
 
 func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
@@ -16,7 +16,7 @@ func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
 		}
 		// authed users when auth is required must be present in the
 		// event if it is privileged.
-		privileged = bytes.Equal(ev.Pubkey, authedPubkey)
+		privileged = utils.FastEqual(ev.Pubkey, authedPubkey)
 		// if the authed pubkey matches the event author, it is
 		// allowed.
 		if !privileged {
@@ -30,7 +30,7 @@ func CheckPrivilege(authedPubkey []byte, ev *event.E) (privileged bool) {
 			var hexAuthedKey []byte
 			hex.EncAppend(hexAuthedKey, authedPubkey)
 			for _, e := range eTags.ToSliceOfTags() {
-				if bytes.Equal(e.Value(), hexAuthedKey) {
+				if utils.FastEqual(e.Value(), hexAuthedKey) {
 					privileged = true
 					break
 				}

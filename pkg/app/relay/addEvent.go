@@ -10,6 +10,7 @@ import (
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/protocol/httpauth"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	realy_lol "orly.dev/pkg/version"
@@ -126,7 +127,7 @@ func (s *Server) AddEvent(
 			// same time), so if the pubkeys from the http event endpoint sent
 			// us here matches the index of this address, we can skip it.
 			for _, pk := range pubkeys {
-				if bytes.Equal(s.Peers.Pubkeys[i], pk) {
+				if utils.FastEqual(s.Peers.Pubkeys[i], pk) {
 					log.T.C(
 						func() string {
 							return fmt.Sprintf(

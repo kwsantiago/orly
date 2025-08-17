@@ -42,7 +42,7 @@ func (d *D) RunMigrations() {
 			for it.Rewind(); it.Valid(); it.Next() {
 				// there should only be one
 				item := it.Item()
-				key := item.KeyCopy(nil)
+				key := item.Key()
 				if err = indexes.VersionDec(ver).UnmarshalRead(
 					bytes.NewBuffer(key),
 				); chk.E(err) {
@@ -110,7 +110,7 @@ func (d *D) UpdateExpirationTags() {
 				if _, err = expTS.Unmarshal(expTag.Value()); chk.E(err) {
 					continue
 				}
-				key := item.KeyCopy(nil)
+				key := item.Key()
 				ser := indexes.EventVars()
 				if err = indexes.EventDec(ser).UnmarshalRead(
 					bytes.NewBuffer(key),

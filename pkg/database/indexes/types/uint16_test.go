@@ -71,7 +71,7 @@ func TestUint16(t *testing.T) {
 		}
 
 		// Compare encoded bytes to ensure correctness
-		if !bytes.Equal(encoded, bufEnc.Bytes()) {
+		if !utils.FastEqual(encoded, bufEnc.Bytes()) {
 			t.Fatalf(
 				"Byte encoding mismatch: got %v, expected %v", bufEnc.Bytes(),
 				encoded,

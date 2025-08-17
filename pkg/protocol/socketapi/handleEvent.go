@@ -17,6 +17,7 @@ import (
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/server"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/iptracker"
@@ -154,7 +155,7 @@ func (a *A) HandleEvent(
 		return
 	}
 	calculatedId := env.E.GetIDBytes()
-	if !bytes.Equal(calculatedId, env.E.ID) {
+	if !utils.FastEqual(calculatedId, env.E.ID) {
 		if err = Ok.Invalid(
 			a, env, "event id is computed incorrectly, "+
 				"event has ID %0x, but when computed it is %0x",
@@ -204,7 +205,7 @@ func (a *A) HandleEvent(
 	protectedTag := env.E.Tags.GetFirst(tag.New("-"))
 	if protectedTag != nil && a.AuthRequired() {
 		// check that the pubkey of the event matches the authed pubkey
-		if !bytes.Equal(a.Listener.AuthedPubkey(), env.E.Pubkey) {
+		if !utils.FastEqual(a.Listener.AuthedPubkey(), env.E.Pubkey) {
 			if err = Ok.Blocked(
 				a, env,
 				"protected tag may only be published by client authed to the same pubkey",
@@ -224,7 +225,7 @@ func (a *A) HandleEvent(
 		)
 		var ownerDelete bool
 		for _, pk := range a.OwnersPubkeys() {
-			if bytes.Equal(pk, env.Pubkey) {
+			if utils.FastEqual(pk, env.Pubkey) {
 				ownerDelete = true
 			}
 		}
@@ -232,7 +233,7 @@ func (a *A) HandleEvent(
 			var res []*event.E
 			if t.Len() >= 2 {
 				switch {
-				case bytes.Equal(t.Key(), []byte("e")):
+				case utils.FastEqual(t.Key(), []byte("e")):
 					// Process 'e' tag (event reference)
 					eventId := make([]byte, sha256.Size)
 					if _, err = hex.DecBytes(eventId, t.Value()); chk.E(err) {
@@ -263,7 +264,7 @@ func (a *A) HandleEvent(
 						// Check if the author of the deletion event matches the
 						// author of the referenced event. Owners can delete
 						// anything.
-						if !bytes.Equal(
+						if !utils.FastEqual(
 							referencedEvent.Pubkey, env.Pubkey,
 						) && !ownerDelete {
 							if err = Ok.Blocked(
@@ -304,7 +305,7 @@ func (a *A) HandleEvent(
 							},
 						)
 					}
-				case bytes.Equal(t.Key(), []byte("a")):
+				case utils.FastEqual(t.Key(), []byte("a")):
 					split := bytes.Split(t.Value(), []byte{':'})
 					if len(split) != 3 {
 						continue
@@ -351,7 +352,7 @@ func (a *A) HandleEvent(
 						}
 						return
 					}
-					if !bytes.Equal(pk, env.E.Pubkey) && !ownerDelete {
+					if !utils.FastEqual(pk, env.E.Pubkey) && !ownerDelete {
 						if err = Ok.Blocked(
 							a, env,
 							"can't delete other users' events (delete by a tag)",
@@ -404,7 +405,7 @@ func (a *A) HandleEvent(
 					)
 					continue
 				}
-				if !bytes.Equal(target.Pubkey, env.Pubkey) && !ownerDelete {
+				if !utils.FastEqual(target.Pubkey, env.Pubkey) && !ownerDelete {
 					if err = Ok.Error(
 						a, env, "only author can delete event",
 					); chk.E(err) {

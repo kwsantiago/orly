@@ -31,7 +31,7 @@ func TestMarshalUnmarshal(t *testing.T) {
 		}
 		bc = tg2.Marshal(bc)
 		// log.I.ToSliceOfBytes("\n\norig\n%s\n\ncopy\n%s\n", bo, bc)
-		if !bytes.Equal(bool, bc) {
+		if !utils.FastEqual(bool, bc) {
 			t.Fatalf("got\n%s\nwant\n%s", bool, bc)
 		}
 		if len(rem) != 0 {
@@ -50,14 +50,14 @@ func TestMarshalUnmarshalZeroLengthTag(t *testing.T) {
 	tg := &T{}
 	b, _ = tg.Unmarshal(empty)
 	b = tg.Marshal(b)
-	if !bytes.Equal(empty, b) {
+	if !utils.FastEqual(empty, b) {
 		t.Fatalf("got\n%s\nwant\n%s", b, empty)
 	}
 	empty = []byte("[]")
 	tg = &T{}
 	b, _ = tg.Unmarshal(empty)
 	b = tg.Marshal(b)
-	if !bytes.Equal(empty, b) {
+	if !utils.FastEqual(empty, b) {
 		t.Fatalf("got\n%s\nwant\n%s", b, empty)
 	}
 }

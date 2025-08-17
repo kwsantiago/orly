@@ -13,6 +13,7 @@ import (
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"orly.dev/pkg/utils/log"
@@ -66,7 +67,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			},
 		)
 	} else {
-		var idPkTs []store.IdPkTs
+		var idPkTs []*store.IdPkTs
 		if idPkTs, err = d.QueryForIds(c, f); chk.E(err) {
 			return
 		}
@@ -93,7 +94,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 				Authors: f.Authors,
 			}
 
-			var deletionIdPkTs []store.IdPkTs
+			var deletionIdPkTs []*store.IdPkTs
 			if deletionIdPkTs, err = d.QueryForIds(
 				c, deletionFilter,
 			); chk.E(err) {
@@ -190,7 +191,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 						continue
 					}
 					// Only allow users to delete their own events
-					if !bytes.Equal(pk, ev.Pubkey) {
+					if !utils.FastEqual(pk, ev.Pubkey) {
 						continue
 					}
 					// Create the key for the deletion map using hex
@@ -241,7 +242,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					}
 					targetEv := targetEvs[0]
 					// Only allow users to delete their own events
-					if !bytes.Equal(targetEv.Pubkey, ev.Pubkey) {
+					if !utils.FastEqual(targetEv.Pubkey, ev.Pubkey) {
 						continue
 					}
 					// Mark the specific event ID as deleted
@@ -296,7 +297,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			isIdInFilter := false
 			if f.Ids != nil && f.Ids.Len() > 0 {
 				for i := 0; i < f.Ids.Len(); i++ {
-					if bytes.Equal(ev.ID, f.Ids.B(i)) {
+					if utils.FastEqual(ev.ID, f.Ids.B(i)) {
 						isIdInFilter = true
 						break
 					}

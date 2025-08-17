@@ -37,7 +37,7 @@ func TestMarshalUnmarshal(t *testing.T) {
 		}
 		var bc []byte
 		bc = ta.Marshal(bc)
-		if !bytes.Equal(bb, bc) {
+		if !utils.FastEqual(bb, bc) {
 			t.Fatalf("got\n%s\nwant\n%s\n", bc, bb)
 		}
 		b, rem, bb, bc = b[:0], rem[:0], bb[:0], bc[:0]
@@ -59,8 +59,8 @@ func TestEmpty(t *testing.T) {
 	}
 	empty2 = New()
 	b1 = empty2.Marshal(b1)
-	if !bytes.Equal(bc, b1) {
-		t.Fatalf("'%s' == '%s' -> %v", bc, b1, bytes.Equal(bc, b1))
+	if !utils.FastEqual(bc, b1) {
+		t.Fatalf("'%s' == '%s' -> %v", bc, b1, utils.FastEqual(bc, b1))
 	}
 	b0, bc, b1 = b0[:0], bc[:0], b1[:0]
 	empty = New(&tag.T{})
@@ -73,8 +73,8 @@ func TestEmpty(t *testing.T) {
 	}
 	empty2 = New()
 	b1 = empty1.Marshal(b1)
-	if !bytes.Equal(bc, b1) {
-		t.Fatalf("'%s' == '%s' -> %v", bc, b1, bytes.Equal(bc, b1))
+	if !utils.FastEqual(bc, b1) {
+		t.Fatalf("'%s' == '%s' -> %v", bc, b1, utils.FastEqual(bc, b1))
 	}
 	b0, bc, b1 = b0[:0], bc[:0], b1[:0]
 }

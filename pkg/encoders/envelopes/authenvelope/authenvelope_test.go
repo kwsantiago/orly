@@ -39,14 +39,14 @@ func TestAuth(t *testing.T) {
 		if len(rem) != 0 {
 			t.Fatalf("remainder should be empty\n%s", rem)
 		}
-		if !bytes.Equal(chal.Challenge, c2.Challenge) {
+		if !utils.FastEqual(chal.Challenge, c2.Challenge) {
 			t.Fatalf(
 				"challenge mismatch\n%s\n%s",
 				chal.Challenge, c2.Challenge,
 			)
 		}
 		b2 = c2.Marshal(b2)
-		if !bytes.Equal(oChal, b2) {
+		if !utils.FastEqual(oChal, b2) {
 			t.Fatalf("challenge mismatch\n%s\n%s", oChal, b2)
 		}
 		resp := Response{
@@ -72,7 +72,7 @@ func TestAuth(t *testing.T) {
 			t.Fatal(err)
 		}
 		b4 = r2.Marshal(b4)
-		if !bytes.Equal(oResp, b4) {
+		if !utils.FastEqual(oResp, b4) {
 			t.Fatalf("challenge mismatch\n%s\n%s", oResp, b4)
 		}
 		b1, b2, b3, b4 = b1[:0], b2[:0], b3[:0], b4[:0]

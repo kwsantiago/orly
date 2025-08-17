@@ -1,9 +1,9 @@
 package relay
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/kind"
 	"orly.dev/pkg/encoders/kinds"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/keys"
 	"orly.dev/pkg/utils/log"
@@ -55,12 +55,12 @@ func (s *Server) Spider(noFetch ...bool) (err error) {
 		filteredFollows := make([][]byte, 0, len(followedFollows))
 		for _, follow := range followedFollows {
 			for _, owner := range ownersFollowed {
-				if bytes.Equal(follow, owner) {
+				if utils.FastEqual(follow, owner) {
 					break
 				}
 			}
 			for _, owner := range ownersMuted {
-				if bytes.Equal(follow, owner) {
+				if utils.FastEqual(follow, owner) {
 					break
 				}
 			}

@@ -100,7 +100,7 @@ func TestBech32(t *testing.T) {
 		if err != nil {
 			t.Errorf("encoding failed: %v", err)
 		}
-		if !bytes.Equal(encoded, bytes.ToLower([]byte(str))) {
+		if !utils.FastEqual(encoded, bytes.ToLower([]byte(str))) {
 			t.Errorf(
 				"expected data to encode to %v, but got %v",
 				str, encoded,
@@ -182,7 +182,7 @@ func TestBech32M(t *testing.T) {
 			t.Errorf("encoding failed: %v", err)
 		}
 
-		if !bytes.Equal(encoded, bytes.ToLower(str)) {
+		if !utils.FastEqual(encoded, bytes.ToLower(str)) {
 			t.Errorf(
 				"expected data to encode to %v, but got %v",
 				str, encoded,
@@ -338,7 +338,7 @@ func TestMixedCaseEncode(t *testing.T) {
 			t.Errorf("%q: unexpected encode error: %v", test.name, err)
 			continue
 		}
-		if !bytes.Equal(gotEncoded, []byte(test.encoded)) {
+		if !utils.FastEqual(gotEncoded, []byte(test.encoded)) {
 			t.Errorf(
 				"%q: mismatched encoding -- got %q, want %q", test.name,
 				gotEncoded, test.encoded,
@@ -353,7 +353,7 @@ func TestMixedCaseEncode(t *testing.T) {
 			continue
 		}
 		wantHRP := strings.ToLower(test.hrp)
-		if !bytes.Equal(gotHRP, []byte(wantHRP)) {
+		if !utils.FastEqual(gotHRP, []byte(wantHRP)) {
 			t.Errorf(
 				"%q: mismatched decoded HRP -- got %q, want %q", test.name,
 				gotHRP, wantHRP,
@@ -368,7 +368,7 @@ func TestMixedCaseEncode(t *testing.T) {
 			)
 			continue
 		}
-		if !bytes.Equal(convertedGotData, data) {
+		if !utils.FastEqual(convertedGotData, data) {
 			t.Errorf(
 				"%q: mismatched data -- got %x, want %x", test.name,
 				convertedGotData, data,
@@ -396,7 +396,7 @@ func TestCanDecodeUnlimtedBech32(t *testing.T) {
 		)
 	}
 	// Verify data for correctness.
-	if !bytes.Equal(hrp, []byte("1")) {
+	if !utils.FastEqual(hrp, []byte("1")) {
 		t.Fatalf("Unexpected hrp: %v", hrp)
 	}
 	decodedHex := fmt.Sprintf("%x", data)
@@ -501,7 +501,7 @@ func TestBech32Base256(t *testing.T) {
 			continue
 		}
 		// Ensure the expected HRP and original data are as expected.
-		if !bytes.Equal(gotHRP, []byte(test.hrp)) {
+		if !utils.FastEqual(gotHRP, []byte(test.hrp)) {
 			t.Errorf(
 				"%q: mismatched decoded HRP -- got %q, want %q", test.name,
 				gotHRP, test.hrp,
@@ -513,7 +513,7 @@ func TestBech32Base256(t *testing.T) {
 			t.Errorf("%q: invalid hex %q: %v", test.name, test.data, err)
 			continue
 		}
-		if !bytes.Equal(gotData, data) {
+		if !utils.FastEqual(gotData, data) {
 			t.Errorf(
 				"%q: mismatched data -- got %x, want %x", test.name,
 				gotData, data,
@@ -533,7 +533,7 @@ func TestBech32Base256(t *testing.T) {
 			)
 		}
 		wantEncoded := bytes.ToLower([]byte(str))
-		if !bytes.Equal(gotEncoded, wantEncoded) {
+		if !utils.FastEqual(gotEncoded, wantEncoded) {
 			t.Errorf(
 				"%q: mismatched encoding -- got %q, want %q", test.name,
 				gotEncoded, wantEncoded,
@@ -551,7 +551,7 @@ func TestBech32Base256(t *testing.T) {
 				err,
 			)
 		}
-		if !bytes.Equal(gotEncoded, wantEncoded) {
+		if !utils.FastEqual(gotEncoded, wantEncoded) {
 			t.Errorf(
 				"%q: mismatched encoding -- got %q, want %q", test.name,
 				gotEncoded, wantEncoded,
@@ -575,7 +575,7 @@ func TestBech32Base256(t *testing.T) {
 				err,
 			)
 		}
-		if !bytes.Equal(gotEncoded, wantEncoded) {
+		if !utils.FastEqual(gotEncoded, wantEncoded) {
 			t.Errorf(
 				"%q: mismatched encoding -- got %q, want %q", test.name,
 				gotEncoded, wantEncoded,
@@ -688,7 +688,7 @@ func TestConvertBits(t *testing.T) {
 		if err != nil {
 			t.Fatalf("test case %d failed: %v", i, err)
 		}
-		if !bytes.Equal(actual, expected) {
+		if !utils.FastEqual(actual, expected) {
 			t.Fatalf(
 				"test case %d has wrong output; expected=%x actual=%x",
 				i, expected, actual,

@@ -11,6 +11,7 @@ import (
 	"orly.dev/pkg/encoders/eventid"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/log"
@@ -55,9 +56,9 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 	}
 	buf := bytes.NewBuffer(data)
 	switch {
-	case bytes.Equal(prefix, NpubHRP) ||
-		bytes.Equal(prefix, NsecHRP) ||
-		bytes.Equal(prefix, NoteHRP):
+	case utils.FastEqual(prefix, NpubHRP) ||
+		utils.FastEqual(prefix, NsecHRP) ||
+		utils.FastEqual(prefix, NoteHRP):
 		if len(data) < 32 {
 			return prefix, nil, errorf.E(
 				"data is less than 32 bytes (%d)", len(data),
@@ -66,7 +67,7 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 		b := make([]byte, schnorr.PubKeyBytesLen*2)
 		hex.EncBytes(b, data[:32])
 		return prefix, b, nil
-	case bytes.Equal(prefix, NprofileHRP):
+	case utils.FastEqual(prefix, NprofileHRP):
 		var result pointers.Profile
 		for {
 			t, v := tlv.ReadEntry(buf)
@@ -92,7 +93,7 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 				// ignore
 			}
 		}
-	case bytes.Equal(prefix, NeventHRP):
+	case utils.FastEqual(prefix, NeventHRP):
 		var result pointers.Event
 		for {
 			t, v := tlv.ReadEntry(buf)
@@ -127,7 +128,7 @@ func Decode(bech32string []byte) (prefix []byte, value any, err error) {
 				// ignore
 			}
 		}
-	case bytes.Equal(prefix, NentityHRP):
+	case utils.FastEqual(prefix, NentityHRP):
 		var result pointers.Entity
 		for {
 			t, v := tlv.ReadEntry(buf)

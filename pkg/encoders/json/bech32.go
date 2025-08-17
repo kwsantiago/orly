@@ -1,10 +1,10 @@
 package json
 
 import (
-	"bytes"
 	"orly.dev/pkg/crypto/ec/bech32"
 	"orly.dev/pkg/encoders/bech32encoding"
 	"orly.dev/pkg/encoders/text"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 )
@@ -46,7 +46,7 @@ func (b2 *Bech32) Unmarshal(dst []byte) (rem []byte, err error) {
 	if hrp, b5, err = bech32.Decode(c); chk.E(err) {
 		return
 	}
-	if !bytes.Equal(hrp, b2.HRP) {
+	if !utils.FastEqual(hrp, b2.HRP) {
 		err = errorf.E("invalid HRP, got '%s' expected '%s'", hrp, b2.HRP)
 		return
 	}

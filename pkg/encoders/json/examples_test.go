@@ -108,7 +108,7 @@ newlines and hidden tab and spaces at the end    `
 	if err != nil || len(rem) != 0 {
 		return
 	}
-	fmt.Printf("%v\n", bytes.Equal(s2.V, []byte(ex)))
+	fmt.Printf("%v\n", utils.FastEqual(s2.V, []byte(ex)))
 	// Output:
 	// "test with\n\t\nnewlines and hidden tab and spaces at the end    "
 	// true
@@ -133,7 +133,7 @@ func ExampleBech32_Marshal() {
 		return
 	}
 	fmt.Printf("hrp: %s\ndata: %0x\n", b33.HRP, b33.V)
-	fmt.Printf("%v\n", bytes.Equal(bin, b33.V))
+	fmt.Printf("%v\n", utils.FastEqual(bin, b33.V))
 	// Output:
 	// "herp1qr02m0h0etlqzg69v7y6hn00qr02m0h0etlqzg69v7y6hn00jujvlj"
 	// hrp: herp
@@ -160,7 +160,7 @@ func ExampleHex_Marshal() {
 		return
 	}
 	fmt.Printf("data: %0x\n", h2.V)
-	fmt.Printf("%v\n", bytes.Equal(bin, h2.V))
+	fmt.Printf("%v\n", utils.FastEqual(bin, h2.V))
 	// Output:
 	// "deadbeefcafe0123456789abcdef00deadbeefcafe0123456789abcdef"
 	// data: deadbeefcafe0123456789abcdef00deadbeefcafe0123456789abcdef
@@ -186,7 +186,7 @@ func ExampleBase64_Marshal() {
 		return
 	}
 	fmt.Printf("data: %0x\n", b2.V)
-	fmt.Printf("%v\n", bytes.Equal(bin, b2.V))
+	fmt.Printf("%v\n", utils.FastEqual(bin, b2.V))
 	// Output:
 	// "3q2+78r+ASNFZ4mrze8A3q2+78r+ASNFZ4mrze8A"
 	// data: deadbeefcafe0123456789abcdef00deadbeefcafe0123456789abcdef00
@@ -209,7 +209,7 @@ func ExampleKeyValue_Marshal() {
 	var b, b2 []byte
 	b = kv.Marshal(b)
 	b2 = kv2.Marshal(b2)
-	fmt.Printf("%s\n%s\n%v\n", b, b2, bytes.Equal(b, b2))
+	fmt.Printf("%s\n%s\n%v\n", b, b2, utils.FastEqual(b, b2))
 	// Output:
 	// "key":"value"
 	// "key":"value"

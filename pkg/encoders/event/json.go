@@ -1,7 +1,6 @@
 package event
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/minio/sha256-simd"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"orly.dev/pkg/encoders/tags"
 	text2 "orly.dev/pkg/encoders/text"
 	"orly.dev/pkg/encoders/timestamp"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
 )
@@ -179,7 +179,7 @@ InVal:
 
 	switch key[0] {
 	case jId[0]:
-		if !bytes.Equal(jId, key) {
+		if !utils.FastEqual(jId, key) {
 			goto invalid
 		}
 		var id []byte
@@ -196,7 +196,7 @@ InVal:
 		ev.ID = id
 		goto BetweenKV
 	case jPubkey[0]:
-		if !bytes.Equal(jPubkey, key) {
+		if !utils.FastEqual(jPubkey, key) {
 			goto invalid
 		}
 		var pk []byte
@@ -213,7 +213,7 @@ InVal:
 		ev.Pubkey = pk
 		goto BetweenKV
 	case jKind[0]:
-		if !bytes.Equal(jKind, key) {
+		if !utils.FastEqual(jKind, key) {
 			goto invalid
 		}
 		ev.Kind = kind.New(0)
@@ -222,7 +222,7 @@ InVal:
 		}
 		goto BetweenKV
 	case jTags[0]:
-		if !bytes.Equal(jTags, key) {
+		if !utils.FastEqual(jTags, key) {
 			goto invalid
 		}
 		ev.Tags = tags.New()
@@ -231,7 +231,7 @@ InVal:
 		}
 		goto BetweenKV
 	case jSig[0]:
-		if !bytes.Equal(jSig, key) {
+		if !utils.FastEqual(jSig, key) {
 			goto invalid
 		}
 		var sig []byte
@@ -249,7 +249,7 @@ InVal:
 		goto BetweenKV
 	case jContent[0]:
 		if key[1] == jContent[1] {
-			if !bytes.Equal(jContent, key) {
+			if !utils.FastEqual(jContent, key) {
 				goto invalid
 			}
 			if ev.Content, r, err = text2.UnmarshalQuoted(r); chk.T(err) {
@@ -257,7 +257,7 @@ InVal:
 			}
 			goto BetweenKV
 		} else if key[1] == jCreatedAt[1] {
-			if !bytes.Equal(jCreatedAt, key) {
+			if !utils.FastEqual(jCreatedAt, key) {
 				goto invalid
 			}
 			ev.CreatedAt = timestamp.New(int64(0))

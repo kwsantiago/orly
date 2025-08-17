@@ -127,7 +127,7 @@ func TestMultipleParameterizedReplaceableEvents(t *testing.T) {
 	}
 
 	// Verify it's the newest event
-	if !bytes.Equal(evs[0].ID, newestEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, newestEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match the newest event. Got %x, expected %x",
 			evs[0].ID, newestEvent.ID,
@@ -161,7 +161,7 @@ func TestMultipleParameterizedReplaceableEvents(t *testing.T) {
 	}
 
 	// Verify it's the base event
-	if !bytes.Equal(evs[0].ID, baseEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, baseEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for base event by ID. Got %x, expected %x",
 			evs[0].ID, baseEvent.ID,

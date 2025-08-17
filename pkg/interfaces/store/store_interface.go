@@ -69,7 +69,7 @@ type IdPkTs struct {
 }
 
 type Querier interface {
-	QueryForIds(c context.T, f *filter.F) (evs []IdPkTs, err error)
+	QueryForIds(c context.T, f *filter.F) (evs []*IdPkTs, err error)
 }
 
 type GetIdsWriter interface {

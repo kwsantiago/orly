@@ -1,9 +1,9 @@
 package relay
 
 import (
-	"bytes"
 	"net/http"
 	"orly.dev/pkg/protocol/httpauth"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"time"
@@ -30,7 +30,7 @@ func (s *Server) OwnersFollowedAuth(
 		return
 	}
 	for _, pk := range s.ownersFollowed {
-		if bytes.Equal(pk, pubkey) {
+		if utils.FastEqual(pk, pubkey) {
 			authed = true
 			return
 		}

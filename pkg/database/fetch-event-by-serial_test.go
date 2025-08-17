@@ -102,7 +102,7 @@ func TestFetchEventBySerial(t *testing.T) {
 	}
 
 	// Verify the fetched event has the same ID as the original event
-	if !bytes.Equal(fetchedEvent.ID, testEvent.ID) {
+	if !utils.FastEqual(fetchedEvent.ID, testEvent.ID) {
 		t.Fatalf(
 			"Fetched event ID doesn't match original event ID. Got %x, expected %x",
 			fetchedEvent.ID, testEvent.ID,
@@ -117,7 +117,7 @@ func TestFetchEventBySerial(t *testing.T) {
 		)
 	}
 
-	if !bytes.Equal(fetchedEvent.Pubkey, testEvent.Pubkey) {
+	if !utils.FastEqual(fetchedEvent.Pubkey, testEvent.Pubkey) {
 		t.Fatalf(
 			"Fetched event pubkey doesn't match. Got %x, expected %x",
 			fetchedEvent.Pubkey, testEvent.Pubkey,

@@ -105,7 +105,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.ID) {
+			if utils.FastEqual(result.Id, ev.ID) {
 				found = true
 				break
 			}
@@ -143,7 +143,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.ID) {
+			if utils.FastEqual(result.Id, ev.ID) {
 				found = true
 				break
 			}
@@ -181,7 +181,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 		// Find the event with this ID
 		var found bool
 		for _, ev := range events {
-			if bytes.Equal(result.Id, ev.ID) {
+			if utils.FastEqual(result.Id, ev.ID) {
 				found = true
 				break
 			}

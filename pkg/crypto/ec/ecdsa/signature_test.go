@@ -328,7 +328,7 @@ func TestSignatureSerialize(t *testing.T) {
 	}
 	for i, test := range tests {
 		result := test.ecsig.Serialize()
-		if !bytes.Equal(result, test.expected) {
+		if !utils.FastEqual(result, test.expected) {
 			t.Errorf(
 				"Serialize #%d (%s) unexpected result:\n"+
 					"got:  %x\nwant: %x", i, test.name, result,

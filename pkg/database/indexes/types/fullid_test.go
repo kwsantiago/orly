@@ -27,7 +27,7 @@ func TestFromId(t *testing.T) {
 	}
 
 	// Verify the ID was set correctly
-	if !bytes.Equal(fi.Bytes(), validId) {
+	if !utils.FastEqual(fi.Bytes(), validId) {
 		t.Errorf(
 			"FromId did not set the ID correctly: got %v, want %v", fi.Bytes(),
 			validId,
@@ -62,7 +62,7 @@ func TestIdMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the written bytes
-	if !bytes.Equal(buf.Bytes(), validId) {
+	if !utils.FastEqual(buf.Bytes(), validId) {
 		t.Errorf("MarshalWrite wrote %v, want %v", buf.Bytes(), validId)
 	}
 
@@ -74,7 +74,7 @@ func TestIdMarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the read value
-	if !bytes.Equal(fi2.Bytes(), validId) {
+	if !utils.FastEqual(fi2.Bytes(), validId) {
 		t.Errorf("UnmarshalRead read %v, want %v", fi2.Bytes(), validId)
 	}
 }
@@ -108,7 +108,7 @@ func TestIdUnmarshalReadWithCorruptedData(t *testing.T) {
 
 	// The UnmarshalRead method should not have copied the original data to itself
 	// before reading, so the value should be partially overwritten
-	if bytes.Equal(fi2.Bytes(), differentId) {
+	if utils.FastEqual(fi2.Bytes(), differentId) {
 		t.Errorf("UnmarshalRead did not modify the value as expected")
 	}
 }

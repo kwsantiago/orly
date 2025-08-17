@@ -26,7 +26,7 @@ func TestFromIdent(t *testing.T) {
 	}
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(i.Bytes(), expected) {
+	if !utils.FastEqual(i.Bytes(), expected) {
 		t.Errorf(
 			"FromIdent did not set the hash correctly: got %v, want %v",
 			i.Bytes(), expected,
@@ -52,7 +52,7 @@ func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the written bytes
-	if !bytes.Equal(buf.Bytes(), i1.Bytes()) {
+	if !utils.FastEqual(buf.Bytes(), i1.Bytes()) {
 		t.Errorf("MarshalWrite wrote %v, want %v", buf.Bytes(), i1.Bytes())
 	}
 
@@ -64,7 +64,7 @@ func TestIdent_MarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the read value
-	if !bytes.Equal(i2.Bytes(), i1.Bytes()) {
+	if !utils.FastEqual(i2.Bytes(), i1.Bytes()) {
 		t.Errorf("UnmarshalRead read %v, want %v", i2.Bytes(), i1.Bytes())
 	}
 }
@@ -93,7 +93,7 @@ func TestIdent_UnmarshalReadWithCorruptedData(t *testing.T) {
 
 	// The UnmarshalRead method should not have copied the original data to itself
 	// before reading, so the value should be partially overwritten
-	if bytes.Equal(i2.Bytes(), i1.Bytes()) {
+	if utils.FastEqual(i2.Bytes(), i1.Bytes()) {
 		t.Errorf("UnmarshalRead did not modify the value as expected")
 	}
 }

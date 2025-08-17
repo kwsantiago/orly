@@ -103,7 +103,7 @@ func TestQueryEventsByID(t *testing.T) {
 	}
 
 	// Verify it's the correct event
-	if !bytes.Equal(evs[0].ID, testEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, testEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match. Got %x, expected %x", evs[0].ID,
 			testEvent.ID,
@@ -171,7 +171,7 @@ func TestQueryEventsByAuthor(t *testing.T) {
 
 	// Verify all events have the correct author
 	for i, ev := range evs {
-		if !bytes.Equal(ev.Pubkey, events[1].Pubkey) {
+		if !utils.FastEqual(ev.Pubkey, events[1].Pubkey) {
 			t.Fatalf(
 				"Event %d has incorrect author. Got %x, expected %x",
 				i, ev.Pubkey, events[1].Pubkey,
@@ -241,7 +241,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the original event
-	if !bytes.Equal(evs[0].ID, replaceableEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, replaceableEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for replaced event. Got %x, expected %x",
 			evs[0].ID, replaceableEvent.ID,
@@ -271,7 +271,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the newer event
-	if !bytes.Equal(evs[0].ID, newerEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, newerEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for replaceable events. Got %x, expected %x",
 			evs[0].ID, newerEvent.ID,
@@ -321,7 +321,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's still the newer event
-	if !bytes.Equal(evs[0].ID, newerEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, newerEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match after deletion. Got %x, expected %x",
 			evs[0].ID, newerEvent.ID,
@@ -347,7 +347,7 @@ func TestReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the original event
-	if !bytes.Equal(evs[0].ID, replaceableEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, replaceableEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for deleted event by ID. Got %x, expected %x",
 			evs[0].ID, replaceableEvent.ID,
@@ -507,7 +507,7 @@ func TestParameterizedReplaceableEventsAndDeletion(t *testing.T) {
 	}
 
 	// Verify it's the correct event
-	if !bytes.Equal(evs[0].ID, paramEvent.ID) {
+	if !utils.FastEqual(evs[0].ID, paramEvent.ID) {
 		t.Fatalf(
 			"Event ID doesn't match when querying for deleted parameterized event by ID. Got %x, expected %x",
 			evs[0].ID, paramEvent.ID,
@@ -618,8 +618,8 @@ func TestQueryEventsByTag(t *testing.T) {
 		var hasTag bool
 		for _, tag := range ev.Tags.ToSliceOfTags() {
 			if tag.Len() >= 2 && len(tag.B(0)) == 1 {
-				if bytes.Equal(tag.B(0), testTag.B(0)) &&
-					bytes.Equal(tag.B(1), testTag.B(1)) {
+				if utils.FastEqual(tag.B(0), testTag.B(0)) &&
+					utils.FastEqual(tag.B(1), testTag.B(1)) {
 					hasTag = true
 					break
 				}

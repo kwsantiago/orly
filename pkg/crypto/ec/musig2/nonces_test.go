@@ -64,7 +64,7 @@ func TestMusig2NonceGenTestVectors(t *testing.T) {
 					t.Fatalf("err gen nonce aux bytes %v", err)
 				}
 				expectedBytes, _ := hex.Dec(testCase.Expected)
-				if !bytes.Equal(nonce.SecNonce[:], expectedBytes) {
+				if !utils.FastEqual(nonce.SecNonce[:], expectedBytes) {
 					t.Fatalf(
 						"nonces don't match: expected %x, got %x",
 						expectedBytes, nonce.SecNonce[:],

@@ -21,7 +21,7 @@ func (d *D) GetSerialsByRange(idx Range) (
 			for it.Seek(idx.End); it.Valid(); it.Next() {
 				item := it.Item()
 				var key []byte
-				key = item.KeyCopy(nil)
+				key = item.Key()
 				if bytes.Compare(
 					key[:len(key)-5], idx.Start,
 				) < 0 {

@@ -40,7 +40,7 @@ func TestPrefixMethods(t *testing.T) {
 	prefix := NewPrefix(Event)
 
 	// Test Bytes method
-	if !bytes.Equal(prefix.Bytes(), []byte(EventPrefix)) {
+	if !utils.FastEqual(prefix.Bytes(), []byte(EventPrefix)) {
 		t.Errorf(
 			"Bytes method returned %v, expected %v", prefix.Bytes(),
 			[]byte(EventPrefix),
@@ -53,7 +53,7 @@ func TestPrefixMethods(t *testing.T) {
 	if chk.E(err) {
 		t.Fatalf("MarshalWrite failed: %v", err)
 	}
-	if !bytes.Equal(buf.Bytes(), []byte(EventPrefix)) {
+	if !utils.FastEqual(buf.Bytes(), []byte(EventPrefix)) {
 		t.Errorf(
 			"MarshalWrite wrote %v, expected %v", buf.Bytes(),
 			[]byte(EventPrefix),
@@ -66,7 +66,7 @@ func TestPrefixMethods(t *testing.T) {
 	if chk.E(err) {
 		t.Fatalf("UnmarshalRead failed: %v", err)
 	}
-	if !bytes.Equal(newPrefix.Bytes(), []byte(EventPrefix)) {
+	if !utils.FastEqual(newPrefix.Bytes(), []byte(EventPrefix)) {
 		t.Errorf(
 			"UnmarshalRead read %v, expected %v", newPrefix.Bytes(),
 			[]byte(EventPrefix),
@@ -224,7 +224,7 @@ func TestTStruct(t *testing.T) {
 	// Verify the decoded values
 	decodedPrefix := dec.Encs[0].(*P)
 	decodedSer := dec.Encs[1].(*types.Uint40)
-	if !bytes.Equal(decodedPrefix.Bytes(), prefix.Bytes()) {
+	if !utils.FastEqual(decodedPrefix.Bytes(), prefix.Bytes()) {
 		t.Errorf(
 			"Decoded prefix %v, expected %v", decodedPrefix.Bytes(),
 			prefix.Bytes(),
@@ -333,7 +333,7 @@ func TestIdFunctions(t *testing.T) {
 	}
 
 	// Verify the decoded values
-	if !bytes.Equal(newId.Bytes(), id.Bytes()) {
+	if !utils.FastEqual(newId.Bytes(), id.Bytes()) {
 		t.Errorf("Decoded id %v, expected %v", newId.Bytes(), id.Bytes())
 	}
 	if newSer.Get() != ser.Get() {
@@ -409,10 +409,10 @@ func TestIdPubkeyFunctions(t *testing.T) {
 	if newSer.Get() != ser.Get() {
 		t.Errorf("Decoded serial %d, expected %d", newSer.Get(), ser.Get())
 	}
-	if !bytes.Equal(newFid.Bytes(), fid.Bytes()) {
+	if !utils.FastEqual(newFid.Bytes(), fid.Bytes()) {
 		t.Errorf("Decoded id %v, expected %v", newFid.Bytes(), fid.Bytes())
 	}
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
+	if !utils.FastEqual(newP.Bytes(), p.Bytes()) {
 		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -531,7 +531,7 @@ func TestPubkeyFunctions(t *testing.T) {
 	}
 
 	// Verify the decoded values
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
+	if !utils.FastEqual(newP.Bytes(), p.Bytes()) {
 		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -603,7 +603,7 @@ func TestPubkeyTagFunctions(t *testing.T) {
 	}
 
 	// Verify the decoded values
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
+	if !utils.FastEqual(newP.Bytes(), p.Bytes()) {
 		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
 	}
 	if newK.Letter() != k.Letter() {
@@ -611,7 +611,7 @@ func TestPubkeyTagFunctions(t *testing.T) {
 			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
 		)
 	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
+	if !utils.FastEqual(newV.Bytes(), v.Bytes()) {
 		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -680,7 +680,7 @@ func TestTagFunctions(t *testing.T) {
 			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
 		)
 	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
+	if !utils.FastEqual(newV.Bytes(), v.Bytes()) {
 		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -812,7 +812,7 @@ func TestKindTagFunctions(t *testing.T) {
 			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
 		)
 	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
+	if !utils.FastEqual(newV.Bytes(), v.Bytes()) {
 		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -883,7 +883,7 @@ func TestKindPubkeyFunctions(t *testing.T) {
 	if newKi.Get() != ki.Get() {
 		t.Errorf("Decoded kind %d, expected %d", newKi.Get(), ki.Get())
 	}
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
+	if !utils.FastEqual(newP.Bytes(), p.Bytes()) {
 		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
 	}
 	if newCa.Get() != ca.Get() {
@@ -959,7 +959,7 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 	if newKi.Get() != ki.Get() {
 		t.Errorf("Decoded kind %d, expected %d", newKi.Get(), ki.Get())
 	}
-	if !bytes.Equal(newP.Bytes(), p.Bytes()) {
+	if !utils.FastEqual(newP.Bytes(), p.Bytes()) {
 		t.Errorf("Decoded pubkey hash %v, expected %v", newP.Bytes(), p.Bytes())
 	}
 	if newK.Letter() != k.Letter() {
@@ -967,7 +967,7 @@ func TestKindPubkeyTagFunctions(t *testing.T) {
 			"Decoded key letter %c, expected %c", newK.Letter(), k.Letter(),
 		)
 	}
-	if !bytes.Equal(newV.Bytes(), v.Bytes()) {
+	if !utils.FastEqual(newV.Bytes(), v.Bytes()) {
 		t.Errorf("Decoded value hash %v, expected %v", newV.Bytes(), v.Bytes())
 	}
 	if newCa.Get() != ca.Get() {

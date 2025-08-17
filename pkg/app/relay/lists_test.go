@@ -26,7 +26,10 @@ func TestLists_OwnersPubkeys(t *testing.T) {
 
 	// Verify length
 	if l.LenOwnersPubkeys() != len(testPubkeys) {
-		t.Errorf("Expected length %d, got %d", len(testPubkeys), l.LenOwnersPubkeys())
+		t.Errorf(
+			"Expected length %d, got %d", len(testPubkeys),
+			l.LenOwnersPubkeys(),
+		)
 	}
 
 	// Verify content
@@ -37,16 +40,18 @@ func TestLists_OwnersPubkeys(t *testing.T) {
 
 	// Verify each pubkey
 	for i, pk := range pks {
-		if !bytes.Equal(pk, testPubkeys[i]) {
-			t.Errorf("Pubkey at index %d doesn't match: expected %s, got %s",
-				i, testPubkeys[i], pk)
+		if !utils.FastEqual(pk, testPubkeys[i]) {
+			t.Errorf(
+				"Pubkey at index %d doesn't match: expected %s, got %s",
+				i, testPubkeys[i], pk,
+			)
 		}
 	}
 
 	// Verify that the returned slice is a copy, not a reference
 	pks[0] = []byte("modified")
 	newPks := l.OwnersPubkeys()
-	if bytes.Equal(pks[0], newPks[0]) {
+	if utils.FastEqual(pks[0], newPks[0]) {
 		t.Error("Returned slice should be a copy, not a reference")
 	}
 }
@@ -72,20 +77,27 @@ func TestLists_OwnersFollowed(t *testing.T) {
 
 	// Verify length
 	if l.LenOwnersFollowed() != len(testPubkeys) {
-		t.Errorf("Expected length %d, got %d", len(testPubkeys), l.LenOwnersFollowed())
+		t.Errorf(
+			"Expected length %d, got %d", len(testPubkeys),
+			l.LenOwnersFollowed(),
+		)
 	}
 
 	// Verify content
 	followed = l.OwnersFollowed()
 	if len(followed) != len(testPubkeys) {
-		t.Errorf("Expected %d followed, got %d", len(testPubkeys), len(followed))
+		t.Errorf(
+			"Expected %d followed, got %d", len(testPubkeys), len(followed),
+		)
 	}
 
 	// Verify each pubkey
 	for i, pk := range followed {
-		if !bytes.Equal(pk, testPubkeys[i]) {
-			t.Errorf("Followed at index %d doesn't match: expected %s, got %s",
-				i, testPubkeys[i], pk)
+		if !utils.FastEqual(pk, testPubkeys[i]) {
+			t.Errorf(
+				"Followed at index %d doesn't match: expected %s, got %s",
+				i, testPubkeys[i], pk,
+			)
 		}
 	}
 }
@@ -111,7 +123,10 @@ func TestLists_FollowedFollows(t *testing.T) {
 
 	// Verify length
 	if l.LenFollowedFollows() != len(testPubkeys) {
-		t.Errorf("Expected length %d, got %d", len(testPubkeys), l.LenFollowedFollows())
+		t.Errorf(
+			"Expected length %d, got %d", len(testPubkeys),
+			l.LenFollowedFollows(),
+		)
 	}
 
 	// Verify content
@@ -122,9 +137,11 @@ func TestLists_FollowedFollows(t *testing.T) {
 
 	// Verify each pubkey
 	for i, pk := range follows {
-		if !bytes.Equal(pk, testPubkeys[i]) {
-			t.Errorf("Follow at index %d doesn't match: expected %s, got %s",
-				i, testPubkeys[i], pk)
+		if !utils.FastEqual(pk, testPubkeys[i]) {
+			t.Errorf(
+				"Follow at index %d doesn't match: expected %s, got %s",
+				i, testPubkeys[i], pk,
+			)
 		}
 	}
 }
@@ -150,7 +167,9 @@ func TestLists_OwnersMuted(t *testing.T) {
 
 	// Verify length
 	if l.LenOwnersMuted() != len(testPubkeys) {
-		t.Errorf("Expected length %d, got %d", len(testPubkeys), l.LenOwnersMuted())
+		t.Errorf(
+			"Expected length %d, got %d", len(testPubkeys), l.LenOwnersMuted(),
+		)
 	}
 
 	// Verify content
@@ -161,9 +180,11 @@ func TestLists_OwnersMuted(t *testing.T) {
 
 	// Verify each pubkey
 	for i, pk := range muted {
-		if !bytes.Equal(pk, testPubkeys[i]) {
-			t.Errorf("Muted at index %d doesn't match: expected %s, got %s",
-				i, testPubkeys[i], pk)
+		if !utils.FastEqual(pk, testPubkeys[i]) {
+			t.Errorf(
+				"Muted at index %d doesn't match: expected %s, got %s",
+				i, testPubkeys[i], pk,
+			)
 		}
 	}
 }
@@ -186,7 +207,11 @@ func TestLists_ConcurrentAccess(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 100; i++ {
-			l.SetOwnersFollowed([][]byte{[]byte("followed1"), []byte("followed2")})
+			l.SetOwnersFollowed(
+				[][]byte{
+					[]byte("followed1"), []byte("followed2"),
+				},
+			)
 			l.OwnersFollowed()
 		}
 		done <- true

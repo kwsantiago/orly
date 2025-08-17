@@ -33,7 +33,7 @@ func TestPubHash_FromPubkey(t *testing.T) {
 	expected := pkh[:PubHashLen]
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(ph.Bytes(), expected) {
+	if !utils.FastEqual(ph.Bytes(), expected) {
 		t.Errorf(
 			"FromPubkey did not set the hash correctly: got %v, want %v",
 			ph.Bytes(), expected,
@@ -70,7 +70,7 @@ func TestPubHash_FromPubkeyHex(t *testing.T) {
 	expected := pkh[:PubHashLen]
 
 	// Verify the hash was set correctly
-	if !bytes.Equal(ph.Bytes(), expected) {
+	if !utils.FastEqual(ph.Bytes(), expected) {
 		t.Errorf(
 			"FromPubkeyHex did not set the hash correctly: got %v, want %v",
 			ph.Bytes(), expected,
@@ -112,7 +112,7 @@ func TestPubHash_MarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the written bytes
-	if !bytes.Equal(buf.Bytes(), ph1.Bytes()) {
+	if !utils.FastEqual(buf.Bytes(), ph1.Bytes()) {
 		t.Errorf("MarshalWrite wrote %v, want %v", buf.Bytes(), ph1.Bytes())
 	}
 
@@ -124,7 +124,7 @@ func TestPubHash_MarshalWriteUnmarshalRead(t *testing.T) {
 	}
 
 	// Verify the read value
-	if !bytes.Equal(ph2.Bytes(), ph1.Bytes()) {
+	if !utils.FastEqual(ph2.Bytes(), ph1.Bytes()) {
 		t.Errorf("UnmarshalRead read %v, want %v", ph2.Bytes(), ph1.Bytes())
 	}
 }
@@ -158,7 +158,7 @@ func TestPubHash_UnmarshalReadWithCorruptedData(t *testing.T) {
 
 	// The UnmarshalRead method should not have copied the original data to itself
 	// before reading, so the value should be partially overwritten
-	if bytes.Equal(ph2.Bytes(), ph1.Bytes()) {
+	if utils.FastEqual(ph2.Bytes(), ph1.Bytes()) {
 		t.Errorf("UnmarshalRead did not modify the value as expected")
 	}
 }

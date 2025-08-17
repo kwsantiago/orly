@@ -55,7 +55,7 @@ func TestQuery(t *testing.T) {
 	); chk.E(err) {
 		t.Fatal(err)
 	}
-	if err != nil || !bytes.Equal(pp.PublicKey, pkb) {
+	if err != nil || !utils.FastEqual(pp.PublicKey, pkb) {
 		t.Fatalf("invalid query for fiatjaf.com")
 	}
 
@@ -65,7 +65,7 @@ func TestQuery(t *testing.T) {
 	); chk.E(err) {
 		t.Fatal(err)
 	}
-	if err != nil || !bytes.Equal(pp.PublicKey, pkb) {
+	if err != nil || !utils.FastEqual(pp.PublicKey, pkb) {
 		t.Fatalf("invalid query for htlc@fiatjaf.com")
 	}
 }

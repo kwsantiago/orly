@@ -59,7 +59,9 @@ func TestPublish(t *testing.T) {
 			assert.NoError(t, err)
 
 			event := parseEventMessage(t, raw)
-			assert.True(t, bytes.Equal(event.Serialize(), textNote.Serialize()))
+			assert.True(
+				t, utils.FastEqual(event.Serialize(), textNote.Serialize()),
+			)
 
 			// send back an ok nip-20 command result
 			res := []any{"OK", textNote.IdString(), true, ""}

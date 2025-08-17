@@ -61,7 +61,7 @@ func TestSigner_Generate(t *testing.T) {
 // 		calculatedID := ev.GetIDBytes()
 //
 // 		// Check if the stored ID matches the calculated ID
-// 		if !bytes.Equal(storedID, calculatedID) {
+// 		if !utils.FastEqual(storedID, calculatedID) {
 // 			log.D.Ln("Event ID mismatch: stored ID doesn't match calculated ID")
 // 			// Use the calculated ID for verification as ev.Verify() would do
 // 			ev.ID = calculatedID
@@ -178,7 +178,7 @@ func TestBTCECECDH(t *testing.T) {
 			if secret2, err = s2.ECDH(s1.Pub()); chk.E(err) {
 				t.Fatal(err)
 			}
-			if !bytes.Equal(secret1, secret2) {
+			if !utils.FastEqual(secret1, secret2) {
 				counter++
 				t.Errorf(
 					"ECDH generation failed to work in both directions, %x %x",

@@ -101,7 +101,7 @@ func TestBase58(t *testing.T) {
 			t.Errorf("hex.DecodeString failed failed #%d: got: %s", x, test.in)
 			continue
 		}
-		if res := base58.Decode(test.out); !bytes.Equal(res, b) {
+		if res := base58.Decode(test.out); !utils.FastEqual(res, b) {
 			t.Errorf(
 				"Decode test #%d failed: got: %q want: %q",
 				x, res, test.in,
