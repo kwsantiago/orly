@@ -43,9 +43,9 @@ func (a *A) HandleMessage(msg, authedPubkey []byte) {
 	}
 	switch t {
 	case eventenvelope.L:
-		notice = a.HandleEvent(a.Context(), rem, a.I)
+		notice = a.HandleEvent(a.Ctx, rem, a.I)
 	case reqenvelope.L:
-		notice = a.HandleReq(a.Context(), rem, a.I)
+		notice = a.HandleReq(a.Ctx, rem, a.I)
 	case closeenvelope.L:
 		notice = a.HandleClose(rem, a.I)
 	case authenvelope.L:
