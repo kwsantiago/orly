@@ -38,41 +38,107 @@ type BenchmarkResults struct {
 
 func main() {
 	var (
-		relayURL        = flag.String("relay", "ws://localhost:7447", "Relay URL to benchmark")
-		eventCount      = flag.Int("events", 10000, "Number of events to publish")
-		eventSize       = flag.Int("size", 1024, "Average size of event content in bytes")
-		concurrency     = flag.Int("concurrency", 10, "Number of concurrent publishers")
-		queryCount      = flag.Int("queries", 100, "Number of queries to execute")
-		queryLimit      = flag.Int("query-limit", 100, "Limit for each query")
-		skipPublish     = flag.Bool("skip-publish", false, "Skip publishing phase")
-		skipQuery       = flag.Bool("skip-query", false, "Skip query phase")
-		verbose         = flag.Bool("v", false, "Verbose output")
-		multiRelay      = flag.Bool("multi-relay", false, "Use multi-relay harness")
-		relayBinPath    = flag.String("relay-bin", "", "Path to relay binary (for multi-relay mode)")
-		profileQueries  = flag.Bool("profile", false, "Run query performance profiling")
-		profileSubs     = flag.Bool("profile-subs", false, "Profile subscription performance")
-		subCount        = flag.Int("sub-count", 100, "Number of concurrent subscriptions for profiling")
-		subDuration     = flag.Duration("sub-duration", 30*time.Second, "Duration for subscription profiling")
-		installRelays   = flag.Bool("install", false, "Install relay dependencies and binaries")
-		installSecp     = flag.Bool("install-secp", false, "Install only secp256k1 library")
-		workDir         = flag.String("work-dir", "/tmp/relay-build", "Working directory for builds")
-		installDir      = flag.String("install-dir", "/usr/local/bin", "Installation directory for binaries")
-		generateReport  = flag.Bool("report", false, "Generate comparative report")
-		reportFormat    = flag.String("report-format", "markdown", "Report format: markdown, json, csv")
-		reportFile      = flag.String("report-file", "benchmark_report", "Report output filename (without extension)")
-		reportTitle     = flag.String("report-title", "Relay Benchmark Comparison", "Report title")
-		timingMode      = flag.Bool("timing", false, "Run end-to-end timing instrumentation")
-		timingEvents    = flag.Int("timing-events", 100, "Number of events for timing instrumentation")
-		timingSubs      = flag.Bool("timing-subs", false, "Test subscription timing")
-		timingDuration  = flag.Duration("timing-duration", 10*time.Second, "Duration for subscription timing test")
-		loadTest        = flag.Bool("load", false, "Run load pattern simulation")
-		loadPattern     = flag.String("load-pattern", "constant", "Load pattern: constant, spike, burst, sine, ramp")
-		loadDuration    = flag.Duration("load-duration", 60*time.Second, "Duration for load test")
-		loadBase        = flag.Int("load-base", 50, "Base load (events/sec)")
-		loadPeak        = flag.Int("load-peak", 200, "Peak load (events/sec)")
-		loadPool        = flag.Int("load-pool", 10, "Connection pool size for load testing")
-		loadSuite       = flag.Bool("load-suite", false, "Run comprehensive load test suite")
-		loadConstraints = flag.Bool("load-constraints", false, "Test under resource constraints")
+		relayURL = flag.String(
+			"relay", "ws://localhost:7447", "Client URL to benchmark",
+		)
+		eventCount = flag.Int(
+			"events", 10000, "Number of events to publish",
+		)
+		eventSize = flag.Int(
+			"size", 1024, "Average size of event content in bytes",
+		)
+		concurrency = flag.Int(
+			"concurrency", 10, "Number of concurrent publishers",
+		)
+		queryCount = flag.Int(
+			"queries", 100, "Number of queries to execute",
+		)
+		queryLimit  = flag.Int("query-limit", 100, "Limit for each query")
+		skipPublish = flag.Bool(
+			"skip-publish", false, "Skip publishing phase",
+		)
+		skipQuery  = flag.Bool("skip-query", false, "Skip query phase")
+		verbose    = flag.Bool("v", false, "Verbose output")
+		multiRelay = flag.Bool(
+			"multi-relay", false, "Use multi-relay harness",
+		)
+		relayBinPath = flag.String(
+			"relay-bin", "", "Path to relay binary (for multi-relay mode)",
+		)
+		profileQueries = flag.Bool(
+			"profile", false, "Run query performance profiling",
+		)
+		profileSubs = flag.Bool(
+			"profile-subs", false, "Profile subscription performance",
+		)
+		subCount = flag.Int(
+			"sub-count", 100,
+			"Number of concurrent subscriptions for profiling",
+		)
+		subDuration = flag.Duration(
+			"sub-duration", 30*time.Second,
+			"Duration for subscription profiling",
+		)
+		installRelays = flag.Bool(
+			"install", false, "Install relay dependencies and binaries",
+		)
+		installSecp = flag.Bool(
+			"install-secp", false, "Install only secp256k1 library",
+		)
+		workDir = flag.String(
+			"work-dir", "/tmp/relay-build", "Working directory for builds",
+		)
+		installDir = flag.String(
+			"install-dir", "/usr/local/bin",
+			"Installation directory for binaries",
+		)
+		generateReport = flag.Bool(
+			"report", false, "Generate comparative report",
+		)
+		reportFormat = flag.String(
+			"report-format", "markdown", "Report format: markdown, json, csv",
+		)
+		reportFile = flag.String(
+			"report-file", "benchmark_report",
+			"Report output filename (without extension)",
+		)
+		reportTitle = flag.String(
+			"report-title", "Client Benchmark Comparison", "Report title",
+		)
+		timingMode = flag.Bool(
+			"timing", false, "Run end-to-end timing instrumentation",
+		)
+		timingEvents = flag.Int(
+			"timing-events", 100, "Number of events for timing instrumentation",
+		)
+		timingSubs = flag.Bool(
+			"timing-subs", false, "Test subscription timing",
+		)
+		timingDuration = flag.Duration(
+			"timing-duration", 10*time.Second,
+			"Duration for subscription timing test",
+		)
+		loadTest = flag.Bool(
+			"load", false, "Run load pattern simulation",
+		)
+		loadPattern = flag.String(
+			"load-pattern", "constant",
+			"Load pattern: constant, spike, burst, sine, ramp",
+		)
+		loadDuration = flag.Duration(
+			"load-duration", 60*time.Second, "Duration for load test",
+		)
+		loadBase = flag.Int("load-base", 50, "Base load (events/sec)")
+		loadPeak = flag.Int("load-peak", 200, "Peak load (events/sec)")
+		loadPool = flag.Int(
+			"load-pool", 10, "Connection pool size for load testing",
+		)
+		loadSuite = flag.Bool(
+			"load-suite", false, "Run comprehensive load test suite",
+		)
+		loadConstraints = flag.Bool(
+			"load-constraints", false, "Test under resource constraints",
+		)
 	)
 	flag.Parse()
 
@@ -89,25 +155,46 @@ func main() {
 	} else if *generateReport {
 		runReportGeneration(*reportTitle, *reportFormat, *reportFile)
 	} else if *loadTest || *loadSuite || *loadConstraints {
-		runLoadSimulation(c, *relayURL, *loadPattern, *loadDuration, *loadBase, *loadPeak, *loadPool, *eventSize, *loadSuite, *loadConstraints)
+		runLoadSimulation(
+			c, *relayURL, *loadPattern, *loadDuration, *loadBase, *loadPeak,
+			*loadPool, *eventSize, *loadSuite, *loadConstraints,
+		)
 	} else if *timingMode || *timingSubs {
-		runTimingInstrumentation(c, *relayURL, *timingEvents, *eventSize, *timingSubs, *timingDuration)
+		runTimingInstrumentation(
+			c, *relayURL, *timingEvents, *eventSize, *timingSubs,
+			*timingDuration,
+		)
 	} else if *profileQueries || *profileSubs {
-		runQueryProfiler(c, *relayURL, *queryCount, *concurrency, *profileSubs, *subCount, *subDuration)
+		runQueryProfiler(
+			c, *relayURL, *queryCount, *concurrency, *profileSubs, *subCount,
+			*subDuration,
+		)
 	} else if *multiRelay {
-		runMultiRelayBenchmark(c, *relayBinPath, *eventCount, *eventSize, *concurrency, *queryCount, *queryLimit, *skipPublish, *skipQuery)
+		runMultiRelayBenchmark(
+			c, *relayBinPath, *eventCount, *eventSize, *concurrency,
+			*queryCount, *queryLimit, *skipPublish, *skipQuery,
+		)
 	} else {
-		runSingleRelayBenchmark(c, *relayURL, *eventCount, *eventSize, *concurrency, *queryCount, *queryLimit, *skipPublish, *skipQuery)
+		runSingleRelayBenchmark(
+			c, *relayURL, *eventCount, *eventSize, *concurrency, *queryCount,
+			*queryLimit, *skipPublish, *skipQuery,
+		)
 	}
 }
 
-func runSingleRelayBenchmark(c context.T, relayURL string, eventCount, eventSize, concurrency, queryCount, queryLimit int, skipPublish, skipQuery bool) {
+func runSingleRelayBenchmark(
+	c context.T, relayURL string,
+	eventCount, eventSize, concurrency, queryCount, queryLimit int,
+	skipPublish, skipQuery bool,
+) {
 	results := &BenchmarkResults{}
 
 	// Phase 1: Publish events
 	if !skipPublish {
 		fmt.Printf("Publishing %d events to %s...\n", eventCount, relayURL)
-		if err := benchmarkPublish(c, relayURL, eventCount, eventSize, concurrency, results); chk.E(err) {
+		if err := benchmarkPublish(
+			c, relayURL, eventCount, eventSize, concurrency, results,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Error during publish benchmark: %v\n", err)
 			os.Exit(1)
 		}
@@ -116,7 +203,9 @@ func runSingleRelayBenchmark(c context.T, relayURL string, eventCount, eventSize
 	// Phase 2: Query events
 	if !skipQuery {
 		fmt.Printf("\nQuerying events from %s...\n", relayURL)
-		if err := benchmarkQuery(c, relayURL, queryCount, queryLimit, results); chk.E(err) {
+		if err := benchmarkQuery(
+			c, relayURL, queryCount, queryLimit, results,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Error during query benchmark: %v\n", err)
 			os.Exit(1)
 		}
@@ -126,7 +215,11 @@ func runSingleRelayBenchmark(c context.T, relayURL string, eventCount, eventSize
 	printResults(results)
 }
 
-func runMultiRelayBenchmark(c context.T, relayBinPath string, eventCount, eventSize, concurrency, queryCount, queryLimit int, skipPublish, skipQuery bool) {
+func runMultiRelayBenchmark(
+	c context.T, relayBinPath string,
+	eventCount, eventSize, concurrency, queryCount, queryLimit int,
+	skipPublish, skipQuery bool,
+) {
 	harness := NewMultiRelayHarness()
 	generator := NewReportGenerator()
 
@@ -165,16 +258,26 @@ func runMultiRelayBenchmark(c context.T, relayBinPath string, eventCount, eventS
 
 		if !skipPublish {
 			fmt.Printf("Publishing %d events to %s...\n", eventCount, relayURL)
-			if err := benchmarkPublish(c, relayURL, eventCount, eventSize, concurrency, results); chk.E(err) {
-				fmt.Fprintf(os.Stderr, "Error during publish benchmark for %s: %v\n", relayType, err)
+			if err := benchmarkPublish(
+				c, relayURL, eventCount, eventSize, concurrency, results,
+			); chk.E(err) {
+				fmt.Fprintf(
+					os.Stderr, "Error during publish benchmark for %s: %v\n",
+					relayType, err,
+				)
 				continue
 			}
 		}
 
 		if !skipQuery {
 			fmt.Printf("\nQuerying events from %s...\n", relayURL)
-			if err := benchmarkQuery(c, relayURL, queryCount, queryLimit, results); chk.E(err) {
-				fmt.Fprintf(os.Stderr, "Error during query benchmark for %s: %v\n", relayType, err)
+			if err := benchmarkQuery(
+				c, relayURL, queryCount, queryLimit, results,
+			); chk.E(err) {
+				fmt.Fprintf(
+					os.Stderr, "Error during query benchmark for %s: %v\n",
+					relayType, err,
+				)
 				continue
 			}
 		}
@@ -190,16 +293,21 @@ func runMultiRelayBenchmark(c context.T, relayBinPath string, eventCount, eventS
 		generator.AddRelayData(relayType.String(), results, metrics, nil)
 	}
 
-	generator.GenerateReport("Multi-Relay Benchmark Results")
+	generator.GenerateReport("Multi-Client Benchmark Results")
 
-	if err := SaveReportToFile("BENCHMARK_RESULTS.md", "markdown", generator); chk.E(err) {
+	if err := SaveReportToFile(
+		"BENCHMARK_RESULTS.md", "markdown", generator,
+	); chk.E(err) {
 		fmt.Printf("Warning: Failed to save benchmark results: %v\n", err)
 	} else {
 		fmt.Printf("\nBenchmark results saved to: BENCHMARK_RESULTS.md\n")
 	}
 }
 
-func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concurrency int, results *BenchmarkResults) error {
+func benchmarkPublish(
+	c context.T, relayURL string, eventCount, eventSize, concurrency int,
+	results *BenchmarkResults,
+) error {
 	// Generate signers for each concurrent publisher
 	signers := make([]*testSigner, concurrency)
 	for i := range signers {
@@ -244,7 +352,7 @@ func benchmarkPublish(c context.T, relayURL string, eventCount, eventSize, concu
 			for j := 0; j < eventsToPublish; j++ {
 				ev := generateEvent(signer, eventSize, time.Duration(0), 0)
 
-				if err := relay.Publish(c, ev); err != nil {
+				if err = relay.Publish(c, ev); err != nil {
 					log.E.F(
 						"Publisher %d failed to publish event: %v", publisherID,
 						err,
@@ -372,7 +480,9 @@ func benchmarkQuery(
 	return nil
 }
 
-func generateEvent(signer *testSigner, contentSize int, rateLimit time.Duration, burstSize int) *event.E {
+func generateEvent(
+	signer *testSigner, contentSize int, rateLimit time.Duration, burstSize int,
+) *event.E {
 	return generateSimpleEvent(signer, contentSize)
 }
 
@@ -450,18 +560,31 @@ func printHarnessMetrics(relayType RelayType, metrics *HarnessMetrics) {
 	}
 }
 
-func runQueryProfiler(c context.T, relayURL string, queryCount, concurrency int, profileSubs bool, subCount int, subDuration time.Duration) {
+func runQueryProfiler(
+	c context.T, relayURL string, queryCount, concurrency int, profileSubs bool,
+	subCount int, subDuration time.Duration,
+) {
 	profiler := NewQueryProfiler(relayURL)
 
 	if profileSubs {
-		fmt.Printf("Profiling %d concurrent subscriptions for %v...\n", subCount, subDuration)
-		if err := profiler.TestSubscriptionPerformance(c, subDuration, subCount); chk.E(err) {
+		fmt.Printf(
+			"Profiling %d concurrent subscriptions for %v...\n", subCount,
+			subDuration,
+		)
+		if err := profiler.TestSubscriptionPerformance(
+			c, subDuration, subCount,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Subscription profiling failed: %v\n", err)
 			os.Exit(1)
 		}
 	} else {
-		fmt.Printf("Profiling %d queries with %d concurrent workers...\n", queryCount, concurrency)
-		if err := profiler.ExecuteProfile(c, queryCount, concurrency); chk.E(err) {
+		fmt.Printf(
+			"Profiling %d queries with %d concurrent workers...\n", queryCount,
+			concurrency,
+		)
+		if err := profiler.ExecuteProfile(
+			c, queryCount, concurrency,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Query profiling failed: %v\n", err)
 			os.Exit(1)
 		}
@@ -488,7 +611,10 @@ func runSecp256k1Installer(workDir, installDir string) {
 	}
 }
 
-func runLoadSimulation(c context.T, relayURL, patternStr string, duration time.Duration, baseLoad, peakLoad, poolSize, eventSize int, runSuite, runConstraints bool) {
+func runLoadSimulation(
+	c context.T, relayURL, patternStr string, duration time.Duration,
+	baseLoad, peakLoad, poolSize, eventSize int, runSuite, runConstraints bool,
+) {
 	if runSuite {
 		suite := NewLoadTestSuite(relayURL, poolSize, eventSize)
 		if err := suite.RunAllPatterns(c); chk.E(err) {
@@ -515,7 +641,9 @@ func runLoadSimulation(c context.T, relayURL, patternStr string, duration time.D
 		os.Exit(1)
 	}
 
-	simulator := NewLoadSimulator(relayURL, pattern, duration, baseLoad, peakLoad, poolSize, eventSize)
+	simulator := NewLoadSimulator(
+		relayURL, pattern, duration, baseLoad, peakLoad, poolSize, eventSize,
+	)
 
 	if err := simulator.Run(c); chk.E(err) {
 		fmt.Fprintf(os.Stderr, "Load simulation failed: %v\n", err)
@@ -524,8 +652,12 @@ func runLoadSimulation(c context.T, relayURL, patternStr string, duration time.D
 
 	if runConstraints {
 		fmt.Printf("\n")
-		if err := simulator.SimulateResourceConstraints(c, 512, 80); chk.E(err) {
-			fmt.Fprintf(os.Stderr, "Resource constraint simulation failed: %v\n", err)
+		if err := simulator.SimulateResourceConstraints(
+			c, 512, 80,
+		); chk.E(err) {
+			fmt.Fprintf(
+				os.Stderr, "Resource constraint simulation failed: %v\n", err,
+			)
 		}
 	}
 
@@ -540,7 +672,10 @@ func runLoadSimulation(c context.T, relayURL, patternStr string, duration time.D
 	fmt.Printf("Peak latency: %vms\n", metrics["peak_latency_ms"])
 }
 
-func runTimingInstrumentation(c context.T, relayURL string, eventCount, eventSize int, testSubs bool, duration time.Duration) {
+func runTimingInstrumentation(
+	c context.T, relayURL string, eventCount, eventSize int, testSubs bool,
+	duration time.Duration,
+) {
 	instrumentation := NewTimingInstrumentation(relayURL)
 
 	fmt.Printf("Connecting to relay at %s...\n", relayURL)
@@ -552,13 +687,17 @@ func runTimingInstrumentation(c context.T, relayURL string, eventCount, eventSiz
 
 	if testSubs {
 		fmt.Printf("\n=== Subscription Timing Test ===\n")
-		if err := instrumentation.TestSubscriptionTiming(c, duration); chk.E(err) {
+		if err := instrumentation.TestSubscriptionTiming(
+			c, duration,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Subscription timing test failed: %v\n", err)
 			os.Exit(1)
 		}
 	} else {
 		fmt.Printf("\n=== Full Event Lifecycle Instrumentation ===\n")
-		if err := instrumentation.RunFullInstrumentation(c, eventCount, eventSize); chk.E(err) {
+		if err := instrumentation.RunFullInstrumentation(
+			c, eventCount, eventSize,
+		); chk.E(err) {
 			fmt.Fprintf(os.Stderr, "Timing instrumentation failed: %v\n", err)
 			os.Exit(1)
 		}
@@ -574,12 +713,14 @@ func runTimingInstrumentation(c context.T, relayURL string, eventCount, eventSiz
 	if bottlenecks, ok := metrics["bottlenecks"].(map[string]map[string]interface{}); ok {
 		fmt.Printf("\n=== Pipeline Stage Analysis ===\n")
 		for stage, data := range bottlenecks {
-			fmt.Printf("%s: avg=%vms, p95=%vms, p99=%vms, throughput=%.2f ops/s\n",
+			fmt.Printf(
+				"%s: avg=%vms, p95=%vms, p99=%vms, throughput=%.2f ops/s\n",
 				stage,
 				data["avg_latency_ms"],
 				data["p95_latency_ms"],
 				data["p99_latency_ms"],
-				data["throughput_ops_sec"])
+				data["throughput_ops_sec"],
+			)
 		}
 	}
 }

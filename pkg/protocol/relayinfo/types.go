@@ -57,7 +57,7 @@ var (
 	NIP8                     = HandlingMentions
 	EventDeletion            = NIP{"Event Deletion", 9}
 	NIP9                     = EventDeletion
-	RelayInformationDocument = NIP{"Relay Information Document", 11}
+	RelayInformationDocument = NIP{"Client Information Document", 11}
 	NIP11                    = RelayInformationDocument
 	GenericTagQueries        = NIP{"Generic Tag Queries", 12}
 	NIP12                    = GenericTagQueries
@@ -133,7 +133,7 @@ var (
 	NIP57                          = LightningZaps
 	Badges                         = NIP{"Badges", 58}
 	NIP58                          = Badges
-	RelayListMetadata              = NIP{"Relay List Metadata", 65}
+	RelayListMetadata              = NIP{"Client List Metadata", 65}
 	NIP65                          = RelayListMetadata
 	ProtectedEvents                = NIP{"Protected Events", 70}
 	NIP70                          = ProtectedEvents

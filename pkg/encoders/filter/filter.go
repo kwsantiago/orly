@@ -23,7 +23,6 @@ import (
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/errorf"
-	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/pointers"
 
 	"lukechampine.com/frand"
@@ -446,21 +445,15 @@ invalid:
 // determines if the event matches the filter, ignoring timestamp constraints..
 func (f *F) MatchesIgnoringTimestampConstraints(ev *event.E) bool {
 	if ev == nil {
-		log.I.F("nil event")
 		return false
 	}
 	if f.Ids.Len() > 0 && !f.Ids.Contains(ev.ID) {
-		log.I.F("no ids in filter match event")
 		return false
 	}
 	if f.Kinds.Len() > 0 && !f.Kinds.Contains(ev.Kind) {
-		log.I.F(
-			"no matching kinds in filter",
-		)
 		return false
 	}
 	if f.Authors.Len() > 0 && !f.Authors.Contains(ev.Pubkey) {
-		log.I.F("no matching authors in filter")
 		return false
 	}
 	// if f.Tags.Len() > 0 && !ev.Tags.Intersects(f.Tags) {
@@ -470,7 +463,6 @@ func (f *F) MatchesIgnoringTimestampConstraints(ev *event.E) bool {
 		for _, v := range f.Tags.ToSliceOfTags() {
 			tvs := v.ToSliceOfBytes()
 			if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
-				log.I.F("no matching tags in filter")
 				return false
 			}
 		}
@@ -485,11 +477,9 @@ func (f *F) Matches(ev *event.E) (match bool) {
 		return
 	}
 	if f.Since.Int() != 0 && ev.CreatedAt.I64() < f.Since.I64() {
-		log.I.F("event is older than since")
 		return
 	}
 	if f.Until.Int() != 0 && ev.CreatedAt.I64() > f.Until.I64() {
-		log.I.F("event is newer than until")
 		return
 	}
 	return true

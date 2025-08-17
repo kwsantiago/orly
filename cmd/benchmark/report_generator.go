@@ -60,7 +60,10 @@ func NewReportGenerator() *ReportGenerator {
 	}
 }
 
-func (rg *ReportGenerator) AddRelayData(relayType string, results *BenchmarkResults, metrics *HarnessMetrics, profilerMetrics *QueryMetrics) {
+func (rg *ReportGenerator) AddRelayData(
+	relayType string, results *BenchmarkResults, metrics *HarnessMetrics,
+	profilerMetrics *QueryMetrics,
+) {
 	data := RelayBenchmarkData{
 		RelayType:         relayType,
 		EventsPublished:   results.EventsPublished,
@@ -148,19 +151,25 @@ func (rg *ReportGenerator) detectAnomalies() {
 
 	for _, data := range rg.data {
 		if math.Abs(data.PublishRate-publishMean) > 2*publishStdDev {
-			anomaly := fmt.Sprintf("%s publish rate (%.2f) deviates significantly from average (%.2f)",
-				data.RelayType, data.PublishRate, publishMean)
+			anomaly := fmt.Sprintf(
+				"%s publish rate (%.2f) deviates significantly from average (%.2f)",
+				data.RelayType, data.PublishRate, publishMean,
+			)
 			rg.report.Anomalies = append(rg.report.Anomalies, anomaly)
 		}
 
 		if math.Abs(data.QueryRate-queryMean) > 2*queryStdDev {
-			anomaly := fmt.Sprintf("%s query rate (%.2f) deviates significantly from average (%.2f)",
-				data.RelayType, data.QueryRate, queryMean)
+			anomaly := fmt.Sprintf(
+				"%s query rate (%.2f) deviates significantly from average (%.2f)",
+				data.RelayType, data.QueryRate, queryMean,
+			)
 			rg.report.Anomalies = append(rg.report.Anomalies, anomaly)
 		}
 
 		if data.Errors > 0 {
-			anomaly := fmt.Sprintf("%s had %d errors during benchmark", data.RelayType, data.Errors)
+			anomaly := fmt.Sprintf(
+				"%s had %d errors during benchmark", data.RelayType, data.Errors,
+			)
 			rg.report.Anomalies = append(rg.report.Anomalies, anomaly)
 		}
 	}
@@ -171,9 +180,11 @@ func (rg *ReportGenerator) generateRecommendations() {
 		return
 	}
 
-	sort.Slice(rg.data, func(i, j int) bool {
-		return rg.data[i].PublishRate > rg.data[j].PublishRate
-	})
+	sort.Slice(
+		rg.data, func(i, j int) bool {
+			return rg.data[i].PublishRate > rg.data[j].PublishRate
+		},
+	)
 
 	if len(rg.data) > 1 {
 		best := rg.data[0]
@@ -181,16 +192,20 @@ func (rg *ReportGenerator) generateRecommendations() {
 
 		improvement := (best.PublishRate - worst.PublishRate) / worst.PublishRate * 100
 		if improvement > 20 {
-			rec := fmt.Sprintf("Consider using %s for high-throughput scenarios (%.1f%% faster than %s)",
-				best.RelayType, improvement, worst.RelayType)
+			rec := fmt.Sprintf(
+				"Consider using %s for high-throughput scenarios (%.1f%% faster than %s)",
+				best.RelayType, improvement, worst.RelayType,
+			)
 			rg.report.Recommendations = append(rg.report.Recommendations, rec)
 		}
 	}
 
 	for _, data := range rg.data {
 		if data.MemoryUsageMB > 500 {
-			rec := fmt.Sprintf("%s shows high memory usage (%.1f MB) - monitor for memory leaks",
-				data.RelayType, data.MemoryUsageMB)
+			rec := fmt.Sprintf(
+				"%s shows high memory usage (%.1f MB) - monitor for memory leaks",
+				data.RelayType, data.MemoryUsageMB,
+			)
 			rg.report.Recommendations = append(rg.report.Recommendations, rec)
 		}
 	}
@@ -198,25 +213,39 @@ func (rg *ReportGenerator) generateRecommendations() {
 
 func (rg *ReportGenerator) OutputMarkdown(writer io.Writer) error {
 	fmt.Fprintf(writer, "# %s\n\n", rg.report.Title)
-	fmt.Fprintf(writer, "Generated: %s\n\n", rg.report.GeneratedAt.Format(time.RFC3339))
+	fmt.Fprintf(
+		writer, "Generated: %s\n\n", rg.report.GeneratedAt.Format(time.RFC3339),
+	)
 
 	fmt.Fprintf(writer, "## Performance Summary\n\n")
-	fmt.Fprintf(writer, "| Relay | Publish Rate | Publish BW | Query Rate | Avg Events/Query | Memory (MB) |\n")
-	fmt.Fprintf(writer, "|-------|--------------|------------|------------|------------------|-------------|\n")
+	fmt.Fprintf(
+		writer,
+		"| Client | Publish Rate | Publish BW | Query Rate | Avg Events/Query | Memory (MB) |\n",
+	)
+	fmt.Fprintf(
+		writer,
+		"|-------|--------------|------------|------------|------------------|-------------|\n",
+	)
 
 	for _, data := range rg.data {
-		fmt.Fprintf(writer, "| %s | %.2f/s | %.2f MB/s | %.2f/s | %.2f | %.1f |\n",
+		fmt.Fprintf(
+			writer, "| %s | %.2f/s | %.2f MB/s | %.2f/s | %.2f | %.1f |\n",
 			data.RelayType, data.PublishRate, data.PublishBandwidth,
-			data.QueryRate, data.AvgEventsPerQuery, data.MemoryUsageMB)
+			data.QueryRate, data.AvgEventsPerQuery, data.MemoryUsageMB,
+		)
 	}
 
 	if rg.report.WinnerPublish != "" || rg.report.WinnerQuery != "" {
 		fmt.Fprintf(writer, "\n## Winners\n\n")
 		if rg.report.WinnerPublish != "" {
-			fmt.Fprintf(writer, "- **Best Publisher**: %s\n", rg.report.WinnerPublish)
+			fmt.Fprintf(
+				writer, "- **Best Publisher**: %s\n", rg.report.WinnerPublish,
+			)
 		}
 		if rg.report.WinnerQuery != "" {
-			fmt.Fprintf(writer, "- **Best Query Engine**: %s\n", rg.report.WinnerQuery)
+			fmt.Fprintf(
+				writer, "- **Best Query Engine**: %s\n", rg.report.WinnerQuery,
+			)
 		}
 	}
 
@@ -237,12 +266,18 @@ func (rg *ReportGenerator) OutputMarkdown(writer io.Writer) error {
 	fmt.Fprintf(writer, "\n## Detailed Results\n\n")
 	for _, data := range rg.data {
 		fmt.Fprintf(writer, "### %s\n\n", data.RelayType)
-		fmt.Fprintf(writer, "- Events Published: %d (%.2f MB)\n", data.EventsPublished, data.EventsPublishedMB)
+		fmt.Fprintf(
+			writer, "- Events Published: %d (%.2f MB)\n", data.EventsPublished,
+			data.EventsPublishedMB,
+		)
 		fmt.Fprintf(writer, "- Publish Duration: %s\n", data.PublishDuration)
 		fmt.Fprintf(writer, "- Queries Executed: %d\n", data.QueriesExecuted)
 		fmt.Fprintf(writer, "- Query Duration: %s\n", data.QueryDuration)
 		if data.P50Latency != "" {
-			fmt.Fprintf(writer, "- Latency P50/P95/P99: %s/%s/%s\n", data.P50Latency, data.P95Latency, data.P99Latency)
+			fmt.Fprintf(
+				writer, "- Latency P50/P95/P99: %s/%s/%s\n", data.P50Latency,
+				data.P95Latency, data.P99Latency,
+			)
 		}
 		if data.StartupTime != "" {
 			fmt.Fprintf(writer, "- Startup Time: %s\n", data.StartupTime)
@@ -264,9 +299,12 @@ func (rg *ReportGenerator) OutputCSV(writer io.Writer) error {
 	defer w.Flush()
 
 	header := []string{
-		"relay_type", "events_published", "events_published_mb", "publish_duration",
-		"publish_rate", "publish_bandwidth", "queries_executed", "events_returned",
-		"query_duration", "query_rate", "avg_events_per_query", "memory_usage_mb",
+		"relay_type", "events_published", "events_published_mb",
+		"publish_duration",
+		"publish_rate", "publish_bandwidth", "queries_executed",
+		"events_returned",
+		"query_duration", "query_rate", "avg_events_per_query",
+		"memory_usage_mb",
 		"p50_latency", "p95_latency", "p99_latency", "startup_time", "errors",
 	}
 
@@ -315,9 +353,11 @@ func (rg *ReportGenerator) GenerateThroughputCurve() []ThroughputPoint {
 		points = append(points, point)
 	}
 
-	sort.Slice(points, func(i, j int) bool {
-		return points[i].Throughput < points[j].Throughput
-	})
+	sort.Slice(
+		points, func(i, j int) bool {
+			return points[i].Throughput < points[j].Throughput
+		},
+	)
 
 	return points
 }
@@ -370,7 +410,9 @@ func stdDev(values []float64, mean float64) float64 {
 	return math.Sqrt(variance)
 }
 
-func SaveReportToFile(filename, format string, generator *ReportGenerator) error {
+func SaveReportToFile(
+	filename, format string, generator *ReportGenerator,
+) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

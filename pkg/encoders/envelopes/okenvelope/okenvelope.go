@@ -90,17 +90,19 @@ func (en *T) Marshal(dst []byte) (b []byte) {
 // subscription.Id strings are correctly unescaped by NIP-01 escaping rules.
 func (en *T) Unmarshal(b []byte) (r []byte, err error) {
 	r = b
-	var idHex []byte
-	if idHex, r, err = text2.UnmarshalHex(r); chk.E(err) {
+	var idBytes []byte
+	// Parse event id as quoted hex (NIP-20 compliant)
+	if idBytes, r, err = text2.UnmarshalHex(r); err != nil {
 		return
 	}
-	if len(idHex) != sha256.Size {
+	if len(idBytes) != sha256.Size {
 		err = errorf.E(
 			"invalid size for ID, require %d got %d",
-			len(idHex), sha256.Size,
+			sha256.Size, len(idBytes),
 		)
+		return
 	}
-	en.EventID = eventid.NewWith(idHex)
+	en.EventID = eventid.NewWith(idBytes)
 	if r, err = text2.Comma(r); chk.E(err) {
 		return
 	}

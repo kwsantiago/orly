@@ -4,31 +4,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
-	"sync/atomic"
-
 	"orly.dev/pkg/encoders/envelopes/closeenvelope"
 	"orly.dev/pkg/encoders/envelopes/reqenvelope"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filters"
 	"orly.dev/pkg/encoders/subscription"
-	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/encoders/timestamp"
+	"sync"
+	"sync/atomic"
 )
+
+type ReplaceableKey struct {
+	PubKey string
+	D      string
+}
 
 // Subscription represents a subscription to a relay.
 type Subscription struct {
 	counter int64
-	id      string
+	id      *subscription.Id
 
-	Relay   *Client
+	Client  *Client
 	Filters *filters.T
-
-	// // for this to be treated as a COUNT and not a REQ this must be set
-	// countResult chan CountEnvelope
 
 	// the Events channel emits all EVENTs that come in a Subscription
 	// will be closed when the subscription ends
-	Events event.C
+	Events chan *event.E
 	mu     sync.Mutex
 
 	// the EndOfStoredEvents channel gets closed when an EOSE comes for that subscription
@@ -40,13 +41,13 @@ type Subscription struct {
 	// Context will be .Done() when the subscription ends
 	Context context.Context
 
-	// // if it is not nil, checkDuplicate will be called for every event received
-	// // if it returns true that event will not be processed further.
-	// checkDuplicate func(id string, relay string) bool
-	//
-	// // if it is not nil, checkDuplicateReplaceable will be called for every event received
-	// // if it returns true that event will not be processed further.
-	// checkDuplicateReplaceable func(rk ReplaceableKey, ts Timestamp) bool
+	// if it is not nil, checkDuplicate will be called for every event received
+	// if it returns true that event will not be processed further.
+	checkDuplicate func(id string, relay string) bool
+
+	// if it is not nil, checkDuplicateReplaceable will be called for every event received
+	// if it returns true that event will not be processed further.
+	checkDuplicateReplaceable func(rk ReplaceableKey, ts *timestamp.T) bool
 
 	match  func(*event.E) bool // this will be either Filters.Match or Filters.MatchIgnoringTimestampConstraints
 	live   atomic.Bool
@@ -69,20 +70,20 @@ type WithLabel string
 
 func (_ WithLabel) IsSubscriptionOption() {}
 
-// // WithCheckDuplicate sets checkDuplicate on the subscription
-// type WithCheckDuplicate func(id, relay string) bool
-//
-// func (_ WithCheckDuplicate) IsSubscriptionOption() {}
-//
-// // WithCheckDuplicateReplaceable sets checkDuplicateReplaceable on the subscription
-// type WithCheckDuplicateReplaceable func(rk ReplaceableKey, ts *timestamp.T) bool
-//
-// func (_ WithCheckDuplicateReplaceable) IsSubscriptionOption() {}
+// WithCheckDuplicate sets checkDuplicate on the subscription
+type WithCheckDuplicate func(id, relay string) bool
+
+func (_ WithCheckDuplicate) IsSubscriptionOption() {}
+
+// WithCheckDuplicateReplaceable sets checkDuplicateReplaceable on the subscription
+type WithCheckDuplicateReplaceable func(rk ReplaceableKey, ts *timestamp.T) bool
+
+func (_ WithCheckDuplicateReplaceable) IsSubscriptionOption() {}
 
 var (
 	_ SubscriptionOption = (WithLabel)("")
-	// _ SubscriptionOption = (WithCheckDuplicate)(nil)
-	// _ SubscriptionOption = (WithCheckDuplicateReplaceable)(nil)
+	_ SubscriptionOption = (WithCheckDuplicate)(nil)
+	_ SubscriptionOption = (WithCheckDuplicateReplaceable)(nil)
 )
 
 func (sub *Subscription) start() {
@@ -98,7 +99,7 @@ func (sub *Subscription) start() {
 }
 
 // GetID returns the subscription ID.
-func (sub *Subscription) GetID() string { return sub.id }
+func (sub *Subscription) GetID() string { return sub.id.String() }
 
 func (sub *Subscription) dispatchEvent(evt *event.E) {
 	added := false
@@ -117,6 +118,7 @@ func (sub *Subscription) dispatchEvent(evt *event.E) {
 			case <-sub.Context.Done():
 			}
 		}
+
 		if added {
 			sub.storedwg.Done()
 		}
@@ -159,19 +161,15 @@ func (sub *Subscription) unsub(err error) {
 	}
 
 	// remove subscription from our map
-	sub.Relay.Subscriptions.Delete(sub.counter)
+	sub.Client.Subscriptions.Delete(sub.id.String())
 }
 
 // Close just sends a CLOSE message. You probably want Unsub() instead.
 func (sub *Subscription) Close() {
-	if sub.Relay.IsConnected() {
-		id, err := subscription.NewId(sub.id)
-		if err != nil {
-			return
-		}
-		closeMsg := closeenvelope.NewFrom(id)
+	if sub.Client.IsConnected() {
+		closeMsg := closeenvelope.NewFrom(sub.id)
 		closeb := closeMsg.Marshal(nil)
-		<-sub.Relay.Write(closeb)
+		<-sub.Client.Write(closeb)
 	}
 }
 
@@ -184,21 +182,14 @@ func (sub *Subscription) Sub(_ context.Context, ff *filters.T) {
 
 // Fire sends the "REQ" command to the relay.
 func (sub *Subscription) Fire() (err error) {
-	// if sub.countResult == nil {
-	req := reqenvelope.NewWithIdString(sub.id, sub.Filters)
-	if req == nil {
-		return fmt.Errorf("invalid ID or filters")
-	}
-	reqb := req.Marshal(nil)
-	// } else
-	// if len(sub.Filters) == 1 {
-	// 	reqb, _ = CountEnvelope{sub.id, sub.Filters[0], nil, nil}.MarshalJSON()
-	// } else {
-	// 	return fmt.Errorf("unexpected sub configuration")
+	var reqb []byte
+	reqb = reqenvelope.NewFrom(sub.id, sub.Filters).Marshal(nil)
 	sub.live.Store(true)
-	if err = <-sub.Relay.Write(reqb); chk.E(err) {
+	if err = <-sub.Client.Write(reqb); err != nil {
 		err = fmt.Errorf("failed to write: %w", err)
 		sub.cancel(err)
+		return
 	}
+
 	return
 }
