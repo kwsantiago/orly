@@ -1,11 +1,11 @@
 package bech32encoding
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/bech32encoding/pointers"
 	"orly.dev/pkg/encoders/eventid"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"reflect"

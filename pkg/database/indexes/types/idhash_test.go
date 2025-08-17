@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"encoding/base64"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/encoders/hex"

@@ -7,6 +7,7 @@ import (
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/event/examples"
 	"orly.dev/pkg/encoders/subscription"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

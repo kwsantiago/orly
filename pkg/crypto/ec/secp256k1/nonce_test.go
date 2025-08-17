@@ -6,9 +6,9 @@
 package secp256k1
 
 import (
-	"bytes"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"testing"
 )
 

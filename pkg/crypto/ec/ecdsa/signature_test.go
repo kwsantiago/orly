@@ -9,11 +9,11 @@
 package ecdsa
 
 import (
-	"bytes"
 	"errors"
 	"math/rand"
 	"orly.dev/pkg/crypto/ec/secp256k1"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 	"time"

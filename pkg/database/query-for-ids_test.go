@@ -12,6 +12,7 @@ import (
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -74,7 +75,7 @@ func TestQueryForIds(t *testing.T) {
 
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{
 			Authors: tag.New(events[1].Pubkey),

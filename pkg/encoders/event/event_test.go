@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/crypto/p256k"

@@ -10,6 +10,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -103,7 +104,7 @@ func TestQueryForKindsTags(t *testing.T) {
 	}
 
 	// Test querying by kind and tag
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 
 	// Use the kind from the test event
 	testKind := testEvent.Kind

@@ -21,8 +21,8 @@
 package atomic
 
 import (
-	"bytes"
 	"encoding/json"
+	"orly.dev/pkg/utils"
 	"runtime"
 	"sync"
 	"testing"

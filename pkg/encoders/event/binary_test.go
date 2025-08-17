@@ -3,6 +3,7 @@ package event
 import (
 	"bufio"
 	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 	"time"
 

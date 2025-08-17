@@ -5,9 +5,9 @@
 package base58_test
 
 import (
-	"bytes"
 	"encoding/hex"
 	"orly.dev/pkg/crypto/ec/base58"
+	"orly.dev/pkg/utils"
 	"testing"
 )
 

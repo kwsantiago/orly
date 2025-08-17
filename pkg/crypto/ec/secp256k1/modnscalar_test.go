@@ -5,11 +5,11 @@
 package secp256k1
 
 import (
-	"bytes"
 	"fmt"
 	"math/big"
 	"math/rand"
 	"orly.dev/pkg/encoders/hex"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"reflect"
 	"testing"

@@ -1,9 +1,9 @@
 package tags
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/tag"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"testing"

@@ -5,6 +5,7 @@ package p256k_test
 import (
 	"bufio"
 	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 	"time"
 

@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/encoders/hex"

@@ -5,7 +5,7 @@
 package btcec
 
 import (
-	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 )
 

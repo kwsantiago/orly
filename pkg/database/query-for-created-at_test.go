@@ -8,6 +8,7 @@ import (
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/timestamp"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -83,7 +84,7 @@ func TestQueryForCreatedAt(t *testing.T) {
 	untilTime.V = middleEvent.CreatedAt.V + 3600 // 1 hour after middle event
 
 	// Test querying by created_at range
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 
 	idTsPk, err = db.QueryForIds(
 		ctx, &filter.F{

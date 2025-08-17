@@ -6,8 +6,8 @@
 package secp256k1
 
 import (
-	"bytes"
 	"errors"
+	"orly.dev/pkg/utils"
 	"testing"
 )
 

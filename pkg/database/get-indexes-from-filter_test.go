@@ -3,6 +3,7 @@ package database
 import (
 	"bytes"
 	"math"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/database/indexes"

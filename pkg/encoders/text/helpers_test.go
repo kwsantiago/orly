@@ -1,7 +1,7 @@
 package text
 
 import (
-	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/crypto/sha256"

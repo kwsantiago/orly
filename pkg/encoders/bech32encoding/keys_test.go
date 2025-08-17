@@ -1,11 +1,11 @@
 package bech32encoding
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/crypto/ec/secp256k1"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

@@ -5,7 +5,7 @@
 package chainhash
 
 import (
-	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 )
 

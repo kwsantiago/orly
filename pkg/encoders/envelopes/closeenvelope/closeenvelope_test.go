@@ -1,9 +1,9 @@
 package closeenvelope
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/envelopes"
 	"orly.dev/pkg/encoders/subscription"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

@@ -1,10 +1,10 @@
 package authenvelope
 
 import (
-	"bytes"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/envelopes"
 	"orly.dev/pkg/protocol/auth"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

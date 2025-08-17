@@ -50,12 +50,12 @@
 package sha256
 
 import (
-	"bytes"
 	"encoding"
 	"encoding/hex"
 	"fmt"
 	"hash"
 	"io"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"strings"
 	"testing"

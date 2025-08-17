@@ -1,7 +1,6 @@
 package database
 
 import (
-	"bytes"
 	"fmt"
 	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event"
@@ -12,6 +11,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/timestamp"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"os"
 	"testing"

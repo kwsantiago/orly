@@ -1,7 +1,7 @@
 package dns
 
 import (
-	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/crypto/keys"

@@ -10,6 +10,7 @@ import (
 	"orly.dev/pkg/encoders/kinds"
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -73,7 +74,7 @@ func TestQueryForKindsAuthors(t *testing.T) {
 	t.Logf("Successfully saved %d events to the database", eventCount)
 
 	// Test querying by kind and author
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 
 	// Find an event with a specific kind and author
 	testKind := kind.New(1) // Kind 1 is typically text notes

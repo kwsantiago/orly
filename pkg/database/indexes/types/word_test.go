@@ -3,6 +3,7 @@ package types_test
 import (
 	"bytes"
 	"orly.dev/pkg/database/indexes/types"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"orly.dev/pkg/utils"
 	"testing"
 
 	"orly.dev/pkg/crypto/ec/schnorr"

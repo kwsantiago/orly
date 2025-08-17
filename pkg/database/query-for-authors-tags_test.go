@@ -9,6 +9,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -103,7 +104,7 @@ func TestQueryForAuthorsTags(t *testing.T) {
 	}
 
 	// Test querying by author and tag
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 
 	// Use the author from the test event
 	authorFilter := tag.New(testEvent.Pubkey)

@@ -3,7 +3,6 @@
 package ws
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -17,6 +16,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/encoders/timestamp"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/normalize"
 	"sync"

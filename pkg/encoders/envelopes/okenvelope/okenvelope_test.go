@@ -1,10 +1,10 @@
 package okenvelope
 
 import (
-	"bytes"
 	"orly.dev/pkg/encoders/envelopes"
 	"orly.dev/pkg/encoders/envelopes/messages"
 	"orly.dev/pkg/encoders/eventid"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"testing"
 )

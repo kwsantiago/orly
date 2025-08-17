@@ -9,6 +9,7 @@ import (
 	"orly.dev/pkg/encoders/tag"
 	"orly.dev/pkg/encoders/tags"
 	"orly.dev/pkg/interfaces/store"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
 	"os"
@@ -102,7 +103,7 @@ func TestQueryForTags(t *testing.T) {
 	}
 
 	// Test querying by tag only
-	var idTsPk []store.IdPkTs
+	var idTsPk []*store.IdPkTs
 
 	// Create a tags filter with the test tag
 	tagsFilter := tags.New(testTag)

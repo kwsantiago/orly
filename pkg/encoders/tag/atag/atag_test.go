@@ -1,11 +1,11 @@
 package atag
 
 import (
-	"bytes"
 	"math"
 	"orly.dev/pkg/crypto/ec/schnorr"
 	"orly.dev/pkg/encoders/hex"
 	"orly.dev/pkg/encoders/kind"
+	"orly.dev/pkg/utils"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/log"
 	"testing"
