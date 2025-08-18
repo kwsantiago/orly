@@ -3,10 +3,10 @@ package ws
 import (
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/errorf"
 	"orly.dev/pkg/utils/units"
 	"time"
 
@@ -40,7 +40,7 @@ func (c *Connection) WriteMessage(
 	ctx context.T, data []byte,
 ) (err error) {
 	if err = c.conn.Write(ctx, ws.MessageText, data); err != nil {
-		err = fmt.Errorf("failed to write message: %w", err)
+		err = errorf.E("failed to write message: %w", err)
 		return
 	}
 	return nil
@@ -52,11 +52,11 @@ func (c *Connection) ReadMessage(
 ) (err error) {
 	var reader io.Reader
 	if _, reader, err = c.conn.Reader(ctx); err != nil {
-		err = fmt.Errorf("failed to get reader: %w", err)
+		err = errorf.E("failed to get reader: %w", err)
 		return
 	}
 	if _, err = io.Copy(buf, reader); err != nil {
-		err = fmt.Errorf("failed to read message: %w", err)
+		err = errorf.E("failed to read message: %w", err)
 		return
 	}
 	return

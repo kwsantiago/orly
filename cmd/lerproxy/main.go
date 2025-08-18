@@ -1,10 +1,10 @@
 // Command lerproxy implements https reverse proxy with automatic LetsEncrypt
-// usage for multiple hostnames/backends,your own SSL certificates, nostr NIP-05
-// DNS verification hosting and Go vanity redirects.
+// usage for multiple hostnames/backends, and URL rewriting capability.
 package main
 
 import (
 	"bufio"
+	"context"
 	"crypto/tls"
 	_ "embed"
 	"encoding/json"
@@ -15,14 +15,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"orly.dev/cmd/lerproxy/buf"
-	"orly.dev/cmd/lerproxy/hsts"
-	"orly.dev/cmd/lerproxy/reverse"
-	"orly.dev/cmd/lerproxy/tcpkeepalive"
-	"orly.dev/cmd/lerproxy/util"
-	"orly.dev/pkg/utils/chk"
-	"orly.dev/pkg/utils/context"
-	"orly.dev/pkg/utils/log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -34,14 +26,22 @@ import (
 	"github.com/alexflint/go-arg"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
+	"orly.dev/cmd/lerproxy/buf"
+	"orly.dev/cmd/lerproxy/hsts"
+	"orly.dev/cmd/lerproxy/reverse"
+	"orly.dev/cmd/lerproxy/tcpkeepalive"
+	"orly.dev/cmd/lerproxy/util"
+	"orly.dev/pkg/utils/chk"
+	"orly.dev/pkg/utils/log"
 )
 
 //go:embed favicon.ico
 var defaultFavicon []byte
 
 type runArgs struct {
-	Addr  string        `arg:"-l,--listen" default:":https" help:"address to listen at"`
-	Conf  string        `arg:"-m,--map" default:"mapping.txt" help:"file with host/backend mapping"`
+	Addr string `arg:"-l,--listen" default:":https" help:"address to listen at"`
+	Conf string `arg:"-m,--map" default:"mapping.txt" help:"file with host/backend mapping"`
+	// Rewrites string        `arg:"-r,--rewrites" default:"rewrites.txt"`
 	Cache string        `arg:"-c,--cachedir" default:"/var/cache/letsencrypt" help:"path to directory to cache key and certificates"`
 	HSTS  bool          `arg:"-h,--hsts" help:"add Strict-Transport-Security header"`
 	Email string        `arg:"-e,--email" help:"contact email address presented to letsencrypt CA"`
@@ -49,22 +49,21 @@ type runArgs struct {
 	RTO   time.Duration `arg:"-r,--rto" default:"1m" help:"maximum duration before timing out read of the request"`
 	WTO   time.Duration `arg:"-w,--wto" default:"5m" help:"maximum duration before timing out write of the response"`
 	Idle  time.Duration `arg:"-i,--idle" help:"how long idle connection is kept before closing (set rto, wto to 0 to use this)"`
-	Certs []string      `arg:"--cert,separate" help:"certificates and the domain they match: eg: orly.dev:/path/to/cert - this will indicate to load two, one with extension .key and one with .crt, each expected to be PEM encoded TLS private and public keys, respectively"`
-	// Rewrites string        `arg:"-r,--rewrites" default:"rewrites.txt"`
+	Certs []string      `arg:"--cert,separate" help:"certificates and the domain they match: eg: mleku.dev:/path/to/cert - this will indicate to load two, one with extension .key and one with .crt, each expected to be PEM encoded TLS private and public keys, respectively"`
 }
 
 var args runArgs
 
 func main() {
 	arg.MustParse(&args)
-	ctx, cancel := signal.NotifyContext(context.Bg(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
-	if err := run(ctx, args); chk.T(err) {
+	if err := run(ctx, args); err != nil {
 		log.F.Ln(err)
 	}
 }
 
-func run(c context.T, args runArgs) (err error) {
+func run(ctx context.Context, args runArgs) (err error) {
 
 	if args.Cache == "" {
 		err = log.E.Err("no cache specified")
@@ -83,7 +82,7 @@ func run(c context.T, args runArgs) (err error) {
 	if args.WTO > 0 {
 		srv.WriteTimeout = args.WTO
 	}
-	group, ctx := errgroup.WithContext(c)
+	group, ctx := errgroup.WithContext(ctx)
 	if args.HTTP != "" {
 		httpServer := http.Server{
 			Addr:         args.HTTP,
@@ -100,8 +99,8 @@ func run(c context.T, args runArgs) (err error) {
 		group.Go(
 			func() error {
 				<-ctx.Done()
-				ctx, cancel := context.Timeout(
-					context.Bg(),
+				ctx, cancel := context.WithTimeout(
+					context.Background(),
 					time.Second,
 				)
 				defer cancel()
@@ -137,7 +136,9 @@ func run(c context.T, args runArgs) (err error) {
 	group.Go(
 		func() error {
 			<-ctx.Done()
-			ctx, cancel := context.Timeout(context.Bg(), time.Second)
+			ctx, cancel := context.WithTimeout(
+				context.Background(), time.Second,
+			)
 			defer cancel()
 			return srv.Shutdown(ctx)
 		},
@@ -328,13 +329,12 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				)
 				fin := hn + "/favicon.ico"
 				var fi []byte
-				if fi, err = os.ReadFile(fin); chk.E(err) {
+				if fi, err = os.ReadFile(fin); !chk.E(err) {
 					fi = defaultFavicon
 				}
 				mux.HandleFunc(
 					hn+"/favicon.ico",
 					func(writer http.ResponseWriter, request *http.Request) {
-						log.T.F("serving favicon to %s", hn)
 						if _, err = writer.Write(fi); chk.E(err) {
 							return
 						}
@@ -376,12 +376,12 @@ func setProxy(mapping map[string]string) (h http.Handler, err error) {
 				)
 				// req.Header.Set("Access-Control-Allow-Credentials", "true")
 				req.Header.Set("Access-Control-Allow-Origin", "*")
-				log.I.Ln(req.URL, req.RemoteAddr)
+				log.D.Ln(req.URL, req.RemoteAddr)
 			},
 			Transport: &http.Transport{
-				DialContext: func(c context.T, n, addr string) (
-					net.Conn, error,
-				) {
+				DialContext: func(
+					ctx context.Context, n, addr string,
+				) (net.Conn, error) {
 					return net.DialTimeout(network, ba, 5*time.Second)
 				},
 			},
