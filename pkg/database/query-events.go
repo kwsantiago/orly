@@ -2,7 +2,6 @@ package database
 
 import (
 	"bytes"
-	"fmt"
 	"orly.dev/pkg/crypto/sha256"
 	"orly.dev/pkg/database/indexes/types"
 	"orly.dev/pkg/encoders/event"
@@ -105,14 +104,6 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			idPkTs = append(idPkTs, deletionIdPkTs...)
 		}
 		// First pass: collect all deletion events
-		log.T.C(
-			func() string {
-				return fmt.Sprintf(
-					"Debug: Starting first pass - processing %d events\n",
-					len(idPkTs),
-				)
-			},
-		)
 		for _, idpk := range idPkTs {
 			var ev *event.E
 			ser := new(types.Uint40)
@@ -130,14 +121,6 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 			}
 			// Process deletion events to build our deletion maps
 			if ev.Kind.Equal(kind.Deletion) {
-				log.T.C(
-					func() string {
-						return fmt.Sprintf(
-							"found deletion event with ID: %s\n",
-							hex.Enc(ev.ID),
-						)
-					},
-				)
 				// Check for 'e' tags that directly reference event IDs
 				eTags := ev.Tags.GetAll(tag.New([]byte{'e'}))
 				for _, eTag := range eTags.ToSliceOfTags() {
@@ -149,22 +132,7 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 				}
 				// Check for 'a' tags that reference parameterized replaceable
 				// events
-				log.T.C(
-					func() string {
-						return fmt.Sprintf(
-							"processing deletion event with ID: %s\n",
-							hex.Enc(ev.ID),
-						)
-					},
-				)
 				aTags := ev.Tags.GetAll(tag.New([]byte{'a'}))
-				log.D.C(
-					func() string {
-						return fmt.Sprintf(
-							"Found %d a-tags\n", aTags.Len(),
-						)
-					},
-				)
 				for _, aTag := range aTags.ToSliceOfTags() {
 					if aTag.Len() < 2 {
 						continue
@@ -205,21 +173,6 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 					dValue := string(split[2])
 					deletionsByKindPubkeyDTag[key][dValue] = true
 					// Debug logging
-					log.D.C(
-						func() string {
-							return fmt.Sprintf(
-								"processing a-tag: %s\n", string(aTag.Value()),
-							)
-						},
-					)
-					log.D.C(
-						func() string {
-							return fmt.Sprintf(
-								"adding to deletion map - key: %s, d-tag: %s\n",
-								key, dValue,
-							)
-						},
-					)
 				}
 				// For replaceable events, we need to check if there are any
 				// e-tags that reference events with the same kind and pubkey
@@ -353,23 +306,6 @@ func (d *D) QueryEvents(c context.T, f *filter.F) (evs event.S, err error) {
 
 				// Check if this event has been deleted via an a-tag
 				if deletionMap, exists := deletionsByKindPubkeyDTag[key]; exists {
-					// Debug logging
-					log.T.C(
-						func() string {
-							return fmt.Sprintf(
-								"Checking deletion map - key: %s, d-tag: %s",
-								key, dValue,
-							)
-						},
-					)
-					log.T.C(
-						func() string {
-							return fmt.Sprintf(
-								"Deletion map contains key: %v, d-tag in map: %v",
-								exists, deletionMap[dValue],
-							)
-						},
-					)
 					// If the d-tag value is in the deletion map and this event
 					// is not specifically requested by ID, skip it
 					if deletionMap[dValue] && !isIdInFilter {
