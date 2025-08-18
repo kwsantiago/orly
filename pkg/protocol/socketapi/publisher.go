@@ -140,7 +140,7 @@ func (p *S) Receive(msg typer.T) {
 // # Expected behaviour
 //
 // Delivers the event to all subscribers whose filters match the event. It
-// applies authentication checks if required by the server, and skips delivery
+// applies authentication checks if required by the server and skips delivery
 // for unauthenticated users when events are privileged.
 func (p *S) Deliver(ev *event.E) {
 	var err error
@@ -163,29 +163,11 @@ func (p *S) Deliver(ev *event.E) {
 			},
 		)
 		for id, subscriber := range subs {
-			log.T.F(
-				"subscriber %s\n%s", w.RealRemote(),
-				subscriber.Marshal(nil),
-			)
 			if !subscriber.Match(ev) {
-				log.T.C(
-					func() string {
-						return fmt.Sprintf(
-							"subscriber %s filter %s not match", id,
-							subscriber.Marshal(nil),
-						)
-					},
-				)
 				continue
 			}
 			if p.Server.AuthRequired() {
 				if !auth.CheckPrivilege(w.AuthedPubkey(), ev) {
-					log.W.F(
-						"not privileged %0x ev pubkey %0x ev pubkey %0x kind %s privileged: %v",
-						w.AuthedPubkey(), ev.Pubkey,
-						w.AuthedPubkey(), ev.Kind.Name(),
-						ev.Kind.IsPrivileged(),
-					)
 					continue
 				}
 				var res *eventenvelope.Result

@@ -16,7 +16,7 @@ import (
 // separate from the ownersFollowed list, but there could be reasons for this
 // distinction, such as rate limiting applying to the former and not the latter.
 type Lists struct {
-	sync.Mutex
+	sync.RWMutex
 	ownersPubkeys   [][]byte
 	ownersFollowed  [][]byte
 	followedFollows [][]byte
@@ -24,15 +24,15 @@ type Lists struct {
 }
 
 func (l *Lists) LenOwnersPubkeys() (ll int) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	ll = len(l.ownersPubkeys)
 	return
 }
 
 func (l *Lists) OwnersPubkeys() (pks [][]byte) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersPubkeys...)
 	return
 }
@@ -45,15 +45,15 @@ func (l *Lists) SetOwnersPubkeys(pks [][]byte) {
 }
 
 func (l *Lists) LenOwnersFollowed() (ll int) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	ll = len(l.ownersFollowed)
 	return
 }
 
 func (l *Lists) OwnersFollowed() (pks [][]byte) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersFollowed...)
 	return
 }
@@ -66,15 +66,15 @@ func (l *Lists) SetOwnersFollowed(pks [][]byte) {
 }
 
 func (l *Lists) LenFollowedFollows() (ll int) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	ll = len(l.followedFollows)
 	return
 }
 
 func (l *Lists) FollowedFollows() (pks [][]byte) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	pks = append(pks, l.followedFollows...)
 	return
 }
@@ -87,15 +87,15 @@ func (l *Lists) SetFollowedFollows(pks [][]byte) {
 }
 
 func (l *Lists) LenOwnersMuted() (ll int) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	ll = len(l.ownersMuted)
 	return
 }
 
 func (l *Lists) OwnersMuted() (pks [][]byte) {
-	l.Lock()
-	defer l.Unlock()
+	l.RLock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersMuted...)
 	return
 }

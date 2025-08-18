@@ -1,13 +1,12 @@
-// Package reverse is a copy of httputil.NewSingleHostReverseProxy with addition
-// of "X-Forwarded-Proto" header.
 package reverse
 
 import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"orly.dev/cmd/lerproxy/util"
 	"orly.dev/pkg/utils/log"
+
+	"orly.dev/cmd/lerproxy/util"
 )
 
 // NewSingleHostReverseProxy is a copy of httputil.NewSingleHostReverseProxy

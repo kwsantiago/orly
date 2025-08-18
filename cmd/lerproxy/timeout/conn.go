@@ -1,5 +1,3 @@
-// Package timeout provides a simple extension of a net.TCPConn with a
-// configurable read/write deadline.
 package timeout
 
 import (

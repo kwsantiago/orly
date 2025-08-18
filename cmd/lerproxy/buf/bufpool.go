@@ -1,4 +1,3 @@
-// Package buf implements a simple concurrent safe buffer pool for raw bytes.
 package buf
 
 import "sync"

@@ -273,7 +273,7 @@ func (r *Client) ConnectWithTLS(
 				); err != nil {
 					r.ConnectionError = err
 					r.Close()
-					break
+					return
 				}
 				message := buf.Bytes()
 				var t string

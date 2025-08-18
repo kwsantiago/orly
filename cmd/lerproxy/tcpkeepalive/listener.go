@@ -1,12 +1,11 @@
-// Package tcpkeepalive implements a net.TCPListener with a singleton set period
-// for a default 3 minute keep-aline.
 package tcpkeepalive
 
 import (
 	"net"
-	"orly.dev/cmd/lerproxy/timeout"
 	"orly.dev/pkg/utils/chk"
 	"time"
+
+	"orly.dev/cmd/lerproxy/timeout"
 )
 
 // Period can be changed prior to opening a Listener to alter its'
