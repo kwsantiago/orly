@@ -25,14 +25,14 @@ type Lists struct {
 
 func (l *Lists) LenOwnersPubkeys() (ll int) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	ll = len(l.ownersPubkeys)
 	return
 }
 
 func (l *Lists) OwnersPubkeys() (pks [][]byte) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersPubkeys...)
 	return
 }
@@ -46,14 +46,14 @@ func (l *Lists) SetOwnersPubkeys(pks [][]byte) {
 
 func (l *Lists) LenOwnersFollowed() (ll int) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	ll = len(l.ownersFollowed)
 	return
 }
 
 func (l *Lists) OwnersFollowed() (pks [][]byte) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersFollowed...)
 	return
 }
@@ -67,14 +67,14 @@ func (l *Lists) SetOwnersFollowed(pks [][]byte) {
 
 func (l *Lists) LenFollowedFollows() (ll int) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	ll = len(l.followedFollows)
 	return
 }
 
 func (l *Lists) FollowedFollows() (pks [][]byte) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	pks = append(pks, l.followedFollows...)
 	return
 }
@@ -88,14 +88,14 @@ func (l *Lists) SetFollowedFollows(pks [][]byte) {
 
 func (l *Lists) LenOwnersMuted() (ll int) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	ll = len(l.ownersMuted)
 	return
 }
 
 func (l *Lists) OwnersMuted() (pks [][]byte) {
 	l.RLock()
-	defer l.Unlock()
+	defer l.RUnlock()
 	pks = append(pks, l.ownersMuted...)
 	return
 }
