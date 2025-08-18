@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"orly.dev/pkg/crypto/encryption"
-	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
@@ -24,136 +23,119 @@ import (
 )
 
 type Client struct {
-	client          *ws.Client
 	relay           string
 	clientSecretKey signer.I
 	walletPublicKey []byte
-	conversationKey []byte // nip44
+	conversationKey []byte
 }
 
-type Request struct {
-	Method string `json:"method"`
-	Params any    `json:"params"`
-}
-
-type ResponseError struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-}
-
-func (err *ResponseError) Error() string {
-	return fmt.Sprintf("%s %s", err.Code, err.Message)
-}
-
-type Response struct {
-	ResultType string         `json:"result_type"`
-	Error      *ResponseError `json:"error"`
-	Result     any            `json:"result"`
-}
-
-func NewClient(c context.T, connectionURI string) (cl *Client, err error) {
+func NewClient(connectionURI string) (cl *Client, err error) {
 	var parts *ConnectionParams
 	if parts, err = ParseConnectionURI(connectionURI); chk.E(err) {
 		return
 	}
-	clientKey := &p256k.Signer{}
-	if err = clientKey.InitSec(parts.clientSecretKey); chk.E(err) {
-		return
-	}
-	var ck []byte
-	if ck, err = encryption.GenerateConversationKeyWithSigner(
-		clientKey,
-		parts.walletPublicKey,
-	); chk.E(err) {
-		return
-	}
-	var relay *ws.Client
-	if relay, err = ws.RelayConnect(c, parts.relay); chk.E(err) {
-		return
-	}
 	cl = &Client{
-		client:          relay,
 		relay:           parts.relay,
-		clientSecretKey: clientKey,
+		clientSecretKey: parts.clientSecretKey,
 		walletPublicKey: parts.walletPublicKey,
-		conversationKey: ck,
+		conversationKey: parts.conversationKey,
 	}
 	return
 }
 
-type rpcOptions struct {
-	timeout *time.Duration
-}
+func (cl *Client) Request(c context.T, method string, params, result any) (err error) {
+	ctx, cancel := context.Timeout(c, 10*time.Second)
+	defer cancel()
 
-func (cl *Client) RPC(
-	c context.T, method Capability, params, result any, noUnmarshal bool,
-	opts *rpcOptions,
-) (raw []byte, err error) {
+	request := map[string]any{"method": method}
+	if params != nil {
+		request["params"] = params
+	}
+
 	var req []byte
-	if req, err = json.Marshal(
-		Request{
-			Method: string(method),
-			Params: params,
-		},
-	); chk.E(err) {
+	if req, err = json.Marshal(request); chk.E(err) {
 		return
 	}
+
 	var content []byte
 	if content, err = encryption.Encrypt(req, cl.conversationKey); chk.E(err) {
 		return
 	}
+
 	ev := &event.E{
 		Content:   content,
 		CreatedAt: timestamp.Now(),
-		Kind:      kind.WalletRequest,
+		Kind:      kind.New(23194),
 		Tags: tags.New(
+			tag.New("encryption", "nip44_v2"),
 			tag.New("p", hex.Enc(cl.walletPublicKey)),
-			tag.New(EncryptionTag, Nip44V2),
 		),
 	}
+
 	if err = ev.Sign(cl.clientSecretKey); chk.E(err) {
 		return
 	}
+
 	var rc *ws.Client
-	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
+	if rc, err = ws.RelayConnect(ctx, cl.relay); chk.E(err) {
 		return
 	}
 	defer rc.Close()
+
 	var sub *ws.Subscription
 	if sub, err = rc.Subscribe(
-		c, filters.New(
+		ctx, filters.New(
 			&filter.F{
-				Limit:   values.ToUintPointer(1),
-				Kinds:   kinds.New(kind.WalletResponse),
-				Authors: tag.New(cl.walletPublicKey),
-				Tags:    tags.New(tag.New("#e", hex.Enc(ev.ID))),
+				Limit: values.ToUintPointer(1),
+				Kinds: kinds.New(kind.New(23195)),
+				Since: &timestamp.T{V: time.Now().Unix()},
 			},
 		),
 	); chk.E(err) {
 		return
 	}
 	defer sub.Unsub()
-	if err = rc.Publish(context.Bg(), ev); chk.E(err) {
-		return
+
+	if err = rc.Publish(ctx, ev); chk.E(err) {
+		return fmt.Errorf("publish failed: %w", err)
 	}
+
 	select {
-	case <-c.Done():
-		err = fmt.Errorf("context canceled waiting for response")
+	case <-ctx.Done():
+		return fmt.Errorf("no response from wallet (connection may be inactive)")
 	case e := <-sub.Events:
-		if raw, err = encryption.Decrypt(
-			e.Content, cl.conversationKey,
-		); chk.E(err) {
+		if e == nil {
+			return fmt.Errorf("subscription closed (wallet connection inactive)")
+		}
+		if len(e.Content) == 0 {
+			return fmt.Errorf("empty response content")
+		}
+		var raw []byte
+		if raw, err = encryption.Decrypt(e.Content, cl.conversationKey); chk.E(err) {
+			return fmt.Errorf("decryption failed (invalid conversation key): %w", err)
+		}
+
+		var resp map[string]any
+		if err = json.Unmarshal(raw, &resp); chk.E(err) {
 			return
 		}
-		if noUnmarshal {
-			return
+
+		if errData, ok := resp["error"].(map[string]any); ok {
+			code, _ := errData["code"].(string)
+			msg, _ := errData["message"].(string)
+			return fmt.Errorf("%s: %s", code, msg)
 		}
-		resp := &Response{
-			Result: &result,
-		}
-		if err = json.Unmarshal(raw, resp); chk.E(err) {
-			return
+
+		if result != nil && resp["result"] != nil {
+			var resultBytes []byte
+			if resultBytes, err = json.Marshal(resp["result"]); chk.E(err) {
+				return
+			}
+			if err = json.Unmarshal(resultBytes, result); chk.E(err) {
+				return
+			}
 		}
 	}
+
 	return
 }
