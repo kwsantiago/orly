@@ -259,7 +259,7 @@ func (f *F) Unmarshal(b []byte) (r []byte, err error) {
 	r = b[:]
 	var key []byte
 	var state int
-	for ; len(r) >= 0; r = r[1:] {
+	for ; len(r) > 0; r = r[1:] {
 		// log.I.ToSliceOfBytes("%c", rem[0])
 		switch state {
 		case beforeOpen:
