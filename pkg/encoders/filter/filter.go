@@ -142,12 +142,6 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 		dst = text2.MarshalHexArray(dst, f.Authors.ToSliceOfBytes())
 	}
 	if f.Tags.Len() > 0 {
-		// log.I.S(f.Tags)
-		// if first {
-		// 	dst = append(dst, ',')
-		// } else {
-		// 	first = true
-		// }
 		// tags are stored as tags with the initial element the "#a" and the rest the list in
 		// each element of the tags list. eg:
 		//
@@ -158,14 +152,14 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 				// nothing here
 				continue
 			}
-			if tg.Len() < 1 || len(tg.Key()) != 2 {
-				// if there is no values, skip; the "key" field must be 2 characters long,
+			if tg.Len() < 2 {
+				// must have at least key and one value
 				continue
 			}
 			tKey := tg.ToSliceOfBytes()[0]
-			if tKey[0] != '#' &&
-				(tKey[1] < 'a' && tKey[1] > 'z' || tKey[1] < 'A' && tKey[1] > 'Z') {
-				// first "key" field must begin with '#' and second be alpha
+			if len(tKey) != 1 ||
+				((tKey[0] < 'a' || tKey[0] > 'z') && (tKey[0] < 'A' || tKey[0] > 'Z')) {
+				// key must be single alpha character
 				continue
 			}
 			values := tg.ToSliceOfBytes()[1:]
@@ -177,17 +171,12 @@ func (f *F) Marshal(dst []byte) (b []byte) {
 			} else {
 				first = true
 			}
-			// append the key
-			dst = append(dst, '"', tg.B(0)[0], tg.B(0)[1], '"', ':')
+			// append the key with # prefix
+			dst = append(dst, '"', '#', tKey[0], '"', ':')
 			dst = append(dst, '[')
 			for i, value := range values {
 				dst = append(dst, '"')
-				// if tKey[1] == 'e' || tKey[1] == 'p' {
-				// 	// event and pubkey tags are binary 32 bytes
-				// 	dst = hex.EncAppend(dst, value)
-				// } else {
 				dst = append(dst, value...)
-				// }
 				dst = append(dst, '"')
 				if i < len(values)-1 {
 					dst = append(dst, ',')
@@ -461,12 +450,15 @@ func (f *F) MatchesIgnoringTimestampConstraints(ev *event.E) bool {
 	// }
 	if f.Tags.Len() > 0 {
 		for _, v := range f.Tags.ToSliceOfTags() {
-			tvs := v.ToSliceOfBytes()
-			if !ev.Tags.ContainsAny(v.FilterKey(), tag.New(tvs...)) {
+			if v.Len() < 2 {
+				continue
+			}
+			key := v.Key()
+			values := v.ToSliceOfBytes()[1:]
+			if !ev.Tags.ContainsAny(key, tag.New(values...)) {
 				return false
 			}
 		}
-		// return false
 	}
 	return true
 }

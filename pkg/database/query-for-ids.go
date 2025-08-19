@@ -29,25 +29,14 @@ func (d *D) QueryForIds(c context.T, f *filter.F) (
 	var results []*store.IdPkTs
 	var founds []*types.Uint40
 	for _, idx := range idxs {
-		if f.Tags != nil && f.Tags.Len() > 1 {
-			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
-				return
-			}
-			var tmp []*store.IdPkTs
-			if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
-				return
-			}
-			results = append(results, tmp...)
-		} else {
-			if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
-				return
-			}
-			var tmp []*store.IdPkTs
-			if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
-				return
-			}
-			results = append(results, tmp...)
+		if founds, err = d.GetSerialsByRange(idx); chk.E(err) {
+			return
 		}
+		var tmp []*store.IdPkTs
+		if tmp, err = d.GetFullIdPubkeyBySerials(founds); chk.E(err) {
+			return
+		}
+		results = append(results, tmp...)
 	}
 	// deduplicate in case this somehow happened (such as two or more
 	// from one tag matched, only need it once)

@@ -120,7 +120,7 @@ func GetIndexesFromFilter(f *filter.F) (idxs []Range, err error) {
 		caEnd.Set(uint64(math.MaxInt64))
 	}
 
-	if f.Tags != nil && f.Tags.Len() > 1 {
+	if f.Tags != nil && f.Tags.Len() > 0 {
 		// sort the tags so they are in iteration order (reverse)
 		tmp := f.Tags.ToSliceOfTags()
 		sort.Slice(

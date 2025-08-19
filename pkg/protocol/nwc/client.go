@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"orly.dev/pkg/crypto/encryption"
-	"orly.dev/pkg/crypto/p256k"
 	"orly.dev/pkg/encoders/event"
 	"orly.dev/pkg/encoders/filter"
 	"orly.dev/pkg/encoders/filters"
@@ -20,140 +19,230 @@ import (
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/chk"
 	"orly.dev/pkg/utils/context"
+	"orly.dev/pkg/utils/log"
 	"orly.dev/pkg/utils/values"
 )
 
 type Client struct {
-	client          *ws.Client
 	relay           string
 	clientSecretKey signer.I
 	walletPublicKey []byte
-	conversationKey []byte // nip44
+	conversationKey []byte
 }
 
-type Request struct {
-	Method string `json:"method"`
-	Params any    `json:"params"`
-}
-
-type ResponseError struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-}
-
-func (err *ResponseError) Error() string {
-	return fmt.Sprintf("%s %s", err.Code, err.Message)
-}
-
-type Response struct {
-	ResultType string         `json:"result_type"`
-	Error      *ResponseError `json:"error"`
-	Result     any            `json:"result"`
-}
-
-func NewClient(c context.T, connectionURI string) (cl *Client, err error) {
+func NewClient(connectionURI string) (cl *Client, err error) {
 	var parts *ConnectionParams
 	if parts, err = ParseConnectionURI(connectionURI); chk.E(err) {
 		return
 	}
-	clientKey := &p256k.Signer{}
-	if err = clientKey.InitSec(parts.clientSecretKey); chk.E(err) {
-		return
-	}
-	var ck []byte
-	if ck, err = encryption.GenerateConversationKeyWithSigner(
-		clientKey,
-		parts.walletPublicKey,
-	); chk.E(err) {
-		return
-	}
-	var relay *ws.Client
-	if relay, err = ws.RelayConnect(c, parts.relay); chk.E(err) {
-		return
-	}
 	cl = &Client{
-		client:          relay,
 		relay:           parts.relay,
-		clientSecretKey: clientKey,
+		clientSecretKey: parts.clientSecretKey,
 		walletPublicKey: parts.walletPublicKey,
-		conversationKey: ck,
+		conversationKey: parts.conversationKey,
 	}
 	return
 }
 
-type rpcOptions struct {
-	timeout *time.Duration
-}
+func (cl *Client) Request(c context.T, method string, params, result any) (err error) {
+	ctx, cancel := context.Timeout(c, 10*time.Second)
+	defer cancel()
 
-func (cl *Client) RPC(
-	c context.T, method Capability, params, result any, noUnmarshal bool,
-	opts *rpcOptions,
-) (raw []byte, err error) {
+	request := map[string]any{"method": method}
+	if params != nil {
+		request["params"] = params
+	}
+
 	var req []byte
-	if req, err = json.Marshal(
-		Request{
-			Method: string(method),
-			Params: params,
-		},
-	); chk.E(err) {
+	if req, err = json.Marshal(request); chk.E(err) {
 		return
 	}
+
 	var content []byte
 	if content, err = encryption.Encrypt(req, cl.conversationKey); chk.E(err) {
 		return
 	}
+
 	ev := &event.E{
 		Content:   content,
 		CreatedAt: timestamp.Now(),
-		Kind:      kind.WalletRequest,
+		Kind:      kind.New(23194),
 		Tags: tags.New(
+			tag.New("encryption", "nip44_v2"),
 			tag.New("p", hex.Enc(cl.walletPublicKey)),
-			tag.New(EncryptionTag, Nip44V2),
 		),
 	}
+
 	if err = ev.Sign(cl.clientSecretKey); chk.E(err) {
 		return
 	}
+
 	var rc *ws.Client
-	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
+	if rc, err = ws.RelayConnect(ctx, cl.relay); chk.E(err) {
 		return
 	}
 	defer rc.Close()
+
 	var sub *ws.Subscription
 	if sub, err = rc.Subscribe(
-		c, filters.New(
+		ctx, filters.New(
 			&filter.F{
-				Limit:   values.ToUintPointer(1),
-				Kinds:   kinds.New(kind.WalletResponse),
-				Authors: tag.New(cl.walletPublicKey),
-				Tags:    tags.New(tag.New("#e", hex.Enc(ev.ID))),
+				Limit: values.ToUintPointer(1),
+				Kinds: kinds.New(kind.New(23195)),
+				Since: &timestamp.T{V: time.Now().Unix()},
 			},
 		),
 	); chk.E(err) {
 		return
 	}
 	defer sub.Unsub()
-	if err = rc.Publish(context.Bg(), ev); chk.E(err) {
-		return
+
+	if err = rc.Publish(ctx, ev); chk.E(err) {
+		return fmt.Errorf("publish failed: %w", err)
 	}
+
 	select {
-	case <-c.Done():
-		err = fmt.Errorf("context canceled waiting for response")
+	case <-ctx.Done():
+		return fmt.Errorf("no response from wallet (connection may be inactive)")
 	case e := <-sub.Events:
-		if raw, err = encryption.Decrypt(
-			e.Content, cl.conversationKey,
-		); chk.E(err) {
+		if e == nil {
+			return fmt.Errorf("subscription closed (wallet connection inactive)")
+		}
+		if len(e.Content) == 0 {
+			return fmt.Errorf("empty response content")
+		}
+		var raw []byte
+		if raw, err = encryption.Decrypt(e.Content, cl.conversationKey); chk.E(err) {
+			return fmt.Errorf("decryption failed (invalid conversation key): %w", err)
+		}
+
+		var resp map[string]any
+		if err = json.Unmarshal(raw, &resp); chk.E(err) {
 			return
 		}
-		if noUnmarshal {
-			return
+
+		if errData, ok := resp["error"].(map[string]any); ok {
+			code, _ := errData["code"].(string)
+			msg, _ := errData["message"].(string)
+			return fmt.Errorf("%s: %s", code, msg)
 		}
-		resp := &Response{
-			Result: &result,
-		}
-		if err = json.Unmarshal(raw, resp); chk.E(err) {
-			return
+
+		if result != nil && resp["result"] != nil {
+			var resultBytes []byte
+			if resultBytes, err = json.Marshal(resp["result"]); chk.E(err) {
+				return
+			}
+			if err = json.Unmarshal(resultBytes, result); chk.E(err) {
+				return
+			}
 		}
 	}
+
 	return
+}
+
+// NotificationHandler is a callback for handling NWC notifications
+type NotificationHandler func(notificationType string, notification map[string]any) error
+
+// SubscribeNotifications subscribes to NWC notification events (kinds 23197/23196)
+// and handles them with the provided callback. It maintains a persistent connection
+// with auto-reconnection on disconnect.
+func (cl *Client) SubscribeNotifications(c context.T, handler NotificationHandler) (err error) {
+	delay := time.Second
+	for {
+		if err = cl.subscribeNotificationsOnce(c, handler); err != nil {
+			if err == context.Canceled {
+				return err
+			}
+			select {
+			case <-time.After(delay):
+				if delay < 30*time.Second {
+					delay *= 2
+				}
+			case <-c.Done():
+				return context.Canceled
+			}
+			continue
+		}
+		delay = time.Second
+	}
+}
+
+// subscribeNotificationsOnce performs a single subscription attempt
+func (cl *Client) subscribeNotificationsOnce(c context.T, handler NotificationHandler) (err error) {
+	// Connect to relay
+	var rc *ws.Client
+	if rc, err = ws.RelayConnect(c, cl.relay); chk.E(err) {
+		return fmt.Errorf("relay connection failed: %w", err)
+	}
+	defer rc.Close()
+
+	// Subscribe to notification events filtered by "p" tag
+	// Support both NIP-44 (kind 23197) and legacy NIP-04 (kind 23196)
+	var sub *ws.Subscription
+	if sub, err = rc.Subscribe(
+		c, filters.New(
+			&filter.F{
+				Kinds: kinds.New(kind.New(23197), kind.New(23196)),
+				Tags: tags.New(
+					tag.New("p", hex.Enc(cl.clientSecretKey.Pub())),
+				),
+				Since: &timestamp.T{V: time.Now().Unix()},
+			},
+		),
+	); chk.E(err) {
+		return fmt.Errorf("subscription failed: %w", err)
+	}
+	defer sub.Unsub()
+
+	log.I.F("subscribed to NWC notifications from wallet %s", hex.Enc(cl.walletPublicKey))
+
+	// Process notification events
+	for {
+		select {
+		case <-c.Done():
+			return context.Canceled
+		case ev := <-sub.Events:
+			if ev == nil {
+				// Channel closed, subscription ended
+				return fmt.Errorf("subscription closed")
+			}
+
+			// Process the notification event
+			if err := cl.processNotificationEvent(ev, handler); err != nil {
+				log.E.F("error processing notification: %v", err)
+				// Continue processing other notifications even if one fails
+			}
+		}
+	}
+}
+
+// processNotificationEvent decrypts and processes a single notification event
+func (cl *Client) processNotificationEvent(ev *event.E, handler NotificationHandler) (err error) {
+	// Decrypt the notification content
+	var decrypted []byte
+	if decrypted, err = encryption.Decrypt(ev.Content, cl.conversationKey); err != nil {
+		return fmt.Errorf("failed to decrypt notification: %w", err)
+	}
+
+	// Parse the notification JSON
+	var notification map[string]any
+	if err = json.Unmarshal(decrypted, &notification); err != nil {
+		return fmt.Errorf("failed to parse notification JSON: %w", err)
+	}
+
+	// Extract notification type
+	notificationType, ok := notification["notification_type"].(string)
+	if !ok {
+		return fmt.Errorf("missing or invalid notification_type")
+	}
+
+	// Extract notification data
+	notificationData, ok := notification["notification"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("missing or invalid notification data")
+	}
+
+	// Route to type-specific handler
+	return handler(notificationType, notificationData)
 }

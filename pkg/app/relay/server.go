@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"orly.dev/pkg/database"
 	"orly.dev/pkg/protocol/openapi"
 	"orly.dev/pkg/protocol/socketapi"
 
@@ -43,7 +45,11 @@ type Server struct {
 	*config.C
 	*Lists
 	*Peers
-	Mux *servemux.S
+	Mux               *servemux.S
+	MetricsCollector  *MetricsCollector
+	subscriptionCache map[string]time.Time // pubkey hex -> cache expiry time
+	subscriptionMutex sync.RWMutex
+	paymentProcessor  *PaymentProcessor
 }
 
 // ServerParams represents the configuration parameters for initializing a
@@ -99,14 +105,15 @@ func NewServer(
 		}
 	}
 	s = &Server{
-		Ctx:     sp.Ctx,
-		Cancel:  sp.Cancel,
-		relay:   sp.Rl,
-		mux:     serveMux,
-		options: op,
-		C:       sp.C,
-		Lists:   new(Lists),
-		Peers:   new(Peers),
+		Ctx:               sp.Ctx,
+		Cancel:            sp.Cancel,
+		relay:             sp.Rl,
+		mux:               serveMux,
+		options:           op,
+		C:                 sp.C,
+		Lists:             new(Lists),
+		Peers:             new(Peers),
+		subscriptionCache: make(map[string]time.Time),
 	}
 	// Parse blacklist pubkeys
 	for _, v := range s.C.Blacklist {
@@ -225,6 +232,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Start(
 	host string, port int, started ...chan bool,
 ) (err error) {
+	// Initialize payment processor if subscription is enabled
+	if s.C.SubscriptionEnabled && s.C.NWCUri != "" {
+		if db, ok := s.relay.Storage().(*database.D); ok {
+			if s.paymentProcessor, err = NewPaymentProcessor(s.C, db); err != nil {
+				log.E.F("failed to create payment processor: %v", err)
+				// Continue without payment processor
+			} else {
+				if err := s.paymentProcessor.Start(); err != nil {
+					log.E.F("failed to start payment processor: %v", err)
+				} else {
+					log.I.F("payment processor started successfully")
+				}
+			}
+		} else {
+			log.E.F("subscription enabled but storage is not database.D")
+		}
+	}
+
 	log.I.F("running spider every %v", s.C.SpiderTime)
 	if len(s.C.Owners) > 0 {
 		// start up spider
@@ -289,6 +314,13 @@ func (s *Server) Start(
 // context.
 func (s *Server) Shutdown() {
 	log.I.Ln("shutting down relay")
+
+	// Stop payment processor if running
+	if s.paymentProcessor != nil {
+		log.I.Ln("stopping payment processor")
+		s.paymentProcessor.Stop()
+	}
+
 	s.Cancel()
 	log.W.Ln("closing event store")
 	chk.E(s.relay.Storage().Close())

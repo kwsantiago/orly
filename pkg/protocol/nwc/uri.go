@@ -4,19 +4,27 @@ import (
 	"errors"
 	"net/url"
 
+	"orly.dev/pkg/crypto/encryption"
 	"orly.dev/pkg/crypto/p256k"
+	"orly.dev/pkg/interfaces/signer"
 	"orly.dev/pkg/utils/chk"
 )
 
 type ConnectionParams struct {
-	clientSecretKey []byte
+	clientSecretKey signer.I
 	walletPublicKey []byte
+	conversationKey []byte
 	relay           string
 }
 
 // GetWalletPublicKey returns the wallet public key from the ConnectionParams.
 func (c *ConnectionParams) GetWalletPublicKey() []byte {
 	return c.walletPublicKey
+}
+
+// GetConversationKey returns the conversation key from the ConnectionParams.
+func (c *ConnectionParams) GetConversationKey() []byte {
+	return c.conversationKey
 }
 
 func ParseConnectionURI(nwcUri string) (parts *ConnectionParams, err error) {
@@ -49,8 +57,20 @@ func ParseConnectionURI(nwcUri string) (parts *ConnectionParams, err error) {
 		err = errors.New("missing secret parameter")
 		return
 	}
-	if parts.clientSecretKey, err = p256k.HexToBin(secret); chk.E(err) {
+	var secretBytes []byte
+	if secretBytes, err = p256k.HexToBin(secret); chk.E(err) {
 		err = errors.New("invalid secret")
+		return
+	}
+	clientKey := &p256k.Signer{}
+	if err = clientKey.InitSec(secretBytes); chk.E(err) {
+		return
+	}
+	parts.clientSecretKey = clientKey
+	if parts.conversationKey, err = encryption.GenerateConversationKeyWithSigner(
+		clientKey,
+		parts.walletPublicKey,
+	); chk.E(err) {
 		return
 	}
 	return
