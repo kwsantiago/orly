@@ -1,21 +1,21 @@
 package nwc_test
 
 import (
-	"testing"
-	"time"
 	"orly.dev/pkg/protocol/nwc"
 	"orly.dev/pkg/protocol/ws"
 	"orly.dev/pkg/utils/context"
+	"testing"
+	"time"
 )
 
 func TestNWCClientCreation(t *testing.T) {
 	uri := "nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b?relay=wss://relay.getalby.com/v1&secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-	
+
 	c, err := nwc.NewClient(uri)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if c == nil {
 		t.Fatal("client should not be nil")
 	}
@@ -29,7 +29,7 @@ func TestNWCInvalidURI(t *testing.T) {
 		"nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b",
 		"nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b?relay=invalid",
 	}
-	
+
 	for _, uri := range invalidURIs {
 		_, err := nwc.NewClient(uri)
 		if err == nil {
@@ -41,42 +41,42 @@ func TestNWCInvalidURI(t *testing.T) {
 func TestNWCRelayConnection(t *testing.T) {
 	ctx, cancel := context.Timeout(context.TODO(), 5*time.Second)
 	defer cancel()
-	
+
 	rc, err := ws.RelayConnect(ctx, "wss://relay.getalby.com/v1")
 	if err != nil {
 		t.Fatalf("relay connection failed: %v", err)
 	}
 	defer rc.Close()
-	
+
 	t.Log("relay connection successful")
 }
 
 func TestNWCRequestTimeout(t *testing.T) {
 	uri := "nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b?relay=wss://relay.getalby.com/v1&secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-	
+
 	c, err := nwc.NewClient(uri)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	ctx, cancel := context.Timeout(context.TODO(), 2*time.Second)
 	defer cancel()
-	
+
 	var r map[string]any
 	err = c.Request(ctx, "get_info", nil, &r)
-	
+
 	if err == nil {
-		t.Log("unexpected success - wallet may be active")
+		t.Log("wallet responded")
 		return
 	}
-	
+
 	expectedErrors := []string{
 		"no response from wallet",
 		"subscription closed",
 		"timeout waiting for response",
 		"context deadline exceeded",
 	}
-	
+
 	errorFound := false
 	for _, expected := range expectedErrors {
 		if contains(err.Error(), expected) {
@@ -84,18 +84,18 @@ func TestNWCRequestTimeout(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !errorFound {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	t.Logf("proper timeout handling: %v", err)
 }
 
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || (len(s) > len(substr) && 
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || 
-		findInString(s, substr))))
+	return len(s) >= len(substr) && (s == substr || (len(s) > len(substr) &&
+		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
+			findInString(s, substr))))
 }
 
 func findInString(s, substr string) bool {
@@ -109,48 +109,48 @@ func findInString(s, substr string) bool {
 
 func TestNWCEncryption(t *testing.T) {
 	uri := "nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b?relay=wss://relay.getalby.com/v1&secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-	
+
 	c, err := nwc.NewClient(uri)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// We can't directly access private fields, but we can test the client creation
-	// validates that the conversation key is properly generated
+	// check conversation key generation
 	if c == nil {
 		t.Fatal("client creation should succeed with valid URI")
 	}
-	
-	t.Log("✅ NWC client encryption setup validated")
+
+	// Test passed
 }
 
 func TestNWCEventFormat(t *testing.T) {
 	uri := "nostr+walletconnect://816fd7f1d000ae81a3da251c91866fc47f4bcd6ce36921e6d46773c32f1d548b?relay=wss://relay.getalby.com/v1&secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-	
+
 	c, err := nwc.NewClient(uri)
 	if err != nil {
 		t.Fatal(err)
 	}
-	
-	// Test that the client can be created and is properly initialized
+
+	// Test client creation
 	// The Request method will create proper NWC events with:
 	// - Kind 23194 for requests
 	// - Proper encryption tag
 	// - Signed with client key
-	
+
 	ctx, cancel := context.Timeout(context.TODO(), 1*time.Second)
 	defer cancel()
-	
+
 	var r map[string]any
 	err = c.Request(ctx, "get_info", nil, &r)
-	
+
 	// We expect this to fail due to inactive connection, but it should fail
-	// AFTER creating and sending a properly formatted NWC event
+	// after creating and sending NWC event
 	if err == nil {
-		t.Log("✅ Unexpected success - wallet may be active")
+		t.Log("wallet responded")
 		return
 	}
-	
+
 	// Verify it failed for the right reason (connection/response issue, not formatting)
 	validFailures := []string{
 		"subscription closed",
@@ -158,7 +158,7 @@ func TestNWCEventFormat(t *testing.T) {
 		"context deadline exceeded",
 		"timeout waiting for response",
 	}
-	
+
 	validFailure := false
 	for _, failure := range validFailures {
 		if contains(err.Error(), failure) {
@@ -166,10 +166,10 @@ func TestNWCEventFormat(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !validFailure {
 		t.Fatalf("unexpected error type (suggests formatting issue): %v", err)
 	}
-	
-	t.Log("✅ NWC event format validation passed")
+
+	// Test passed
 }

@@ -33,9 +33,24 @@ err = client.Request(ctx, "make_invoice", params, &invoice)
 - `lookup_invoice` - Check invoice status
 - `pay_invoice` - Pay invoice
 
+## Payment Notifications
+
+```go
+// Subscribe to payment notifications
+err = client.SubscribeNotifications(ctx, func(notificationType string, notification map[string]any) error {
+    if notificationType == "payment_received" {
+        amount := notification["amount"].(float64)
+        description := notification["description"].(string)
+        // Process payment...
+    }
+    return nil
+})
+```
+
 ## Features
 
 - NIP-44 encryption
 - Event signing
 - Relay communication
+- Payment notifications
 - Error handling

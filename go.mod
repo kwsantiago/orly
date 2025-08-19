@@ -11,6 +11,7 @@ require (
 	github.com/dgraph-io/badger/v4 v4.8.0
 	github.com/fasthttp/websocket v1.5.12
 	github.com/fatih/color v1.18.0
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/klauspost/cpuid/v2 v2.3.0
 	github.com/minio/sha256-simd v1.0.1
@@ -19,6 +20,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	github.com/templexxx/xhex v0.0.0-20200614015412-aed53437177b
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	go-simpler.org/env v0.12.0
 	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.41.0
@@ -50,6 +52,7 @@ require (
 	github.com/templexxx/cpu v0.1.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.65.0 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
